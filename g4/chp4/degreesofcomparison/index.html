@@ -11,8 +11,8 @@ body{font-family:Arial,sans-serif;background:#141e30;color:#fff;min-height:100vh
 .splash-screen.hidden{opacity:0;pointer-events:none;}
 .splash-screen img{max-width:480px;width:90%;height:auto;animation:logoFloat 2s ease-in-out infinite;}
 @keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-.container{max-width:1200px;width:100%;background:#0b1020;border-radius:20px;border:3px solid #ffd700;overflow:hidden;opacity:0;transition:opacity 0.6s;}
-.container.visible{opacity:1;display:flex;flex-direction:column;}
+.container{max-width:1200px;width:100%;background:#0b1020;border-radius:20px;border:3px solid #ffd700;overflow:hidden;opacity:0;transition:opacity 0.6s;display:flex;flex-direction:column;}
+.container.visible{opacity:1;}
 .header{padding:20px;text-align:center;background:linear-gradient(135deg,#ffd700,#ff9f1c);color:#1a1a2e;}
 .header h1{font-size:28px;letter-spacing:1px;text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
 .stage-indicator{margin-top:5px;display:inline-block;padding:6px 16px;border-radius:20px;background:rgba(26,26,46,0.9);border:2px solid #ffd700;color:#ffd700;font-weight:bold;font-size:14px;}
@@ -45,8 +45,9 @@ body{font-family:Arial,sans-serif;background:#141e30;color:#fff;min-height:100vh
 </head>
 <body>
 
-<!-- Splash -->
-<div class="splash-screen" id="splashScreen"><img src="assets/logo.png" alt="Logo"></div>
+<div class="splash-screen" id="splashScreen">
+<img src="assets/logo.png" alt="Logo">
+</div>
 
 <div class="container" id="mainContainer">
 <div class="header">
@@ -78,44 +79,47 @@ body{font-family:Arial,sans-serif;background:#141e30;color:#fff;min-height:100vh
 </div>
 
 <script>
-// Assets
-const correctSound=new Audio('assets/correct.mp3');
-const wrongSound=new Audio('assets/wrong.mp3');
-const celebrationSound=new Audio('assets/freesound_community-claps-44774.mp3');
+// Audio
+const correctSound = new Audio('assets/correct.mp3');
+const wrongSound = new Audio('assets/wrong.mp3');
+const celebrationSound = new Audio('assets/freesound_community-claps-44774.mp3');
 
-// Game Data
-const questionBank=[
+// Mixed-degree question bank
+const questionBank = [
 {scenario:"Today is ___ than yesterday.",options:["hot","hotter","hottest","more hot"],correct:1},
-{scenario:"This puzzle is ___ than the last one.",options:["easy","easier","easiest","more easy"],correct:1},
-{scenario:"My house is ___ than my friend’s.",options:["big","bigger","biggest","more big"],correct:1},
-{scenario:"She is the ___ player on the team.",options:["fast","faster","fastest","more fast"],correct:2},
-{scenario:"Math is ___ than English for me.",options:["hard","harder","hardest","more hard"],correct:1},
-{scenario:"This movie is ___ than the one we watched yesterday.",options:["interesting","more interesting","most interesting","interestinger"],correct:1},
-{scenario:"Ali runs ___ than Sam.",options:["quick","quicker","quickest","more quick"],correct:1},
-{scenario:"This cake is the ___ of all.",options:["delicious","more delicious","most delicious","deliciouser"],correct:2},
-{scenario:"Summer is ___ than winter.",options:["hot","hotter","hottest","more hot"],correct:1},
+{scenario:"Ali runs ___ in the morning.",options:["quick","quicker","quickest","more quick"],correct:0},
+{scenario:"She is ___ student in the class.",options:["intelligent","more intelligent","most intelligent","intelligenter"],correct:2},
+{scenario:"Math today is ___ than yesterday.",options:["hard","harder","hardest","more hard"],correct:1},
+{scenario:"Today is a ___ day for a walk.",options:["beautiful","more beautiful","most beautiful","beautifuller"],correct:0},
 {scenario:"This book is ___ than the last one I read.",options:["good","better","best","more good"],correct:1},
-{scenario:"My car is ___ than my brother’s.",options:["fast","faster","fastest","more fast"],correct:1},
-{scenario:"Today is the ___ day of the week.",options:["bright","brighter","brightest","more bright"],correct:2}
+{scenario:"This cake is the ___ of all.",options:["delicious","more delicious","most delicious","deliciouser"],correct:2},
+{scenario:"Peter is a ___ student in his class.",options:["bright","brighter","brightest","more bright"],correct:0},
+{scenario:"Summer is ___ than winter.",options:["hot","hotter","hottest","more hot"],correct:1},
+{scenario:"She solved the puzzle ___ in the group.",options:["fast","faster","fastest","more fast"],correct:2},
+{scenario:"This puzzle is ___ easy for beginners.",options:["easy","easier","easiest","more easy"],correct:0},
+{scenario:"My house is ___ than my friend’s.",options:["big","bigger","biggest","more big"],correct:2}
 ];
 
-let currentCase=0,score=0,timer,timeLeft=60;
+let currentCase = 0, score = 0, timer, timeLeft = 60;
 
-// Splash init
-setTimeout(()=>{document.getElementById('splashScreen').classList.add('hidden');document.getElementById('mainContainer').classList.add('visible');loadCase();},3000);
+setTimeout(()=>{
+document.getElementById('splashScreen').classList.add('hidden');
+document.getElementById('mainContainer').classList.add('visible');
+loadCase();
+},3000);
 
 function loadCase(){
-const q=questionBank[currentCase];
-document.getElementById('scenarioText').textContent=q.scenario;
-const container=document.getElementById('optionsContainer');
-container.innerHTML='';
-document.getElementById('feedback').style.display='none';
+const q = questionBank[currentCase];
+document.getElementById('scenarioText').textContent = q.scenario;
+const container = document.getElementById('optionsContainer');
+container.innerHTML = '';
+document.getElementById('feedback').style.display = 'none';
 q.options.forEach((opt,i)=>{
-const btn=document.createElement('button');
-btn.className='option-btn';
-btn.textContent=opt;
-btn.onclick=()=>selectOption(i);
-container.appendChild(btn);
+  const btn = document.createElement('button');
+  btn.className='option-btn';
+  btn.textContent = opt;
+  btn.onclick = () => selectOption(i);
+  container.appendChild(btn);
 });
 document.getElementById('nextBtn').style.display='none';
 document.getElementById('stageIndicator').textContent=`Case ${currentCase+1} of 12`;
@@ -135,16 +139,39 @@ clearInterval(timer);
 const q=questionBank[currentCase];
 const buttons=document.querySelectorAll('.option-btn');
 buttons.forEach(b=>b.disabled=true);
-if(idx===q.correct){buttons[idx].classList.add('correct');document.getElementById('feedback').textContent='Correct!';document.getElementById('feedback').className='feedback correct';correctSound.play();score++;}
-else{buttons[idx].classList.add('wrong');document.getElementById('feedback').textContent='Wrong!';document.getElementById('feedback').className='feedback wrong';wrongSound.play();}
+if(idx===q.correct){
+buttons[idx].classList.add('correct');
+document.getElementById('feedback').textContent='Correct!';
+document.getElementById('feedback').className='feedback correct';
+correctSound.play();
+score++;
+}else{
+buttons[idx].classList.add('wrong');
+document.getElementById('feedback').textContent='Wrong!';
+document.getElementById('feedback').className='feedback wrong';
+wrongSound.play();
+}
 document.getElementById('feedback').style.display='block';
 document.getElementById('nextBtn').style.display='inline-block';
-document.getElementById('nextBtn').onclick=nextCase;
+document.getElementById('nextBtn').onclick = nextCase;
 }
 
-function autoNext(){document.getElementById('feedback').textContent='Time up!';document.getElementById('feedback').className='feedback wrong';document.getElementById('feedback').style.display='block';document.getElementById('nextBtn').style.display='inline-block';document.getElementById('nextBtn').onclick=nextCase;}
+function autoNext(){
+document.getElementById('feedback').textContent='Time up!';
+document.getElementById('feedback').className='feedback wrong';
+document.getElementById('feedback').style.display='block';
+document.getElementById('nextBtn').style.display='inline-block';
+document.getElementById('nextBtn').onclick = nextCase;
+}
 
-function nextCase(){currentCase++;if(currentCase<questionBank.length){loadCase();}else{endGame();}}
+function nextCase(){
+currentCase++;
+if(currentCase < questionBank.length){
+loadCase();
+}else{
+endGame();
+}
+}
 
 function endGame(){
 document.getElementById('mainContainer').style.display='none';
