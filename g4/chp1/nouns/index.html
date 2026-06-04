@@ -5,182 +5,236 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grade 4 Nouns - Spin the Wheel</title>
 <style>
-  body {
+  @import url('https://fonts.googleapis.com/css2?family=Arbutus+Slab&display=swap');
+
+  body, html {
     margin: 0;
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(120deg, #4a90e2, #50e3c2);
+    padding: 0;
+    font-family: 'Arbutus Slab', serif;
+    height: 100%;
     overflow: hidden;
-    height: 100vh;
+    background: linear-gradient(to right, #40E0D0, #4169E1);
+    position: relative;
+  }
+
+  /* Splash */
+  #splash {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: #fff;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    color: #fff;
+    z-index: 10;
   }
 
-  #logo {
-    width: 150px;
+  #splash img {
+    width: 250px;
+  }
+
+  /* Floating bubbles */
+  .bubble {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background: yellow;
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: floatBubble linear infinite;
+  }
+
+  @keyframes floatBubble {
+    0% { transform: translateY(100vh) translateX(0);}
+    100% { transform: translateY(-50px) translateX(50px);}
+  }
+
+  /* Container */
+  #container {
+    text-align: center;
+    padding-top: 20px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    color: #fff;
     margin-bottom: 20px;
   }
 
   #wheel-container {
     position: relative;
-    width: 300px;
-    height: 300px;
+    display: inline-block;
     margin-bottom: 20px;
   }
 
   #wheel {
-    width: 100%;
-    height: 100%;
+    width: 350px;
+    height: 350px;
     border-radius: 50%;
-    border: 5px solid #fff;
+    border: 6px solid white;
     position: relative;
     overflow: hidden;
+    transform: rotate(0deg);
+    transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
   }
 
-  #wheel div {
+  .segment {
     position: absolute;
     width: 50%;
     height: 50%;
-    background: rgba(255,255,255,0.2);
-    transform-origin: 100% 100%;
+    top: 50%;
+    left: 50%;
+    transform-origin: 0% 0%;
     text-align: right;
-    padding: 10px;
-    box-sizing: border-box;
+    font-size: 1.2rem;
+    color: #fff;
+    padding-right: 10px;
   }
 
-  #spin-btn {
-    padding: 10px 20px;
-    background-color: #f5a623;
-    border: none;
-    border-radius: 10px;
-    font-size: 18px;
-    cursor: pointer;
-    margin-bottom: 20px;
-  }
-
-  #sentence-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  #noun-input {
-    padding: 10px;
-    font-size: 18px;
-    width: 300px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border: none;
-  }
-
-  #teacher-buttons button {
-    padding: 10px 20px;
-    margin: 0 10px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-  }
-
-  #teacher-buttons #correct { background-color: green; color: #fff; }
-  #teacher-buttons #wrong { background-color: red; color: #fff; }
-
-  #feedback { margin-top: 10px; font-size: 18px; font-weight: bold; }
-
-  /* Stars animation */
-  .star {
+  #pin {
     position: absolute;
-    background: yellow;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    animation: float 6s infinite;
-    opacity: 0.7;
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: 30px solid red;
+    top: -30px;
+    left: calc(50% - 15px);
   }
 
-  @keyframes float {
-    0% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(-200px) translateX(100px); }
-    100% { transform: translateY(0) translateX(0); }
+  #sentence {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 15px;
   }
 
+  #input-block {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  #correctBtn { background: green; color: #fff; }
+  #wrongBtn { background: red; color: #fff; }
+
+  #nounType {
+    color: #fff;
+    margin-top: 10px;
+  }
 </style>
 </head>
 <body>
 
-<img src="g4/chp1/nouns/assets/logo.png" id="logo" alt="Innovine Logo">
-
-<div id="wheel-container">
-  <div id="wheel"></div>
+<!-- Splash -->
+<div id="splash">
+  <img src="assets/logo.png" alt="Innovine Logo">
 </div>
 
-<button id="spin-btn">Spin the Wheel</button>
+<!-- Bubbles -->
+<script>
+  for(let i=0;i<25;i++){
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    b.style.left = Math.random()*100+'vw';
+    b.style.animationDuration = 5+Math.random()*5+'s';
+    b.style.width = 10+Math.random()*10+'px';
+    b.style.height = 10+Math.random()*10+'px';
+    document.body.appendChild(b);
+  }
+</script>
 
-<div id="sentence-container">
-  <input type="text" id="noun-input" placeholder="Type a sentence using the noun type">
-  <div id="teacher-buttons">
-    <button id="correct">Correct</button>
-    <button id="wrong">Wrong</button>
+<div id="container">
+  <h1>Grade 4 Nouns - Spin the Wheel</h1>
+
+  <div id="wheel-container">
+    <div id="wheel">
+      <div class="segment" style="transform: rotate(0deg)">Common</div>
+      <div class="segment" style="transform: rotate(72deg)">Proper</div>
+      <div class="segment" style="transform: rotate(144deg)">Abstract</div>
+      <div class="segment" style="transform: rotate(216deg)">Collective</div>
+      <div class="segment" style="transform: rotate(288deg)">Concrete</div>
+    </div>
+    <div id="pin"></div>
   </div>
-  <div id="feedback"></div>
+
+  <button onclick="spinWheel()">Spin the Wheel</button>
+
+  <div id="sentence"></div>
+  <div id="nounType"></div>
+
+  <div id="input-block">
+    <button id="correctBtn">Correct</button>
+    <button id="wrongBtn">Wrong</button>
+  </div>
 </div>
+
+<audio id="correctSound" src="assets/correct.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
+<audio id="clapSound" src="assets/freesound_community-claps-44774.mp3"></audio>
 
 <script>
 const wheel = document.getElementById('wheel');
-const spinBtn = document.getElementById('spin-btn');
-const feedback = document.getElementById('feedback');
-const nounInput = document.getElementById('noun-input');
-const correctBtn = document.getElementById('correct');
-const wrongBtn = document.getElementById('wrong');
+const sentenceDiv = document.getElementById('sentence');
+const nounDiv = document.getElementById('nounType');
+const correctBtn = document.getElementById('correctBtn');
+const wrongBtn = document.getElementById('wrongBtn');
+const correctSound = document.getElementById('correctSound');
+const wrongSound = document.getElementById('wrongSound');
+const clapSound = document.getElementById('clapSound');
 
-const nouns = ['Common', 'Proper', 'Abstract', 'Collective', 'Concrete'];
-let currentNoun = '';
-let rotation = 0;
+let sentences = {
+  "Common": ["The dog barked loudly.", "I ate an apple.", "The boy runs fast.", "She opened the book.", "The car stopped."],
+  "Proper": ["John is my friend.", "London is a city.", "Mount Everest is tall.", "I met Alice.", "The Nile flows."],
+  "Abstract": ["Love is powerful.", "Happiness is contagious.", "Courage is necessary.", "Freedom is precious.", "Honesty is key."],
+  "Collective": ["The team won the match.", "A flock of birds flew.", "The class listened carefully.", "A pack of wolves hunted.", "The choir sang well."],
+  "Concrete": ["I saw a chair.", "The pencil is blue.", "The river flows.", "The house is big.", "She bought a cake."]
+};
 
-function createWheel() {
-  for (let i = 0; i < nouns.length; i++) {
-    const div = document.createElement('div');
-    div.style.transform = `rotate(${i * 72}deg) skewY(-36deg)`;
-    div.textContent = nouns[i];
-    wheel.appendChild(div);
-  }
+let currentNoun = "";
+let spinning = false;
+
+function spinWheel(){
+  if(spinning) return;
+  spinning = true;
+  const randomSegment = Math.floor(Math.random()*5);
+  const degrees = 720 + randomSegment*72 + 36; // multiple spins + half segment
+  wheel.style.transform = `rotate(${degrees}deg)`;
+
+  setTimeout(()=>{
+    spinning = false;
+    const keys = Object.keys(sentences);
+    currentNoun = keys[randomSegment];
+    nounDiv.textContent = "Pin landed on: " + currentNoun;
+    const senArr = sentences[currentNoun];
+    sentenceDiv.textContent = senArr[Math.floor(Math.random()*senArr.length)];
+  }, 5200);
 }
 
-// Spin the wheel
-spinBtn.addEventListener('click', () => {
-  const rand = Math.floor(Math.random() * nouns.length);
-  const degrees = rand * 72 + 1440 + rotation; 
-  rotation += degrees; // cumulative rotation
-  wheel.style.transition = 'transform 4s ease-out';
-  wheel.style.transform = `rotate(${rotation}deg)`;
-  setTimeout(() => {
-    currentNoun = nouns[rand];
-    feedback.textContent = `Pin landed on: ${currentNoun}`;
-  }, 4000);
-});
-
-// Teacher buttons
-correctBtn.addEventListener('click', () => {
-  feedback.textContent = "Marked Correct!";
-  nounInput.value = '';
-});
-wrongBtn.addEventListener('click', () => {
-  feedback.textContent = "Marked Wrong!";
-});
-
-createWheel();
-
-// Create floating stars
-for(let i=0;i<20;i++){
-  const star = document.createElement('div');
-  star.classList.add('star');
-  star.style.left = Math.random()*100 + 'vw';
-  star.style.top = Math.random()*100 + 'vh';
-  star.style.animationDuration = (4+Math.random()*4) + 's';
-  document.body.appendChild(star);
+correctBtn.onclick = () => {
+  correctSound.play();
+  clapSound.play();
+  alert("Teacher marked correct! Next spin.");
 }
+
+wrongBtn.onclick = () => {
+  wrongSound.play();
+  alert("Teacher marked wrong! Try again.");
+}
+
+// Splash timeout
+setTimeout(()=>{ document.getElementById('splash').style.display='none'; }, 3000);
 </script>
+
 </body>
 </html>
