@@ -5,236 +5,222 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grade 4 Nouns - Spin the Wheel</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Arbutus+Slab&display=swap');
-
-  body, html {
+body, html {
     margin: 0;
     padding: 0;
-    font-family: 'Arbutus Slab', serif;
     height: 100%;
+    font-family: 'Arial', sans-serif;
     overflow: hidden;
-    background: linear-gradient(to right, #40E0D0, #4169E1);
-    position: relative;
-  }
+}
 
-  /* Splash */
-  #splash {
+#splash {
     position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:white;
+    display:flex; justify-content:center; align-items:center;
+    z-index: 10;
+}
+
+#wheel-container {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    margin: auto;
+    top: 50px;
+}
+
+#wheel {
     width: 100%;
     height: 100%;
-    background: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-  }
-
-  #splash img {
-    width: 250px;
-  }
-
-  /* Floating bubbles */
-  .bubble {
-    position: absolute;
-    width: 15px;
-    height: 15px;
-    background: yellow;
     border-radius: 50%;
-    opacity: 0.7;
-    animation: floatBubble linear infinite;
-  }
-
-  @keyframes floatBubble {
-    0% { transform: translateY(100vh) translateX(0);}
-    100% { transform: translateY(-50px) translateX(50px);}
-  }
-
-  /* Container */
-  #container {
-    text-align: center;
-    padding-top: 20px;
-  }
-
-  h1 {
-    font-size: 2rem;
-    color: #fff;
-    margin-bottom: 20px;
-  }
-
-  #wheel-container {
+    border: 5px solid white;
     position: relative;
-    display: inline-block;
-    margin-bottom: 20px;
-  }
+    transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+}
 
-  #wheel {
-    width: 350px;
-    height: 350px;
-    border-radius: 50%;
-    border: 6px solid white;
-    position: relative;
-    overflow: hidden;
-    transform: rotate(0deg);
-    transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
-  }
-
-  .segment {
+#wheel span {
     position: absolute;
     width: 50%;
     height: 50%;
-    top: 50%;
     left: 50%;
+    top: 50%;
     transform-origin: 0% 0%;
     text-align: right;
-    font-size: 1.2rem;
-    color: #fff;
-    padding-right: 10px;
-  }
+    font-size: 18px;
+    color: white;
+    font-weight: bold;
+}
 
-  #pin {
+#pin {
     position: absolute;
+    top: -20px;
+    left: 50%;
+    margin-left: -15px;
     width: 0;
     height: 0;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
     border-bottom: 30px solid red;
-    top: -30px;
-    left: calc(50% - 15px);
-  }
+    z-index: 2;
+}
 
-  #sentence {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 15px;
-  }
+#sentence {
+    text-align:center;
+    margin-top: 20px;
+    font-size: 24px;
+    font-weight:bold;
+    color:white;
+}
 
-  #input-block {
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
+#buttons {
+    text-align:center;
+    margin-top: 20px;
+}
 
-  button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    font-weight: bold;
+button {
+    padding: 12px 25px;
+    margin: 10px;
+    font-size: 18px;
+    font-weight:bold;
     border: none;
-    cursor: pointer;
-    border-radius: 5px;
-  }
+    border-radius: 6px;
+    cursor:pointer;
+}
 
-  #correctBtn { background: green; color: #fff; }
-  #wrongBtn { background: red; color: #fff; }
+#correctBtn {background-color: green; color:white;}
+#wrongBtn {background-color: red; color:white;}
 
-  #nounType {
-    color: #fff;
-    margin-top: 10px;
-  }
+#pinLanded {
+    text-align:center;
+    margin-top:10px;
+    font-size: 20px;
+    color:white;
+    font-weight:bold;
+}
+
+#spinBtn {
+    display:block;
+    margin:20px auto;
+    padding:12px 25px;
+    font-size:18px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    background-color: orange;
+    font-weight:bold;
+}
+
+#background {
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: linear-gradient(to bottom right, #1e3c72, #2a5298); /* royal blue shade */
+    z-index:-1;
+    overflow:hidden;
+}
+
+/* bubbles */
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: #fdfd96;
+    opacity: 0.6;
+    pointer-events:none;
+    animation: float 10s linear infinite;
+}
+
+@keyframes float {
+    0% {transform: translateY(0);}
+    100% {transform: translateY(-1100px);}
+}
 </style>
 </head>
 <body>
 
-<!-- Splash -->
+<div id="background"></div>
+
 <div id="splash">
-  <img src="assets/logo.png" alt="Innovine Logo">
+    <img src="assets/logo.png" alt="Innovine Logo" style="width:200px;">
 </div>
 
-<!-- Bubbles -->
-<script>
-  for(let i=0;i<25;i++){
-    const b = document.createElement('div');
-    b.className = 'bubble';
-    b.style.left = Math.random()*100+'vw';
-    b.style.animationDuration = 5+Math.random()*5+'s';
-    b.style.width = 10+Math.random()*10+'px';
-    b.style.height = 10+Math.random()*10+'px';
-    document.body.appendChild(b);
-  }
-</script>
-
-<div id="container">
-  <h1>Grade 4 Nouns - Spin the Wheel</h1>
-
-  <div id="wheel-container">
-    <div id="wheel">
-      <div class="segment" style="transform: rotate(0deg)">Common</div>
-      <div class="segment" style="transform: rotate(72deg)">Proper</div>
-      <div class="segment" style="transform: rotate(144deg)">Abstract</div>
-      <div class="segment" style="transform: rotate(216deg)">Collective</div>
-      <div class="segment" style="transform: rotate(288deg)">Concrete</div>
-    </div>
+<div id="wheel-container">
     <div id="pin"></div>
-  </div>
+    <div id="wheel">
+        <span style="transform:rotate(0deg)">Common</span>
+        <span style="transform:rotate(72deg)">Proper</span>
+        <span style="transform:rotate(144deg)">Abstract</span>
+        <span style="transform:rotate(216deg)">Collective</span>
+        <span style="transform:rotate(288deg)">Concrete</span>
+    </div>
+</div>
 
-  <button onclick="spinWheel()">Spin the Wheel</button>
+<div id="sentence">Courage is necessary.</div>
 
-  <div id="sentence"></div>
-  <div id="nounType"></div>
+<button id="spinBtn">Spin the Wheel</button>
 
-  <div id="input-block">
+<div id="buttons">
     <button id="correctBtn">Correct</button>
     <button id="wrongBtn">Wrong</button>
-  </div>
 </div>
+
+<div id="pinLanded"></div>
 
 <audio id="correctSound" src="assets/correct.mp3"></audio>
 <audio id="wrongSound" src="assets/wrong.mp3"></audio>
 <audio id="clapSound" src="assets/freesound_community-claps-44774.mp3"></audio>
 
 <script>
+const splash = document.getElementById('splash');
+setTimeout(()=>{ splash.style.display='none'; }, 5000);
+
 const wheel = document.getElementById('wheel');
-const sentenceDiv = document.getElementById('sentence');
-const nounDiv = document.getElementById('nounType');
+const sentence = document.getElementById('sentence');
+const pinLanded = document.getElementById('pinLanded');
 const correctBtn = document.getElementById('correctBtn');
 const wrongBtn = document.getElementById('wrongBtn');
-const correctSound = document.getElementById('correctSound');
-const wrongSound = document.getElementById('wrongSound');
-const clapSound = document.getElementById('clapSound');
+const spinBtn = document.getElementById('spinBtn');
 
-let sentences = {
-  "Common": ["The dog barked loudly.", "I ate an apple.", "The boy runs fast.", "She opened the book.", "The car stopped."],
-  "Proper": ["John is my friend.", "London is a city.", "Mount Everest is tall.", "I met Alice.", "The Nile flows."],
-  "Abstract": ["Love is powerful.", "Happiness is contagious.", "Courage is necessary.", "Freedom is precious.", "Honesty is key."],
-  "Collective": ["The team won the match.", "A flock of birds flew.", "The class listened carefully.", "A pack of wolves hunted.", "The choir sang well."],
-  "Concrete": ["I saw a chair.", "The pencil is blue.", "The river flows.", "The house is big.", "She bought a cake."]
-};
+const nouns = ["Common", "Proper", "Abstract", "Collective", "Concrete"];
+const sentences = [
+    "Courage is necessary.",
+    "The cat is sleeping.",
+    "Paris is beautiful.",
+    "A flock of birds flew away.",
+    "Happiness is important."
+];
 
-let currentNoun = "";
-let spinning = false;
+function randomInt(max){ return Math.floor(Math.random()*max); }
 
-function spinWheel(){
-  if(spinning) return;
-  spinning = true;
-  const randomSegment = Math.floor(Math.random()*5);
-  const degrees = 720 + randomSegment*72 + 36; // multiple spins + half segment
-  wheel.style.transform = `rotate(${degrees}deg)`;
-
-  setTimeout(()=>{
-    spinning = false;
-    const keys = Object.keys(sentences);
-    currentNoun = keys[randomSegment];
-    nounDiv.textContent = "Pin landed on: " + currentNoun;
-    const senArr = sentences[currentNoun];
-    sentenceDiv.textContent = senArr[Math.floor(Math.random()*senArr.length)];
-  }, 5200);
+function createBubbles(){
+    for(let i=0;i<15;i++){
+        let bubble = document.createElement('div');
+        bubble.classList.add('bubble');
+        bubble.style.width = bubble.style.height = (10 + Math.random()*30) + 'px';
+        bubble.style.left = Math.random()*window.innerWidth + 'px';
+        bubble.style.top = window.innerHeight + 'px';
+        bubble.style.animationDuration = (6 + Math.random()*6) + 's';
+        document.body.appendChild(bubble);
+    }
 }
+createBubbles();
 
-correctBtn.onclick = () => {
-  correctSound.play();
-  clapSound.play();
-  alert("Teacher marked correct! Next spin.");
-}
+spinBtn.addEventListener('click', ()=>{
+    let randIndex = randomInt(nouns.length);
+    let randSentence = sentences[randIndex];
+    sentence.textContent = randSentence;
 
-wrongBtn.onclick = () => {
-  wrongSound.play();
-  alert("Teacher marked wrong! Try again.");
-}
+    let degree = 360/5 * randIndex + 360*5 + 36; // align with pin
+    wheel.style.transform = `rotate(${degree}deg)`;
 
-// Splash timeout
-setTimeout(()=>{ document.getElementById('splash').style.display='none'; }, 3000);
+    pinLanded.textContent = "Pin landed on: " + nouns[randIndex];
+});
+correctBtn.addEventListener('click', ()=>{
+    document.getElementById('correctSound').play();
+});
+wrongBtn.addEventListener('click', ()=>{
+    document.getElementById('wrongSound').play();
+});
 </script>
-
 </body>
 </html>
