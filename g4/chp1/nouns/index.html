@@ -2,225 +2,199 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grade 4 Nouns - Spin the Wheel</title>
 <style>
-body, html {
+body {
     margin: 0;
-    padding: 0;
-    height: 100%;
     font-family: 'Arial', sans-serif;
     overflow: hidden;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    height: 100vh;
 }
-
-#splash {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:white;
-    display:flex; justify-content:center; align-items:center;
-    z-index: 10;
+#logo {
+    display: block;
+    margin: 20px auto;
+    width: 150px;
 }
-
-#wheel-container {
+#wheelContainer {
     position: relative;
     width: 400px;
     height: 400px;
-    margin: auto;
-    top: 50px;
+    margin: 30px auto;
 }
-
 #wheel {
     width: 100%;
     height: 100%;
     border-radius: 50%;
     border: 5px solid white;
     position: relative;
+    overflow: hidden;
+    transform: rotate(0deg);
     transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
 }
-
-#wheel span {
+.sector {
     position: absolute;
     width: 50%;
     height: 50%;
-    left: 50%;
-    top: 50%;
-    transform-origin: 0% 0%;
+    top: 0; left: 50%;
+    transform-origin: left bottom;
+    background: rgba(255,255,255,0.2);
     text-align: right;
+    padding-right: 10px;
+    box-sizing: border-box;
+    font-weight: bold;
     font-size: 18px;
     color: white;
-    font-weight: bold;
 }
-
 #pin {
     position: absolute;
     top: -20px;
     left: 50%;
-    margin-left: -15px;
     width: 0;
     height: 0;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
     border-bottom: 30px solid red;
-    z-index: 2;
+    transform: translateX(-50%);
+    z-index: 10;
 }
-
-#sentence {
-    text-align:center;
-    margin-top: 20px;
-    font-size: 24px;
-    font-weight:bold;
-    color:white;
+#sentenceContainer {
+    text-align: center;
+    margin-top: 30px;
 }
-
-#buttons {
-    text-align:center;
-    margin-top: 20px;
+#sentenceContainer h2 {
+    font-size: 22px;
+    color: #fff;
+    margin-bottom: 15px;
 }
-
-button {
-    padding: 12px 25px;
-    margin: 10px;
+#typingBox {
+    width: 80%;
+    padding: 10px;
     font-size: 18px;
-    font-weight:bold;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    outline: none;
+}
+#buttons {
+    margin-top: 15px;
+}
+#buttons button {
+    font-size: 18px;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 10px;
     border: none;
-    border-radius: 6px;
-    cursor:pointer;
+    cursor: pointer;
+    font-weight: bold;
 }
+#correctBtn { background-color: green; color: white;}
+#wrongBtn { background-color: red; color: white;}
+#spinBtn { font-size: 20px; padding: 10px 30px; margin-top: 20px; background-color: orange; color: white; border-radius: 10px; border: none; cursor: pointer; font-weight: bold;}
 
-#correctBtn {background-color: green; color:white;}
-#wrongBtn {background-color: red; color:white;}
-
-#pinLanded {
-    text-align:center;
-    margin-top:10px;
-    font-size: 20px;
-    color:white;
-    font-weight:bold;
-}
-
-#spinBtn {
-    display:block;
-    margin:20px auto;
-    padding:12px 25px;
-    font-size:18px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    background-color: orange;
-    font-weight:bold;
-}
-
-#background {
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: linear-gradient(to bottom right, #1e3c72, #2a5298); /* royal blue shade */
-    z-index:-1;
-    overflow:hidden;
-}
-
-/* bubbles */
 .bubble {
     position: absolute;
     border-radius: 50%;
-    background: #fdfd96;
-    opacity: 0.6;
-    pointer-events:none;
-    animation: float 10s linear infinite;
-}
-
-@keyframes float {
-    0% {transform: translateY(0);}
-    100% {transform: translateY(-1100px);}
+    background-color: yellow;
+    opacity: 0.7;
+    pointer-events: none;
 }
 </style>
 </head>
 <body>
 
-<div id="background"></div>
+<img id="logo" src="assets/logo.png" alt="Innovine Logo">
 
-<div id="splash">
-    <img src="assets/logo.png" alt="Innovine Logo" style="width:200px;">
-</div>
-
-<div id="wheel-container">
+<div id="wheelContainer">
     <div id="pin"></div>
     <div id="wheel">
-        <span style="transform:rotate(0deg)">Common</span>
-        <span style="transform:rotate(72deg)">Proper</span>
-        <span style="transform:rotate(144deg)">Abstract</span>
-        <span style="transform:rotate(216deg)">Collective</span>
-        <span style="transform:rotate(288deg)">Concrete</span>
+        <div class="sector" style="transform: rotate(0deg);">Proper</div>
+        <div class="sector" style="transform: rotate(72deg);">Abstract</div>
+        <div class="sector" style="transform: rotate(144deg);">Collective</div>
+        <div class="sector" style="transform: rotate(216deg);">Concrete</div>
+        <div class="sector" style="transform: rotate(288deg);">Common</div>
     </div>
 </div>
 
-<div id="sentence">Courage is necessary.</div>
-
-<button id="spinBtn">Spin the Wheel</button>
-
-<div id="buttons">
-    <button id="correctBtn">Correct</button>
-    <button id="wrongBtn">Wrong</button>
+<div id="sentenceContainer">
+    <h2>Pin landed on: <span id="nounType">--</span></h2>
+    <input type="text" id="typingBox" placeholder="Type a sentence using the noun type">
+    <div id="buttons">
+        <button id="correctBtn">Correct</button>
+        <button id="wrongBtn">Wrong</button>
+    </div>
+    <button id="spinBtn">Spin the Wheel</button>
 </div>
-
-<div id="pinLanded"></div>
 
 <audio id="correctSound" src="assets/correct.mp3"></audio>
 <audio id="wrongSound" src="assets/wrong.mp3"></audio>
-<audio id="clapSound" src="assets/freesound_community-claps-44774.mp3"></audio>
+<audio id="applauseSound" src="assets/freesound_community-claps-44774.mp3"></audio>
 
 <script>
-const splash = document.getElementById('splash');
-setTimeout(()=>{ splash.style.display='none'; }, 5000);
+// Bubbles effect
+function createBubble() {
+    const bubble = document.createElement('div');
+    bubble.classList.add('bubble');
+    const size = Math.random() * 20 + 10;
+    bubble.style.width = size + 'px';
+    bubble.style.height = size + 'px';
+    bubble.style.left = Math.random() * window.innerWidth + 'px';
+    bubble.style.top = window.innerHeight + 'px';
+    document.body.appendChild(bubble);
+    let speed = Math.random() * 2 + 1;
+    function move() {
+        let top = parseFloat(bubble.style.top);
+        if(top + size < 0) {
+            bubble.remove();
+        } else {
+            bubble.style.top = (top - speed) + 'px';
+            requestAnimationFrame(move);
+        }
+    }
+    move();
+}
+setInterval(createBubble, 300);
 
+// Wheel logic
 const wheel = document.getElementById('wheel');
-const sentence = document.getElementById('sentence');
-const pinLanded = document.getElementById('pinLanded');
+const spinBtn = document.getElementById('spinBtn');
+const nounTypeSpan = document.getElementById('nounType');
+const nounTypes = ["Proper","Abstract","Collective","Concrete","Common"];
+let isSpinning = false;
+
+spinBtn.addEventListener('click', () => {
+    if(isSpinning) return;
+    isSpinning = true;
+    const randomDegree = Math.floor(Math.random()*360) + 720; // 2-3 rotations
+    wheel.style.transform = `rotate(${randomDegree}deg)`;
+    setTimeout(() => {
+        const actualDegree = randomDegree % 360;
+        const sectorSize = 360 / nounTypes.length;
+        const index = Math.floor(actualDegree / sectorSize);
+        const landed = nounTypes[index];
+        nounTypeSpan.textContent = landed;
+        isSpinning = false;
+    }, 4200);
+});
+
+// Teacher buttons logic
 const correctBtn = document.getElementById('correctBtn');
 const wrongBtn = document.getElementById('wrongBtn');
-const spinBtn = document.getElementById('spinBtn');
+const correctSound = document.getElementById('correctSound');
+const wrongSound = document.getElementById('wrongSound');
+const applauseSound = document.getElementById('applauseSound');
 
-const nouns = ["Common", "Proper", "Abstract", "Collective", "Concrete"];
-const sentences = [
-    "Courage is necessary.",
-    "The cat is sleeping.",
-    "Paris is beautiful.",
-    "A flock of birds flew away.",
-    "Happiness is important."
-];
-
-function randomInt(max){ return Math.floor(Math.random()*max); }
-
-function createBubbles(){
-    for(let i=0;i<15;i++){
-        let bubble = document.createElement('div');
-        bubble.classList.add('bubble');
-        bubble.style.width = bubble.style.height = (10 + Math.random()*30) + 'px';
-        bubble.style.left = Math.random()*window.innerWidth + 'px';
-        bubble.style.top = window.innerHeight + 'px';
-        bubble.style.animationDuration = (6 + Math.random()*6) + 's';
-        document.body.appendChild(bubble);
-    }
-}
-createBubbles();
-
-spinBtn.addEventListener('click', ()=>{
-    let randIndex = randomInt(nouns.length);
-    let randSentence = sentences[randIndex];
-    sentence.textContent = randSentence;
-
-    let degree = 360/5 * randIndex + 360*5 + 36; // align with pin
-    wheel.style.transform = `rotate(${degree}deg)`;
-
-    pinLanded.textContent = "Pin landed on: " + nouns[randIndex];
+correctBtn.addEventListener('click', () => {
+    correctSound.play();
+    applauseSound.play();
+    alert("Correct! Well done!");
+    document.getElementById('typingBox').value = '';
 });
-correctBtn.addEventListener('click', ()=>{
-    document.getElementById('correctSound').play();
-});
-wrongBtn.addEventListener('click', ()=>{
-    document.getElementById('wrongSound').play();
+
+wrongBtn.addEventListener('click', () => {
+    wrongSound.play();
+    alert("Wrong! Try again.");
 });
 </script>
+
 </body>
 </html>
