@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joining Words Game</title>
+<style>
+body { font-family: Arial; display: flex; flex-direction: column; align-items:center; justify-content: center; background: linear-gradient(135deg,#fff9c4,#fff59d); min-height:100vh; margin:0; }
+#logo-screen { position:fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:10; }
+#game-container { display:none; flex-direction: column; align-items:center; max-width:600px; width:95%; animation: fadeIn 1s ease-in; }
+h2 { text-align:center; }
+.options { display:flex; flex-direction: column; margin-top:20px; }
+.option-btn { background:#ffe082; color:#4a148c; border:none; padding:15px; margin:5px 0; border-radius:8px; cursor:pointer; font-size:1.1rem; transition: transform 0.3s, background 0.3s; }
+.option-btn:hover { transform: scale(1.05); }
+#timer { margin-top:10px; font-weight:bold; font-size:1.2rem; }
+@keyframes fadeIn { from {opacity:0; transform: translateY(-20px);} to {opacity:1; transform: translateY(0);} }
+.correct-anim { animation: pop 0.5s; }
+@keyframes pop { 0% {transform:scale(1);} 50% {transform:scale(1.3);} 100% {transform:scale(1);} }
+#score-popup { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:15px; box-shadow:0 0 10px rgba(0,0,0,0.5); text-align:center; z-index:20; }
+#restart-btn { margin-top:20px; padding:10px 20px; border:none; background:#ffd54f; color:white; border-radius:8px; cursor:pointer; }
+table { margin-top:15px; border-collapse: collapse; width:100%; }
+th, td { border:1px solid #4a148c; padding:5px 10px; text-align:center; }
+th { background-color:#fbc02d; color:white; }
+</style>
+</head>
+<body>
+
+<div id="logo-screen">
+    <img src="assets/7aa5e401-15de-48fc-94d6-75adfc42cd20.png" style="max-width:200px;" alt="Logo">
+</div>
+
+<div id="game-container">
+    <h2 id="question-prompt"></h2>
+    <h2 id="question-text"></h2>
+    <div class="options" id="options-container"></div>
+    <div id="timer">Time left: 85s</div>
+</div>
+
+<div id="score-popup">
+    <h2 id="score-text"></h2>
+    <div id="wrong-table-container"></div>
+    <button id="restart-btn">Restart</button>
+</div>
+
+<audio id="clap-sound" src="clap.mp3" volume="1"></audio>
+
+<script>
+// Dynamic prompt variations
+const prompts = [
+    "Which word best completes the sentence?",
+    "Which word can be used in the blank?",
+    "Select the correct joining word for the sentence.",
+    "Choose the correct word to fill in the blank."
+];
+
+// Questions: 15 joining words with punctuation
+const questions = [
+    {q:"I like tea ___ coffee.", options:["and","but"], answer:"and"},
+    {q:"I wanted to go ___ I was sick.", options:["and","but"], answer:"but"},
+    {q:"Sun rises ___ sets.", options:["and","but"], answer:"and"},
+    {q:"He tried hard ___ failed.", options:["and","but"], answer:"but"},
+    {q:"We bought pencils ___ erasers.", options:["and","but"], answer:"and"},
+    {q:"I was tired ___ went to school.", options:["and","but"], answer:"but"},
+    {q:"She smiled ___ waved.", options:["and","but"], answer:"and"},
+    {q:"I wanted cake ___ there was none.", options:["and","but"], answer:"but"},
+    {q:"Tom played ___ Jerry fought.", options:["and","but"], answer:"and"},
+    {q:"It was sunny ___ cold.", options:["and","but"], answer:"but"},
+    {q:"Apples ___ oranges are healthy.", options:["and","but"], answer:"and"},
+    {q:"I tried ___ I could not succeed.", options:["and","but"], answer:"but"},
+    {q:"We sang ___ danced.", options:["and","but"], answer:"and"},
+    {q:"He is smart ___ lazy sometimes.", options:["and","but"], answer:"but"},
+    {q:"We read books ___ magazines.", options:["and","but"], answer:"and"}
+];
+
+let currentQuestion=0;
+let score=0;
+let wrongAnswers=[];
+let timer;
+let timeLeft=85;
+
+function showQuestion(){
+    if(currentQuestion>=questions.length){
+        showScore();
+        return;
+    }
+    const q = questions[currentQuestion];
+    document.getElementById("question-text").textContent = q.q;
+    // Random prompt
+    const prompt = prompts[Math.floor(Math.random()*prompts.length)];
+    document.getElementById("question-prompt").textContent = prompt;
+
+    const container = document.getElementById("options-container");
+    container.innerHTML="";
+    q.options.sort(()=>Math.random()-0.5);
+    q.options.forEach(opt=>{
+        const btn = document.createElement("button");
+        btn.className="option-btn";
+        btn.textContent = opt;
+        btn.onclick = ()=>checkAnswer(opt,btn);
+        container.appendChild(btn);
+    });
+    startTimer();
+}
+
+function checkAnswer(opt, btn){
+    clearInterval(timer);
+    const q = questions[currentQuestion];
+    if(opt===q.answer){
+        btn.classList.add("correct-anim");
+        score++;
+        playClap();
+        confettiEffect(btn);
+    } else {
+        wrongAnswers.push({question:q.q, correct:q.answer});
+    }
+    currentQuestion++;
+    setTimeout(()=>{timeLeft=85; showQuestion();},800);
+}
+
+function startTimer(){
+    timeLeft=85;
+    document.getElementById("timer").textContent=`Time left: ${timeLeft}s`;
+    clearInterval(timer);
+    timer = setInterval(()=>{
+        timeLeft--;
+        document.getElementById("timer").textContent=`Time left: ${timeLeft}s`;
+        if(timeLeft<=0){
+            clearInterval(timer);
+            const q = questions[currentQuestion];
+            wrongAnswers.push({question:q.q, correct:q.answer});
+            currentQuestion++;
+            showQuestion();
+        }
+    },1000);
+}
+
+function showScore(){
+    document.getElementById("game-container").style.display="none";
+    const popup = document.getElementById("score-popup");
+    document.getElementById("score-text").textContent=`Your score: ${score}/${questions.length}`;
+    
+    if(wrongAnswers.length>0){
+        let html = '<table><tr><th>Question</th><th>Correct Answer</th></tr>';
+        wrongAnswers.forEach(item=>{
+            html += `<tr><td>${item.question}</td><td>${item.correct}</td></tr>`;
+        });
+        html += '</table>';
+        document.getElementById("wrong-table-container").innerHTML=html;
+    }
+    popup.style.display="block";
+}
+
+document.getElementById("restart-btn").onclick = ()=> location.reload();
+
+function playClap(){
+    const audio = document.getElementById("clap-sound");
+    audio.currentTime=0;
+    audio.volume=1;
+    audio.play();
+}
+
+function confettiEffect(tile){
+    for(let i=0;i<15;i++){
+        const c = document.createElement("div");
+        c.style.position="absolute";
+        c.style.width="10px"; c.style.height="10px"; c.style.backgroundColor=`hsl(${Math.random()*360},80%,60%)`;
+        c.style.borderRadius="50%";
+        const rect = tile.getBoundingClientRect();
+        c.style.left = rect.left+rect.width/2+"px";
+        c.style.top = rect.top+rect.height/2+"px";
+        document.body.appendChild(c);
+        let angle = Math.random()*2*Math.PI, distance=0;
+        const interval = setInterval(()=>{
+            distance+=5;
+            c.style.left = rect.left+rect.width/2 + Math.cos(angle)*distance + "px";
+            c.style.top = rect.top+rect.height/2 + Math.sin(angle)*distance + "px";
+            if(distance>100){ clearInterval(interval); c.remove();}
+        },20);
+    }
+}
+
+window.onload = ()=>{
+    setTimeout(()=>{
+        document.getElementById("logo-screen").style.display="none";
+        document.getElementById("game-container").style.display="flex";
+        showQuestion();
+    },5000);
+};
+</script>
+</body>
+</html>
