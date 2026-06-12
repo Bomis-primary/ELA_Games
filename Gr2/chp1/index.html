@@ -1,1 +1,179 @@
-html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Common vs Proper Nouns Game</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(to bottom,#ffe066,#ff6b6b);
+  overflow: hidden;
+  color: #222;
+  text-align: center;
+}
+#splash {
+  position: fixed;
+  top:0;left:0;width:100%;height:100%;
+  background: white url('innovinelogo.png') center/contain no-repeat;
+  z-index: 1000;
+}
+#game { display:none; padding: 10px; max-width: 800px; margin:auto; }
+#card { background:white; padding:20px; border-radius:15px; margin:20px auto; max-width:300px; }
+#card img { width:150px; height:150px; margin-bottom:10px; border-radius:10px; object-fit:cover; }
+button { padding:10px 20px; margin:5px; font-size:16px; border-radius:10px; cursor:pointer; }
+#feedback { font-size:20px; min-height:30px; margin-top:10px; }
+#score { font-size:22px; margin-top:10px; }
+#restart { display:none; padding:10px 20px; font-size:18px; border-radius:10px; cursor:pointer; margin-top:15px;}
+.star {
+  position: absolute;
+  width:2px; height:2px; background:white; border-radius:50%;
+  animation: twinkle 3s linear infinite, float 10s linear infinite;
+}
+@keyframes twinkle { 0%,100% {opacity:0.2;} 50% {opacity:1;} }
+@keyframes float { 0% {transform:translateY(0);} 50% {transform:translateY(-20px);} 100% {transform:translateY(0);} }
+#confetti { position:absolute; width:100%; height:100%; top:0; left:0; pointer-events:none; z-index:500;}
+</style>
+</head>
+<body>
+
+<div id="splash"></div>
+
+<div id="game">
+<h1>🌟 Common vs Proper Nouns 🌟</h1>
+<p>Sort the noun into the correct category!</p>
+
+<div id="card">
+  <img id="nounImage" src="">
+  <h2 id="nounWord"></h2>
+</div>
+
+<div>
+<button onclick="check('common')">Common Noun</button>
+<button onclick="check('proper')">Proper Noun</button>
+</div>
+
+<div id="feedback"></div>
+<div id="score">Score: 0 / 0</div>
+<div id="restart" onclick="restartGame()">🔄 Restart Game</div>
+<div id="confetti"></div>
+</div>
+
+<audio id="correctAudio" src="correct.mp3"></audio>
+<audio id="wrongAudio" src="wrong.mp3"></audio>
+<audio id="clapAudio" src="clapping.mp3"></audio>
+
+<script>
+// Game items (vector-style placeholder images)
+const items = [
+  {word:'dog',type:'common',img:'https://via.placeholder.com/150?text=Dog'},
+  {word:'teacher',type:'common',img:'https://via.placeholder.com/150?text=Teacher'},
+  {word:'apple',type:'common',img:'https://via.placeholder.com/150?text=Apple'},
+  {word:'school',type:'common',img:'https://via.placeholder.com/150?text=School'},
+  {word:'book',type:'common',img:'https://via.placeholder.com/150?text=Book'},
+  {word:'pencil',type:'common',img:'https://via.placeholder.com/150?text=Pencil'},
+  {word:'Riya',type:'proper',img:'https://via.placeholder.com/150?text=Riya'},
+  {word:'India',type:'proper',img:'https://via.placeholder.com/150?text=India'},
+  {word:'Mumbai',type:'proper',img:'https://via.placeholder.com/150?text=Mumbai'},
+  {word:'Monday',type:'proper',img:'https://via.placeholder.com/150?text=Monday'},
+  {word:'Eiffel Tower',type:'proper',img:'https://via.placeholder.com/150?text=Eiffel+Tower'},
+  {word:'River Nile',type:'proper',img:'https://via.placeholder.com/150?text=River+Nile'},
+  {word:'Christmas',type:'proper',img:'https://via.placeholder.com/150?text=Christmas'},
+  {word:'Taj Mahal',type:'proper',img:'https://via.placeholder.com/150?text=Taj+Mahal'},
+  {word:'glass',type:'common',img:'https://via.placeholder.com/150?text=Glass'},
+  {word:'chair',type:'common',img:'https://via.placeholder.com/150?text=Chair'}
+];
+
+let currentIndex = 0;
+let score = 0;
+
+// Splash
+setTimeout(()=>{
+  document.getElementById('splash').style.display='none';
+  document.getElementById('game').style.display='block';
+  shuffle(items);
+  showNext();
+},5000);
+
+// Stars background
+for(let i=0;i<100;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  s.style.top=Math.random()*100+'%';
+  s.style.left=Math.random()*100+'%';
+  s.style.width=1+Math.random()*3+'px';
+  s.style.height=1+Math.random()*3+'px';
+  s.style.animationDuration=(2+Math.random()*3)+'s';
+  document.body.appendChild(s);
+}
+
+// Shuffle array
+function shuffle(array){for(let i=array.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]];}}
+
+// Show next item
+function showNext(){
+  if(currentIndex>=items.length){
+    document.getElementById('nounWord').innerText='🎉 Finished!';
+    document.getElementById('nounImage').style.display='none';
+    document.getElementById('feedback').innerText='';
+    document.getElementById('restart').style.display='inline-block';
+    document.getElementById('clapAudio').play();
+    return;
+  }
+  const current = items[currentIndex];
+  document.getElementById('nounImage').src=current.img;
+  document.getElementById('nounImage').style.display='block';
+  document.getElementById('nounWord').innerText=current.word;
+  document.getElementById('feedback').innerText='';
+  document.getElementById('score').innerText = `Score: ${score} / ${items.length}`;
+}
+
+// Check answer
+function check(type){
+  const current = items[currentIndex];
+  if(type===current.type){
+    score++;
+    document.getElementById('feedback').innerText='✅ Correct!';
+    document.getElementById('correctAudio').play();
+    celebrate();
+  }else{
+    document.getElementById('feedback').innerText='❌ Wrong!';
+    document.getElementById('wrongAudio').play();
+  }
+  currentIndex++;
+  setTimeout(showNext,900);
+}
+
+// Confetti celebration
+function celebrate(){
+  const container=document.getElementById('confetti');
+  for(let i=0;i<50;i++){
+    const c=document.createElement('div');
+    c.style.position='absolute';
+    c.style.width='6px';
+    c.style.height='6px';
+    c.style.background='yellow';
+    c.style.top='50%';
+    c.style.left='50%';
+    c.style.borderRadius='50%';
+    c.style.opacity=1;
+    c.style.transform=`translate(${Math.random()*400-200}px, ${Math.random()*400-200}px)`;
+    c.style.transition='all 1s ease-out';
+    container.appendChild(c);
+    setTimeout(()=>{c.remove();},1000);
+  }
+}
+
+// Restart
+function restartGame(){
+  currentIndex=0;
+  score=0;
+  shuffle(items);
+  document.getElementById('nounImage').style.display='block';
+  document.getElementById('restart').style.display='none';
+  showNext();
+}
+</script>
+
+</body>
+</html>
