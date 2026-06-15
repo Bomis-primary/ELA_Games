@@ -97,28 +97,31 @@ button:active{
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:14px;
+  gap:12px;
+  padding-top:35px;
 }
 
 .questionText{
   background:#fff;
-  padding:16px 22px;
+  padding:14px 22px;
   border-radius:24px;
   box-shadow:0 5px 15px #0002;
   font-size:27px;
   font-weight:bold;
   max-width:850px;
+  z-index:5;
 }
 
 .wordBox{
   background:#fff6d8;
   border:5px dashed #ff9800;
   border-radius:24px;
-  padding:16px 34px;
-  font-size:42px;
+  padding:14px 34px;
+  font-size:40px;
   font-weight:bold;
   color:#7b3f00;
   box-shadow:0 5px 12px #0002;
+  z-index:5;
 }
 
 .factory{
@@ -129,6 +132,8 @@ button:active{
   border:7px solid #455a64;
   border-radius:30px;
   box-shadow:0 12px 25px #0004;
+  margin-top:10px;
+  overflow:hidden;
 }
 
 .factory.shake{
@@ -145,34 +150,37 @@ button:active{
 
 .chimney{
   position:absolute;
-  top:-70px;
-  left:70px;
-  width:70px;
-  height:85px;
+  top:15px;
+  left:25px;
+  width:58px;
+  height:70px;
   background:#546e7a;
   border:6px solid #37474f;
-  border-radius:14px 14px 0 0;
+  border-radius:12px;
+  z-index:2;
 }
 
 .smoke{
   position:absolute;
-  top:-105px;
-  left:74px;
-  font-size:42px;
-  animation:floatSmoke 1.5s infinite alternate;
+  top:8px;
+  left:95px;
+  font-size:28px;
+  opacity:.85;
+  animation:floatSmoke 1.4s infinite alternate;
+  z-index:3;
 }
 
 @keyframes floatSmoke{
   from{transform:translateY(0);opacity:.6}
-  to{transform:translateY(-14px);opacity:1}
+  to{transform:translateY(-8px);opacity:1}
 }
 
 .machineWindow{
   position:absolute;
-  top:55px;
+  top:80px;
   left:50%;
   transform:translateX(-50%);
-  width:210px;
+  width:220px;
   height:105px;
   background:#e1f5fe;
   border:6px solid #263238;
@@ -183,16 +191,18 @@ button:active{
   font-size:30px;
   font-weight:bold;
   color:#01579b;
+  z-index:4;
 }
 
 .gear{
   position:absolute;
   font-size:52px;
   animation:spin 2s linear infinite;
+  z-index:3;
 }
 
-.gear.one{bottom:28px;left:60px}
-.gear.two{bottom:28px;right:60px}
+.gear.one{bottom:25px;left:60px}
+.gear.two{bottom:25px;right:60px}
 
 @keyframes spin{
   to{transform:rotate(360deg)}
@@ -200,18 +210,20 @@ button:active{
 
 .pipe{
   position:absolute;
-  right:-55px;
-  top:105px;
-  width:70px;
+  right:0;
+  top:110px;
+  width:60px;
   height:50px;
   background:#ffb74d;
   border:5px solid #e65100;
-  border-radius:0 20px 20px 0;
+  border-right:0;
+  border-radius:20px 0 0 20px;
+  z-index:3;
 }
 
 .output{
-  min-height:54px;
-  font-size:30px;
+  min-height:46px;
+  font-size:29px;
   font-weight:bold;
   color:#2e7d32;
 }
@@ -293,12 +305,38 @@ button:active{
 @media(max-width:650px){
   .topbar{font-size:17px}
   .badge{padding:8px 12px}
-  .questionText{font-size:21px}
-  .wordBox{font-size:32px}
-  .factory{height:235px}
-  .option{font-size:21px;min-width:145px}
+  .factoryWrap{
+    height:86vh;
+    gap:9px;
+    padding-top:45px;
+  }
+  .questionText{font-size:20px;padding:11px 16px}
+  .wordBox{font-size:28px;padding:10px 20px}
+  .factory{height:220px;width:92vw}
+  .machineWindow{
+    top:72px;
+    width:185px;
+    height:82px;
+    font-size:24px;
+  }
+  .chimney{
+    top:13px;
+    left:20px;
+    width:50px;
+    height:60px;
+  }
+  .smoke{
+    top:6px;
+    left:78px;
+    font-size:24px;
+  }
+  .gear{font-size:40px}
+  .gear.one{left:45px;bottom:20px}
+  .gear.two{right:45px;bottom:20px}
+  .option{font-size:20px;min-width:140px;padding:11px 14px}
   .topicCard h1{font-size:32px}
   .topicCard p{font-size:20px}
+  .output{font-size:20px}
 }
 </style>
 </head>
@@ -309,7 +347,7 @@ button:active{
 <audio id="wrongSound" src="wrong.mp3"></audio>
 
 <div id="logoScreen" class="screen active" style="background:white">
-  <img src="innovine-logo_Final.png" class="logo" alt="Innovine Logo">
+  <img src="./assets/innovine-logo_Final.png" class="logo" alt="Innovine Logo">
 </div>
 
 <div id="startScreen" class="screen">
