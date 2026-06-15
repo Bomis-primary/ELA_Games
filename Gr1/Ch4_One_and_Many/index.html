@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One and Many - Magic Word Factory</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:"Comic Sans MS", Arial, sans-serif;
+  background:linear-gradient(135deg,#ffe7a8,#a6ecff,#c9ffd2);
+  overflow:hidden;
+  color:#243042;
+}
+
+.screen{
+  width:100vw;
+  height:100vh;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  text-align:center;
+  padding:18px;
+}
+
+.active{display:flex}
+
+.logo{
+  width:70%;
+  max-width:360px;
+}
+
+button{
+  font-family:inherit;
+  font-size:22px;
+  padding:14px 26px;
+  border:0;
+  border-radius:18px;
+  background:#ffca28;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 6px #c79100;
+  margin:10px;
+}
+
+button:active{
+  transform:translateY(4px);
+  box-shadow:0 2px #c79100;
+}
+
+.topicCard{
+  background:#fff;
+  padding:28px;
+  border-radius:30px;
+  box-shadow:0 10px 28px #0003;
+  max-width:750px;
+}
+
+.topicCard h1{
+  font-size:42px;
+  margin:10px 0;
+  color:#ff6f00;
+}
+
+.topicCard p{
+  font-size:24px;
+}
+
+.topbar{
+  position:absolute;
+  top:10px;
+  left:10px;
+  right:10px;
+  display:flex;
+  justify-content:space-between;
+  font-size:22px;
+  font-weight:bold;
+  z-index:10;
+}
+
+.badge{
+  background:white;
+  padding:10px 18px;
+  border-radius:18px;
+  box-shadow:0 5px 14px #0002;
+}
+
+.factoryWrap{
+  width:96%;
+  max-width:950px;
+  height:82vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+}
+
+.questionText{
+  background:#fff;
+  padding:16px 22px;
+  border-radius:24px;
+  box-shadow:0 5px 15px #0002;
+  font-size:27px;
+  font-weight:bold;
+  max-width:850px;
+}
+
+.wordBox{
+  background:#fff6d8;
+  border:5px dashed #ff9800;
+  border-radius:24px;
+  padding:16px 34px;
+  font-size:42px;
+  font-weight:bold;
+  color:#7b3f00;
+  box-shadow:0 5px 12px #0002;
+}
+
+.factory{
+  width:min(88vw,520px);
+  height:270px;
+  position:relative;
+  background:linear-gradient(#b0bec5,#78909c);
+  border:7px solid #455a64;
+  border-radius:30px;
+  box-shadow:0 12px 25px #0004;
+}
+
+.factory.shake{
+  animation:shake .45s infinite;
+}
+
+@keyframes shake{
+  0%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  50%{transform:translateX(6px)}
+  75%{transform:translateX(-4px)}
+  100%{transform:translateX(0)}
+}
+
+.chimney{
+  position:absolute;
+  top:-70px;
+  left:70px;
+  width:70px;
+  height:85px;
+  background:#546e7a;
+  border:6px solid #37474f;
+  border-radius:14px 14px 0 0;
+}
+
+.smoke{
+  position:absolute;
+  top:-105px;
+  left:74px;
+  font-size:42px;
+  animation:floatSmoke 1.5s infinite alternate;
+}
+
+@keyframes floatSmoke{
+  from{transform:translateY(0);opacity:.6}
+  to{transform:translateY(-14px);opacity:1}
+}
+
+.machineWindow{
+  position:absolute;
+  top:55px;
+  left:50%;
+  transform:translateX(-50%);
+  width:210px;
+  height:105px;
+  background:#e1f5fe;
+  border:6px solid #263238;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  font-weight:bold;
+  color:#01579b;
+}
+
+.gear{
+  position:absolute;
+  font-size:52px;
+  animation:spin 2s linear infinite;
+}
+
+.gear.one{bottom:28px;left:60px}
+.gear.two{bottom:28px;right:60px}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+.pipe{
+  position:absolute;
+  right:-55px;
+  top:105px;
+  width:70px;
+  height:50px;
+  background:#ffb74d;
+  border:5px solid #e65100;
+  border-radius:0 20px 20px 0;
+}
+
+.output{
+  min-height:54px;
+  font-size:30px;
+  font-weight:bold;
+  color:#2e7d32;
+}
+
+.options{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:14px;
+  width:100%;
+}
+
+.option{
+  min-width:210px;
+  background:#ffffff;
+  border:5px solid #2196f3;
+  border-radius:22px;
+  padding:15px 18px;
+  font-size:26px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 6px 12px #0002;
+}
+
+.option.correct{
+  background:#b9f6ca;
+  border-color:#00c853;
+}
+
+.option.wrong{
+  background:#ffcdd2;
+  border-color:#d50000;
+}
+
+.stars{
+  position:absolute;
+  font-size:28px;
+  animation:rise 1.2s forwards;
+}
+
+@keyframes rise{
+  from{opacity:1;transform:translateY(0) scale(1)}
+  to{opacity:0;transform:translateY(-80px) scale(1.6)}
+}
+
+.finalCard{
+  background:white;
+  padding:32px;
+  border-radius:34px;
+  max-width:760px;
+  width:92%;
+  box-shadow:0 12px 32px #0004;
+}
+
+.finalCard h1{
+  color:#ff6f00;
+  font-size:42px;
+}
+
+.stats{
+  font-size:25px;
+  line-height:1.8;
+}
+
+.confetti{
+  position:fixed;
+  width:12px;
+  height:12px;
+  top:-15px;
+  border-radius:50%;
+  animation:fall 2s linear forwards;
+  z-index:2000;
+}
+
+@keyframes fall{
+  to{transform:translateY(110vh) rotate(360deg)}
+}
+
+@media(max-width:650px){
+  .topbar{font-size:17px}
+  .badge{padding:8px 12px}
+  .questionText{font-size:21px}
+  .wordBox{font-size:32px}
+  .factory{height:235px}
+  .option{font-size:21px;min-width:145px}
+  .topicCard h1{font-size:32px}
+  .topicCard p{font-size:20px}
+}
+</style>
+</head>
+
+<body>
+
+<audio id="correctSound" src="correct.mp3"></audio>
+<audio id="wrongSound" src="wrong.mp3"></audio>
+
+<div id="logoScreen" class="screen active" style="background:white">
+  <img src="innovine-logo_Final.png" class="logo" alt="Innovine Logo">
+</div>
+
+<div id="startScreen" class="screen">
+  <div class="topicCard">
+    <h1>🏭 Magic Word Factory 🏭</h1>
+    <p>Help the machine make many words!</p>
+    <p>Choose the correct word with <b>s</b> or <b>es</b>.</p>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+</div>
+
+<div id="gameScreen" class="screen">
+  <div class="topbar">
+    <div class="badge" id="counter">1/10</div>
+    <div class="badge" id="timer">⏱ 80</div>
+  </div>
+
+  <div class="factoryWrap">
+    <div class="questionText" id="questionText"></div>
+    <div class="wordBox" id="oneWord"></div>
+
+    <div class="factory" id="factory">
+      <div class="smoke">☁️</div>
+      <div class="chimney"></div>
+      <div class="machineWindow" id="machineWindow">READY</div>
+      <div class="gear one">⚙️</div>
+      <div class="gear two">⚙️</div>
+      <div class="pipe"></div>
+    </div>
+
+    <div class="output" id="outputText"></div>
+    <div class="options" id="options"></div>
+  </div>
+</div>
+
+<div id="finalScreen" class="screen">
+  <div class="finalCard">
+    <h1>🌟 Factory Complete! 🌟</h1>
+    <div class="stats" id="finalStats"></div>
+    <button onclick="location.reload()">Restart</button>
+  </div>
+</div>
+
+<script>
+const allQuestions=[
+{one:"box",q:"One box. Many ____.",options:["boxs","boxes","boxies"],answer:"boxes"},
+{one:"bus",q:"One bus. Many ____.",options:["buss","buses","busies"],answer:"buses"},
+{one:"pencil",q:"One pencil. Many ____.",options:["pencils","penciles","pencilies"],answer:"pencils"},
+{one:"mango",q:"One mango. Many ____.",options:["mangos","mangoes","mangoies"],answer:"mangoes"},
+{one:"glass",q:"One glass. Many ____.",options:["glasss","glasses","glassies"],answer:"glasses"},
+{one:"boy",q:"One boy. Many ____.",options:["boys","boyes","boies"],answer:"boys"},
+{one:"dish",q:"One dish. Many ____.",options:["dishs","dishes","dishies"],answer:"dishes"},
+{one:"flower",q:"One flower. Many ____.",options:["flowers","floweres","floweries"],answer:"flowers"},
+{one:"watch",q:"One watch. Many ____.",options:["watchs","watches","watchies"],answer:"watches"},
+{one:"tomato",q:"One tomato. Many ____.",options:["tomatos","tomatoes","tomatoies"],answer:"tomatoes"},
+{one:"cat",q:"One cat. Many ____.",options:["cats","cates","caties"],answer:"cats"},
+{one:"brush",q:"One brush. Many ____.",options:["brushs","brushes","brushies"],answer:"brushes"},
+{one:"bench",q:"One bench. Many ____.",options:["benchs","benches","benchies"],answer:"benches"},
+{one:"kite",q:"One kite. Many ____.",options:["kites","kitees","kities"],answer:"kites"},
+{one:"fox",q:"One fox. Many ____.",options:["foxs","foxes","foxies"],answer:"foxes"}
+];
+
+let questions=[];
+let index=0;
+let score=0;
+let timer;
+let timeLeft=80;
+let startTime;
+const totalQ=10;
+
+const logoScreen=document.getElementById("logoScreen");
+const startScreen=document.getElementById("startScreen");
+const gameScreen=document.getElementById("gameScreen");
+const finalScreen=document.getElementById("finalScreen");
+
+setTimeout(()=>{
+  logoScreen.classList.remove("active");
+  startScreen.classList.add("active");
+},5000);
+
+function startGame(){
+  questions=[...allQuestions].sort(()=>Math.random()-0.5).slice(0,totalQ);
+  startTime=Date.now();
+  startScreen.classList.remove("active");
+  gameScreen.classList.add("active");
+  showQuestion();
+}
+
+function showQuestion(){
+  clearInterval(timer);
+
+  if(index>=totalQ){
+    endGame();
+    return;
+  }
+
+  const item=questions[index];
+
+  document.getElementById("counter").innerText=(index+1)+"/"+totalQ;
+  document.getElementById("questionText").innerText=item.q;
+  document.getElementById("oneWord").innerText="ONE WORD: " + item.one;
+  document.getElementById("machineWindow").innerText="READY";
+  document.getElementById("outputText").innerText="";
+  document.getElementById("factory").classList.remove("shake");
+
+  const optionsBox=document.getElementById("options");
+  optionsBox.innerHTML="";
+
+  [...item.options].sort(()=>Math.random()-0.5).forEach(opt=>{
+    const btn=document.createElement("div");
+    btn.className="option";
+    btn.innerText=opt;
+    btn.onclick=()=>checkAnswer(btn,opt);
+    optionsBox.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function startTimer(){
+  timeLeft=80;
+  document.getElementById("timer").innerText="⏱ " + timeLeft;
+
+  timer=setInterval(()=>{
+    timeLeft--;
+    document.getElementById("timer").innerText="⏱ " + timeLeft;
+
+    if(timeLeft<=0){
+      clearInterval(timer);
+      document.getElementById("outputText").innerText="Time up! Let's try the next word.";
+      document.getElementById("wrongSound").play();
+      setTimeout(()=>{
+        index++;
+        showQuestion();
+      },1500);
+    }
+  },1000);
+}
+
+function checkAnswer(element,selected){
+  clearInterval(timer);
+
+  document.querySelectorAll(".option").forEach(btn=>{
+    btn.onclick=null;
+  });
+
+  const item=questions[index];
+
+  document.getElementById("factory").classList.add("shake");
+  document.getElementById("machineWindow").innerText="MAKING...";
+
+  setTimeout(()=>{
+    document.getElementById("factory").classList.remove("shake");
+
+    if(selected===item.answer){
+      element.classList.add("correct");
+      score++;
+      document.getElementById("correctSound").play();
+      document.getElementById("machineWindow").innerText=item.answer;
+      document.getElementById("outputText").innerText="✨ Many word made: " + item.answer + " ✨";
+      confetti();
+      stars();
+    }else{
+      element.classList.add("wrong");
+      document.getElementById("wrongSound").play();
+      document.getElementById("machineWindow").innerText=item.answer;
+      document.getElementById("outputText").innerText="The correct many word is: " + item.answer;
+    }
+
+    setTimeout(()=>{
+      index++;
+      showQuestion();
+    },2200);
+
+  },900);
+}
+
+function endGame(){
+  clearInterval(timer);
+  gameScreen.classList.remove("active");
+  finalScreen.classList.add("active");
+
+  const percent=(score/totalQ)*100;
+
+  let remark="";
+  if(percent>=80) remark="Excellent! 🌟";
+  else if(percent>=60) remark="Good Job! 👏";
+  else if(percent>=45) remark="Well Tried! 🙂";
+  else remark="Let’s revise and come back! 📘";
+
+  const seconds=Math.floor((Date.now()-startTime)/1000);
+
+  document.getElementById("finalStats").innerHTML=
+  `<b>You answered ${score} out of ${totalQ} correct.</b><br>
+  Remark: <b>${remark}</b><br>
+  Time Taken: <b>${seconds} seconds</b>`;
+
+  confetti();
+}
+
+function confetti(){
+  for(let i=0;i<70;i++){
+    const c=document.createElement("div");
+    c.className="confetti";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=["#ff4081","#ffeb3b","#00e676","#40c4ff","#ff9100","#7c4dff"][Math.floor(Math.random()*6)];
+    c.style.animationDelay=Math.random()+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),2200);
+  }
+}
+
+function stars(){
+  for(let i=0;i<12;i++){
+    const s=document.createElement("div");
+    s.className="stars";
+    s.innerText="⭐";
+    s.style.left=(40+Math.random()*20)+"vw";
+    s.style.top=(48+Math.random()*12)+"vh";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1300);
+  }
+}
+</script>
+
+</body>
+</html>
