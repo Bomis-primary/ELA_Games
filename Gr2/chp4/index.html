@@ -1,49 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Adjective Construction City PRO</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+overflow:hidden;
+}
+
+/* SCREEN SYSTEM */
+.screen{
+position:absolute;
+width:100%;
+height:100vh;
+display:none;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+}
+
+.hidden{display:none;}
+
+/* LOGO */
+#logoScreen{
+display:flex;
+background:white;
+}
+
+#logoScreen img{
+width:240px;
+}
+
+/* INSTRUCTIONS */
+#instructionScreen{
+background:#fff3d6;
+font-size:20px;
+font-weight:bold;
+text-align:center;
+padding:20px;
+}
+
+/* GAME BACKGROUND */
+#gameScreen{
+background:url("assets/buildingbackground.png") center/cover no-repeat;
+position:relative;
+}
+
+/* OVERLAY */
+.overlay{
+background:rgba(0,0,0,0.55);
+width:100%;
+height:100vh;
+color:white;
+padding:10px;
+}
+
+/* TOP BAR */
+.topbar{
+display:flex;
+justify-content:space-between;
+font-size:18px;
+margin-bottom:10px;
+}
+
+/* CITY */
+.city{
+display:flex;
+justify-content:space-around;
+margin-top:20px;
+}
+
+.tower{
+width:22%;
+min-height:260px;
+background:rgba(255,255,255,0.15);
+border-radius:12px;
+display:flex;
+flex-direction:column-reverse;
+align-items:center;
+padding:10px;
+}
+
+/* BLOCKS */
+.block{
+width:50px;
+height:30px;
+margin:3px;
+border-radius:4px;
+animation:drop 0.4s ease;
+}
+
+@keyframes drop{
+from{transform:translateY(-120px);}
+to{transform:translateY(0);}
+}
+
+/* COLORS */
+.c1{background:#ff4d4d;}
+.c2{background:#4da6ff;}
+.c3{background:#4dff88;}
+.c4{background:#ffd24d;}
+.c5{background:#b84dff;}
+
+/* CRANE */
+#crane{
+position:absolute;
+top:40px;
+left:10%;
+font-size:70px;
+z-index:9999;
+transition:left 0.9s ease-in-out;
+}
+
+/* QUESTION BOX */
+.question-box{
+background:white;
+color:black;
+padding:15px;
+border-radius:12px;
+margin-top:15px;
+max-width:700px;
+margin:auto;
+}
+
+button{
+padding:10px 14px;
+margin:6px;
+border:none;
+border-radius:10px;
+background:#ffd166;
+font-weight:bold;
+cursor:pointer;
+}
+
+/* END SCREEN */
+#endScreen{
+background:#e6f7ff;
+font-size:28px;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- LOGO -->
+<div id="logoScreen" class="screen">
+<img src="assets/innovinelogo.png">
+</div>
+
+<!-- INSTRUCTIONS -->
+<div id="instructionScreen" class="screen">
+<div>
+🏗️ INSTRUCTIONS<br><br>
+Read full sentences carefully<br>
+Choose correct adjective<br>
+Watch crane build your city<br><br>
+🚧 Starting Construction...
+</div>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen" class="screen">
+<div class="overlay">
+
+<div id="crane">🏗️</div>
+
+<div class="topbar">
+<div>Score: <span id="score">0</span>/20</div>
+<div>Progress: <span id="progress">1</span>/20</div>
+</div>
+
+<div class="city">
+<div class="tower" id="colourTower">🌈</div>
+<div class="tower" id="sizeTower">📏</div>
+<div class="tower" id="shapeTower">🔷</div>
+<div class="tower" id="feelingTower">😊</div>
+</div>
+
+<div class="question-box">
+<h2 id="question"></h2>
+<div id="options"></div>
+<div id="feedback"></div>
+</div>
+
+</div>
+</div>
+
+<!-- END -->
+<div id="endScreen" class="screen">
+<div>
+<h1>🏙️ CITY COMPLETE!</h1>
+<h2>🏆 ADJECTIVE ARCHITECT</h2>
+<h3 id="finalScore"></h3>
+<button onclick="location.reload()">Play Again</button>
+</div>
+</div>
+
+<audio id="correctSound" src="assets/correct.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
+<audio id="clapSound" src="assets/clapping.mp3"></audio>
+
 <script>
 
 /* =========================
-   QUESTIONS (20 SENTENCE BASED)
+   20 SENTENCE QUESTIONS
 ========================= */
 let questions = [
-{type:"colour",q:"The sky turned deep blue during sunset over the city.",a:["blue","run","eat","car"],c:"blue"},
-{type:"colour",q:"She wore a bright red dress to the school function.",a:["red","jump","sit","run"],c:"red"},
-{type:"colour",q:"Fresh green leaves moved gently in the wind.",a:["green","dog","eat","run"],c:"green"},
-{type:"colour",q:"The warm yellow sunlight filled the classroom.",a:["yellow","sit","car","run"],c:"yellow"},
-{type:"colour",q:"A soft pink flower bloomed near the window.",a:["pink","run","eat","car"],c:"pink"},
+{type:"colour",q:"The sky turned deep blue during sunset over the city.",a:["blue","run","eat","fast"],c:"blue"},
+{type:"size",q:"The tiny mouse hid behind the wooden box.",a:["small","car","jump","run"],c:"small"},
+{type:"shape",q:"The round ball rolled down the hill.",a:["round","dog","eat","run"],c:"round"},
+{type:"feeling",q:"The happy children were dancing in the rain.",a:["happy","sit","car","run"],c:"happy"},
 
-{type:"size",q:"The giant elephant slowly walked across the forest path.",a:["big","run","eat","sit"],c:"big"},
-{type:"size",q:"The tiny mouse hid behind the wooden box.",a:["small","car","run","eat"],c:"small"},
-{type:"size",q:"A huge building stood tall in the busy city.",a:["huge","dog","sit","run"],c:"huge"},
-{type:"size",q:"The large suitcase was heavy for the child.",a:["large","eat","run","car"],c:"large"},
-{type:"size",q:"The little toy car rolled under the sofa.",a:["tiny","sit","run","car"],c:"tiny"},
+{type:"colour",q:"She wore a bright red dress at the school event.",a:["red","jump","eat","run"],c:"red"},
+{type:"size",q:"The giant elephant walked through the forest.",a:["big","run","eat","sit"],c:"big"},
+{type:"shape",q:"The square box was placed on the table.",a:["square","dog","eat","run"],c:"square"},
+{type:"feeling",q:"The sad boy sat alone near the window.",a:["sad","run","eat","car"],c:"sad"},
 
-{type:"shape",q:"The round ball bounced across the playground.",a:["round","run","eat","car"],c:"round"},
-{type:"shape",q:"The square box was placed on the shelf.",a:["square","dog","run","eat"],c:"square"},
-{type:"shape",q:"The oval egg rolled off the table.",a:["oval","car","sit","run"],c:"oval"},
-{type:"shape",q:"The circle moon shone in the night sky.",a:["circle","eat","run","dog"],c:"circle"},
-{type:"shape",q:"The triangle sign warned drivers on the road.",a:["triangle","sit","car","run"],c:"triangle"},
+{type:"colour",q:"Fresh green leaves moved in the wind.",a:["green","jump","sit","run"],c:"green"},
+{type:"size",q:"The huge building stood in the city.",a:["huge","dog","eat","run"],c:"huge"},
+{type:"shape",q:"The oval egg rolled off the table.",a:["oval","run","sit","car"],c:"oval"},
+{type:"feeling",q:"The excited students waited for the trip.",a:["excited","dog","eat","run"],c:"excited"},
 
-{type:"feeling",q:"The happy children celebrated their victory.",a:["happy","run","eat","car"],c:"happy"},
-{type:"feeling",q:"The sad boy sat near the window.",a:["sad","dog","run","sit"],c:"sad"},
-{type:"feeling",q:"The excited students waited for the picnic.",a:["excited","car","run","eat"],c:"excited"},
-{type:"feeling",q:"The tired girl rested after the journey.",a:["tired","sit","run","car"],c:"tired"},
-{type:"feeling",q:"The angry teacher spoke firmly in class.",a:["angry","dog","run","eat"],c:"angry"}
+{type:"colour",q:"The warm yellow sunlight filled the room.",a:["yellow","run","sit","car"],c:"yellow"},
+{type:"size",q:"The small toy car fit inside the box.",a:["small","eat","run","sit"],c:"small"},
+{type:"shape",q:"The triangle sign warned drivers.",a:["triangle","dog","run","eat"],c:"triangle"},
+{type:"feeling",q:"The tired girl rested after school.",a:["tired","run","eat","car"],c:"tired"},
+
+{type:"colour",q:"A soft pink flower bloomed near the gate.",a:["pink","run","sit","car"],c:"pink"},
+{type:"size",q:"The large suitcase was heavy to carry.",a:["large","dog","eat","run"],c:"large"},
+{type:"shape",q:"The circle moon shone in the night sky.",a:["circle","run","sit","eat"],c:"circle"},
+{type:"feeling",q:"The angry teacher spoke firmly in class.",a:["angry","run","eat","car"],c:"angry"}
 ];
 
-let index = 0;
-let score = 0;
+let index=0;
+let score=0;
 
 /* =========================
-   CRANE POSITION MAP
+   RANDOMIZER
 ========================= */
-const cranePositions = {
-  colour: "15%",
-  size: "38%",
-  shape: "62%",
-  feeling: "85%"
-};
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}
+return arr;
+}
+
+questions = shuffle(questions);
 
 /* =========================
-   START FLOW (SAFE)
+   START FLOW (LOGIC FIXED)
 ========================= */
 window.addEventListener("load",()=>{
 
@@ -57,7 +268,7 @@ setTimeout(()=>{
 document.getElementById("instructionScreen").style.display="none";
 document.getElementById("gameScreen").style.display="block";
 
-loadQuestion();
+load();
 
 },5000);
 
@@ -68,90 +279,83 @@ loadQuestion();
 /* =========================
    LOAD QUESTION
 ========================= */
-function loadQuestion(){
+function load(){
 
-if(index >= questions.length){
+if(index>=questions.length){
 endGame();
 return;
 }
 
-let q = questions[index];
+let q=questions[index];
 
-document.getElementById("question").innerText = q.q;
-document.getElementById("progress").innerText = index+1;
-document.getElementById("score").innerText = score;
+document.getElementById("question").innerText=q.q;
+document.getElementById("progress").innerText=index+1;
+document.getElementById("score").innerText=score;
 
-let box = document.getElementById("options");
+let box=document.getElementById("options");
 box.innerHTML="";
 
+/* shuffle options */
 shuffle([...q.a]).forEach(v=>{
-let btn = document.createElement("button");
-btn.innerText = v;
-btn.onclick = ()=>checkAnswer(v,q);
-box.appendChild(btn);
+let b=document.createElement("button");
+b.innerText=v;
+b.onclick=()=>check(v,q);
+box.appendChild(b);
 });
 
 }
 
 /* =========================
-   CHECK ANSWER
+   CRANE MOVE + DROP
 ========================= */
-function checkAnswer(value,q){
+function moveCrane(type){
 
-if(value === q.c){
+let crane=document.getElementById("crane");
+
+let pos={
+colour:"12%",
+size:"35%",
+shape:"60%",
+feeling:"85%"
+};
+
+crane.style.left=pos[type];
+}
+
+/* =========================
+   CHECK
+========================= */
+function check(v,q){
+
+if(v===q.c){
 score++;
-document.getElementById("feedback").innerText="✔ Correct! Crane is moving...";
+document.getElementById("correctSound").play();
 
-moveCraneAndDrop(q.type, q.c);
+moveCrane(q.type);
 
+addBlock(q.type);
+
+document.getElementById("feedback").innerText="✔ Correct!";
 }else{
-document.getElementById("feedback").innerText="✖ Try again!";
 document.getElementById("wrongSound").play();
+document.getElementById("feedback").innerText="✖ Try again!";
 }
 
 index++;
-setTimeout(loadQuestion,1200);
+setTimeout(load,900);
 }
 
 /* =========================
-   CRANE MOVE + DROP (NEW FEATURE)
+   BLOCKS
 ========================= */
-function moveCraneAndDrop(type, answer){
+function addBlock(type){
 
-const crane = document.getElementById("crane");
+let tower=document.getElementById(type+"Tower");
 
-/* STEP 1: MOVE CRANE */
-crane.style.transition = "left 0.8s ease-in-out";
-crane.style.left = cranePositions[type];
+let block=document.createElement("div");
 
-/* STEP 2: AFTER MOVE → DROP BLOCK */
-setTimeout(()=>{
-
-dropBlock(type);
-
-/* SOUND SYNC (CLICK EFFECT) */
-document.getElementById("correctSound").currentTime = 0;
-document.getElementById("correctSound").play();
-
-},800);
-}
-
-/* =========================
-   DROP BLOCK INTO TOWER
-========================= */
-function dropBlock(type){
-
-let tower = document.getElementById(type+"Tower");
-
-let block = document.createElement("div");
-block.className = "block";
-
-/* random construction color */
-let colors = ["c1","c2","c3","c4","c5"];
-block.classList.add(colors[Math.floor(Math.random()*colors.length)]);
-
-/* drop animation */
-block.classList.add("dropAnim");
+let colors=["c1","c2","c3","c4","c5"];
+block.className="block "+colors[Math.floor(Math.random()*colors.length)];
 
 tower.appendChild(block);
 }
@@ -164,21 +368,13 @@ function endGame(){
 document.getElementById("gameScreen").style.display="none";
 document.getElementById("endScreen").style.display="flex";
 
-document.getElementById("finalScore").innerText =
+document.getElementById("finalScore").innerText=
 "Score: "+score+"/20";
 
 document.getElementById("clapSound").play();
 }
 
-/* =========================
-   SHUFFLE
-========================= */
-function shuffle(arr){
-for(let i=arr.length-1;i>0;i--){
-let j=Math.floor(Math.random()*i);
-[arr[i],arr[j]]=[arr[j],arr[i]];
-}
-return arr;
-}
-
 </script>
+
+</body>
+</html>
