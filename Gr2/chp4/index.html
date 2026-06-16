@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Adjective Tower Builder</title>
+<title>Adjective Construction Tower</title>
 
 <style>
 body{
@@ -10,22 +10,9 @@ margin:0;
 font-family:Arial,sans-serif;
 overflow:hidden;
 text-align:center;
-background:black;
 }
 
-/* BACKGROUND FIX */
-#gameScreen{
-background:url('assets/buidlingbackground.png') center/cover no-repeat fixed;
-height:100vh;
-}
-
-.overlay{
-background:rgba(0,0,0,0.55);
-height:100vh;
-padding:10px;
-color:white;
-}
-
+/* ===== LOGO SCREEN ===== */
 #logoScreen{
 display:flex;
 align-items:center;
@@ -36,11 +23,35 @@ background:white;
 
 #logoScreen img{
 width:220px;
+animation:pop 1s ease-in-out;
+}
+
+@keyframes pop{
+from{transform:scale(0.5);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+/* ===== GAME SCREEN ===== */
+#gameScreen{
+background:url('assets/constructionbackground.png') center/cover no-repeat;
+height:100vh;
+}
+
+.overlay{
+background:rgba(0,0,0,0.55);
+height:100vh;
+padding:10px;
+color:white;
 }
 
 .hidden{display:none;}
 
 h1{margin:10px 0;}
+
+.topbar{
+font-size:18px;
+margin-bottom:10px;
+}
 
 #tower{
 display:flex;
@@ -51,7 +62,7 @@ margin:10px auto;
 }
 
 .block{
-font-size:28px;
+font-size:30px;
 margin:2px;
 animation:grow 0.4s ease-out;
 }
@@ -87,12 +98,6 @@ font-weight:bold;
 margin-top:10px;
 }
 
-.topbar{
-color:white;
-margin-bottom:10px;
-font-size:18px;
-}
-
 #confetti{
 display:none;
 font-size:40px;
@@ -114,7 +119,7 @@ animation:fall 2s linear forwards;
 
 <body>
 
-<!-- LOGO SCREEN -->
+<!-- LOGO SCREEN (5 sec) -->
 <div id="logoScreen">
 <img src="assets/innovinelogo.png">
 </div>
@@ -123,7 +128,7 @@ animation:fall 2s linear forwards;
 <div id="gameScreen" class="hidden">
 <div class="overlay">
 
-<h1>🧱 Adjective Tower Builder</h1>
+<h1>🏗️ Adjective Construction Tower</h1>
 
 <div class="topbar">
 Score: <span id="score">0</span>/20 |
@@ -152,30 +157,26 @@ Progress: <span id="progress">1</span>/20
 
 <script>
 
-/* 20 QUESTIONS */
+/* ===== 20 QUESTIONS ===== */
 const questions=[
-/* Colour (5) */
 {q:"Which word is colour?",a:["red","run","ball","jump"],c:0,type:"🟥"},
 {q:"Find colour word:",a:["blue","big","eat","dog"],c:0,type:"🟦"},
 {q:"Which is colour?",a:["green","sit","pen","car"],c:0,type:"🟩"},
 {q:"Choose colour:",a:["yellow","book","play","table"],c:0,type:"🟨"},
 {q:"Colour word:",a:["pink","run","chair","eat"],c:0,type:"🩷"},
 
-/* Size (5) */
-{q:"Which shows size?",a:["tiny","ball","dog","run"],c:0,type:"📏"},
-{q:"Find size word:",a:["huge","pen","book","sit"],c:0,type:"📦"},
-{q:"Which is size?",a:["big","eat","car","pen"],c:0,type:"📐"},
-{q:"Choose size:",a:["small","jump","dog","run"],c:0,type:"🔷"},
-{q:"Size word:",a:["large","book","pen","sit"],c:0,type:"📊"},
+{q:"Which shows size?",a:["tiny","ball","dog","run"],c:0,type:"📦"},
+{q:"Find size word:",a:["huge","pen","book","sit"],c:0,type:"🏗️"},
+{q:"Which is size?",a:["big","eat","car","pen"],c:0,type:"📏"},
+{q:"Choose size:",a:["small","jump","dog","run"],c:0,type:"🔧"},
+{q:"Size word:",a:["large","book","pen","sit"],c:0,type:"🏢"},
 
-/* Shape (5) */
 {q:"Shape word:",a:["round","red","run","pen"],c:0,type:"⚪"},
 {q:"Find shape:",a:["square","eat","dog","car"],c:0,type:"⬜"},
 {q:"Which is shape?",a:["circle","book","run","sit"],c:0,type:"⭕"},
 {q:"Choose shape:",a:["oval","pen","jump","eat"],c:0,type:"🥚"},
 {q:"Shape word:",a:["triangle","dog","run","car"],c:0,type:"🔺"},
 
-/* Feelings (5) */
 {q:"Feeling word:",a:["happy","car","pen","run"],c:0,type:"😊"},
 {q:"Find feeling:",a:["sad","book","eat","pen"],c:0,type:"😢"},
 {q:"Which shows feeling?",a:["angry","dog","run","sit"],c:0,type:"😡"},
@@ -185,6 +186,7 @@ const questions=[
 
 let i=0,score=0;
 
+/* ===== LOGIC: LOGO FOR 5 SECONDS ===== */
 setTimeout(()=>{
 document.getElementById("logoScreen").style.display="none";
 document.getElementById("gameScreen").classList.remove("hidden");
@@ -223,24 +225,26 @@ if(idx===q.c){
 score++;
 document.getElementById("correctSound").play();
 document.getElementById("feedback").innerText="✔ Correct!";
-add(q.type);
+addBlock(q.type);
 }else{
 document.getElementById("wrongSound").play();
-document.getElementById("feedback").innerText="✖ Wrong!";
+document.getElementById("feedback").innerText="✖ Try Again!";
 }
 
 i++;
-setTimeout(load,800);
+setTimeout(load,900);
 }
 
-function add(type){
-let t=document.getElementById("tower");
-let d=document.createElement("div");
-d.className="block";
-d.innerText=type;
-t.appendChild(d);
+/* ===== TOWER BLOCK ===== */
+function addBlock(type){
+let tower=document.getElementById("tower");
+let div=document.createElement("div");
+div.className="block";
+div.innerText=type;
+tower.appendChild(div);
 }
 
+/* ===== END SCREEN ===== */
 function end(){
 document.querySelector(".question-box").style.display="none";
 document.getElementById("clapSound").play();
@@ -249,7 +253,7 @@ document.getElementById("confetti").style.display="block";
 for(let x=0;x<40;x++){
 let c=document.createElement("div");
 c.className="confettiPiece";
-c.innerText=["🎉","⭐","🌟","🎊"][Math.floor(Math.random()*4)];
+c.innerText=["🎉","⭐","🏗️","🎊"][Math.floor(Math.random()*4)];
 c.style.left=Math.random()*100+"vw";
 document.body.appendChild(c);
 setTimeout(()=>c.remove(),2000);
