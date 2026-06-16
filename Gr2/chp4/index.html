@@ -1,1 +1,134 @@
-1234
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Adjective Builder Blocks</title>
+<style>
+body{
+ margin:0;font-family:Arial,sans-serif;
+ background:url('assets/buildingbackground.png') center/cover no-repeat fixed;
+ color:#fff;text-align:center;
+}
+.overlay{background:rgba(0,0,0,0.5);min-height:100vh;padding:20px;}
+#logo{width:120px;}
+#tower{display:flex;flex-direction:column-reverse;align-items:center;height:250px;margin:20px;}
+.block{
+ width:120px;height:25px;margin:2px;border-radius:5px;
+ color:#000;font-weight:bold;display:flex;align-items:center;justify-content:center;
+}
+.question-box{background:#ffffffdd;color:#000;padding:20px;border-radius:15px;max-width:700px;margin:auto;}
+button{
+ padding:12px 20px;margin:8px;border:none;border-radius:10px;
+ font-size:18px;cursor:pointer;
+}
+#feedback{font-size:24px;font-weight:bold;margin:10px;}
+#confetti{display:none;font-size:40px;}
+</style>
+</head>
+<body>
+<div class="overlay">
+<img id="logo" src="assets/innovinelogo.png"><br>
+<h1>🧱 Adjective Builder Blocks</h1>
+<p>Help build the tallest tower by answering adjective questions!</p>
+
+<div>Score: <span id="score">0</span>/15</div>
+<div id="tower"></div>
+
+<div class="question-box">
+<h2 id="question"></h2>
+<div id="answers"></div>
+<div id="feedback"></div>
+</div>
+
+<div id="confetti">
+🎉🎊🎉<br>
+<h2>Congratulations! You are an Adjective Architect! 🏆</h2>
+<button onclick="location.reload()">Play Again</button>
+</div>
+
+<audio id="correctSound" src="assets/correct.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
+<audio id="clapSound" src="assets/clapping.mp3"></audio>
+
+<script>
+const questions = [
+{q:"Which word tells the colour? The red kite flew high.",a:["red","kite","flew","high"],c:0,type:"🎨"},
+{q:"Choose the colour adjective.",a:["blue","run","book","small"],c:0,type:"🎨"},
+{q:"Which word tells colour? The yellow bus arrived.",a:["yellow","bus","arrived","the"],c:0,type:"🎨"},
+{q:"Choose the colour adjective.",a:["green","jump","apple","round"],c:0,type:"🎨"},
+
+{q:"Which word tells size? The tiny ant worked hard.",a:["tiny","ant","worked","hard"],c:0,type:"📏"},
+{q:"Choose the size adjective.",a:["huge","dance","ball","red"],c:0,type:"📏"},
+{q:"Which word tells size? The big elephant trumpeted.",a:["big","elephant","trumpeted","the"],c:0,type:"📏"},
+{q:"Choose the size adjective.",a:["small","chair","run","blue"],c:0,type:"📏"},
+
+{q:"Which word tells shape? We ate round biscuits.",a:["round","ate","biscuits","we"],c:0,type:"🔷"},
+{q:"Choose the shape adjective.",a:["square","happy","yellow","dance"],c:0,type:"🔷"},
+{q:"Which word tells shape? The oval egg rolled.",a:["oval","egg","rolled","the"],c:0,type:"🔷"},
+{q:"Choose the shape adjective.",a:["triangle","angry","tiny","read"],c:0,type:"🔷"},
+
+{q:"Which word tells feeling? The excited children shouted.",a:["excited","children","shouted","loudly"],c:0,type:"😊"},
+{q:"Choose the feeling adjective.",a:["sad","green","jump","square"],c:0,type:"😊"},
+{q:"Which word tells feeling? The happy girl smiled.",a:["happy","girl","smiled","the"],c:0,type:"😊"}
+];
+
+let current=0, score=0;
+
+function loadQuestion(){
+ if(current>=questions.length){ endGame(); return; }
+ const q=questions[current];
+ document.getElementById("question").innerText=q.q;
+ const ans=document.getElementById("answers");
+ ans.innerHTML="";
+ q.a.forEach((choice,index)=>{
+   const btn=document.createElement("button");
+   btn.innerText=choice;
+   btn.onclick=()=>checkAnswer(index);
+   ans.appendChild(btn);
+ });
+}
+
+function checkAnswer(index){
+ const q=questions[current];
+ const feedback=document.getElementById("feedback");
+
+ if(index===q.c){
+   score++;
+   document.getElementById("score").innerText=score;
+   document.getElementById("correctSound").play();
+   feedback.innerText="✅ Correct!";
+   addBlock(q.type);
+ } else {
+   document.getElementById("wrongSound").play();
+   feedback.innerText="❌ Try Again!";
+ }
+
+ setTimeout(()=>{
+   feedback.innerText="";
+   current++;
+   loadQuestion();
+ },1000);
+}
+
+function addBlock(type){
+ const tower=document.getElementById("tower");
+ const block=document.createElement("div");
+ block.className="block";
+ block.innerText=type;
+ const colors={"🎨":"#ff6b6b","📏":"#ffa94d","🔷":"#4dabf7","😊":"#69db7c"};
+ block.style.background=colors[type];
+ tower.appendChild(block);
+}
+
+function endGame(){
+ document.querySelector(".question-box").style.display="none";
+ document.getElementById("confetti").style.display="block";
+ document.getElementById("clapSound").play();
+}
+
+loadQuestion();
+</script>
+</div>
+</body>
+</html>
