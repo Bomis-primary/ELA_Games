@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Adjective Construction Tower</title>
+<title>Adjective Construction City</title>
 
 <style>
 body{
@@ -12,12 +12,21 @@ overflow:hidden;
 text-align:center;
 }
 
-/* ===== LOGO SCREEN ===== */
-#logoScreen{
+/* ===== SCREENS ===== */
+.screen{
+position:absolute;
+width:100%;
+height:100vh;
 display:flex;
 align-items:center;
 justify-content:center;
-height:100vh;
+flex-direction:column;
+}
+
+.hidden{display:none;}
+
+/* ===== LOGO ===== */
+#logoScreen{
 background:white;
 }
 
@@ -31,39 +40,49 @@ from{transform:scale(0.5);opacity:0;}
 to{transform:scale(1);opacity:1;}
 }
 
-/* ===== GAME SCREEN ===== */
+/* ===== INSTRUCTIONS ===== */
+#instructionScreen{
+background:#fff7e6;
+padding:20px;
+font-size:22px;
+font-weight:bold;
+}
+
+/* ===== GAME ===== */
 #gameScreen{
-background:url('assets/constructionbackground.png') center/cover no-repeat;
-height:100vh;
+background:url('assets/buidlingbackground.png') center/cover no-repeat;
 }
 
 .overlay{
 background:rgba(0,0,0,0.55);
+width:100%;
 height:100vh;
-padding:10px;
 color:white;
+padding:10px;
 }
 
-.hidden{display:none;}
-
-h1{margin:10px 0;}
-
-.topbar{
-font-size:18px;
-margin-bottom:10px;
+/* ===== TOWERS ===== */
+#city{
+display:flex;
+justify-content:space-around;
+margin-top:10px;
+flex-wrap:wrap;
 }
 
-#tower{
+.tower{
+width:22%;
+min-height:260px;
+background:rgba(255,255,255,0.2);
+border-radius:15px;
+padding:10px;
 display:flex;
 flex-direction:column-reverse;
 align-items:center;
-height:260px;
-margin:10px auto;
 }
 
 .block{
 font-size:30px;
-margin:2px;
+margin:3px;
 animation:grow 0.4s ease-out;
 }
 
@@ -72,6 +91,7 @@ from{transform:scale(0);}
 to{transform:scale(1);}
 }
 
+/* ===== UI ===== */
 .question-box{
 background:white;
 color:black;
@@ -98,57 +118,73 @@ font-weight:bold;
 margin-top:10px;
 }
 
-#confetti{
-display:none;
-font-size:40px;
-margin-top:20px;
+.topbar{
+font-size:18px;
+margin-bottom:10px;
 }
 
-.confettiPiece{
-position:fixed;
-font-size:22px;
-animation:fall 2s linear forwards;
+/* ===== BUILDING FINISH ===== */
+#finalScreen{
+background:#e6f7ff;
+font-size:28px;
+font-weight:bold;
 }
 
-@keyframes fall{
-0%{transform:translateY(-50px);}
-100%{transform:translateY(110vh) rotate(360deg);}
-}
 </style>
 </head>
 
 <body>
 
-<!-- LOGO SCREEN (5 sec) -->
-<div id="logoScreen">
+<!-- LOGO -->
+<div id="logoScreen" class="screen">
 <img src="assets/innovinelogo.png">
 </div>
 
-<!-- GAME SCREEN -->
-<div id="gameScreen" class="hidden">
+<!-- INSTRUCTIONS -->
+<div id="instructionScreen" class="screen hidden">
+<div>
+🏗️ Help build the city by choosing correct adjectives!<br><br>
+✔ Read full sentences<br>
+✔ Choose correct adjective<br>
+✔ Build Colour, Size, Shape & Feeling towers<br><br>
+🎮 Game starting...
+</div>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen" class="screen hidden">
 <div class="overlay">
 
-<h1>🏗️ Adjective Construction Tower</h1>
+<h2>🏗️ Adjective Construction City</h2>
 
 <div class="topbar">
 Score: <span id="score">0</span>/20 |
 Progress: <span id="progress">1</span>/20
 </div>
 
-<div id="tower"></div>
+<div id="city">
+
+<div class="tower" id="colourTower">🌈 Colour</div>
+<div class="tower" id="sizeTower">📏 Size</div>
+<div class="tower" id="shapeTower">🔷 Shape</div>
+<div class="tower" id="feelingTower">😊 Feeling</div>
+
+</div>
 
 <div class="question-box">
-<h2 id="question"></h2>
+<h3 id="question"></h3>
 <div id="options"></div>
 <div id="feedback"></div>
 </div>
 
-<div id="confetti">
-🎉🏆 ADJECTIVE ARCHITECT 🏆🎉
-<br><button onclick="location.reload()">Play Again</button>
+</div>
 </div>
 
-</div>
+<!-- FINAL -->
+<div id="finalScreen" class="screen hidden">
+🎉 CITY COMPLETED! 🎉<br>
+🏆 ADJECTIVE ARCHITECT 🏆<br>
+<button onclick="location.reload()">Play Again</button>
 </div>
 
 <audio id="correctSound" src="assets/correct.mp3"></audio>
@@ -157,42 +193,60 @@ Progress: <span id="progress">1</span>/20
 
 <script>
 
-/* ===== 20 QUESTIONS ===== */
-const questions=[
-{q:"Which word is colour?",a:["red","run","ball","jump"],c:0,type:"🟥"},
-{q:"Find colour word:",a:["blue","big","eat","dog"],c:0,type:"🟦"},
-{q:"Which is colour?",a:["green","sit","pen","car"],c:0,type:"🟩"},
-{q:"Choose colour:",a:["yellow","book","play","table"],c:0,type:"🟨"},
-{q:"Colour word:",a:["pink","run","chair","eat"],c:0,type:"🩷"},
+/* ===== FULL SENTENCE QUESTIONS ===== */
+let questions=[
+{type:"colour",q:"The sky looks ____ today.",a:["blue","run","eat","fast"],c:"blue",icon:"🌈"},
+{type:"colour",q:"She wore a ____ dress.",a:["red","jump","chair","sing"],c:"red",icon:"🌈"},
+{type:"colour",q:"The banana is ____.",a:["yellow","big","run","sit"],c:"yellow",icon:"🌈"},
+{type:"colour",q:"The grass is ____.",a:["green","eat","car","fast"],c:"green",icon:"🌈"},
+{type:"colour",q:"The rose is ____.",a:["pink","run","dog","sit"],c:"pink",icon:"🌈"},
 
-{q:"Which shows size?",a:["tiny","ball","dog","run"],c:0,type:"📦"},
-{q:"Find size word:",a:["huge","pen","book","sit"],c:0,type:"🏗️"},
-{q:"Which is size?",a:["big","eat","car","pen"],c:0,type:"📏"},
-{q:"Choose size:",a:["small","jump","dog","run"],c:0,type:"🔧"},
-{q:"Size word:",a:["large","book","pen","sit"],c:0,type:"🏢"},
+{type:"size",q:"The elephant is very ____.",a:["big","blue","run","eat"],c:"big",icon:"📏"},
+{type:"size",q:"The mouse is ____.",a:["small","red","car","jump"],c:"small",icon:"📏"},
+{type:"size",q:"The building is ____.",a:["huge","sit","dog","run"],c:"huge",icon:"📏"},
+{type:"size",q:"This box is ____.",a:["large","blue","eat","jump"],c:"large",icon:"📏"},
+{type:"size",q:"The toy is ____.",a:["tiny","run","car","sit"],c:"tiny",icon:"📏"},
 
-{q:"Shape word:",a:["round","red","run","pen"],c:0,type:"⚪"},
-{q:"Find shape:",a:["square","eat","dog","car"],c:0,type:"⬜"},
-{q:"Which is shape?",a:["circle","book","run","sit"],c:0,type:"⭕"},
-{q:"Choose shape:",a:["oval","pen","jump","eat"],c:0,type:"🥚"},
-{q:"Shape word:",a:["triangle","dog","run","car"],c:0,type:"🔺"},
+{type:"shape",q:"The moon is ____ tonight.",a:["round","red","run","eat"],c:"round",icon:"🔷"},
+{type:"shape",q:"The box is ____.",a:["square","blue","jump","sit"],c:"square",icon:"🔷"},
+{type:"shape",q:"The ball is ____.",a:["circle","car","run","eat"],c:"circle",icon:"🔷"},
+{type:"shape",q:"The egg is ____.",a:["oval","dog","run","sit"],c:"oval",icon:"🔷"},
+{type:"shape",q:"The pyramid is ____.",a:["triangle","eat","car","run"],c:"triangle",icon:"🔷"},
 
-{q:"Feeling word:",a:["happy","car","pen","run"],c:0,type:"😊"},
-{q:"Find feeling:",a:["sad","book","eat","pen"],c:0,type:"😢"},
-{q:"Which shows feeling?",a:["angry","dog","run","sit"],c:0,type:"😡"},
-{q:"Feeling word:",a:["excited","car","pen","book"],c:0,type:"🤩"},
-{q:"Choose feeling:",a:["tired","run","dog","pen"],c:0,type:"😴"}
+{type:"feeling",q:"She feels very ____ today.",a:["happy","red","run","car"],c:"happy",icon:"😊"},
+{type:"feeling",q:"The boy is ____ after winning.",a:["excited","blue","sit","eat"],c:"excited",icon:"😊"},
+{type:"feeling",q:"He looks ____.",a:["sad","car","run","jump"],c:"sad",icon:"😊"},
+{type:"feeling",q:"They are ____ about the trip.",a:["angry","dog","run","eat"],c:"excited",icon:"😊"},
+{type:"feeling",q:"The baby is ____.",a:["tired","sit","car","jump"],c:"tired",icon:"😊"}
 ];
+
+/* shuffle */
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*i);
+[a[i],a[j]]=[a[j],a[i]];
+}
+return a;
+}
+
+questions=shuffle(questions);
 
 let i=0,score=0;
 
-/* ===== LOGIC: LOGO FOR 5 SECONDS ===== */
+/* ===== FLOW ===== */
 setTimeout(()=>{
 document.getElementById("logoScreen").style.display="none";
+document.getElementById("instructionScreen").classList.remove("hidden");
+
+setTimeout(()=>{
+document.getElementById("instructionScreen").style.display="none";
 document.getElementById("gameScreen").classList.remove("hidden");
 load();
 },5000);
 
+},5000);
+
+/* ===== LOAD ===== */
 function load(){
 if(i>=questions.length){
 end();
@@ -208,24 +262,26 @@ document.getElementById("question").innerText=q.q;
 let box=document.getElementById("options");
 box.innerHTML="";
 
-q.a.forEach((v,idx)=>{
+/* shuffle options */
+let opts=shuffle([...q.a]);
+
+opts.forEach(v=>{
 let b=document.createElement("button");
 b.innerText=v;
-b.onclick=()=>check(idx);
+b.onclick=()=>check(v,q);
 box.appendChild(b);
 });
 
 document.getElementById("feedback").innerText="";
 }
 
-function check(idx){
-let q=questions[i];
-
-if(idx===q.c){
+/* ===== CHECK ===== */
+function check(v,q){
+if(v===q.c){
 score++;
 document.getElementById("correctSound").play();
 document.getElementById("feedback").innerText="✔ Correct!";
-addBlock(q.type);
+add(q.type,q.icon);
 }else{
 document.getElementById("wrongSound").play();
 document.getElementById("feedback").innerText="✖ Try Again!";
@@ -235,30 +291,24 @@ i++;
 setTimeout(load,900);
 }
 
-/* ===== TOWER BLOCK ===== */
-function addBlock(type){
-let tower=document.getElementById("tower");
-let div=document.createElement("div");
-div.className="block";
-div.innerText=type;
-tower.appendChild(div);
+/* ===== BUILDING TOWERS ===== */
+function add(type,icon){
+let tower=document.getElementById(type+"Tower");
+
+let block=document.createElement("div");
+block.className="block";
+block.innerText=icon;
+
+tower.appendChild(block);
 }
 
-/* ===== END SCREEN ===== */
+/* ===== END ===== */
 function end(){
-document.querySelector(".question-box").style.display="none";
+document.getElementById("gameScreen").style.display="none";
+document.getElementById("finalScreen").classList.remove("hidden");
 document.getElementById("clapSound").play();
-document.getElementById("confetti").style.display="block";
+}
 
-for(let x=0;x<40;x++){
-let c=document.createElement("div");
-c.className="confettiPiece";
-c.innerText=["🎉","⭐","🏗️","🎊"][Math.floor(Math.random()*4)];
-c.style.left=Math.random()*100+"vw";
-document.body.appendChild(c);
-setTimeout(()=>c.remove(),2000);
-}
-}
 </script>
 
 </body>
