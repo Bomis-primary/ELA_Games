@@ -1,291 +1,166 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Adjective Construction City PRO</title>
-
-<style>
-body{
-margin:0;
-font-family:Arial,sans-serif;
-overflow:hidden;
-}
-
-/* SCREEN SYSTEM */
-.screen{
-position:absolute;
-width:100%;
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-}
-
-.hidden{display:none;}
-
-/* LOGO */
-#logoScreen{
-background:white;
-}
-
-#logoScreen img{
-width:240px;
-}
-
-/* INSTRUCTIONS */
-#instructionScreen{
-background:#fff3d6;
-font-size:22px;
-font-weight:bold;
-text-align:center;
-padding:20px;
-}
-
-/* GAME */
-#gameScreen{
-background:url("assets/buildingbackground.png") center/cover no-repeat;
-}
-
-.overlay{
-background:rgba(0,0,0,0.55);
-width:100%;
-height:100vh;
-color:white;
-padding:10px;
-}
-
-/* TOP BAR */
-.topbar{
-display:flex;
-justify-content:space-between;
-font-size:18px;
-margin-bottom:10px;
-}
-
-/* CITY */
-.city{
-display:flex;
-justify-content:space-around;
-margin-top:20px;
-}
-
-.tower{
-width:22%;
-min-height:260px;
-background:rgba(255,255,255,0.15);
-border-radius:12px;
-display:flex;
-flex-direction:column-reverse;
-align-items:center;
-padding:10px;
-}
-
-/* BLOCK */
-.block{
-font-size:32px;
-animation:drop 0.5s ease;
-}
-
-@keyframes drop{
-from{transform:translateY(-120px) scale(0.6);}
-to{transform:translateY(0) scale(1);}
-}
-
-/* CRANE */
-#crane{
-position:absolute;
-top:70px;
-left:50%;
-transform:translateX(-50%);
-font-size:60px;
-animation:sway 2s infinite;
-}
-
-@keyframes sway{
-0%{transform:translateX(-50%) rotate(-3deg);}
-50%{transform:translateX(-50%) rotate(3deg);}
-100%{transform:translateX(-50%) rotate(-3deg);}
-}
-
-/* QUESTION */
-.question-box{
-background:white;
-color:black;
-padding:15px;
-border-radius:12px;
-margin-top:15px;
-max-width:700px;
-margin:auto;
-}
-
-button{
-padding:10px 14px;
-margin:6px;
-border:none;
-border-radius:10px;
-background:#ffd166;
-font-weight:bold;
-cursor:pointer;
-}
-
-#feedback{
-font-size:20px;
-font-weight:bold;
-margin-top:10px;
-}
-
-</style>
-</head>
-
-<body>
-
-<!-- LOGO -->
-<div id="logoScreen" class="screen">
-<img src="assets/innovinelogo.png">
-</div>
-
-<!-- INSTRUCTIONS -->
-<div id="instructionScreen" class="screen hidden">
-<div>
-🏗️ INSTRUCTIONS<br><br>
-Read sentence carefully<br>
-Choose correct adjective<br>
-Watch crane build your city<br><br>
-🚧 Loading Construction Site...
-</div>
-</div>
-
-<!-- GAME -->
-<div id="gameScreen" class="screen hidden">
-<div class="overlay">
-
-<div id="crane">🏗️</div>
-
-<div class="topbar">
-<div>Score: <span id="score">0</span>/20</div>
-<div>Progress: <span id="progress">1</span>/20</div>
-<div>Level: <span id="level">Phase 1</span></div>
-</div>
-
-<div class="city">
-<div class="tower" id="colourTower">🌈</div>
-<div class="tower" id="sizeTower">📏</div>
-<div class="tower" id="shapeTower">🔷</div>
-<div class="tower" id="feelingTower">😊</div>
-</div>
-
-<div class="question-box">
-<h2 id="question"></h2>
-<div id="options"></div>
-<div id="feedback"></div>
-</div>
-
-</div>
-</div>
-
-<audio id="correctSound" src="assets/correct.mp3"></audio>
-<audio id="wrongSound" src="assets/wrong.mp3"></audio>
-<audio id="clapSound" src="assets/clapping.mp3"></audio>
-
 <script>
 
-/* ===== SAFE GAME ENGINE ===== */
+/* =========================
+   20 QUESTIONS (FIXED)
+========================= */
 let questions = [
+/* COLOUR (5) */
 {type:"colour",q:"The sky looks ____.",a:["blue","run","eat","car"],c:"blue",icon:"🌈"},
-{type:"size",q:"The elephant is ____.",a:["big","run","eat","car"],c:"big",icon:"📏"},
+{type:"colour",q:"She wears a ____ dress.",a:["red","jump","sit","run"],c:"red",icon:"🌈"},
+{type:"colour",q:"The grass is ____.",a:["green","dog","eat","run"],c:"green",icon:"🌈"},
+{type:"colour",q:"The sun is ____.",a:["yellow","sit","car","run"],c:"yellow",icon:"🌈"},
+{type:"colour",q:"The flower is ____.",a:["pink","run","eat","car"],c:"pink",icon:"🌈"},
+
+/* SIZE (5) */
+{type:"size",q:"The elephant is ____.",a:["big","run","eat","sit"],c:"big",icon:"📏"},
+{type:"size",q:"The mouse is ____.",a:["small","car","run","eat"],c:"small",icon:"📏"},
+{type:"size",q:"The tower is ____.",a:["huge","dog","sit","run"],c:"huge",icon:"📏"},
+{type:"size",q:"This box is ____.",a:["large","eat","run","car"],c:"large",icon:"📏"},
+{type:"size",q:"The toy is ____.",a:["tiny","sit","run","car"],c:"tiny",icon:"📏"},
+
+/* SHAPE (5) */
 {type:"shape",q:"The ball is ____.",a:["round","run","eat","car"],c:"round",icon:"🔷"},
-{type:"feeling",q:"She feels ____.",a:["happy","run","eat","car"],c:"happy",icon:"😊"}
+{type:"shape",q:"The box is ____.",a:["square","dog","run","eat"],c:"square",icon:"🔷"},
+{type:"shape",q:"The egg is ____.",a:["oval","car","sit","run"],c:"oval",icon:"🔷"},
+{type:"shape",q:"The moon is ____.",a:["circle","eat","run","dog"],c:"circle",icon:"🔷"},
+{type:"shape",q:"The sign is ____.",a:["triangle","sit","car","run"],c:"triangle",icon:"🔷"},
+
+/* FEELINGS (5) */
+{type:"feeling",q:"She feels ____.",a:["happy","run","eat","car"],c:"happy",icon:"😊"},
+{type:"feeling",q:"He is ____.",a:["sad","dog","run","sit"],c:"sad",icon:"😊"},
+{type:"feeling",q:"They are ____.",a:["excited","car","run","eat"],c:"excited",icon:"😊"},
+{type:"feeling",q:"The baby is ____.",a:["tired","sit","run","car"],c:"tired",icon:"😊"},
+{type:"feeling",q:"She looks ____.",a:["angry","dog","run","eat"],c:"angry",icon:"😊"}
 ];
 
-let index=0;
-let score=0;
+let index = 0;
+let score = 0;
 
-/* ===== SAFE START ENGINE ===== */
+/* =========================
+   SHUFFLE FUNCTION
+========================= */
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*i);
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}
+return arr;
+}
+
+/* =========================
+   SAFE START (LOGIC FIXED)
+========================= */
 window.addEventListener("load",()=>{
 
 setTimeout(()=>{
+
 document.getElementById("logoScreen").classList.add("hidden");
 document.getElementById("instructionScreen").classList.remove("hidden");
 
 setTimeout(()=>{
+
 document.getElementById("instructionScreen").classList.add("hidden");
 document.getElementById("gameScreen").classList.remove("hidden");
+
 load();
+
 },5000);
 
 },5000);
 
 });
 
-/* ===== LOAD ===== */
+/* =========================
+   LOAD QUESTION
+========================= */
 function load(){
-if(index>=questions.length){
-end();
+
+if(index >= questions.length){
+endGame();
 return;
 }
 
-let q=questions[index];
+let q = questions[index];
 
-document.getElementById("question").innerText=q.q;
-document.getElementById("progress").innerText=index+1;
-document.getElementById("score").innerText=score;
+document.getElementById("question").innerText = q.q;
+document.getElementById("progress").innerText = index+1;
+document.getElementById("score").innerText = score;
 
-let box=document.getElementById("options");
-box.innerHTML="";
+let box = document.getElementById("options");
+box.innerHTML = "";
 
+/* shuffle options */
 shuffle([...q.a]).forEach(v=>{
-let b=document.createElement("button");
-b.innerText=v;
-b.onclick=()=>check(v,q);
+let b = document.createElement("button");
+b.innerText = v;
+b.onclick = ()=>check(v,q);
 box.appendChild(b);
 });
 
-document.getElementById("feedback").innerText="";
+document.getElementById("feedback").innerText = "";
 }
 
-/* ===== CHECK ===== */
+/* =========================
+   CHECK ANSWER
+========================= */
 function check(v,q){
-if(v===q.c){
+
+if(v === q.c){
 score++;
 document.getElementById("correctSound").play();
-add(q.type,q.icon);
-document.getElementById("feedback").innerText="✔ Correct!";
+addBlock(q.type,q.icon);
+document.getElementById("feedback").innerText = "✔ Correct!";
 }else{
 document.getElementById("wrongSound").play();
-document.getElementById("feedback").innerText="✖ Wrong!";
+document.getElementById("feedback").innerText = "✖ Try Again!";
 }
 
 index++;
-setTimeout(load,900);
+setTimeout(load,800);
 }
 
-/* ===== BLOCK ===== */
-function add(type,icon){
-let t=document.getElementById(type+"Tower");
-let d=document.createElement("div");
-d.className="block";
-d.innerText=icon;
-t.appendChild(d);
+/* =========================
+   ADD BLOCK
+========================= */
+function addBlock(type,icon){
+let tower = document.getElementById(type+"Tower");
+
+let div = document.createElement("div");
+div.className = "block";
+div.innerText = icon;
+
+tower.appendChild(div);
 }
 
-/* ===== UTIL ===== */
-function shuffle(a){
-for(let i=a.length-1;i>0;i--){
-let j=Math.floor(Math.random()*i);
-[a[i],a[j]]=[a[j],a[i]];
-}
-return a;
-}
+/* =========================
+   END GAME (FIXED + PLAY AGAIN)
+========================= */
+function endGame(){
 
-/* ===== END ===== */
-function end(){
-document.getElementById("gameScreen").innerHTML=
-"<div style='color:white;text-align:center;margin-top:40vh;font-size:30px;'>🏙️ CITY COMPLETE!<br>🏆 ADJECTIVE ARCHITECT</div>";
+document.getElementById("gameScreen").innerHTML = `
+<div style="color:white;text-align:center;margin-top:20vh;">
+<h1>🏙️ CITY COMPLETE!</h1>
+<h2>🏆 ADJECTIVE ARCHITECT</h2>
+<h3>Score: ${score}/20</h3>
+
+<br>
+
+<button onclick="restartGame()" 
+style="padding:12px 20px;font-size:18px;background:#ffd166;border:none;border-radius:10px;font-weight:bold;">
+🔁 Play Again
+</button>
+
+</div>
+`;
+
 document.getElementById("clapSound").play();
 }
 
-</script>
+/* =========================
+   RESTART FIX (IMPORTANT)
+========================= */
+function restartGame(){
+location.reload();
+}
 
-</body>
-</html>
+</script>
