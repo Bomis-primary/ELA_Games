@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <title>Secret Identity Heroes LMS</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 *{box-sizing:border-box;font-family:Arial;margin:0;padding:0;}
 
-body{
-overflow:hidden;
-}
+body{overflow:hidden;background:#000;}
 
-/* BACKGROUND */
+/* BACKGROUND (FULL IMAGE SAFE) */
 #bg{
 position:fixed;
 width:100%;
 height:100%;
-background:url("assets/background.jpg") center/cover no-repeat;
+background-size:contain;
+background-repeat:no-repeat;
+background-position:center;
+background-color:#000;
 z-index:-2;
 }
 
@@ -34,15 +34,55 @@ z-index:-1;
 #splash{
 position:fixed;
 inset:0;
-background:#fff;
+background:white;
 display:flex;
 justify-content:center;
 align-items:center;
 z-index:9999;
 }
-#splash img{width:220px}
+#splash img{width:220px;}
 
-/* SCREEN COMMON */
+/* LEVEL GRID (2x2 BIG CARDS) */
+#levels{
+display:grid;
+grid-template-columns:1fr 1fr;
+grid-template-rows:1fr 1fr;
+gap:20px;
+height:100vh;
+padding:30px;
+justify-items:center;
+align-items:center;
+}
+
+.level{
+width:95%;
+height:200px;
+border-radius:16px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+font-weight:900;
+font-size:26px;
+color:black;
+text-align:center;
+background-size:contain;
+background-repeat:no-repeat;
+background-position:center;
+background-color:white;
+box-shadow:0 6px 18px rgba(0,0,0,0.4);
+position:relative;
+cursor:pointer;
+}
+
+.lock{
+position:absolute;
+top:10px;
+right:10px;
+font-size:28px;
+}
+
+/* SCREENS */
 .screen{
 display:none;
 height:100vh;
@@ -61,7 +101,7 @@ padding:12px;
 border-radius:10px;
 border:none;
 width:220px;
-margin:8px;
+margin:10px;
 text-align:center;
 }
 
@@ -75,41 +115,6 @@ color:white;
 font-size:16px;
 margin:5px;
 cursor:pointer;
-}
-
-/* LEVELS */
-#levels{
-display:none;
-flex-wrap:wrap;
-gap:15px;
-justify-content:center;
-align-items:center;
-height:100vh;
-padding:20px;
-}
-
-.level{
-width:140px;
-height:120px;
-border-radius:12px;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-color:white;
-font-weight:bold;
-background-size:cover;
-background-position:center;
-position:relative;
-cursor:pointer;
-box-shadow:0 4px 10px rgba(0,0,0,0.4);
-}
-
-.lock{
-position:absolute;
-top:5px;
-right:5px;
-font-size:22px;
 }
 
 /* GAME */
@@ -132,7 +137,7 @@ font-weight:bold;
 position:absolute;
 bottom:20px;
 left:10%;
-width:110px;
+width:120px;
 transition:all 0.8s ease;
 }
 
@@ -148,7 +153,15 @@ max-width:520px;
 text-align:center;
 }
 
-/* DRAG OPTIONS */
+/* DROP BLANK */
+.blank{
+border-bottom:3px dashed #333;
+display:inline-block;
+min-width:60px;
+padding:5px;
+}
+
+/* OPTIONS */
 .option{
 padding:10px;
 margin:5px;
@@ -156,15 +169,6 @@ background:#e3f2fd;
 border-radius:10px;
 display:inline-block;
 cursor:grab;
-}
-
-/* DROP AREA */
-#drop{
-margin-top:15px;
-padding:20px;
-border:2px dashed #999;
-border-radius:12px;
-min-height:50px;
 }
 
 /* RESULT */
@@ -190,6 +194,12 @@ animation:fall 2s linear;
 0%{transform:translateY(-10px)}
 100%{transform:translateY(100vh)}
 }
+
+/* MOBILE */
+@media(max-width:600px){
+.level{height:160px;font-size:20px;}
+#hero{width:95px;}
+}
 </style>
 </head>
 
@@ -203,14 +213,6 @@ animation:fall 2s linear;
 <img src="assets/innovine-logo.png">
 </div>
 
-<!-- NAME -->
-<div id="nameScreen" class="screen">
-<h2>Enter Your Hero Name</h2>
-<input id="name" placeholder="Your name">
-<button onclick="chooseGender('boy')">Boy Hero</button>
-<button onclick="chooseGender('girl')">Girl Hero</button>
-</div>
-
 <!-- LEVELS -->
 <div id="levels"></div>
 
@@ -220,17 +222,15 @@ animation:fall 2s linear;
 <div id="player"></div>
 <div>Score: <span id="score">0</span></div>
 <div>Lives: <span id="lives">3</span></div>
-<div>Q: <span id="qno">1</span>/5</div>
+<div>Q: <span id="qno">1</span></div>
 </div>
 
 <img id="hero">
 
 <div id="card">
 <h2 id="question"></h2>
-
-<div id="drop">DROP ANSWER HERE</div>
-
 <div id="options"></div>
+<div id="hint"></div>
 </div>
 </div>
 
@@ -246,246 +246,182 @@ animation:fall 2s linear;
 
 <script>
 
-/* =======================
-ASSETS & THEMES
-======================= */
-const backgrounds={
-beach:"assets/beach.png",
-desert:"assets/desert.png",
-forest:"assets/forest.png",
-city:"assets/city.png"
+/* BACKGROUNDS */
+const themes={
+0:"assets/beach.png",
+1:"assets/desert.png",
+2:"assets/forest.png",
+3:"assets/city.png"
 };
 
-const levels=[
-{theme:"beach",title:"City 1",focus:"I / You"},
-{theme:"desert",title:"City 2",focus:"He / She"},
-{theme:"forest",title:"City 3",focus:"It / They"},
-{theme:"city",title:"City 4",focus:"Mixed"}
+/* LEVEL STORIES */
+const story=[
+"🌊 Beach: Sea monsters are attacking! Save the shore using pronouns!",
+"🏜 Desert: Sandstorm confusion! Restore identities!",
+"🌲 Forest: Magical creatures lost identity!",
+"🏙 City: Emergency chaos! Fix all pronouns!"
 ];
 
-/* =======================
-MISSIONS (5 per level)
-======================= */
-const data=[
+/* DATA (ALL PRONOUNS ALWAYS PRESENT) */
+const levels=[
 [
 {q:"___ am happy",a:"I"},
 {q:"___ are playing",a:"You"},
-{q:"___ am ready",a:"I"},
-{q:"___ are here",a:"You"},
-{q:"___ am a hero",a:"I"}
+{q:"___ is a boy",a:"He"},
+{q:"___ is a girl",a:"She"},
+{q:"___ is a cat",a:"It"}
 ],
 [
 {q:"___ is a doctor",a:"He"},
-{q:"___ is a teacher",a:"She"},
+{q:"___ is a nurse",a:"She"},
+{q:"___ are friends",a:"They"},
 {q:"___ is strong",a:"He"},
-{q:"___ is kind",a:"She"},
-{q:"___ is working",a:"He"}
+{q:"___ is kind",a:"She"}
 ],
 [
-{q:"___ is a cat",a:"It"},
-{q:"___ are friends",a:"They"},
+{q:"___ is a bird",a:"It"},
+{q:"___ are running",a:"They"},
 {q:"___ is a tree",a:"It"},
 {q:"___ are playing",a:"They"},
 {q:"___ is sleeping",a:"It"}
 ],
 [
+{q:"___ am ready",a:"I"},
+{q:"___ are listening",a:"You"},
 {q:"___ is a hero",a:"He"},
 {q:"___ is a leader",a:"She"},
-{q:"___ are saving city",a:"They"},
-{q:"___ is brave",a:"He"},
-{q:"___ is smart",a:"She"}
+{q:"___ are saving city",a:"They"}
 ]
 ];
 
 let level=0;
-let qIndex=0;
+let index=0;
 let score=0;
 let lives=3;
-let name="";
-let heroType="";
-let attempts=0;
 
-/* =======================
-SPLASH
-======================= */
+/* SPLASH */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
-document.getElementById("nameScreen").style.display="flex";
+showLevels();
 },5000);
 
-/* =======================
-GENDER + NAME
-======================= */
-function chooseGender(type){
-heroType=type;
-name=document.getElementById("name").value||"Hero";
-
-document.getElementById("nameScreen").style.display="none";
-showLevels();
-}
-
-/* =======================
-LEVEL SCREEN
-======================= */
+/* LEVEL GRID */
 function showLevels(){
 let box=document.getElementById("levels");
-box.style.display="flex";
-
 box.innerHTML="";
+box.style.display="grid";
 
-levels.forEach((l,i)=>{
-let div=document.createElement("div");
-div.className="level";
-div.style.backgroundImage=`url('${backgrounds[l.theme]}')`;
-div.innerHTML=`${l.title}<br>${l.focus}`;
+for(let i=0;i<4;i++){
+let d=document.createElement("div");
+d.className="level";
+d.style.backgroundImage=`url('${themes[i]}')`;
+d.innerHTML=`Level ${i+1}<br><small>Tap to start</small>`;
 
-if(i>level){
 let lock=document.createElement("div");
 lock.className="lock";
-lock.innerHTML="🔒";
-div.appendChild(lock);
+lock.innerHTML="🔓";
+
+d.appendChild(lock);
+
+d.onclick=()=>startLevel(i);
+box.appendChild(d);
 }
 
-div.onclick=()=>{
-if(i<=level) startLevel(i);
-};
-
-box.appendChild(div);
-});
+document.getElementById("bg").style.backgroundImage="url('assets/background.jpg')";
 }
 
-/* =======================
-START LEVEL
-======================= */
+/* START LEVEL */
 function startLevel(lv){
 
 level=lv;
-qIndex=0;
+index=0;
 score=0;
 lives=3;
 
 document.getElementById("levels").style.display="none";
 document.getElementById("game").style.display="flex";
 
-document.getElementById("hero").src=
-heroType==="boy"?"assets/boy-hero.png":"assets/girl-hero.png";
-
-document.getElementById("player").innerText="🦸 "+name;
-
-document.getElementById("bg").style.backgroundImage=
-`url('${backgrounds[levels[lv].theme]}')`;
+document.getElementById("bg").style.backgroundImage=`url('${themes[lv]}')`;
 
 loadQ();
 }
 
-/* =======================
-LOAD QUESTION
-======================= */
+/* LOAD */
 function loadQ(){
 
-if(qIndex>=5){
+if(index>=levels[level].length){
 endLevel();
 return;
 }
 
-attempts=0;
+let q=levels[level][index];
 
+document.getElementById("question").innerHTML=q.q.replace("___","<span class='blank'>___</span>");
 document.getElementById("score").innerText=score;
 document.getElementById("lives").innerText=lives;
-document.getElementById("qno").innerText=qIndex+1;
+document.getElementById("qno").innerText=index+1;
 
-let q=data[level][qIndex];
+let box=document.getElementById("options");
+box.innerHTML="";
 
-document.getElementById("question").innerText=q.q;
-
-let optBox=document.getElementById("options");
-optBox.innerHTML="";
-
-["I","You","He","She","It","They"].forEach(o=>{
+["I","You","He","She","It","They"].forEach(p=>{
 let d=document.createElement("div");
 d.className="option";
-d.draggable=true;
-d.innerText=o;
+d.innerText=p;
 
-d.ondragstart=(e)=>e.dataTransfer.setData("text",o);
+d.onclick=()=>check(p);
 
-optBox.appendChild(d);
+box.appendChild(d);
 });
-
-/* DROP */
-let drop=document.getElementById("drop");
-drop.ondragover=(e)=>e.preventDefault();
-
-drop.ondrop=(e)=>{
-let val=e.dataTransfer.getData("text");
-check(val);
-};
 }
 
-/* =======================
-CHECK ANSWER
-======================= */
-function check(val){
+/* CHECK */
+function check(ans){
 
-let q=data[level][qIndex];
+let q=levels[level][index];
 
-if(val===q.a){
+if(ans===q.a){
 score++;
 play("correct");
 play("clapping");
 moveHero();
-nextQ();
+index++;
+loadQ();
 }
 else{
-attempts++;
 lives--;
 play("wrong");
 
 if(lives<=0){
-alert("Level Failed! Try Again");
 startLevel(level);
-return;
 }
 }
 }
 
-/* =======================
-NEXT QUESTION
-======================= */
-function nextQ(){
-qIndex++;
-setTimeout(loadQ,700);
-}
-
-/* =======================
-HERO MOVE
-======================= */
+/* HERO MOVE */
 function moveHero(){
 let h=document.getElementById("hero");
-h.style.left=(10+qIndex*15)+"%";
+if(!h.src){
+h.src="assets/boy-hero.png";
+}
+h.style.left=(10+index*15)+"%";
 }
 
-/* =======================
-LEVEL END
-======================= */
+/* END LEVEL */
 function endLevel(){
+document.getElementById("game").style.display="none";
+document.getElementById("levels").style.display="grid";
 
 if(score>=4){
-level++;
-alert("Awesome! Level Completed");
-
-showLevels();
-document.getElementById("game").style.display="none";
+alert("Awesome! Level Complete");
 }
 else{
-alert("Try again! You need at least 4 correct.");
-startLevel(level);
+alert("Try again!");
 }
+showLevels();
 }
 
-/* =======================
-AUDIO
-======================= */
+/* AUDIO */
 function play(id){
 let a=document.getElementById(id);
 a.currentTime=0;
