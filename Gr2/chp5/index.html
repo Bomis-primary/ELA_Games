@@ -73,30 +73,21 @@ font-weight:bold;
 z-index:20;
 }
 
-/* TRAIN (RIGHT ➜ LEFT) */
+/* TRAIN */
 #train{
 position:absolute;
 bottom:40px;
-left:110%;              /* START FROM RIGHT */
+left:110%;
 width:230px;
 height:130px;
 z-index:5;
+transition:left 2.5s ease-in-out;
 }
 
 #train img{
 width:100%;
 height:100%;
 object-fit:contain;
-}
-
-/* MOVE RIGHT → LEFT */
-.move{
-animation:moveTrain 4s linear forwards;
-}
-
-@keyframes moveTrain{
-0%{left:110%;}
-100%{left:-300px;}
 }
 
 /* Tickets */
@@ -147,7 +138,7 @@ line-height:1.2;
 </div>
 
 <div id="instructions">
-🚂 Drag the correct sentence ticket onto the moving train!
+🚂 Drag the correct ticket INTO the train while it is at the station!
 </div>
 
 <div id="game">
@@ -171,25 +162,19 @@ line-height:1.2;
 const statements=[
 "The giraffe is a tall animal.",
 "My brother plays football every evening.",
-"We visited the zoo yesterday.",
-"The flowers are blooming in the garden.",
-"I enjoy reading storybooks."
+"We visited the zoo yesterday."
 ];
 
 const questions=[
 "When is your birthday?",
 "Why is the sky blue?",
-"Can you help me?",
-"Why are you laughing?",
-"Did you finish your homework?"
+"Can you help me?"
 ];
 
 const exclamations=[
 "What a beautiful rainbow!",
 "Hurray! We won the match!",
-"Wow! This cake is delicious!",
-"Oh no! I lost my pencil!",
-"What an amazing performance!"
+"Wow! This cake is delicious!"
 ];
 
 const trainTypes=["statement","question","exclamation"];
@@ -197,6 +182,7 @@ const trainTypes=["statement","question","exclamation"];
 let current=0;
 let score=0;
 let attempts=0;
+let trainState="entering"; // entering | waiting | exiting
 
 function play(id){
 let a=document.getElementById(id);
@@ -204,21 +190,46 @@ a.currentTime=0;
 a.play().catch(()=>{});
 }
 
-/* TRAIN ENTERS RIGHT → EXITS LEFT */
+/* TRAIN ENTER */
 function startTrain(){
 let train=document.getElementById("train");
-train.className="move";
+trainState="entering";
 
-/* WHISTLE DURING MOVEMENT */
-play("whistle");
+train.style.left="110%";
 
 setTimeout(()=>{
-train.className="";
-train.style.left="110%";   // reset RIGHT side
-nextLevel();
-},4000);
+train.style.left="50%";
+train.style.transform="translateX(-50%)";
+
+setTimeout(()=>{
+trainState="waiting"; // DROP ZONE ACTIVE
+document.getElementById("msg").innerText="Drop ticket into train!";
+},2500);
+
+},100);
 }
 
+/* TRAIN EXIT */
+function exitTrain(){
+let train=document.getElementById("train");
+trainState="exiting";
+
+document.getElementById("msg").innerText="Train is leaving...";
+
+play("whistle"); // ONLY HERE
+
+setTimeout(()=>{
+train.style.left="-300px";
+train.style.transform="translateX(0)";
+
+setTimeout(()=>{
+nextLevel();
+},2500);
+
+},500);
+}
+
+/* NEXT LEVEL */
 function nextLevel(){
 current++;
 attempts=0;
@@ -227,13 +238,17 @@ initTickets();
 startTrain();
 }
 
+/* LOAD TRAIN IMAGE */
 function loadTrain(){
 let type=trainTypes[current%3];
 document.getElementById("train").innerHTML=
 `<img src="assets/${type}train.png">`;
 }
 
+/* INIT TICKETS */
 function initTickets(){
+document.getElementById("msg").innerText="";
+
 let arr=[
 {type:"statement",text:statements[Math.floor(Math.random()*statements.length)]},
 {type:"question",text:questions[Math.floor(Math.random()*questions.length)]},
@@ -252,11 +267,42 @@ t.style.display="flex";
 }
 }
 
+/* CHECK ANSWER */
+function check(ticket){
+if(trainState!=="waiting")return;
+
+let correct=trainTypes[current%3];
+
+if(ticket.dataset.type===correct){
+
+document.getElementById("msg").innerText="Correct!";
+score++;
+document.getElementById("score").innerText="Score: "+score;
+
+ticket.style.display="none";
+
+play("correct");
+
+/* AFTER CORRECT → EXIT TRAIN */
+setTimeout(()=>{
+exitTrain();
+},800);
+
+}else{
+play("wrong");
+ticket.classList.add("shake");
+setTimeout(()=>ticket.classList.remove("shake"),300);
+
+document.getElementById("msg").innerText="Try Again!";
+}
+}
+
 /* DRAG */
 function drag(el){
 let dx=0,dy=0;
 
 el.addEventListener("pointerdown",e=>{
+if(trainState!=="waiting")return;
 el.setPointerCapture(e.pointerId);
 dx=e.clientX-el.offsetLeft;
 dy=e.clientY-el.offsetTop;
@@ -264,6 +310,7 @@ dy=e.clientY-el.offsetTop;
 
 el.addEventListener("pointermove",e=>{
 if(e.pressure===0)return;
+if(trainState!=="waiting")return;
 el.style.left=(e.clientX-dx)+"px";
 el.style.top=(e.clientY-dy)+"px";
 });
@@ -279,30 +326,6 @@ if(cx>train.left && cx<train.right && cy>train.top && cy<train.bottom){
 check(el);
 }
 });
-}
-
-function check(ticket){
-let correct=trainTypes[current%3];
-
-if(ticket.dataset.type===correct){
-play("correct");
-play("whistle");
-
-score++;
-document.getElementById("score").innerText="Score: "+score;
-document.getElementById("msg").innerText="Correct!";
-
-ticket.style.display="none";
-
-}else{
-play("wrong");
-attempts++;
-
-ticket.classList.add("shake");
-setTimeout(()=>ticket.classList.remove("shake"),300);
-
-document.getElementById("msg").innerText="Try Again!";
-}
 }
 
 /* INIT */
