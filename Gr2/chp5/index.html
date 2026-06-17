@@ -2,28 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sentence Express Station</title>
+<title>Sentence Express Station PRO</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
 overflow:hidden;
+background:black;
 }
 
-/* SPLASH */
 #splash{
 position:fixed;
-top:0; left:0;
-width:100%; height:100%;
+width:100%;
+height:100%;
 background:white;
 display:flex;
 justify-content:center;
 align-items:center;
-z-index:9999;
+z-index:999;
 }
 
-/* INSTRUCTIONS */
 #instructions{
 display:none;
 position:absolute;
@@ -31,21 +30,19 @@ top:0;
 width:100%;
 background:#fff3cd;
 padding:12px;
-text-align:center;
 font-weight:bold;
+text-align:center;
 z-index:10;
 }
 
-/* GAME AREA */
 #game{
 display:none;
 width:100%;
 height:100vh;
-background:url('railwaystationbackground.png') center/cover no-repeat;
+background:url('assets/railwaystationbackground.png') center/cover no-repeat;
 position:relative;
 }
 
-/* SCORE */
 #score{
 position:absolute;
 top:60px;
@@ -53,48 +50,49 @@ left:10px;
 background:white;
 padding:10px;
 border-radius:10px;
-z-index:5;
 font-weight:bold;
 }
 
-/* TICKET */
+#starBoard{
+position:absolute;
+top:60px;
+right:10px;
+background:white;
+padding:10px;
+border-radius:10px;
+}
+
 #ticket{
 position:absolute;
 bottom:42%;
 left:50%;
 transform:translateX(-50%);
-width:220px;
-min-height:110px;
-background:url('trainticket.png') center/cover no-repeat;
+width:240px;
+min-height:120px;
+background:url('assets/trainticket.png') center/cover no-repeat;
 display:flex;
 align-items:center;
 justify-content:center;
 text-align:center;
-padding:10px;
+padding:15px;
 font-weight:bold;
-z-index:6;
-cursor:grab;
-touch-action:none;
+cursor:pointer;
+transition:0.3s;
 }
 
-/* TRAINS */
 .train{
 position:absolute;
 bottom:40px;
-width:200px;
-z-index:4;
-transition:transform 1s ease;
+width:210px;
+transition:0.3s;
 }
+
+.train img{width:100%;}
 
 #statementTrain{left:5%;}
 #questionTrain{left:40%;}
 #exclamationTrain{left:75%;}
 
-.train img{
-width:100%;
-}
-
-/* MESSAGE */
 #msg{
 position:absolute;
 top:120px;
@@ -102,72 +100,78 @@ width:100%;
 text-align:center;
 font-size:22px;
 font-weight:bold;
-z-index:6;
 }
 
-/* TRAIN MOVE ANIMATION */
-.moveRight{
-transform:translateX(400px);
+.glow{
+filter:drop-shadow(0px 0px 10px gold);
 }
 
-/* SHAKE */
 .shake{
 animation:shake 0.3s;
 }
 
 @keyframes shake{
-0%{transform:translateX(0);}
-25%{transform:translateX(-5px);}
+0%{transform:translateX(-5px);}
 50%{transform:translateX(5px);}
-75%{transform:translateX(-5px);}
 100%{transform:translateX(0);}
+}
+
+.depart{
+animation:depart 0.8s ease;
+}
+
+@keyframes depart{
+0%{transform:translateY(0);}
+50%{transform:translateY(-20px);}
+100%{transform:translateX(200px);}
 }
 </style>
 </head>
 
 <body>
 
-<!-- SPLASH -->
 <div id="splash">
-    <img src="innovinelogo.png" style="width:280px;">
+<img src="assets/innovinelogo.png" style="width:300px;">
 </div>
 
-<!-- INSTRUCTIONS -->
 <div id="instructions">
-🚂 Drag or tap the ticket into the correct train!
+🚂 Drag or tap the ticket into the correct train
 </div>
 
-<!-- GAME -->
 <div id="game">
+
 <div id="score">Score: 0</div>
+<div id="starBoard">⭐⭐⭐</div>
 <div id="msg"></div>
 
 <div id="ticket"></div>
 
 <div class="train" id="statementTrain">
-<img src="statementtrain.jpg">
+<img src="assets/statementtrain.jpg">
 </div>
 
 <div class="train" id="questionTrain">
-<img src="questiontrain.jpg">
+<img src="assets/questiontrain.jpg">
 </div>
 
 <div class="train" id="exclamationTrain">
-<img src="exclamationtrain.jpg">
-</div>
+<img src="assets/exclamationtrain.jpg">
 </div>
 
-<audio id="correct" src="correct.mp3"></audio>
-<audio id="wrong" src="wrong.mp3"></audio>
-<audio id="whistle" src="trainwhistle.mp3"></audio>
-<audio id="clap" src="clapping.mp3"></audio>
+</div>
+
+<audio id="correct" src="assets/correct.mp3"></audio>
+<audio id="wrong" src="assets/wrong.mp3"></audio>
+<audio id="whistle" src="assets/trainwhistle.mp3"></audio>
+<audio id="clap" src="assets/clapping.mp3"></audio>
 
 <script>
-let score = 0;
-let index = 0;
-let attempts = 0;
 
-const data = [
+let score=0;
+let index=0;
+let attempts=0;
+
+const data=[
 {type:"statement",text:"The giraffee is a tall animal."},
 {type:"statement",text:"My brother plays football every evening."},
 {type:"statement",text:"We visited the zoo yesterday."},
@@ -187,95 +191,67 @@ const data = [
 {type:"exclamation",text:"What an amazing performance!"}
 ];
 
-let ticket = document.getElementById("ticket");
-
-/* SHUFFLE FUNCTION */
-function shuffle(array){
-for(let i=array.length-1;i>0;i--){
-let j=Math.floor(Math.random()*(i+1));
-[array[i],array[j]]=[array[j],array[i]];
-}
-return array;
-}
-
-/* SHUFFLE DATA */
-let randomizedData = shuffle([...data]);
-
 function load(){
-attempts = 0;
-if(index >= randomizedData.length) index=0; // loop after all
-let q = randomizedData[index];
-ticket.innerText = q.text;
-ticket.dataset.type = q.type;
-document.getElementById("msg").innerText = "";
+attempts=0;
+let q=data[index%data.length];
+document.getElementById("ticket").innerText=q.text;
+document.getElementById("ticket").dataset.type=q.type;
 }
 
-/* CHECK ANSWER */
 function check(type){
-let train = document.getElementById(type+"Train");
-if(type === ticket.dataset.type){
+
+let correct=document.getElementById("ticket").dataset.type;
+
+if(type===correct){
+
 document.getElementById("correct").play();
 document.getElementById("whistle").play();
 document.getElementById("clap").play();
 
 score++;
-document.getElementById("score").innerText = "Score: "+score;
+document.getElementById("score").innerText="Score: "+score;
 
-train.classList.add("moveRight");
-setTimeout(()=>{train.classList.remove("moveRight");},1000);
+document.getElementById(type+"Train").classList.add("depart");
+
+setTimeout(()=>{
+document.getElementById(type+"Train").classList.remove("depart");
+},800);
 
 index++;
-setTimeout(load,1000);
-} else {
-document.getElementById("wrong").play();
-attempts++;
-train.classList.add("shake");
-setTimeout(()=>{train.classList.remove("shake");},300);
+load();
 
-if(attempts<2){
-document.getElementById("msg").innerText="Try Again!";
 }else{
-document.getElementById("msg").innerText="Correct Answer: "+ticket.dataset.type.toUpperCase();
+
+document.getElementById("wrong").play();
+document.getElementById(type+"Train").classList.add("shake");
+
+setTimeout(()=>{
+document.getElementById(type+"Train").classList.remove("shake");
+},300);
+
+attempts++;
+
+if(attempts>=2){
+document.getElementById("msg").innerText="Correct Answer: "+correct.toUpperCase();
 index++;
 setTimeout(load,1200);
+}else{
+document.getElementById("msg").innerText="Try Again!";
 }
 }
 }
 
-/* TAP */
-document.getElementById("statementTrain").onclick = ()=>check("statement");
-document.getElementById("questionTrain").onclick = ()=>check("question");
-document.getElementById("exclamationTrain").onclick = ()=>check("exclamation");
+document.getElementById("statementTrain").onclick=()=>check("statement");
+document.getElementById("questionTrain").onclick=()=>check("question");
+document.getElementById("exclamationTrain").onclick=()=>check("exclamation");
 
-/* DRAG */
-let dragging = false;
-ticket.addEventListener("pointerdown", startDrag);
-function startDrag(e){
-dragging = true;
-function move(ev){
-if(!dragging) return;
-ticket.style.left = (ev.clientX - 110) + "px";
-ticket.style.top = (ev.clientY - 60) + "px";
-ticket.style.transform = "none";
-}
-function stop(){
-dragging = false;
-document.removeEventListener("pointermove",move);
-document.removeEventListener("pointerup",stop);
-}
-document.addEventListener("pointermove",move);
-document.addEventListener("pointerup",stop);
-}
-
-/* SPLASH FLOW */
-window.onload = function(){
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
 document.getElementById("instructions").style.display="block";
 document.getElementById("game").style.display="block";
 load();
 },5000);
-}
+
 </script>
 
 </body>
