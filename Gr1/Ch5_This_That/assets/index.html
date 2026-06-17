@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>This That These Those</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Comic Sans MS;
+    overflow:hidden;
+}
+
+/* 🌟 CLASSROOM BACKGROUND */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:url("assets/classroom.png") center/cover no-repeat;
+    filter:brightness(1.1) contrast(0.9) saturate(0.8) blur(1px);
+    z-index:-2;
+}
+
+body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:rgba(255,255,255,0.25);
+    z-index:-1;
+}
+
+/* SPLASH */
+#splash{
+    position:fixed;
+    inset:0;
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:20;
+}
+
+/* INTRO */
+#intro{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:linear-gradient(135deg,#dff7ff,#fff3c4);
+    text-align:center;
+    padding-top:90px;
+    z-index:10;
+}
+
+/* GAME */
+#game{
+    display:none;
+    padding:10px;
+}
+
+/* TOP BAR */
+#topbar{
+    display:flex;
+    justify-content:space-between;
+    font-size:22px;
+    font-weight:bold;
+    padding:10px;
+    color:#222;
+}
+
+/* QUESTION BOX */
+#qbox{
+    margin:40px auto;
+    width:85%;
+    background:#ffffff;
+    padding:25px;
+    border-radius:18px;
+    font-size:24px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+    border:3px solid #cfe8ff;
+}
+
+/* OPTIONS BOXES (FIXED COLORS) */
+#options{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    margin-top:40px;
+}
+
+.option{
+    padding:15px 28px;
+    border-radius:14px;
+    font-size:22px;
+    cursor:grab;
+    box-shadow:0 5px 12px rgba(0,0,0,0.15);
+    border:2px solid #ddd;
+    transition:0.2s;
+    background:white;
+}
+
+/* RESTORED COLORS */
+.option:nth-child(1){background:#e3f2fd;}
+.option:nth-child(2){background:#fff3e0;}
+.option:nth-child(3){background:#e8f5e9;}
+.option:nth-child(4){background:#fce4ec;}
+
+.option:hover{
+    transform:scale(1.05);
+}
+
+/* SCORE */
+#score{
+    display:none;
+    text-align:center;
+    padding-top:120px;
+    font-size:30px;
+}
+
+/* SHAKE */
+.shake{animation:shake 0.4s;}
+@keyframes shake{
+0%{transform:translateX(0);}
+25%{transform:translateX(-5px);}
+50%{transform:translateX(5px);}
+75%{transform:translateX(-5px);}
+100%{transform:translateX(0);}
+}
+
+/* 💥 CONFETTI LAYER FIX */
+.confetti{
+    position:fixed;
+    font-size:26px;
+    z-index:99999;
+    pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+<img src="file_00000000e04471fa8b1a463c8aba380d" width="220">
+</div>
+
+<!-- INTRO -->
+<div id="intro">
+<h1>🎮 This / That / These / Those</h1>
+<p>Drag the correct word into the blank</p>
+<button onclick="start()">Start Game</button>
+</div>
+
+<!-- GAME -->
+<div id="game">
+
+<div id="topbar">
+<div id="qnum">Q 1/10</div>
+<div id="time">80</div>
+</div>
+
+<div id="qbox"></div>
+<div id="options"></div>
+
+</div>
+
+<!-- SCORE -->
+<div id="score"></div>
+
+<audio id="wrong" src="assets/wrong.mp3"></audio>
+<audio id="correct" src="assets/correct.mp3"></audio>
+
+<script>
+
+/* DATA (UNCHANGED VERBATIM) */
+let data=[
+{q:`Riya is holding a pencil in her hand. She says: “___ is my pencil.”`,opt:["This","Those"],ans:"This"},
+{q:`Kabir points to birds flying far in the sky. He says: “___ are beautiful birds.”`,opt:["These","Those"],ans:"Those"},
+{q:`Meera is touching her new bag. She says: “___ is my new bag.”`,opt:["That","This"],ans:"This"},
+{q:`Look at the books on the table far away. Teacher says: “___ are library books.”`,opt:["These","Those"],ans:"Those"},
+{q:`A boy shows his toy car in his hand. He says: “___ is my toy car.”`,opt:["This","Those"],ans:"This"},
+{q:`Children are pointing at flowers in a distant garden. They say: “___ are so colorful.”`,opt:["These","Those"],ans:"Those"},
+{q:`Ananya is holding a chocolate. She says: “___ is very tasty.”`,opt:["That","This"],ans:"This"},
+{q:`Look at the stars in the night sky. We say: “___ are shining brightly.”`,opt:["These","Those"],ans:"Those"},
+{q:`Rahul points to a car passing far away. He says: “___ is a red car.”`,opt:["That","These"],ans:"That"},
+{q:`Children are holding crayons in their hands. They say: “___ are our crayons.”`,opt:["These","Those"],ans:"These"},
+{q:`A girl is showing a picture in her book. She says: “___ is my favorite picture.”`,opt:["This","Those"],ans:"This"},
+{q:`Look at the mountains far away. We say: “___ are very tall.”`,opt:["These","Those"],ans:"Those"},
+{q:`Teacher is holding a marker in her hand. She says: “___ is a marker.”`,opt:["This","That"],ans:"This"},
+{q:`Children point to apples in their baskets. They say: “___ are fresh apples.”`,opt:["These","That"],ans:"These"},
+{q:`A boy shows a kite flying far in the sky. He says: “___ is my kite.”`,opt:["This","That"],ans:"That"}
+];
+
+let game=[],i=0,score=0,timer,t=80;
+
+/* START */
+setTimeout(()=>{
+document.getElementById("splash").style.display="none";
+document.getElementById("intro").style.display="block";
+},5000);
+
+function start(){
+document.getElementById("intro").style.display="none";
+document.getElementById("game").style.display="block";
+
+game=data.sort(()=>Math.random()-0.5).slice(0,10);
+load();
+}
+
+function load(){
+
+clearInterval(timer);
+t=80;
+
+if(i>=game.length){end();return;}
+
+document.getElementById("qnum").innerText=`Q ${i+1}/10`;
+document.getElementById("qbox").innerText=game[i].q;
+
+document.getElementById("qbox").ondrop=drop;
+document.getElementById("qbox").ondragover=e=>e.preventDefault();
+
+/* OPTIONS */
+document.getElementById("options").innerHTML=
+game[i].opt.map(o=>
+`<div class="option" draggable="true" ondragstart="drag(event)">${o}</div>`
+).join("");
+
+timer=setInterval(()=>{
+t--;
+document.getElementById("time").innerText=t;
+if(t<=0) next();
+},1000);
+
+}
+
+function drag(e){
+e.dataTransfer.setData("text",e.target.innerText);
+}
+
+function drop(e){
+let val=e.dataTransfer.getData("text");
+
+if(val===game[i].ans){
+score++;
+document.getElementById("correct").play();
+confettiBurst();
+}else{
+document.getElementById("wrong").play();
+document.body.classList.add("shake");
+setTimeout(()=>document.body.classList.remove("shake"),400);
+}
+
+next();
+}
+
+/* 💥 FIXED CONFETTI (100% VISIBLE) */
+function confettiBurst(){
+
+for(let k=0;k<100;k++){
+let c=document.createElement("div");
+c.className="confetti";
+c.innerHTML="🎉";
+
+document.body.appendChild(c);
+
+let x = window.innerWidth/2;
+let y = window.innerHeight/2;
+
+let angle = Math.random()*2*Math.PI;
+let speed = Math.random()*10 + 5;
+
+let vx = Math.cos(angle)*speed;
+let vy = Math.sin(angle)*speed;
+
+let gravity = 0.3;
+let opacity = 1;
+
+let anim=setInterval(()=>{
+
+x += vx;
+y += vy;
+vy += gravity;
+opacity -= 0.015;
+
+c.style.left = x + "px";
+c.style.top = y + "px";
+c.style.opacity = opacity;
+
+if(opacity <= 0){
+clearInterval(anim);
+c.remove();
+}
+},16);
+}
+}
+
+function next(){
+clearInterval(timer);
+i++;
+setTimeout(load,600);
+}
+
+function end(){
+document.getElementById("game").style.display="none";
+document.getElementById("score").style.display="block";
+
+document.getElementById("score").innerHTML=
+`🏆 Game Over<br><br>
+Score: ${score}/10<br><br>
+<button onclick="location.reload()">Play Again</button>`;
+}
+
+</script>
+
+</body>
+</html>
