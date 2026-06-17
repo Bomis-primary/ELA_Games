@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sentence Express Station PRO</title>
+<title>Sentence Express Station FIXED</title>
 
 <style>
 *{box-sizing:border-box}
@@ -78,16 +78,16 @@ z-index:20;
 position:absolute;
 bottom:40px;
 left:110%;
-width:230px;
+width:240px;
 height:130px;
 z-index:5;
-transition:left 2.5s ease-in-out;
 }
 
 #train img{
 width:100%;
 height:100%;
 object-fit:contain;
+transition:all 2.2s ease;
 }
 
 /* Tickets */
@@ -138,14 +138,14 @@ line-height:1.2;
 </div>
 
 <div id="instructions">
-🚂 Drag the correct ticket INTO the train while it is at the station!
+🚂 Drag the correct ticket INTO the train when it stops!
 </div>
 
 <div id="game">
 <div id="score">Score: 0</div>
 <div id="msg"></div>
 
-<div id="train"></div>
+<div id="train"><img id="trainImg"></div>
 
 <div class="ticket" id="ticket1"></div>
 <div class="ticket" id="ticket2"></div>
@@ -159,6 +159,7 @@ line-height:1.2;
 
 <script>
 
+/* ---------------- DATA ---------------- */
 const statements=[
 "The giraffe is a tall animal.",
 "My brother plays football every evening.",
@@ -179,57 +180,82 @@ const exclamations=[
 
 const trainTypes=["statement","question","exclamation"];
 
+/* ---------------- STATE ---------------- */
 let current=0;
 let score=0;
 let attempts=0;
-let trainState="entering"; // entering | waiting | exiting
+let trainState="idle"; // entering | waiting | exiting
 
+/* ---------------- SOUND ---------------- */
 function play(id){
 let a=document.getElementById(id);
 a.currentTime=0;
 a.play().catch(()=>{});
 }
 
-/* TRAIN ENTER */
+/* ---------------- TRAIN ENTER ---------------- */
 function startTrain(){
+
 let train=document.getElementById("train");
 trainState="entering";
+document.getElementById("msg").innerText="Train is arriving...";
 
+/* start from right */
 train.style.left="110%";
 
 setTimeout(()=>{
+
+train.style.transition="left 2.2s ease";
 train.style.left="50%";
-train.style.transform="translateX(-50%)";
 
-setTimeout(()=>{
-trainState="waiting"; // DROP ZONE ACTIVE
+},50);
+
+/* WHEN STOPPED */
+train.addEventListener("transitionend",function handler(e){
+if(e.propertyName==="left" && trainState==="entering"){
+trainState="waiting";
 document.getElementById("msg").innerText="Drop ticket into train!";
-},2500);
+train.removeEventListener("transitionend",handler);
+}
+});
 
-},100);
 }
 
-/* TRAIN EXIT */
+/* ---------------- TRAIN EXIT ---------------- */
 function exitTrain(){
+
 let train=document.getElementById("train");
 trainState="exiting";
 
 document.getElementById("msg").innerText="Train is leaving...";
 
-play("whistle"); // ONLY HERE
+play("whistle"); // ONLY ON EXIT
 
 setTimeout(()=>{
+
+train.style.transition="left 2.2s ease";
 train.style.left="-300px";
-train.style.transform="translateX(0)";
+
+},200);
+
+train.addEventListener("transitionend",function handler(e){
+if(e.propertyName==="left" && trainState==="exiting"){
+
+train.removeEventListener("transitionend",handler);
+
+/* CLAP ONLY AFTER EXIT */
+play("clap");
 
 setTimeout(()=>{
 nextLevel();
-},2500);
+},800);
 
-},500);
+}
+});
+
 }
 
-/* NEXT LEVEL */
+/* ---------------- NEXT LEVEL ---------------- */
 function nextLevel(){
 current++;
 attempts=0;
@@ -238,15 +264,15 @@ initTickets();
 startTrain();
 }
 
-/* LOAD TRAIN IMAGE */
+/* ---------------- LOAD TRAIN ---------------- */
 function loadTrain(){
 let type=trainTypes[current%3];
-document.getElementById("train").innerHTML=
-`<img src="assets/${type}train.png">`;
+document.getElementById("trainImg").src=`assets/${type}train.png`;
 }
 
-/* INIT TICKETS */
+/* ---------------- TICKETS ---------------- */
 function initTickets(){
+
 document.getElementById("msg").innerText="";
 
 let arr=[
@@ -261,34 +287,34 @@ for(let i=0;i<3;i++){
 let t=document.getElementById("ticket"+(i+1));
 t.innerText=arr[i].text;
 t.dataset.type=arr[i].type;
-t.style.top="180px";
-t.style.left=i===0?"10%":i===1?"38%":"66%";
 t.style.display="flex";
 }
 }
 
-/* CHECK ANSWER */
+/* ---------------- CHECK ---------------- */
 function check(ticket){
+
 if(trainState!=="waiting")return;
 
 let correct=trainTypes[current%3];
 
 if(ticket.dataset.type===correct){
 
-document.getElementById("msg").innerText="Correct!";
 score++;
 document.getElementById("score").innerText="Score: "+score;
-
-ticket.style.display="none";
+document.getElementById("msg").innerText="Correct!";
 
 play("correct");
 
-/* AFTER CORRECT → EXIT TRAIN */
+ticket.style.display="none";
+
+/* THEN EXIT TRAIN */
 setTimeout(()=>{
 exitTrain();
-},800);
+},700);
 
 }else{
+
 play("wrong");
 ticket.classList.add("shake");
 setTimeout(()=>ticket.classList.remove("shake"),300);
@@ -297,25 +323,30 @@ document.getElementById("msg").innerText="Try Again!";
 }
 }
 
-/* DRAG */
+/* ---------------- DRAG ---------------- */
 function drag(el){
+
 let dx=0,dy=0;
 
 el.addEventListener("pointerdown",e=>{
 if(trainState!=="waiting")return;
+
 el.setPointerCapture(e.pointerId);
+
 dx=e.clientX-el.offsetLeft;
 dy=e.clientY-el.offsetTop;
 });
 
 el.addEventListener("pointermove",e=>{
-if(e.pressure===0)return;
 if(trainState!=="waiting")return;
+if(e.pressure===0)return;
+
 el.style.left=(e.clientX-dx)+"px";
 el.style.top=(e.clientY-dy)+"px";
 });
 
 el.addEventListener("pointerup",()=>{
+
 let train=document.getElementById("train").getBoundingClientRect();
 let r=el.getBoundingClientRect();
 
