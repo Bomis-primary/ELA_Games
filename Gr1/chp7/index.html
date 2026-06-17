@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pronoun Detective - LMS Safe</title>
+<title>Pronoun Detective - ABCYA PRO</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -11,31 +11,30 @@ body{
     margin:0;
     font-family: Arial;
     overflow:hidden;
-    background: linear-gradient(to bottom,#d7f0ff,#ffffff);
+    background: linear-gradient(to bottom,#dff3ff,#ffffff);
 }
 
 /* SPLASH */
 #splash{
     position:fixed;
-    width:100%;
-    height:100%;
+    inset:0;
     background:white;
     display:flex;
     justify-content:center;
     align-items:center;
-    z-index:999;
+    z-index:9999;
 }
 
-#splash img{
-    width:220px;
-}
+#splash img{width:220px}
 
-/* GAME */
-#game{
+/* GAME WRAPPER */
+.screen{
     display:none;
     height:100vh;
     flex-direction:column;
 }
+
+.active{display:flex}
 
 /* TOP BAR */
 #top{
@@ -49,31 +48,28 @@ body{
 /* CARD */
 .card{
     width:92%;
-    max-width:520px;
+    max-width:540px;
     margin:auto;
     background:white;
     padding:18px;
-    border-radius:16px;
+    border-radius:18px;
     text-align:center;
-    box-shadow:0 6px 20px rgba(0,0,0,0.12);
+    box-shadow:0 6px 18px rgba(0,0,0,0.12);
 }
 
-/* IMAGE TILE */
-.tile{
-    height:170px;
-    border-radius:16px;
-    background-image:url("assets/a_collection_of_eight_educational_digital_illustra.png");
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
-    margin-bottom:10px;
-    border:3px solid transparent;
-    transition:0.25s;
+/* IMAGE */
+#visual{
+    width:150px;
+    height:150px;
+    object-fit:contain;
+    margin:10px auto;
+    display:block;
+    animation:pop 0.4s ease;
 }
 
-.tile:hover{
-    transform:scale(1.03);
-    border:3px solid #4fc3f7;
+@keyframes pop{
+    from{transform:scale(0.7);opacity:0}
+    to{transform:scale(1);opacity:1}
 }
 
 /* OPTIONS */
@@ -94,8 +90,17 @@ body{
     transition:0.2s;
 }
 
-.opt:active{
-    transform:scale(0.97);
+.opt:active{transform:scale(0.96)}
+
+.correct{background:#c8e6c9!important}
+.wrong{background:#ffcdd2!important}
+
+/* HINT BOX */
+#hint{
+    margin-top:8px;
+    font-size:14px;
+    color:#444;
+    min-height:20px;
 }
 
 /* RESULT */
@@ -120,13 +125,6 @@ body{
     0%{transform:translateY(-10px)}
     100%{transform:translateY(100vh)}
 }
-
-/* MOBILE FIX */
-@media(max-width:600px){
-.tile{
-    height:140px;
-}
-}
 </style>
 </head>
 
@@ -138,22 +136,23 @@ body{
 </div>
 
 <!-- GAME -->
-<div id="game">
+<div id="game" class="screen">
 
 <div id="top">
     <div>Score: <span id="score">0</span></div>
+    <div>Level: <span id="level">1</span></div>
     <div>Q: <span id="qno">1</span></div>
 </div>
 
 <div class="card">
 
-    <h2 id="q"></h2>
+    <h2 id="question"></h2>
 
-    <div id="visual" class="tile"></div>
+    <img id="visual" src="" />
 
-    <div class="grid" id="grid"></div>
+    <div id="hint"></div>
 
-    <div id="msg"></div>
+    <div class="grid" id="options"></div>
 
 </div>
 
@@ -162,7 +161,7 @@ body{
 <!-- RESULT -->
 <div id="result">
     <h1>🎉 Great Job!</h1>
-    <h2>Score: <span id="final"></span></h2>
+    <h2 id="final"></h2>
     <button onclick="location.reload()">Play Again</button>
 </div>
 
@@ -172,40 +171,48 @@ body{
 
 <script>
 
-/* =========================
-QUESTIONS (IMAGE BASED)
-========================= */
-const data=[
-{q:"___ is a doctor", img:"doc", a:"He"},
-{q:"___ is a teacher", img:"teacher", a:"She"},
-{q:"___ is a cat", img:"cat", a:"It"},
-{q:"___ are friends", img:"group", a:"They"},
-{q:"___ is a girl", img:"girl", a:"She"},
-{q:"___ is a boy", img:"boy", a:"He"}
-];
+/* =======================
+LEVEL SYSTEM (ABCYA STYLE)
+======================= */
+const levels = {
+1:[
+{q:"___ is a doctor", img:"assets/doctor.png", a:"He", hint:"Think: male doctor"},
+{q:"___ is a teacher", img:"assets/teacher.png", a:"She", hint:"Think: female teacher"}
+],
+2:[
+{q:"___ is a cat", img:"assets/cat.png", a:"It", hint:"Animals use it"},
+{q:"___ are friends", img:"assets/group.png", a:"They", hint:"More than one"}
+],
+3:[
+{q:"___ is a girl", img:"assets/girl.png", a:"She", hint:"Female child"},
+{q:"___ is a boy", img:"assets/boy.png", a:"He", hint:"Male child"}
+]
+};
 
-/* =========================
-STATE ENGINE (LMS SAFE)
-========================= */
+let level=1;
+let data=[];
 let i=0;
 let score=0;
 let attempt=0;
 let locked=false;
 
-/* =========================
-START SEQUENCE
-========================= */
-window.onload=()=>{
+/* SPLASH */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
-document.getElementById("game").style.display="flex";
-load();
+document.getElementById("game").classList.add("active");
+start();
 },5000);
-};
 
-/* =========================
-LOAD QUESTION
-========================= */
+/* START */
+function start(){
+level=1;
+data=[...levels[1],...levels[2],...levels[3]];
+i=0;
+score=0;
+load();
+}
+
+/* LOAD */
 function load(){
 
 locked=false;
@@ -218,27 +225,28 @@ return;
 
 let q=data[i];
 
-document.getElementById("q").innerText=q.q;
-document.getElementById("visual").className="tile "+q.img;
+document.getElementById("question").innerText=q.q;
+document.getElementById("visual").src=q.img;
 
+document.getElementById("hint").innerText="";
 document.getElementById("qno").innerText=i+1;
 document.getElementById("score").innerText=score;
+document.getElementById("level").innerText=getLevel(i);
 
-let box=document.getElementById("grid");
+let box=document.getElementById("options");
 box.innerHTML="";
 
-shuffle(["He","She","It","They","I"]).forEach(op=>{
+["He","She","It","They","I"].forEach(op=>{
 let b=document.createElement("button");
 b.className="opt";
 b.innerText=op;
 b.onclick=()=>check(op);
 box.appendChild(b);
 });
+
 }
 
-/* =========================
-CHECK ANSWER (SAFE LOCK)
-========================= */
+/* CHECK */
 function check(ans){
 
 if(locked) return;
@@ -248,52 +256,46 @@ let q=data[i];
 
 if(ans===q.a){
 score++;
-safe("correct");
-safe("clap");
+document.getElementById("correct").play().catch(()=>{});
+document.getElementById("clap").play().catch(()=>{});
+document.getElementById("hint").innerText="🎉 Correct!";
 confetti();
-document.getElementById("msg").innerText="Correct!";
 }
 else{
 attempt++;
-safe("wrong");
+document.getElementById("wrong").play().catch(()=>{});
+document.getElementById("hint").innerText=q.hint;
 
 if(attempt>=2){
-document.getElementById("msg").innerText="Answer: "+q.a;
+document.getElementById("hint").innerText="Answer: "+q.a;
 }
 }
 
 document.getElementById("score").innerText=score;
 
-/* NEXT QUESTION FLOW */
 setTimeout(()=>{
 i++;
 load();
 },900);
+
 }
 
-/* =========================
-END SCREEN
-========================= */
+/* LEVEL CALC */
+function getLevel(index){
+if(index<2) return 1;
+if(index<4) return 2;
+return 3;
+}
+
+/* END */
 function end(){
-document.getElementById("game").style.display="none";
+document.getElementById("game").classList.remove("active");
 document.getElementById("result").style.display="flex";
-document.getElementById("final").innerText=score+"/"+data.length;
+document.getElementById("final").innerText=`Score: ${score}/${data.length}`;
 confetti();
 }
 
-/* =========================
-SAFE AUDIO
-========================= */
-function safe(id){
-let a=document.getElementById(id);
-if(!a) return;
-a.currentTime=0;
-a.play().catch(()=>{});
-}
-
-/* =========================
-CONFETTI
-========================= */
+/* CONFETTI */
 function confetti(){
 for(let i=0;i<25;i++){
 let d=document.createElement("div");
@@ -303,17 +305,6 @@ d.style.background=["#ff5252","#ffd740","#40c4ff","#69f0ae"][Math.floor(Math.ran
 document.body.appendChild(d);
 setTimeout(()=>d.remove(),2000);
 }
-}
-
-/* =========================
-SHUFFLE ENGINE
-========================= */
-function shuffle(a){
-for(let i=a.length-1;i>0;i--){
-let j=Math.floor(Math.random()*(i+1));
-[a[i],a[j]]=[a[j],a[i]];
-}
-return a;
 }
 
 </script>
