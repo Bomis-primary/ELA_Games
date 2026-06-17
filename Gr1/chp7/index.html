@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pronoun Detective - Image Mode</title>
+<title>Pronoun Detective - LMS Safe</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -26,7 +26,9 @@ body{
     z-index:999;
 }
 
-#splash img{width:220px}
+#splash img{
+    width:220px;
+}
 
 /* GAME */
 #game{
@@ -35,6 +37,7 @@ body{
     flex-direction:column;
 }
 
+/* TOP BAR */
 #top{
     display:flex;
     justify-content:space-between;
@@ -43,7 +46,7 @@ body{
     font-weight:bold;
 }
 
-/* QUESTION */
+/* CARD */
 .card{
     width:92%;
     max-width:520px;
@@ -55,55 +58,30 @@ body{
     box-shadow:0 6px 20px rgba(0,0,0,0.12);
 }
 
-/* IMAGE GRID */
-.grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-    margin-top:15px;
-}
-
-/* IMAGE TILE (CROPPED FROM ONE PACK) */
+/* IMAGE TILE */
 .tile{
-    height:140px;
-    border-radius:14px;
+    height:170px;
+    border-radius:16px;
     background-image:url("assets/a_collection_of_eight_educational_digital_illustra.png");
-    background-size:400px 400px;
-    cursor:pointer;
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    margin-bottom:10px;
     border:3px solid transparent;
-    transition:0.2s;
+    transition:0.25s;
 }
 
 .tile:hover{
     transform:scale(1.03);
+    border:3px solid #4fc3f7;
 }
 
-/* CROPPED POSITIONS (FROM IMAGE GRID) */
-
-/* Doctor */
-.doc{ background-position:0px 0px; }
-
-/* Teacher */
-.teacher{ background-position:-200px 0px; }
-
-/* Cat */
-.cat{ background-position:-400px 0px; }
-
-/* Kids group */
-.group{ background-position:0px -200px; }
-
-/* Girl */
-.girl{ background-position:-200px -200px; }
-
-/* Boy */
-.boy{ background-position:-400px -200px; }
-
 /* OPTIONS */
-.options{
+.grid{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:10px;
-    margin-top:15px;
+    margin-top:10px;
 }
 
 .opt{
@@ -112,11 +90,12 @@ body{
     border-radius:10px;
     background:#e3f2fd;
     font-size:18px;
+    cursor:pointer;
+    transition:0.2s;
 }
 
-#msg{
-    margin-top:10px;
-    font-weight:bold;
+.opt:active{
+    transform:scale(0.97);
 }
 
 /* RESULT */
@@ -142,6 +121,12 @@ body{
     100%{transform:translateY(100vh)}
 }
 
+/* MOBILE FIX */
+@media(max-width:600px){
+.tile{
+    height:140px;
+}
+}
 </style>
 </head>
 
@@ -164,8 +149,7 @@ body{
 
     <h2 id="q"></h2>
 
-    <!-- IMAGE VISUAL -->
-    <div id="visual" class="tile doc"></div>
+    <div id="visual" class="tile"></div>
 
     <div class="grid" id="grid"></div>
 
@@ -188,7 +172,9 @@ body{
 
 <script>
 
-/* QUESTIONS */
+/* =========================
+QUESTIONS (IMAGE BASED)
+========================= */
 const data=[
 {q:"___ is a doctor", img:"doc", a:"He"},
 {q:"___ is a teacher", img:"teacher", a:"She"},
@@ -198,10 +184,17 @@ const data=[
 {q:"___ is a boy", img:"boy", a:"He"}
 ];
 
+/* =========================
+STATE ENGINE (LMS SAFE)
+========================= */
 let i=0;
 let score=0;
 let attempt=0;
+let locked=false;
 
+/* =========================
+START SEQUENCE
+========================= */
 window.onload=()=>{
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
@@ -210,8 +203,12 @@ load();
 },5000);
 };
 
+/* =========================
+LOAD QUESTION
+========================= */
 function load(){
 
+locked=false;
 attempt=0;
 
 if(i>=data.length){
@@ -230,19 +227,22 @@ document.getElementById("score").innerText=score;
 let box=document.getElementById("grid");
 box.innerHTML="";
 
-["He","She","It","They","I"].forEach(op=>{
-
+shuffle(["He","She","It","They","I"]).forEach(op=>{
 let b=document.createElement("button");
 b.className="opt";
 b.innerText=op;
 b.onclick=()=>check(op);
 box.appendChild(b);
-
 });
-
 }
 
+/* =========================
+CHECK ANSWER (SAFE LOCK)
+========================= */
 function check(ans){
+
+if(locked) return;
+locked=true;
 
 let q=data[i];
 
@@ -252,39 +252,48 @@ safe("correct");
 safe("clap");
 confetti();
 document.getElementById("msg").innerText="Correct!";
-
-setTimeout(()=>{
-i++;
-load();
-},900);
-
-}else{
-
+}
+else{
 attempt++;
 safe("wrong");
 
 if(attempt>=2){
 document.getElementById("msg").innerText="Answer: "+q.a;
-setTimeout(()=>{i++;load();},900);
 }
 }
 
 document.getElementById("score").innerText=score;
+
+/* NEXT QUESTION FLOW */
+setTimeout(()=>{
+i++;
+load();
+},900);
 }
 
+/* =========================
+END SCREEN
+========================= */
 function end(){
 document.getElementById("game").style.display="none";
 document.getElementById("result").style.display="flex";
-document.getElementById("final").innerText=score;
+document.getElementById("final").innerText=score+"/"+data.length;
 confetti();
 }
 
+/* =========================
+SAFE AUDIO
+========================= */
 function safe(id){
 let a=document.getElementById(id);
+if(!a) return;
 a.currentTime=0;
 a.play().catch(()=>{});
 }
 
+/* =========================
+CONFETTI
+========================= */
 function confetti(){
 for(let i=0;i<25;i++){
 let d=document.createElement("div");
@@ -294,6 +303,17 @@ d.style.background=["#ff5252","#ffd740","#40c4ff","#69f0ae"][Math.floor(Math.ran
 document.body.appendChild(d);
 setTimeout(()=>d.remove(),2000);
 }
+}
+
+/* =========================
+SHUFFLE ENGINE
+========================= */
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+return a;
 }
 
 </script>
