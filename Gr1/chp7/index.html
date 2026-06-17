@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pronoun Detective</title>
+<title>Pronoun Detective - Classroom Edition</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -10,15 +10,27 @@
 body{
     margin:0;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg,#e3f2fd,#fff3e0);
     overflow:hidden;
+
+    /* CLASSROOM BACKGROUND (SAFE, NO IMAGE DEPENDENCY) */
+    background: linear-gradient(to bottom, #cfe9ff 0%, #ffffff 100%);
+}
+
+/* floating classroom pattern */
+body::before{
+    content:"";
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:
+        radial-gradient(#00000005 2px, transparent 3px);
+    background-size:40px 40px;
+    pointer-events:none;
 }
 
 /* SPLASH */
 #splash{
     position:fixed;
-    top:0;
-    left:0;
     width:100%;
     height:100%;
     background:white;
@@ -30,87 +42,114 @@ body{
 
 #splash img{
     width:220px;
-    max-width:70%;
 }
 
-/* GAME WRAPPER */
-.screen{
+/* HOME */
+#home{
     display:none;
     height:100vh;
     flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+.btn{
+    padding:16px 28px;
+    margin:10px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    background:#4caf50;
+    color:white;
 }
 
 /* TOP BAR */
-#topBar{
+#top{
     display:flex;
     justify-content:space-between;
-    padding:10px;
+    padding:12px;
     background:#ffffffcc;
     font-weight:bold;
 }
 
-#questionBox{
-    flex:1;
-    display:flex;
+/* GAME AREA */
+#game{
+    display:none;
+    height:100vh;
     flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    padding:20px;
 }
 
-/* CARD */
+/* QUESTION CARD */
 .card{
     background:white;
-    padding:20px;
-    border-radius:15px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.1);
-    width:90%;
-    max-width:500px;
+    width:92%;
+    max-width:520px;
+    margin:auto;
+    padding:22px;
+    border-radius:18px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.12);
+    text-align:center;
 }
 
+/* VISUAL TILE (NO EMOJI) */
+.visual{
+    width:140px;
+    height:140px;
+    margin:10px auto;
+    border-radius:20px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:28px;
+    font-weight:bold;
+    color:#333;
+    background:linear-gradient(135deg,#fff3e0,#e1f5fe);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+
+/* OPTIONS */
 .options{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:10px;
-    margin-top:20px;
+    gap:12px;
+    margin-top:15px;
 }
 
-.optionBtn{
-    padding:15px;
+.opt{
+    padding:16px;
     border:none;
-    border-radius:10px;
-    font-size:18px;
-    background:#e1f5fe;
+    border-radius:12px;
+    background:#e3f2fd;
+    font-size:20px;
     cursor:pointer;
+    transition:0.2s;
 }
 
-.optionBtn:active{
-    transform:scale(0.97);
+.opt:active{
+    transform:scale(0.96);
+}
+
+.opt.correct{
+    background:#c8e6c9 !important;
+}
+
+.opt.wrong{
+    background:#ffcdd2 !important;
 }
 
 #msg{
-    margin-top:10px;
+    margin-top:12px;
     font-weight:bold;
 }
 
-/* RESULT SCREEN */
-#resultScreen{
+/* RESULT */
+#result{
     display:none;
     height:100vh;
     justify-content:center;
     align-items:center;
     flex-direction:column;
-    text-align:center;
-}
-
-button.restart{
-    padding:12px 20px;
-    font-size:18px;
-    border:none;
-    border-radius:10px;
-    background:#4caf50;
-    color:white;
 }
 
 /* CONFETTI */
@@ -118,14 +157,13 @@ button.restart{
     position:fixed;
     width:8px;
     height:8px;
-    background:red;
     top:0;
-    animation: fall 2s linear infinite;
+    animation:fall 2s linear;
 }
 
 @keyframes fall{
-    0%{transform:translateY(-10px) rotate(0);}
-    100%{transform:translateY(100vh) rotate(360deg);}
+    0%{transform:translateY(-10px);}
+    100%{transform:translateY(100vh);}
 }
 
 </style>
@@ -135,179 +173,150 @@ button.restart{
 
 <!-- SPLASH -->
 <div id="splash">
-    <img src="assets/innovine-logo.png" alt="logo">
+    <img src="assets/innovine-logo.png">
+</div>
+
+<!-- HOME -->
+<div id="home">
+    <h1>🧠 Pronoun Detective</h1>
+    <button class="btn" onclick="start()">Start Game</button>
 </div>
 
 <!-- GAME -->
-<div class="screen" id="gameScreen">
+<div id="game">
 
-    <div id="topBar">
-        <div>Score: <span id="score">0</span></div>
-        <div>Question: <span id="qno">1</span>/12</div>
-    </div>
+<div id="top">
+    <div>Score: <span id="score">0</span></div>
+    <div>Q: <span id="qno">1</span></div>
+</div>
 
-    <div id="questionBox">
-        <div class="card">
-            <h2 id="questionText"></h2>
-            <div id="visual">🧠</div>
+<div class="card">
+    <h2 id="q"></h2>
 
-            <div class="options" id="options"></div>
-            <div id="msg"></div>
-        </div>
-    </div>
+    <!-- VISUAL CARD (NO EMOJI DEPENDENCY) -->
+    <div class="visual" id="visual"></div>
+
+    <div class="options" id="options"></div>
+    <div id="msg"></div>
+</div>
+
 </div>
 
 <!-- RESULT -->
-<div id="resultScreen">
-    <h1>🎉 Great Job!</h1>
-    <h2>Your Score: <span id="finalScore"></span>/12</h2>
-    <button class="restart" onclick="restartGame()">Play Again</button>
+<div id="result">
+    <h1>🎉 Good Job!</h1>
+    <h2>Your Score: <span id="final"></span></h2>
+    <button class="btn" onclick="location.reload()">Play Again</button>
 </div>
 
-<!-- AUDIO -->
-<audio id="correctSound" src="assets/correct.mp3"></audio>
-<audio id="wrongSound" src="assets/wrong.mp3"></audio>
-<audio id="clapSound" src="assets/clapping.mp3"></audio>
+<audio id="correct" src="assets/correct.mp3"></audio>
+<audio id="wrong" src="assets/wrong.mp3"></audio>
+<audio id="clap" src="assets/clapping.mp3"></audio>
 
 <script>
 
-/* ---------------------------
-QUESTIONS (NO REPETITION)
-----------------------------*/
-const questions = [
-{q:"___ is a doctor.", options:["He","She","They","It"], answer:"He", icon:"👨‍⚕️"},
-{q:"___ is a teacher.", options:["He","She","They","It"], answer:"She", icon:"👩‍🏫"},
-{q:"___ is a cat.", options:["He","She","It","They"], answer:"It", icon:"🐱"},
-{q:"___ are my friends.", options:["He","She","They","It"], answer:"They", icon:"👬"},
-{q:"___ am reading a book.", options:["I","He","She","It"], answer:"I", icon:"📖"},
-{q:"___ are going to school.", options:["We","He","She","It"], answer:"We", icon:"🏫"},
-{q:"___ is a ball.", options:["He","She","It","They"], answer:"It", icon:"⚽"},
-{q:"___ is my brother.", options:["He","She","They","It"], answer:"He", icon:"👦"},
-{q:"___ are playing.", options:["We","They","He","It"], answer:"They", icon:"🎮"},
-{q:"___ are happy children.", options:["We","They","He","It"], answer:"They", icon:"😊"},
-{q:"___ is a dog.", options:["He","She","It","They"], answer:"It", icon:"🐶"},
-{q:"___ are in the park.", options:["We","They","He","It"], answer:"They", icon:"🌳"}
+/* SAFE QUESTION BANK (NO REPEATS) */
+let data = [
+{q:"___ is a doctor", a:"He", icon:"Doctor"},
+{q:"___ is a teacher", a:"She", icon:"Teacher"},
+{q:"___ is a cat", a:"It", icon:"Animal"},
+{q:"___ are friends", a:"They", icon:"Group"},
+{q:"___ am reading", a:"I", icon:"Me"},
+{q:"___ is my brother", a:"He", icon:"Boy"},
+{q:"___ is my sister", a:"She", icon:"Girl"}
 ];
 
-let current = 0;
-let score = 0;
-let attempts = 0;
+let i=0;
+let score=0;
+let attempt=0;
 
-let shuffled = [];
-
-/* ---------------------------
-INIT
-----------------------------*/
 window.onload = () => {
     setTimeout(()=>{
         document.getElementById("splash").style.display="none";
-        document.getElementById("gameScreen").style.display="flex";
-        startGame();
+        document.getElementById("home").style.display="flex";
     },5000);
 };
 
-function startGame(){
-    shuffled = questions.sort(()=>Math.random()-0.5);
-    current = 0;
-    score = 0;
-    loadQ();
+function start(){
+    document.getElementById("home").style.display="none";
+    document.getElementById("game").style.display="flex";
+    load();
 }
 
-function loadQ(){
-    attempts = 0;
-    document.getElementById("msg").innerText="";
-    
-    if(current >= shuffled.length){
-        endGame();
+function load(){
+    attempt=0;
+
+    if(i>=data.length){
+        end();
         return;
     }
 
-    let q = shuffled[current];
+    let q=data[i];
 
-    document.getElementById("questionText").innerText = q.q;
-    document.getElementById("visual").innerText = q.icon;
+    document.getElementById("q").innerText=q.q;
+    document.getElementById("visual").innerText=q.icon;
+    document.getElementById("qno").innerText=i+1;
+    document.getElementById("score").innerText=score;
 
-    document.getElementById("qno").innerText = current+1;
-    document.getElementById("score").innerText = score;
+    let box=document.getElementById("options");
+    box.innerHTML="";
 
-    let optDiv = document.getElementById("options");
-    optDiv.innerHTML="";
-
-    q.options.forEach(opt=>{
-        let btn = document.createElement("button");
-        btn.className="optionBtn";
-        btn.innerText=opt;
-        btn.onclick=()=>check(opt);
-        optDiv.appendChild(btn);
+    ["He","She","It","They","I"].forEach(op=>{
+        let b=document.createElement("button");
+        b.className="opt";
+        b.innerText=op;
+        b.onclick=()=>check(b,op);
+        box.appendChild(b);
     });
 }
 
-/* ---------------------------
-ANSWER CHECK
-----------------------------*/
-function check(opt){
-    let q = shuffled[current];
+function check(btn,ans){
+    let q=data[i];
 
-    if(opt === q.answer){
+    if(ans===q.a){
+        btn.classList.add("correct");
         score++;
-        document.getElementById("msg").innerText="🎉 Correct!";
-        document.getElementById("correctSound").play();
-        document.getElementById("clapSound").play();
+        safe("correct");
+        safe("clap");
         confetti();
 
-        setTimeout(()=>{
-            current++;
-            loadQ();
-        },1000);
+        setTimeout(()=>{ i++; load(); },900);
     }
     else{
-        attempts++;
-        document.getElementById("wrongSound").play();
+        attempt++;
+        btn.classList.add("wrong");
+        safe("wrong");
 
-        if(attempts < 2){
-            document.getElementById("msg").innerText="Try again!";
-        } else {
-            document.getElementById("msg").innerText="Answer: " + q.answer;
-            setTimeout(()=>{
-                current++;
-                loadQ();
-            },1200);
+        if(attempt>=2){
+            document.getElementById("msg").innerText="Answer: "+q.a;
+            setTimeout(()=>{ i++; load(); },900);
         }
     }
 
-    document.getElementById("score").innerText = score;
+    document.getElementById("score").innerText=score;
 }
 
-/* ---------------------------
-END GAME
-----------------------------*/
-function endGame(){
-    document.getElementById("gameScreen").style.display="none";
-    document.getElementById("resultScreen").style.display="flex";
-    document.getElementById("finalScore").innerText = score;
+function end(){
+    document.getElementById("game").style.display="none";
+    document.getElementById("result").style.display="flex";
+    document.getElementById("final").innerText=score;
     confetti();
 }
 
-/* ---------------------------
-RESTART
-----------------------------*/
-function restartGame(){
-    document.getElementById("resultScreen").style.display="none";
-    document.getElementById("gameScreen").style.display="flex";
-    startGame();
+function safe(id){
+    let a=document.getElementById(id);
+    a.currentTime=0;
+    a.play().catch(()=>{});
 }
 
-/* ---------------------------
-CONFETTI
-----------------------------*/
 function confetti(){
-    for(let i=0;i<30;i++){
-        let c = document.createElement("div");
-        c.className="confetti";
-        c.style.left = Math.random()*100 + "vw";
-        c.style.background = ["#ff5252","#ffeb3b","#40c4ff","#69f0ae"][Math.floor(Math.random()*4)];
-        document.body.appendChild(c);
-        setTimeout(()=>c.remove(),2000);
+    for(let i=0;i<20;i++){
+        let d=document.createElement("div");
+        d.className="confetti";
+        d.style.left=Math.random()*100+"vw";
+        d.style.background=["#ff5252","#ffd740","#40c4ff","#69f0ae"][Math.floor(Math.random()*4)];
+        document.body.appendChild(d);
+        setTimeout(()=>d.remove(),2000);
     }
 }
 
