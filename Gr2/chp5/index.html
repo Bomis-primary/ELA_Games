@@ -73,11 +73,11 @@ font-weight:bold;
 z-index:20;
 }
 
-/* TRAIN */
+/* TRAIN (RIGHT ➜ LEFT) */
 #train{
 position:absolute;
 bottom:40px;
-left:-300px;
+left:110%;              /* START FROM RIGHT */
 width:230px;
 height:130px;
 z-index:5;
@@ -89,14 +89,14 @@ height:100%;
 object-fit:contain;
 }
 
-/* Move LEFT → RIGHT */
+/* MOVE RIGHT → LEFT */
 .move{
 animation:moveTrain 4s linear forwards;
 }
 
 @keyframes moveTrain{
-0%{left:-300px;}
-100%{left:110%;}
+0%{left:110%;}
+100%{left:-300px;}
 }
 
 /* Tickets */
@@ -120,7 +120,6 @@ user-select:none;
 touch-action:none;
 z-index:10;
 
-/* FIX TEXT OVERFLOW */
 word-wrap:break-word;
 overflow-wrap:break-word;
 white-space:normal;
@@ -131,17 +130,12 @@ line-height:1.2;
 #ticket2{top:180px;left:38%;}
 #ticket3{top:180px;left:66%;}
 
-/* Shake */
 .shake{animation:shake .3s;}
+
 @keyframes shake{
 0%{transform:translateX(-6px);}
 50%{transform:translateX(6px);}
 100%{transform:translateX(0);}
-}
-
-/* Responsive */
-@media(max-width:900px){
-.ticket{width:30%;font-size:14px}
 }
 </style>
 </head>
@@ -167,7 +161,6 @@ line-height:1.2;
 <div class="ticket" id="ticket3"></div>
 </div>
 
-<!-- AUDIO -->
 <audio id="correct" src="assets/correct.mp3"></audio>
 <audio id="wrong" src="assets/wrong.mp3"></audio>
 <audio id="whistle" src="assets/trainwhistle.mp3"></audio>
@@ -205,14 +198,41 @@ let current=0;
 let score=0;
 let attempts=0;
 
-/* SOUND HELPERS */
 function play(id){
 let a=document.getElementById(id);
 a.currentTime=0;
 a.play().catch(()=>{});
 }
 
-/* INIT TICKETS */
+/* TRAIN ENTERS RIGHT → EXITS LEFT */
+function startTrain(){
+let train=document.getElementById("train");
+train.className="move";
+
+/* WHISTLE DURING MOVEMENT */
+play("whistle");
+
+setTimeout(()=>{
+train.className="";
+train.style.left="110%";   // reset RIGHT side
+nextLevel();
+},4000);
+}
+
+function nextLevel(){
+current++;
+attempts=0;
+loadTrain();
+initTickets();
+startTrain();
+}
+
+function loadTrain(){
+let type=trainTypes[current%3];
+document.getElementById("train").innerHTML=
+`<img src="assets/${type}train.png">`;
+}
+
 function initTickets(){
 let arr=[
 {type:"statement",text:statements[Math.floor(Math.random()*statements.length)]},
@@ -229,82 +249,6 @@ t.dataset.type=arr[i].type;
 t.style.top="180px";
 t.style.left=i===0?"10%":i===1?"38%":"66%";
 t.style.display="flex";
-}
-}
-
-/* TRAIN CONTROL */
-function startTrain(){
-let train=document.getElementById("train");
-train.className="move";
-
-/* WHISTLE WHILE MOVING */
-play("whistle");
-
-/* LOOP RESET */
-setTimeout(()=>{
-train.className="";
-train.style.left="-300px";
-nextLevel();
-},4000);
-}
-
-/* NEXT LEVEL */
-function nextLevel(){
-current++;
-attempts=0;
-loadTrain();
-initTickets();
-startTrain();
-}
-
-/* LOAD TRAIN IMAGE */
-function loadTrain(){
-let type=trainTypes[current%3];
-document.getElementById("train").innerHTML=
-`<img src="assets/${type}train.png">`;
-}
-
-/* RESET POSITION */
-function resetTicket(t,id){
-t.style.top="180px";
-t.style.left=id==="ticket1"?"10%":id==="ticket2"?"38%":"66%";
-}
-
-/* CHECK */
-function check(ticket){
-let correct=trainTypes[current%3];
-
-if(ticket.dataset.type===correct){
-
-play("correct");
-play("whistle"); // correct answer sound
-
-score++;
-document.getElementById("score").innerText="Score: "+score;
-document.getElementById("msg").innerText="Correct!";
-
-ticket.style.display="none";
-
-setTimeout(()=>{
-/* CLAP ONLY AT END */
-play("clap");
-},3500);
-
-}else{
-
-play("wrong");
-attempts++;
-
-ticket.classList.add("shake");
-setTimeout(()=>ticket.classList.remove("shake"),300);
-
-if(attempts>=2){
-document.getElementById("msg").innerText="Correct Answer: "+correct.toUpperCase();
-setTimeout(()=>nextLevel(),1500);
-}else{
-document.getElementById("msg").innerText="Try Again!";
-resetTicket(ticket,ticket.id);
-}
 }
 }
 
@@ -333,10 +277,32 @@ let cy=r.top+r.height/2;
 
 if(cx>train.left && cx<train.right && cy>train.top && cy<train.bottom){
 check(el);
-}else{
-resetTicket(el,el.id);
 }
 });
+}
+
+function check(ticket){
+let correct=trainTypes[current%3];
+
+if(ticket.dataset.type===correct){
+play("correct");
+play("whistle");
+
+score++;
+document.getElementById("score").innerText="Score: "+score;
+document.getElementById("msg").innerText="Correct!";
+
+ticket.style.display="none";
+
+}else{
+play("wrong");
+attempts++;
+
+ticket.classList.add("shake");
+setTimeout(()=>ticket.classList.remove("shake"),300);
+
+document.getElementById("msg").innerText="Try Again!";
+}
 }
 
 /* INIT */
