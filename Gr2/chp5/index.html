@@ -1,1 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sentence Express Station - Pro</title>
 
+<style>
+body{
+margin:0;
+font-family:Arial;
+overflow:hidden;
+background:black;
+}
+
+/* SPLASH */
+#splash{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:white;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+/* INSTRUCTIONS */
+#instructions{
+display:none;
+position:absolute;
+top:0;
+width:100%;
+background:#fff3cd;
+padding:12px;
+font-weight:bold;
+text-align:center;
+z-index:10;
+}
+
+/* GAME */
+#game{
+display:none;
+width:100%;
+height:100vh;
+background:url('railwaystationbackground.png') center/cover no-repeat;
+position:relative;
+}
+
+/* SCORE */
+#score{
+position:absolute;
+top:60px;
+left:10px;
+background:white;
+padding:10px;
+border-radius:10px;
+font-weight:bold;
+}
+
+/* TICKET */
+#ticket{
+position:absolute;
+bottom:42%;
+left:50%;
+transform:translateX(-50%);
+width:230px;
+min-height:120px;
+background:url('trainticket.png') center/cover no-repeat;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+padding:15px;
+font-weight:bold;
+cursor:grab;
+transition:0.3s;
+}
+
+/* FLIP ANIMATION */
+.flip{
+animation:flipIn 0.4s ease;
+}
+
+@keyframes flipIn{
+from{transform:translateX(-50%) rotateY(90deg);}
+to{transform:translateX(-50%) rotateY(0);}
+}
+
+/* TRAINS */
+.train{
+position:absolute;
+bottom:40px;
+width:210px;
+transition:0.4s;
+}
+
+.train img{width:100%;}
+
+#statementTrain{left:5%;}
+#questionTrain{left:40%;}
+#exclamationTrain{left:75%;}
+
+/* FEEDBACK */
+#msg{
+position:absolute;
+top:120px;
+width:100%;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+color:black;
+}
+
+/* CORRECT ANIMATION */
+.depart{
+animation:depart 0.8s ease;
+}
+
+@keyframes depart{
+0%{transform:translateY(0);}
+50%{transform:translateY(-20px);}
+100%{transform:translateX(200px);}
+}
+
+/* SHAKE */
+.shake{
+animation:shake 0.3s;
+}
+
+@keyframes shake{
+0%{transform:translateX(-5px);}
+50%{transform:translateX(5px);}
+100%{transform:translateX(0);}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+<img src="innovinelogo.png" style="width:300px;">
+</div>
+
+<!-- INSTRUCTIONS -->
+<div id="instructions">
+🚂 Drag or tap the sentence ticket into the correct train!
+</div>
+
+<!-- GAME -->
+<div id="game">
+
+<div id="score">Score: 0</div>
+<div id="msg"></div>
+
+<div id="ticket"></div>
+
+<div class="train" id="statementTrain">
+<img src="statementtrain.jpg">
+</div>
+
+<div class="train" id="questionTrain">
+<img src="questiontrain.jpg">
+</div>
+
+<div class="train" id="exclamationTrain">
+<img src="exclamationtrain.jpg">
+</div>
+
+</div>
+
+<audio id="correct" src="correct.mp3"></audio>
+<audio id="wrong" src="wrong.mp3"></audio>
+<audio id="whistle" src="trainwhistle.mp3"></audio>
+<audio id="clap" src="clapping.mp3"></audio>
+
+<script>
+
+let score=0;
+let index=0;
+let attempts=0;
+
+const data=[
+{type:"statement", text:"The giraffee is a tall animal."},
+{type:"statement", text:"My brother plays football every evening."},
+{type:"statement", text:"We visited the zoo yesterday."},
+{type:"statement", text:"The flowers are blooming in the garden."},
+{type:"statement", text:"I enjoy reading storybooks."},
+
+{type:"question", text:"When is your birthday?"},
+{type:"question", text:"Why is the sky blue?"},
+{type:"question", text:"Can you help me?"},
+{type:"question", text:"Why are you laughing?"},
+{type:"question", text:"Did you finish your homework?"},
+
+{type:"exclamation", text:"What a beautiful rainbow!"},
+{type:"exclamation", text:"Hurray! We won the match!"},
+{type:"exclamation", text:"Wow! This cake is delicious!"},
+{type:"exclamation", text:"Oh no! I lost my pencil!"},
+{type:"exclamation", text:"What an amazing performance!"}
+];
+
+const ticket=document.getElementById("ticket");
+
+function load(){
+attempts=0;
+ticket.classList.add("flip");
+
+setTimeout(()=>{
+ticket.classList.remove("flip");
+let q=data[index%data.length];
+ticket.innerText=q.text;
+ticket.dataset.type=q.type;
+document.getElementById("msg").innerText="";
+},200);
+}
+
+/* CHECK */
+function check(type){
+
+if(type===ticket.dataset.type){
+
+document.getElementById("correct").play();
+document.getElementById("whistle").play();
+document.getElementById("clap").play();
+
+score++;
+document.getElementById("score").innerText="Score: "+score;
+
+document.getElementById(type+"Train").classList.add("depart");
+
+setTimeout(()=>{
+document.getElementById(type+"Train").classList.remove("depart");
+},800);
+
+index++;
+setTimeout(load,900);
+
+}else{
+
+document.getElementById("wrong").play();
+document.getElementById(type+"Train").classList.add("shake");
+
+setTimeout(()=>{
+document.getElementById(type+"Train").classList.remove("shake");
+},400);
+
+attempts++;
+
+if(attempts<2){
+document.getElementById("msg").innerText="Try Again!";
+}else{
+document.getElementById("msg").innerText="Correct Answer: "+ticket.dataset.type.toUpperCase();
+index++;
+setTimeout(load,1200);
+}
+}
+}
+
+/* TAP */
+document.getElementById("statementTrain").onclick=()=>check("statement");
+document.getElementById("questionTrain").onclick=()=>check("question");
+document.getElementById("exclamationTrain").onclick=()=>check("exclamation");
+
+/* DRAG */
+ticket.addEventListener("mousedown",dragStart);
+ticket.addEventListener("touchstart",dragStart);
+
+function dragStart(e){
+
+function move(ev){
+let x=ev.touches?ev.touches[0].clientX:ev.clientX;
+let y=ev.touches?ev.touches[0].clientY:ev.clientY;
+ticket.style.left=x-110+"px";
+ticket.style.top=y-60+"px";
+}
+
+function stop(){
+document.removeEventListener("mousemove",move);
+document.removeEventListener("mouseup",stop);
+document.removeEventListener("touchmove",move);
+document.removeEventListener("touchend",stop);
+}
+
+document.addEventListener("mousemove",move);
+document.addEventListener("mouseup",stop);
+document.addEventListener("touchmove",move);
+document.addEventListener("touchend",stop);
+}
+
+/* START FLOW */
+setTimeout(()=>{
+document.getElementById("splash").style.display="none";
+document.getElementById("instructions").style.display="block";
+document.getElementById("game").style.display="block";
+load();
+},5000);
+
+</script>
+
+</body>
+</html>
