@@ -1,4 +1,3 @@
-<!-- Save as index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +7,7 @@
 
 <style>
 *{box-sizing:border-box}
+
 body{
 margin:0;
 font-family:Arial, sans-serif;
@@ -24,7 +24,11 @@ justify-content:center;
 align-items:center;
 z-index:999;
 }
-#splash img{width:320px;max-width:80%;}
+
+#splash img{
+width:320px;
+max-width:80%;
+}
 
 #instructions{
 display:none;
@@ -36,7 +40,7 @@ padding:12px;
 font-size:22px;
 font-weight:bold;
 text-align:center;
-z-index:10;
+z-index:20;
 color:#111;
 }
 
@@ -44,7 +48,7 @@ color:#111;
 display:none;
 width:100%;
 height:100vh;
-background:url('assets/railwaystationbackground.png') center/cover no-repeat;
+background:url("assets/railwaystationbackground.png") center center/cover no-repeat;
 position:relative;
 }
 
@@ -57,42 +61,57 @@ padding:10px 16px;
 border-radius:12px;
 font-size:20px;
 font-weight:bold;
-z-index:10;
+z-index:20;
 }
 
 #msg{
 position:absolute;
-top:110px;
+top:108px;
 width:100%;
 text-align:center;
 font-size:28px;
 font-weight:bold;
 color:#000;
-z-index:10;
+z-index:20;
 }
 
 #train{
 position:absolute;
-bottom:45px;
-left:50%;
-transform:translateX(-50%);
-width:300px;
-height:170px;
-z-index:4;
+bottom:35px;
+left:-260px;
+width:240px;
+height:130px;
+z-index:5;
+animation:trainEnter 3s ease forwards;
 }
+
 #train img{
 width:100%;
 height:100%;
 object-fit:contain;
 }
 
+@keyframes trainEnter{
+from{left:-260px;}
+to{left:50%;transform:translateX(-50%);}
+}
+
+.depart{
+animation:trainDepart 1.2s ease forwards !important;
+}
+
+@keyframes trainDepart{
+from{left:50%;transform:translateX(-50%);}
+to{left:110%;transform:translateX(0);}
+}
+
 .ticket{
 position:absolute;
 width:280px;
-min-height:155px;
+min-height:150px;
 background:
 linear-gradient(rgba(255,255,255,0.45),rgba(255,255,255,0.45)),
-url('assets/trainticket.png') center/cover no-repeat;
+url("assets/trainticket.png") center/cover no-repeat;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -103,7 +122,7 @@ font-weight:bold;
 color:#000;
 cursor:grab;
 border-radius:14px;
-z-index:8;
+z-index:15;
 box-shadow:0 8px 18px rgba(0,0,0,0.25);
 touch-action:none;
 user-select:none;
@@ -113,32 +132,32 @@ user-select:none;
 #ticket2{top:185px;left:38%;}
 #ticket3{top:185px;left:68%;}
 
-.shake{animation:shake .3s;}
+.shake{
+animation:shake .3s;
+}
+
 @keyframes shake{
 0%{transform:translateX(-6px);}
 50%{transform:translateX(6px);}
 100%{transform:translateX(0);}
 }
 
-.depart{
-animation:depart .9s ease forwards;
-}
-@keyframes depart{
-0%{left:50%;}
-100%{left:120%;}
-}
-
 @media(max-width:900px){
 .ticket{
 width:30%;
-min-height:135px;
-font-size:18px;
+min-height:130px;
+font-size:17px;
 padding:10px;
 }
 #ticket1{left:3%;}
 #ticket2{left:35%;}
 #ticket3{left:67%;}
-#train{width:260px;}
+#train{
+width:210px;
+height:115px;
+bottom:30px;
+}
+#instructions{font-size:18px;}
 }
 </style>
 </head>
@@ -195,6 +214,7 @@ const exclamations=[
 ];
 
 const trainTypes=["statement","question","exclamation"];
+
 let currentTrainIndex=0;
 let score=0;
 let attempts=0;
@@ -210,9 +230,9 @@ return arr[Math.floor(Math.random()*arr.length)];
 }
 
 function playSound(id){
-const audio=document.getElementById(id);
-audio.currentTime=0;
-audio.play().catch(()=>{});
+const a=document.getElementById(id);
+a.currentTime=0;
+a.play().catch(()=>{});
 }
 
 function initTickets(){
@@ -227,12 +247,13 @@ let arr=[
 arr.sort(()=>Math.random()-0.5);
 
 for(let i=0;i<3;i++){
-const t=document.getElementById("ticket"+(i+1));
+let t=document.getElementById("ticket"+(i+1));
 t.innerText=arr[i].text;
 t.dataset.type=arr[i].type;
 t.style.top=originalPositions[i].top;
 t.style.left=originalPositions[i].left;
 t.style.display="flex";
+t.style.pointerEvents="auto";
 }
 }
 
@@ -240,9 +261,20 @@ function loadTrain(){
 attempts=0;
 const type=trainTypes[currentTrainIndex%3];
 const train=document.getElementById("train");
-train.classList.remove("depart");
-train.style.left="50%";
+
+train.className="";
+train.style.left="-260px";
+train.style.transform="none";
 train.innerHTML=`<img src="assets/${type}train.png">`;
+
+void train.offsetWidth;
+train.style.animation="trainEnter 3s ease forwards";
+}
+
+function resetTicket(ticket){
+const index=Number(ticket.id.replace("ticket",""))-1;
+ticket.style.top=originalPositions[index].top;
+ticket.style.left=originalPositions[index].left;
 }
 
 function checkAnswer(ticket){
@@ -259,17 +291,21 @@ document.getElementById("score").innerText="Score: "+score;
 document.getElementById("msg").innerText="Correct!";
 
 ticket.style.display="none";
-document.getElementById("train").classList.add("depart");
+
+const train=document.getElementById("train");
+train.style.animation="";
+train.classList.add("depart");
 
 setTimeout(()=>{
 currentTrainIndex++;
 loadTrain();
 initTickets();
-},900);
+},1200);
 
 }else{
 playSound("wrong");
 attempts++;
+
 ticket.classList.add("shake");
 setTimeout(()=>ticket.classList.remove("shake"),300);
 
@@ -278,25 +314,23 @@ document.getElementById("msg").innerText="Try Again!";
 resetTicket(ticket);
 }else{
 document.getElementById("msg").innerText="Correct Answer: "+trainType.toUpperCase();
+
 setTimeout(()=>{
 currentTrainIndex++;
 loadTrain();
 initTickets();
-},1300);
+},1400);
 }
 }
-}
-
-function resetTicket(ticket){
-const id=Number(ticket.id.replace("ticket",""))-1;
-ticket.style.top=originalPositions[id].top;
-ticket.style.left=originalPositions[id].left;
 }
 
 function makeDraggable(el){
-let offsetX=0, offsetY=0;
+let offsetX=0;
+let offsetY=0;
+let dragging=false;
 
 el.addEventListener("pointerdown",e=>{
+dragging=true;
 el.setPointerCapture(e.pointerId);
 offsetX=e.clientX-el.offsetLeft;
 offsetY=e.clientY-el.offsetTop;
@@ -304,12 +338,13 @@ el.style.cursor="grabbing";
 });
 
 el.addEventListener("pointermove",e=>{
-if(e.buttons!==1)return;
+if(!dragging)return;
 el.style.left=(e.clientX-offsetX)+"px";
 el.style.top=(e.clientY-offsetY)+"px";
 });
 
 el.addEventListener("pointerup",()=>{
+dragging=false;
 el.style.cursor="grab";
 
 const train=document.getElementById("train").getBoundingClientRect();
