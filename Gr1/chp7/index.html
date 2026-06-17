@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pronoun Detective</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#e3f2fd,#fff3e0);
+    overflow:hidden;
+}
+
+/* SPLASH */
+#splash{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+#splash img{
+    width:220px;
+    max-width:70%;
+}
+
+/* GAME WRAPPER */
+.screen{
+    display:none;
+    height:100vh;
+    flex-direction:column;
+}
+
+/* TOP BAR */
+#topBar{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    background:#ffffffcc;
+    font-weight:bold;
+}
+
+#questionBox{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:20px;
+}
+
+/* CARD */
+.card{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    width:90%;
+    max-width:500px;
+}
+
+.options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:20px;
+}
+
+.optionBtn{
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    background:#e1f5fe;
+    cursor:pointer;
+}
+
+.optionBtn:active{
+    transform:scale(0.97);
+}
+
+#msg{
+    margin-top:10px;
+    font-weight:bold;
+}
+
+/* RESULT SCREEN */
+#resultScreen{
+    display:none;
+    height:100vh;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    text-align:center;
+}
+
+button.restart{
+    padding:12px 20px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+    background:#4caf50;
+    color:white;
+}
+
+/* CONFETTI */
+.confetti{
+    position:fixed;
+    width:8px;
+    height:8px;
+    background:red;
+    top:0;
+    animation: fall 2s linear infinite;
+}
+
+@keyframes fall{
+    0%{transform:translateY(-10px) rotate(0);}
+    100%{transform:translateY(100vh) rotate(360deg);}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+    <img src="assets/innovine-logo.png" alt="logo">
+</div>
+
+<!-- GAME -->
+<div class="screen" id="gameScreen">
+
+    <div id="topBar">
+        <div>Score: <span id="score">0</span></div>
+        <div>Question: <span id="qno">1</span>/12</div>
+    </div>
+
+    <div id="questionBox">
+        <div class="card">
+            <h2 id="questionText"></h2>
+            <div id="visual">🧠</div>
+
+            <div class="options" id="options"></div>
+            <div id="msg"></div>
+        </div>
+    </div>
+</div>
+
+<!-- RESULT -->
+<div id="resultScreen">
+    <h1>🎉 Great Job!</h1>
+    <h2>Your Score: <span id="finalScore"></span>/12</h2>
+    <button class="restart" onclick="restartGame()">Play Again</button>
+</div>
+
+<!-- AUDIO -->
+<audio id="correctSound" src="assets/correct.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
+<audio id="clapSound" src="assets/clapping.mp3"></audio>
+
+<script>
+
+/* ---------------------------
+QUESTIONS (NO REPETITION)
+----------------------------*/
+const questions = [
+{q:"___ is a doctor.", options:["He","She","They","It"], answer:"He", icon:"👨‍⚕️"},
+{q:"___ is a teacher.", options:["He","She","They","It"], answer:"She", icon:"👩‍🏫"},
+{q:"___ is a cat.", options:["He","She","It","They"], answer:"It", icon:"🐱"},
+{q:"___ are my friends.", options:["He","She","They","It"], answer:"They", icon:"👬"},
+{q:"___ am reading a book.", options:["I","He","She","It"], answer:"I", icon:"📖"},
+{q:"___ are going to school.", options:["We","He","She","It"], answer:"We", icon:"🏫"},
+{q:"___ is a ball.", options:["He","She","It","They"], answer:"It", icon:"⚽"},
+{q:"___ is my brother.", options:["He","She","They","It"], answer:"He", icon:"👦"},
+{q:"___ are playing.", options:["We","They","He","It"], answer:"They", icon:"🎮"},
+{q:"___ are happy children.", options:["We","They","He","It"], answer:"They", icon:"😊"},
+{q:"___ is a dog.", options:["He","She","It","They"], answer:"It", icon:"🐶"},
+{q:"___ are in the park.", options:["We","They","He","It"], answer:"They", icon:"🌳"}
+];
+
+let current = 0;
+let score = 0;
+let attempts = 0;
+
+let shuffled = [];
+
+/* ---------------------------
+INIT
+----------------------------*/
+window.onload = () => {
+    setTimeout(()=>{
+        document.getElementById("splash").style.display="none";
+        document.getElementById("gameScreen").style.display="flex";
+        startGame();
+    },5000);
+};
+
+function startGame(){
+    shuffled = questions.sort(()=>Math.random()-0.5);
+    current = 0;
+    score = 0;
+    loadQ();
+}
+
+function loadQ(){
+    attempts = 0;
+    document.getElementById("msg").innerText="";
+    
+    if(current >= shuffled.length){
+        endGame();
+        return;
+    }
+
+    let q = shuffled[current];
+
+    document.getElementById("questionText").innerText = q.q;
+    document.getElementById("visual").innerText = q.icon;
+
+    document.getElementById("qno").innerText = current+1;
+    document.getElementById("score").innerText = score;
+
+    let optDiv = document.getElementById("options");
+    optDiv.innerHTML="";
+
+    q.options.forEach(opt=>{
+        let btn = document.createElement("button");
+        btn.className="optionBtn";
+        btn.innerText=opt;
+        btn.onclick=()=>check(opt);
+        optDiv.appendChild(btn);
+    });
+}
+
+/* ---------------------------
+ANSWER CHECK
+----------------------------*/
+function check(opt){
+    let q = shuffled[current];
+
+    if(opt === q.answer){
+        score++;
+        document.getElementById("msg").innerText="🎉 Correct!";
+        document.getElementById("correctSound").play();
+        document.getElementById("clapSound").play();
+        confetti();
+
+        setTimeout(()=>{
+            current++;
+            loadQ();
+        },1000);
+    }
+    else{
+        attempts++;
+        document.getElementById("wrongSound").play();
+
+        if(attempts < 2){
+            document.getElementById("msg").innerText="Try again!";
+        } else {
+            document.getElementById("msg").innerText="Answer: " + q.answer;
+            setTimeout(()=>{
+                current++;
+                loadQ();
+            },1200);
+        }
+    }
+
+    document.getElementById("score").innerText = score;
+}
+
+/* ---------------------------
+END GAME
+----------------------------*/
+function endGame(){
+    document.getElementById("gameScreen").style.display="none";
+    document.getElementById("resultScreen").style.display="flex";
+    document.getElementById("finalScore").innerText = score;
+    confetti();
+}
+
+/* ---------------------------
+RESTART
+----------------------------*/
+function restartGame(){
+    document.getElementById("resultScreen").style.display="none";
+    document.getElementById("gameScreen").style.display="flex";
+    startGame();
+}
+
+/* ---------------------------
+CONFETTI
+----------------------------*/
+function confetti(){
+    for(let i=0;i<30;i++){
+        let c = document.createElement("div");
+        c.className="confetti";
+        c.style.left = Math.random()*100 + "vw";
+        c.style.background = ["#ff5252","#ffeb3b","#40c4ff","#69f0ae"][Math.floor(Math.random()*4)];
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(),2000);
+    }
+}
+
+</script>
+
+</body>
+</html>
