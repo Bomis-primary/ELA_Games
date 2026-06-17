@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sentence Express Station</title>
+<title>Sentence Express Station PRO</title>
 
 <style>
 *{box-sizing:border-box}
 
 body{
 margin:0;
-font-family:Arial, sans-serif;
+font-family:Arial;
 overflow:hidden;
 background:black;
 }
 
+/* Splash */
 #splash{
 position:fixed;
 inset:0;
@@ -24,12 +25,9 @@ justify-content:center;
 align-items:center;
 z-index:999;
 }
+#splash img{width:300px;max-width:80%;}
 
-#splash img{
-width:320px;
-max-width:80%;
-}
-
+/* Instructions */
 #instructions{
 display:none;
 position:absolute;
@@ -37,52 +35,52 @@ top:0;
 width:100%;
 background:#fff3cd;
 padding:12px;
-font-size:22px;
+font-size:20px;
 font-weight:bold;
 text-align:center;
 z-index:20;
-color:#111;
 }
 
+/* Game */
 #game{
 display:none;
 width:100%;
 height:100vh;
-background:url("assets/railwaystationbackground.png") center center/cover no-repeat;
+background:url('assets/railwaystationbackground.png') center/cover no-repeat;
 position:relative;
 }
 
+/* Score */
 #score{
 position:absolute;
-top:62px;
-left:12px;
+top:60px;
+left:10px;
 background:white;
-padding:10px 16px;
-border-radius:12px;
-font-size:20px;
+padding:10px 14px;
+border-radius:10px;
 font-weight:bold;
 z-index:20;
 }
 
+/* Message */
 #msg{
 position:absolute;
-top:108px;
+top:110px;
 width:100%;
 text-align:center;
-font-size:28px;
+font-size:26px;
 font-weight:bold;
-color:#000;
 z-index:20;
 }
 
+/* TRAIN */
 #train{
 position:absolute;
-bottom:35px;
-left:-260px;
-width:240px;
+bottom:40px;
+left:-300px;
+width:230px;
 height:130px;
 z-index:5;
-animation:trainEnter 3s ease forwards;
 }
 
 #train img{
@@ -91,73 +89,59 @@ height:100%;
 object-fit:contain;
 }
 
-@keyframes trainEnter{
-from{left:-260px;}
-to{left:50%;transform:translateX(-50%);}
+/* Move LEFT → RIGHT */
+.move{
+animation:moveTrain 4s linear forwards;
 }
 
-.depart{
-animation:trainDepart 1.2s ease forwards !important;
+@keyframes moveTrain{
+0%{left:-300px;}
+100%{left:110%;}
 }
 
-@keyframes trainDepart{
-from{left:50%;transform:translateX(-50%);}
-to{left:110%;transform:translateX(0);}
-}
-
+/* Tickets */
 .ticket{
 position:absolute;
-width:280px;
+width:260px;
 min-height:150px;
 background:
-linear-gradient(rgba(255,255,255,0.45),rgba(255,255,255,0.45)),
-url("assets/trainticket.png") center/cover no-repeat;
+linear-gradient(rgba(255,255,255,0.5),rgba(255,255,255,0.5)),
+url('assets/trainticket.png') center/cover no-repeat;
 display:flex;
 align-items:center;
 justify-content:center;
 text-align:center;
-padding:18px;
-font-size:22px;
+padding:12px;
+font-size:18px;
 font-weight:bold;
-color:#000;
+border-radius:12px;
 cursor:grab;
-border-radius:14px;
-z-index:15;
-box-shadow:0 8px 18px rgba(0,0,0,0.25);
-touch-action:none;
 user-select:none;
+touch-action:none;
+z-index:10;
+
+/* FIX TEXT OVERFLOW */
+word-wrap:break-word;
+overflow-wrap:break-word;
+white-space:normal;
+line-height:1.2;
 }
 
-#ticket1{top:185px;left:8%;}
-#ticket2{top:185px;left:38%;}
-#ticket3{top:185px;left:68%;}
+#ticket1{top:180px;left:10%;}
+#ticket2{top:180px;left:38%;}
+#ticket3{top:180px;left:66%;}
 
-.shake{
-animation:shake .3s;
-}
-
+/* Shake */
+.shake{animation:shake .3s;}
 @keyframes shake{
 0%{transform:translateX(-6px);}
 50%{transform:translateX(6px);}
 100%{transform:translateX(0);}
 }
 
+/* Responsive */
 @media(max-width:900px){
-.ticket{
-width:30%;
-min-height:130px;
-font-size:17px;
-padding:10px;
-}
-#ticket1{left:3%;}
-#ticket2{left:35%;}
-#ticket3{left:67%;}
-#train{
-width:210px;
-height:115px;
-bottom:30px;
-}
-#instructions{font-size:18px;}
+.ticket{width:30%;font-size:14px}
 }
 </style>
 </head>
@@ -169,7 +153,7 @@ bottom:30px;
 </div>
 
 <div id="instructions">
-🚂 Drag the correct sentence ticket onto the train!
+🚂 Drag the correct sentence ticket onto the moving train!
 </div>
 
 <div id="game">
@@ -183,12 +167,14 @@ bottom:30px;
 <div class="ticket" id="ticket3"></div>
 </div>
 
+<!-- AUDIO -->
 <audio id="correct" src="assets/correct.mp3"></audio>
 <audio id="wrong" src="assets/wrong.mp3"></audio>
 <audio id="whistle" src="assets/trainwhistle.mp3"></audio>
 <audio id="clap" src="assets/clapping.mp3"></audio>
 
 <script>
+
 const statements=[
 "The giraffe is a tall animal.",
 "My brother plays football every evening.",
@@ -215,33 +201,23 @@ const exclamations=[
 
 const trainTypes=["statement","question","exclamation"];
 
-let currentTrainIndex=0;
+let current=0;
 let score=0;
 let attempts=0;
 
-const originalPositions=[
-{top:"185px",left:"8%"},
-{top:"185px",left:"38%"},
-{top:"185px",left:"68%"}
-];
-
-function randomItem(arr){
-return arr[Math.floor(Math.random()*arr.length)];
-}
-
-function playSound(id){
-const a=document.getElementById(id);
+/* SOUND HELPERS */
+function play(id){
+let a=document.getElementById(id);
 a.currentTime=0;
 a.play().catch(()=>{});
 }
 
+/* INIT TICKETS */
 function initTickets(){
-document.getElementById("msg").innerText="";
-
 let arr=[
-{type:"statement",text:randomItem(statements)},
-{type:"question",text:randomItem(questions)},
-{type:"exclamation",text:randomItem(exclamations)}
+{type:"statement",text:statements[Math.floor(Math.random()*statements.length)]},
+{type:"question",text:questions[Math.floor(Math.random()*questions.length)]},
+{type:"exclamation",text:exclamations[Math.floor(Math.random()*exclamations.length)]}
 ];
 
 arr.sort(()=>Math.random()-0.5);
@@ -250,41 +226,58 @@ for(let i=0;i<3;i++){
 let t=document.getElementById("ticket"+(i+1));
 t.innerText=arr[i].text;
 t.dataset.type=arr[i].type;
-t.style.top=originalPositions[i].top;
-t.style.left=originalPositions[i].left;
+t.style.top="180px";
+t.style.left=i===0?"10%":i===1?"38%":"66%";
 t.style.display="flex";
-t.style.pointerEvents="auto";
 }
 }
 
-function loadTrain(){
-attempts=0;
-const type=trainTypes[currentTrainIndex%3];
-const train=document.getElementById("train");
+/* TRAIN CONTROL */
+function startTrain(){
+let train=document.getElementById("train");
+train.className="move";
 
+/* WHISTLE WHILE MOVING */
+play("whistle");
+
+/* LOOP RESET */
+setTimeout(()=>{
 train.className="";
-train.style.left="-260px";
-train.style.transform="none";
-train.innerHTML=`<img src="assets/${type}train.png">`;
-
-void train.offsetWidth;
-train.style.animation="trainEnter 3s ease forwards";
+train.style.left="-300px";
+nextLevel();
+},4000);
 }
 
-function resetTicket(ticket){
-const index=Number(ticket.id.replace("ticket",""))-1;
-ticket.style.top=originalPositions[index].top;
-ticket.style.left=originalPositions[index].left;
+/* NEXT LEVEL */
+function nextLevel(){
+current++;
+attempts=0;
+loadTrain();
+initTickets();
+startTrain();
 }
 
-function checkAnswer(ticket){
-const selectedType=ticket.dataset.type;
-const trainType=trainTypes[currentTrainIndex%3];
+/* LOAD TRAIN IMAGE */
+function loadTrain(){
+let type=trainTypes[current%3];
+document.getElementById("train").innerHTML=
+`<img src="assets/${type}train.png">`;
+}
 
-if(selectedType===trainType){
-playSound("correct");
-playSound("whistle");
-playSound("clap");
+/* RESET POSITION */
+function resetTicket(t,id){
+t.style.top="180px";
+t.style.left=id==="ticket1"?"10%":id==="ticket2"?"38%":"66%";
+}
+
+/* CHECK */
+function check(ticket){
+let correct=trainTypes[current%3];
+
+if(ticket.dataset.type===correct){
+
+play("correct");
+play("whistle"); // correct answer sound
 
 score++;
 document.getElementById("score").innerText="Score: "+score;
@@ -292,84 +285,74 @@ document.getElementById("msg").innerText="Correct!";
 
 ticket.style.display="none";
 
-const train=document.getElementById("train");
-train.style.animation="";
-train.classList.add("depart");
-
 setTimeout(()=>{
-currentTrainIndex++;
-loadTrain();
-initTickets();
-},1200);
+/* CLAP ONLY AT END */
+play("clap");
+},3500);
 
 }else{
-playSound("wrong");
+
+play("wrong");
 attempts++;
 
 ticket.classList.add("shake");
 setTimeout(()=>ticket.classList.remove("shake"),300);
 
-if(attempts<2){
-document.getElementById("msg").innerText="Try Again!";
-resetTicket(ticket);
+if(attempts>=2){
+document.getElementById("msg").innerText="Correct Answer: "+correct.toUpperCase();
+setTimeout(()=>nextLevel(),1500);
 }else{
-document.getElementById("msg").innerText="Correct Answer: "+trainType.toUpperCase();
-
-setTimeout(()=>{
-currentTrainIndex++;
-loadTrain();
-initTickets();
-},1400);
+document.getElementById("msg").innerText="Try Again!";
+resetTicket(ticket,ticket.id);
 }
 }
 }
 
-function makeDraggable(el){
-let offsetX=0;
-let offsetY=0;
-let dragging=false;
+/* DRAG */
+function drag(el){
+let dx=0,dy=0;
 
 el.addEventListener("pointerdown",e=>{
-dragging=true;
 el.setPointerCapture(e.pointerId);
-offsetX=e.clientX-el.offsetLeft;
-offsetY=e.clientY-el.offsetTop;
-el.style.cursor="grabbing";
+dx=e.clientX-el.offsetLeft;
+dy=e.clientY-el.offsetTop;
 });
 
 el.addEventListener("pointermove",e=>{
-if(!dragging)return;
-el.style.left=(e.clientX-offsetX)+"px";
-el.style.top=(e.clientY-offsetY)+"px";
+if(e.pressure===0)return;
+el.style.left=(e.clientX-dx)+"px";
+el.style.top=(e.clientY-dy)+"px";
 });
 
 el.addEventListener("pointerup",()=>{
-dragging=false;
-el.style.cursor="grab";
+let train=document.getElementById("train").getBoundingClientRect();
+let r=el.getBoundingClientRect();
 
-const train=document.getElementById("train").getBoundingClientRect();
-const rect=el.getBoundingClientRect();
+let cx=r.left+r.width/2;
+let cy=r.top+r.height/2;
 
-const centerX=rect.left+rect.width/2;
-const centerY=rect.top+rect.height/2;
-
-if(centerX>train.left && centerX<train.right && centerY>train.top && centerY<train.bottom){
-checkAnswer(el);
+if(cx>train.left && cx<train.right && cy>train.top && cy<train.bottom){
+check(el);
 }else{
-resetTicket(el);
+resetTicket(el,el.id);
 }
 });
 }
 
-document.querySelectorAll(".ticket").forEach(makeDraggable);
+/* INIT */
+document.querySelectorAll(".ticket").forEach(drag);
 
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
 document.getElementById("instructions").style.display="block";
 document.getElementById("game").style.display="block";
+
 loadTrain();
 initTickets();
+startTrain();
+
 },5000);
+
 </script>
 
 </body>
