@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sentence Express Station - Multi Ticket</title>
+<title>Sentence Express Station - Multi Ticket PRO</title>
 <style>
 body{
 margin:0;
@@ -67,9 +67,9 @@ transition:all 0.5s ease;
 .ticket{
 position:absolute;
 width:260px;
-min-height:120px;
+min-height:140px;
 background:url('assets/trainticket.png') center/cover no-repeat;
-opacity:0.8;
+opacity:0.6;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -78,12 +78,14 @@ padding:10px;
 font-weight:bold;
 cursor:grab;
 transition:0.3s;
+border-radius:10px;
+font-size:18px;
 }
 
 /* Three tickets side by side */
-#ticket1{top:200px; left:10%;}
-#ticket2{top:200px; left:38%;}
-#ticket3{top:200px; left:66%;}
+#ticket1{top:180px; left:10%;}
+#ticket2{top:180px; left:38%;}
+#ticket3{top:180px; left:66%;}
 
 /* Feedback message */
 #msg{
@@ -131,7 +133,7 @@ animation:depart 0.8s ease;
 <div id="msg"></div>
 
 <!-- Train -->
-<div id="train"><img src="assets/statementtrain.jpg"></div>
+<div id="train"><img src="assets/statementtrain.png"></div>
 
 <!-- Tickets -->
 <div class="ticket" id="ticket1"></div>
@@ -145,7 +147,7 @@ animation:depart 0.8s ease;
 <audio id="clap" src="assets/clapping.mp3"></audio>
 
 <script>
-// Game data
+// Sentences
 const statements = [
 "The giraffee is a tall animal.",
 "My brother plays football every evening.",
@@ -168,43 +170,42 @@ const exclamations = [
 "What an amazing performance!"
 ];
 
-let tickets = [];
-let currentTrainType = "statement";
-let index = 0;
-let score = 0;
-let attempts = 0;
+let tickets=[];
+let trainTypes=["statement","question","exclamation"];
+let currentTrainIndex=0;
+let score=0;
+let attempts=0;
 
 // Initialize tickets with one sentence each
 function initTickets(){
-let arr = [
-{type:"statement", text:statements[Math.floor(Math.random()*statements.length)]},
-{type:"question", text:questions[Math.floor(Math.random()*questions.length)]},
-{type:"exclamation", text:exclamations[Math.floor(Math.random()*exclamations.length)]}
+let arr=[
+{type:"statement",text:statements[Math.floor(Math.random()*statements.length)]},
+{type:"question",text:questions[Math.floor(Math.random()*questions.length)]},
+{type:"exclamation",text:exclamations[Math.floor(Math.random()*exclamations.length)]}
 ];
-// Shuffle array
 arr.sort(()=>Math.random()-0.5);
-
 for(let i=0;i<3;i++){
-let t = document.getElementById("ticket"+(i+1));
-t.innerText = arr[i].text;
-t.dataset.type = arr[i].type;
+let t=document.getElementById("ticket"+(i+1));
+t.innerText=arr[i].text;
+t.dataset.type=arr[i].type;
 tickets.push(t);
 dragElement(t);
 }
 }
 
-// Load next train
+// Load train in sequence
 function loadTrain(){
 attempts=0;
-const trainDiv = document.getElementById("train");
-if(index===0) {currentTrainType="statement"; trainDiv.innerHTML='<img src="assets/statementtrain.jpg">';}
-else if(index===1){currentTrainType="question"; trainDiv.innerHTML='<img src="assets/questiontrain.jpg">';}
-else if(index===2){currentTrainType="exclamation"; trainDiv.innerHTML='<img src="assets/exclamationtrain.jpg">';}
+const trainDiv=document.getElementById("train");
+let type=trainTypes[currentTrainIndex%3];
+let imgSrc="assets/"+type+"train.png";
+trainDiv.innerHTML='<img src="'+imgSrc+'">';
 }
 
-// Check drop
+// Check answer
 function checkAnswer(type){
-if(type===currentTrainType){
+let trainType=trainTypes[currentTrainIndex%3];
+if(type===trainType){
 document.getElementById("correct").play();
 document.getElementById("whistle").play();
 document.getElementById("clap").play();
@@ -213,19 +214,16 @@ document.getElementById("score").innerText="Score: "+score;
 document.getElementById("train").classList.add("depart");
 setTimeout(()=>{
 document.getElementById("train").classList.remove("depart");
-index++;
-if(index>2){index=0;} // loop or reset
+currentTrainIndex++;
 loadTrain();
 initTickets();
 },800);
 }else{
 document.getElementById("wrong").play();
 attempts++;
-if(attempts<2){document.getElementById("msg").innerText="Try Again!";}
-else{
-document.getElementById("msg").innerText="Correct Answer: "+currentTrainType.toUpperCase();
-index++;
-if(index>2){index=0;}
+document.getElementById("msg").innerText=(attempts<2?"Try Again!":"Correct Answer: "+trainType.toUpperCase());
+if(attempts>=2){
+currentTrainIndex++;
 setTimeout(()=>{
 loadTrain();
 initTickets();
@@ -240,34 +238,29 @@ function dragElement(el){
 let offsetX=0, offsetY=0;
 el.onmousedown=dragMouseDown;
 el.ontouchstart=dragMouseDown;
-
 function dragMouseDown(e){
 e=e||window.event;
 e.preventDefault();
-offsetX = e.clientX - el.offsetLeft;
-offsetY = e.clientY - el.offsetTop;
+offsetX=(e.clientX||e.touches[0].clientX)-el.offsetLeft;
+offsetY=(e.clientY||e.touches[0].clientY)-el.offsetTop;
 document.onmouseup=closeDragElement;
 document.onmousemove=elementDrag;
 document.ontouchend=closeDragElement;
 document.ontouchmove=elementDrag;
-
 function elementDrag(ev){
-ev=ev||window.event;
-let clientX = ev.clientX || ev.touches[0].clientX;
-let clientY = ev.clientY || ev.touches[0].clientY;
-el.style.left = clientX - offsetX + "px";
-el.style.top = clientY - offsetY + "px";
+let clientX=ev.clientX||ev.touches[0].clientX;
+let clientY=ev.clientY||ev.touches[0].clientY;
+el.style.left=clientX-offsetX+"px";
+el.style.top=clientY-offsetY+"px";
 }
 function closeDragElement(){
 document.onmouseup=null;
 document.onmousemove=null;
 document.ontouchend=null;
 document.ontouchmove=null;
-
-// Check drop overlap
-let trainDiv = document.getElementById("train");
-let rectTrain = trainDiv.getBoundingClientRect();
-let rectEl = el.getBoundingClientRect();
+let trainDiv=document.getElementById("train");
+let rectTrain=trainDiv.getBoundingClientRect();
+let rectEl=el.getBoundingClientRect();
 if(rectEl.left+rectEl.width/2>rectTrain.left && rectEl.left+rectEl.width/2<rectTrain.right &&
 rectEl.top+rectEl.height/2>rectTrain.top && rectEl.top+rectEl.height/2<rectTrain.bottom){
 checkAnswer(el.dataset.type);
