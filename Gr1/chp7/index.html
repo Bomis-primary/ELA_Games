@@ -2,211 +2,235 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Secret Identity Heroes – World Map LMS</title>
+<title>Secret Identity Heroes LMS</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
+*{box-sizing:border-box;font-family:Arial;margin:0;padding:0;}
+
 body{
-  margin:0;
-  font-family:Arial;
-  overflow:hidden;
+overflow:hidden;
 }
+
+/* BACKGROUND */
 #bg{
-  position:fixed;
-  width:100%;
-  height:100%;
-  background-size:cover;
-  background-position:center;
-  z-index:-2;
+position:fixed;
+width:100%;
+height:100%;
+background:url("assets/background.jpg") center/cover no-repeat;
+z-index:-2;
 }
+
 #overlay{
-  position:fixed;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.25);
-  z-index:-1;
+position:fixed;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.35);
+z-index:-1;
 }
+
 /* SPLASH */
 #splash{
-  position:fixed; inset:0;
-  background:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
+position:fixed;
+inset:0;
+background:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:9999;
 }
-#splash img{width:220px;}
+#splash img{width:220px}
 
-/* START SCREEN */
-#start, #instructions{
-  display:none;
-  height:100vh;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:20px;
-  color:white;
+/* SCREEN COMMON */
+.screen{
+display:none;
+height:100vh;
+width:100%;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+color:white;
+padding:20px;
 }
+
+/* INPUT */
 input{
-  padding:12px;
-  border-radius:8px;
-  border:none;
-  width:200px;
-  text-align:center;
-  margin:5px;
+padding:12px;
+border-radius:10px;
+border:none;
+width:220px;
+margin:8px;
+text-align:center;
 }
+
+/* BUTTON */
 button{
-  padding:12px 18px;
-  border:none;
-  border-radius:10px;
-  background:#4caf50;
-  color:white;
-  font-size:16px;
-  margin-top:5px;
-  cursor:pointer;
+padding:12px 18px;
+border:none;
+border-radius:10px;
+background:#4caf50;
+color:white;
+font-size:16px;
+margin:5px;
+cursor:pointer;
+}
+
+/* LEVELS */
+#levels{
+display:none;
+flex-wrap:wrap;
+gap:15px;
+justify-content:center;
+align-items:center;
+height:100vh;
+padding:20px;
+}
+
+.level{
+width:140px;
+height:120px;
+border-radius:12px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+color:white;
+font-weight:bold;
+background-size:cover;
+background-position:center;
+position:relative;
+cursor:pointer;
+box-shadow:0 4px 10px rgba(0,0,0,0.4);
+}
+
+.lock{
+position:absolute;
+top:5px;
+right:5px;
+font-size:22px;
 }
 
 /* GAME */
 #game{
-  display:none;
-  height:100vh;
-  flex-direction:column;
+display:none;
+height:100vh;
+flex-direction:column;
 }
+
 #top{
-  display:flex;
-  justify-content:space-between;
-  padding:10px;
-  background:rgba(255,255,255,0.9);
-  font-weight:bold;
+display:flex;
+justify-content:space-between;
+padding:10px;
+background:rgba(255,255,255,0.9);
+font-weight:bold;
 }
 
 /* HERO */
 #hero{
-  position:absolute;
-  bottom:20px;
-  left:10%;
-  width:90px;
-  transition:all 0.8s ease;
-}
-
-/* BUILDING / GOAL */
-#goal{
-  position:absolute;
-  right:20px;
-  bottom:20px;
-  width:120px;
+position:absolute;
+bottom:20px;
+left:10%;
+width:110px;
+transition:all 0.8s ease;
 }
 
 /* CARD */
 #card{
-  margin:auto;
-  margin-top:60px;
-  width:90%;
-  max-width:520px;
-  background:white;
-  padding:18px;
-  border-radius:16px;
-  text-align:center;
+margin:auto;
+margin-top:70px;
+background:white;
+padding:18px;
+border-radius:16px;
+width:90%;
+max-width:520px;
+text-align:center;
 }
 
-/* OPTIONS */
-#options{
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:10px;
-  margin-top:15px;
+/* DRAG OPTIONS */
+.option{
+padding:10px;
+margin:5px;
+background:#e3f2fd;
+border-radius:10px;
+display:inline-block;
+cursor:grab;
 }
-.opt{
-  padding:12px 16px;
-  border:none;
-  border-radius:10px;
-  background:#e3f2fd;
-  font-size:16px;
-  min-width:80px;
-  cursor:pointer;
-}
-.opt:active{transform:scale(0.96);}
-.correct{background:#c8e6c9!important;}
-.wrong{background:#ffcdd2!important;}
-#hint{
-  margin-top:8px;
-  font-size:14px;
-  color:#444;
-  min-height:20px;
-  text-align:center;
+
+/* DROP AREA */
+#drop{
+margin-top:15px;
+padding:20px;
+border:2px dashed #999;
+border-radius:12px;
+min-height:50px;
 }
 
 /* RESULT */
 #result{
-  display:none;
-  height:100vh;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  text-align:center;
-  color:white;
+display:none;
+height:100vh;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+color:white;
 }
 
 /* CONFETTI */
 .confetti{
-  position:fixed;
-  width:8px;
-  height:8px;
-  top:0;
-  animation:fall 2s linear;
-}
-@keyframes fall{
-  0%{transform:translateY(-10px)}
-  100%{transform:translateY(100vh)}
+position:fixed;
+width:8px;
+height:8px;
+top:0;
+animation:fall 2s linear;
 }
 
-@media(max-width:600px){
-#hero{width:70px;}
-#card{margin-top:40px;}
-.opt{font-size:14px;}
+@keyframes fall{
+0%{transform:translateY(-10px)}
+100%{transform:translateY(100vh)}
 }
 </style>
 </head>
+
 <body>
 
 <div id="bg"></div>
 <div id="overlay"></div>
 
 <!-- SPLASH -->
-<div id="splash"><img src="assets/innovine-logo.png"></div>
+<div id="splash">
+<img src="assets/innovine-logo.png">
+</div>
 
 <!-- NAME -->
-<div id="start">
+<div id="nameScreen" class="screen">
 <h2>Enter Your Hero Name</h2>
-<input id="nameInput" placeholder="Your name">
-<br>
+<input id="name" placeholder="Your name">
 <button onclick="chooseGender('boy')">Boy Hero</button>
 <button onclick="chooseGender('girl')">Girl Hero</button>
 </div>
 
-<!-- INSTRUCTIONS -->
-<div id="instructions">
-<h2>🦸 Secret Identity Mission</h2>
-<p>Help restore the city’s secret identities by selecting the correct hero mask (pronoun) for each clue.</p>
-<button onclick="startGame()">Start Mission</button>
-</div>
+<!-- LEVELS -->
+<div id="levels"></div>
 
 <!-- GAME -->
 <div id="game">
 <div id="top">
 <div id="player"></div>
 <div>Score: <span id="score">0</span></div>
-<div>Mission: <span id="qno">1</span></div>
+<div>Lives: <span id="lives">3</span></div>
+<div>Q: <span id="qno">1</span>/5</div>
 </div>
 
 <img id="hero">
-<img id="goal" src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
 
 <div id="card">
-<h2 id="q"></h2>
+<h2 id="question"></h2>
+
+<div id="drop">DROP ANSWER HERE</div>
+
 <div id="options"></div>
-<div id="hint"></div>
 </div>
 </div>
 
@@ -218,96 +242,257 @@ button{
 
 <audio id="correct" src="assets/correct.mp3"></audio>
 <audio id="wrong" src="assets/wrong.mp3"></audio>
-<audio id="clap" src="assets/clapping.mp3"></audio>
+<audio id="clapping" src="assets/clapping.mp3"></audio>
 
 <script>
-let missions=[
-{q:"___ is a doctor", a:"He", hint:"Think male hero", theme:"city"},
-{q:"___ is a teacher", a:"She", hint:"Think female hero", theme:"city"},
-{q:"___ are friends", a:"They", hint:"Plural group", theme:"forest"},
-{q:"___ is a cat", a:"It", hint:"Animal", theme:"forest"},
-{q:"___ am happy", a:"I", hint:"First person", theme:"desert"},
-{q:"___ is a nurse", a:"She", hint:"Female worker", theme:"desert"},
-{q:"___ is a boy", a:"He", hint:"Male child", theme:"beach"},
-{q:"___ is a girl", a:"She", hint:"Female child", theme:"beach"}
-];
 
-const themeBackgrounds={
-city:"assets/background.jpg",
-forest:"assets/background.jpg",
-desert:"assets/background.jpg",
-beach:"assets/beach.png"
+/* =======================
+ASSETS & THEMES
+======================= */
+const backgrounds={
+beach:"assets/beach.png",
+desert:"assets/desert.png",
+forest:"assets/forest.png",
+city:"assets/city.png"
 };
 
-let data=[],i=0,score=0,attempt=0,heroX=10,name="",heroType="";
+const levels=[
+{theme:"beach",title:"City 1",focus:"I / You"},
+{theme:"desert",title:"City 2",focus:"He / She"},
+{theme:"forest",title:"City 3",focus:"It / They"},
+{theme:"city",title:"City 4",focus:"Mixed"}
+];
 
-const splash=document.getElementById("splash");
-const startScreen=document.getElementById("start");
-const instructions=document.getElementById("instructions");
-const game=document.getElementById("game");
-const clueBox=document.getElementById("q");
-const optionsBox=document.getElementById("options");
-const hintBox=document.getElementById("hint");
-const scoreBox=document.getElementById("score");
-const qnoBox=document.getElementById("qno");
-const finalScore=document.getElementById("final");
-const hero=document.getElementById("hero");
-const bg=document.getElementById("bg");
+/* =======================
+MISSIONS (5 per level)
+======================= */
+const data=[
+[
+{q:"___ am happy",a:"I"},
+{q:"___ are playing",a:"You"},
+{q:"___ am ready",a:"I"},
+{q:"___ are here",a:"You"},
+{q:"___ am a hero",a:"I"}
+],
+[
+{q:"___ is a doctor",a:"He"},
+{q:"___ is a teacher",a:"She"},
+{q:"___ is strong",a:"He"},
+{q:"___ is kind",a:"She"},
+{q:"___ is working",a:"He"}
+],
+[
+{q:"___ is a cat",a:"It"},
+{q:"___ are friends",a:"They"},
+{q:"___ is a tree",a:"It"},
+{q:"___ are playing",a:"They"},
+{q:"___ is sleeping",a:"It"}
+],
+[
+{q:"___ is a hero",a:"He"},
+{q:"___ is a leader",a:"She"},
+{q:"___ are saving city",a:"They"},
+{q:"___ is brave",a:"He"},
+{q:"___ is smart",a:"She"}
+]
+];
 
+let level=0;
+let qIndex=0;
+let score=0;
+let lives=3;
+let name="";
+let heroType="";
+let attempts=0;
+
+/* =======================
+SPLASH
+======================= */
 setTimeout(()=>{
-splash.style.display="none";
-instructions.style.display="flex";
+document.getElementById("splash").style.display="none";
+document.getElementById("nameScreen").style.display="flex";
 },5000);
 
+/* =======================
+GENDER + NAME
+======================= */
 function chooseGender(type){
 heroType=type;
-name=document.getElementById("nameInput").value || "Hero";
-startScreen.style.display="none";
-instructions.style.display="flex";
+name=document.getElementById("name").value||"Hero";
+
+document.getElementById("nameScreen").style.display="none";
+showLevels();
 }
 
-function startGame(){
-instructions.style.display="none";
-game.style.display="flex";
-hero.src=(heroType==="boy"?"assets/boy-hero.png":"assets/girl-hero.png");
-data=[...missions].sort(()=>Math.random()-0.5);
-i=0;score=0;heroX=10;
-document.getElementById("player").innerText="🦸 "+name;
-loadMission();
+/* =======================
+LEVEL SCREEN
+======================= */
+function showLevels(){
+let box=document.getElementById("levels");
+box.style.display="flex";
+
+box.innerHTML="";
+
+levels.forEach((l,i)=>{
+let div=document.createElement("div");
+div.className="level";
+div.style.backgroundImage=`url('${backgrounds[l.theme]}')`;
+div.innerHTML=`${l.title}<br>${l.focus}`;
+
+if(i>level){
+let lock=document.createElement("div");
+lock.className="lock";
+lock.innerHTML="🔒";
+div.appendChild(lock);
 }
 
-function loadMission(){
-if(i>=data.length){endGame();return;}
-attempt=0;
-let m=data[i];
-clueBox.innerText=m.q;
-scoreBox.innerText=score;
-qnoBox.innerText=i+1;
-hintBox.innerText="";
-bg.style.backgroundImage=`url('${themeBackgrounds[m.theme]}')`;
-optionsBox.innerHTML="";
-["He","She","It","They","I"].forEach(o=>{
-let b=document.createElement("button");
-b.className="opt";b.innerText=o;b.onclick=()=>check(o);
-optionsBox.appendChild(b);
+div.onclick=()=>{
+if(i<=level) startLevel(i);
+};
+
+box.appendChild(div);
 });
 }
 
-function check(ans){
-let m=data[i];
-if(ans===m.a){score++;scoreBox.innerText=score;moveHero();play("correct");play("clap");hintBox.innerText="Correct!";}
-else{attempt++;play("wrong");hintBox.innerText=(attempt<2?m.hint:"Answer: "+m.a);if(attempt<2){return;}}
-i++;setTimeout(loadMission,900);
+/* =======================
+START LEVEL
+======================= */
+function startLevel(lv){
+
+level=lv;
+qIndex=0;
+score=0;
+lives=3;
+
+document.getElementById("levels").style.display="none";
+document.getElementById("game").style.display="flex";
+
+document.getElementById("hero").src=
+heroType==="boy"?"assets/boy-hero.png":"assets/girl-hero.png";
+
+document.getElementById("player").innerText="🦸 "+name;
+
+document.getElementById("bg").style.backgroundImage=
+`url('${backgrounds[levels[lv].theme]}')`;
+
+loadQ();
 }
 
-function moveHero(){heroX+=18;hero.style.left=heroX+"%";}
+/* =======================
+LOAD QUESTION
+======================= */
+function loadQ(){
 
-function endGame(){
-game.style.display="none";finalScore.innerText=`🎉 Well done ${name}! Score: ${score}/${data.length}`;document.getElementById("result").style.display="flex";confetti();
+if(qIndex>=5){
+endLevel();
+return;
 }
 
-function play(id){let a=document.getElementById(id);a.currentTime=0;a.play().catch(()=>{});}
-function confetti(){for(let i=0;i<30;i++){let d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=["#ff5252","#ffd740","#40c4ff","#69f0ae"][Math.floor(Math.random()*4)];document.body.appendChild(d);setTimeout(()=>d.remove(),2000);}}
+attempts=0;
+
+document.getElementById("score").innerText=score;
+document.getElementById("lives").innerText=lives;
+document.getElementById("qno").innerText=qIndex+1;
+
+let q=data[level][qIndex];
+
+document.getElementById("question").innerText=q.q;
+
+let optBox=document.getElementById("options");
+optBox.innerHTML="";
+
+["I","You","He","She","It","They"].forEach(o=>{
+let d=document.createElement("div");
+d.className="option";
+d.draggable=true;
+d.innerText=o;
+
+d.ondragstart=(e)=>e.dataTransfer.setData("text",o);
+
+optBox.appendChild(d);
+});
+
+/* DROP */
+let drop=document.getElementById("drop");
+drop.ondragover=(e)=>e.preventDefault();
+
+drop.ondrop=(e)=>{
+let val=e.dataTransfer.getData("text");
+check(val);
+};
+}
+
+/* =======================
+CHECK ANSWER
+======================= */
+function check(val){
+
+let q=data[level][qIndex];
+
+if(val===q.a){
+score++;
+play("correct");
+play("clapping");
+moveHero();
+nextQ();
+}
+else{
+attempts++;
+lives--;
+play("wrong");
+
+if(lives<=0){
+alert("Level Failed! Try Again");
+startLevel(level);
+return;
+}
+}
+}
+
+/* =======================
+NEXT QUESTION
+======================= */
+function nextQ(){
+qIndex++;
+setTimeout(loadQ,700);
+}
+
+/* =======================
+HERO MOVE
+======================= */
+function moveHero(){
+let h=document.getElementById("hero");
+h.style.left=(10+qIndex*15)+"%";
+}
+
+/* =======================
+LEVEL END
+======================= */
+function endLevel(){
+
+if(score>=4){
+level++;
+alert("Awesome! Level Completed");
+
+showLevels();
+document.getElementById("game").style.display="none";
+}
+else{
+alert("Try again! You need at least 4 correct.");
+startLevel(level);
+}
+}
+
+/* =======================
+AUDIO
+======================= */
+function play(id){
+let a=document.getElementById(id);
+a.currentTime=0;
+a.play().catch(()=>{});
+}
+
 </script>
+
 </body>
 </html>
