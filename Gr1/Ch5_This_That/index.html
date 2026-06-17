@@ -29,6 +29,11 @@ body::after{
     z-index:-1;
 }
 
+/* DISABLE ALL SPELLCHECK (IMPORTANT FIX) */
+*{
+    -webkit-user-modify: read-only;
+}
+
 /* SPLASH */
 #splash{
     position:fixed;
@@ -78,12 +83,14 @@ body::after{
     line-height:1.6;
 }
 
-/* ✅ CLEAN BLANK (NO SPELLCHECK TRIGGER) */
+/* ✅ FINAL BLANK FIX (NO TEXT = NO UNDERLINE EVER) */
 .blank{
     display:inline-block;
-    min-width:130px;
+    width:140px;
+    height:28px;
+    background:rgba(255,255,255,0.15);
     border-bottom:3px dashed #fff;
-    color:#ffd166;
+    border-radius:4px;
 }
 
 /* OPTIONS (chalk style) */
@@ -179,7 +186,7 @@ body::after{
 /* VERBATIM DATA */
 let data=[
 {q:`Riya is holding a pencil in her hand. She says: “___ is my pencil.”`,opt:["This","Those"],ans:"This"},
-{q:`Kabir points to birds flying far in the sky. He says: “___ are beautiful birds.”`,opt:["These","Those"],ans:"Those"},
+{q:`Kabir points to some birds flying far in the sky. He says: “___ are beautiful birds.”`,opt:["These","Those"],ans:"Those"},
 {q:`Meera is touching her new bag. She says: “___ is my new bag.”`,opt:["That","This"],ans:"This"},
 {q:`Look at the books on the table far away. Teacher says: “___ are library books.”`,opt:["These","Those"],ans:"Those"},
 {q:`A boy shows his toy car in his hand. He says: “___ is my toy car.”`,opt:["This","Those"],ans:"This"},
@@ -187,11 +194,11 @@ let data=[
 {q:`Ananya is holding a chocolate. She says: “___ is very tasty.”`,opt:["That","This"],ans:"This"},
 {q:`Look at the stars in the night sky. We say: “___ are shining brightly.”`,opt:["These","Those"],ans:"Those"},
 {q:`Rahul points to a car passing far away. He says: “___ is a red car.”`,opt:["That","These"],ans:"That"},
-{q:`Children are holding crayons in their hands. They say: “___ are our crayons.”`,opt:["These","Those"],ans:"These"},
+{q:`The children are holding crayons in their hands. They say: “___ are our crayons.”`,opt:["These","Those"],ans:"These"},
 {q:`A girl is showing a picture in her book. She says: “___ is my favorite picture.”`,opt:["This","Those"],ans:"This"},
 {q:`Look at the mountains far away. We say: “___ are very tall.”`,opt:["These","Those"],ans:"Those"},
 {q:`Teacher is holding a marker in her hand. She says: “___ is a marker.”`,opt:["This","That"],ans:"This"},
-{q:`Children point to apples in their baskets. They say: “___ are fresh apples.”`,opt:["These","That"],ans:"These"},
+{q:`The children point to the apples in their baskets. They say: “___ are fresh apples.”`,opt:["These","That"],ans:"These"},
 {q:`A boy shows a kite flying far in the sky. He says: “___ is my kite.”`,opt:["This","That"],ans:"That"}
 ];
 
@@ -220,10 +227,10 @@ if(i>=game.length){end();return;}
 
 document.getElementById("qnum").innerText=`Q ${i+1}/10`;
 
-/* 🧠 CLEAN BLANK (NO SPELLCHECK ISSUE) */
+/* 🧠 SAFE BLACKBOARD (NO TEXT BLANKS ANYMORE) */
 document.getElementById("qbox").innerHTML =
 game[i].q.replace("___",
-`<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`
+`<span class="blank"></span>`
 );
 
 /* OPTIONS */
@@ -235,7 +242,6 @@ game[i].opt.map(o=>
 document.getElementById("qbox").ondrop=drop;
 document.getElementById("qbox").ondragover=e=>e.preventDefault();
 
-/* TIMER */
 timer=setInterval(()=>{
 t--;
 document.getElementById("time").innerText=t;
@@ -264,7 +270,7 @@ setTimeout(()=>document.body.classList.remove("shake"),400);
 next();
 }
 
-/* 💥 CONFETTI FIXED */
+/* 💥 CONFETTI FIX */
 function burst(){
 for(let k=0;k<90;k++){
 let c=document.createElement("div");
