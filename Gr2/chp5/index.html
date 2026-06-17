@@ -1,41 +1,45 @@
+<!-- Save as index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sentence Express Station - Multi Ticket PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentence Express Station</title>
+
 <style>
+*{box-sizing:border-box}
 body{
 margin:0;
-font-family:Arial;
+font-family:Arial, sans-serif;
 overflow:hidden;
 background:black;
 }
 
-/* Splash */
 #splash{
 position:fixed;
-top:0; left:0;
-width:100%; height:100%;
+inset:0;
 background:white;
 display:flex;
 justify-content:center;
 align-items:center;
 z-index:999;
 }
+#splash img{width:320px;max-width:80%;}
 
-/* Instructions */
 #instructions{
 display:none;
 position:absolute;
-top:0; width:100%;
+top:0;
+width:100%;
 background:#fff3cd;
 padding:12px;
+font-size:22px;
 font-weight:bold;
 text-align:center;
 z-index:10;
+color:#111;
 }
 
-/* Game area */
 #game{
 display:none;
 width:100%;
@@ -44,85 +48,106 @@ background:url('assets/railwaystationbackground.png') center/cover no-repeat;
 position:relative;
 }
 
-/* Score board */
 #score{
 position:absolute;
-top:60px; left:10px;
+top:62px;
+left:12px;
 background:white;
-padding:10px;
-border-radius:10px;
+padding:10px 16px;
+border-radius:12px;
+font-size:20px;
 font-weight:bold;
 z-index:10;
 }
 
-/* Train */
-#train{
+#msg{
 position:absolute;
-bottom:40px;
-width:210px;
-transition:all 0.5s ease;
+top:110px;
+width:100%;
+text-align:center;
+font-size:28px;
+font-weight:bold;
+color:#000;
+z-index:10;
 }
 
-/* Ticket styling */
+#train{
+position:absolute;
+bottom:45px;
+left:50%;
+transform:translateX(-50%);
+width:300px;
+height:170px;
+z-index:4;
+}
+#train img{
+width:100%;
+height:100%;
+object-fit:contain;
+}
+
 .ticket{
 position:absolute;
-width:260px;
-min-height:140px;
-background:url('assets/trainticket.png') center/cover no-repeat;
-opacity:0.6;
+width:280px;
+min-height:155px;
+background:
+linear-gradient(rgba(255,255,255,0.45),rgba(255,255,255,0.45)),
+url('assets/trainticket.png') center/cover no-repeat;
 display:flex;
 align-items:center;
 justify-content:center;
 text-align:center;
-padding:10px;
-font-weight:bold;
-cursor:grab;
-transition:0.3s;
-border-radius:10px;
-font-size:18px;
-}
-
-/* Three tickets side by side */
-#ticket1{top:180px; left:10%;}
-#ticket2{top:180px; left:38%;}
-#ticket3{top:180px; left:66%;}
-
-/* Feedback message */
-#msg{
-position:absolute;
-top:120px;
-width:100%;
-text-align:center;
+padding:18px;
 font-size:22px;
 font-weight:bold;
-color:black;
+color:#000;
+cursor:grab;
+border-radius:14px;
+z-index:8;
+box-shadow:0 8px 18px rgba(0,0,0,0.25);
+touch-action:none;
+user-select:none;
 }
 
-/* Correct and shake animations */
-.glow{
-filter:drop-shadow(0px 0px 10px gold);
-}
-.shake{
-animation:shake 0.3s;
-}
+#ticket1{top:185px;left:8%;}
+#ticket2{top:185px;left:38%;}
+#ticket3{top:185px;left:68%;}
+
+.shake{animation:shake .3s;}
 @keyframes shake{
-0%{transform:translateX(-5px);}
-50%{transform:translateX(5px);}
+0%{transform:translateX(-6px);}
+50%{transform:translateX(6px);}
 100%{transform:translateX(0);}
 }
+
 .depart{
-animation:depart 0.8s ease;
+animation:depart .9s ease forwards;
 }
 @keyframes depart{
-0%{transform:translateY(0);}
-50%{transform:translateY(-20px);}
-100%{transform:translateX(400px);}
+0%{left:50%;}
+100%{left:120%;}
+}
+
+@media(max-width:900px){
+.ticket{
+width:30%;
+min-height:135px;
+font-size:18px;
+padding:10px;
+}
+#ticket1{left:3%;}
+#ticket2{left:35%;}
+#ticket3{left:67%;}
+#train{width:260px;}
 }
 </style>
 </head>
+
 <body>
 
-<div id="splash"><img src="assets/innovinelogo.png" style="width:300px;"></div>
+<div id="splash">
+<img src="assets/innovinelogo.png">
+</div>
 
 <div id="instructions">
 🚂 Drag the correct sentence ticket onto the train!
@@ -132,10 +157,8 @@ animation:depart 0.8s ease;
 <div id="score">Score: 0</div>
 <div id="msg"></div>
 
-<!-- Train -->
-<div id="train"><img src="assets/statementtrain.png"></div>
+<div id="train"></div>
 
-<!-- Tickets -->
 <div class="ticket" id="ticket1"></div>
 <div class="ticket" id="ticket2"></div>
 <div class="ticket" id="ticket3"></div>
@@ -147,22 +170,23 @@ animation:depart 0.8s ease;
 <audio id="clap" src="assets/clapping.mp3"></audio>
 
 <script>
-// Sentences
-const statements = [
-"The giraffee is a tall animal.",
+const statements=[
+"The giraffe is a tall animal.",
 "My brother plays football every evening.",
 "We visited the zoo yesterday.",
 "The flowers are blooming in the garden.",
 "I enjoy reading storybooks."
 ];
-const questions = [
+
+const questions=[
 "When is your birthday?",
 "Why is the sky blue?",
 "Can you help me?",
 "Why are you laughing?",
 "Did you finish your homework?"
 ];
-const exclamations = [
+
+const exclamations=[
 "What a beautiful rainbow!",
 "Hurray! We won the match!",
 "Wow! This cake is delicious!",
@@ -170,113 +194,148 @@ const exclamations = [
 "What an amazing performance!"
 ];
 
-let tickets=[];
-let trainTypes=["statement","question","exclamation"];
+const trainTypes=["statement","question","exclamation"];
 let currentTrainIndex=0;
 let score=0;
 let attempts=0;
 
-// Initialize tickets with one sentence each
-function initTickets(){
-let arr=[
-{type:"statement",text:statements[Math.floor(Math.random()*statements.length)]},
-{type:"question",text:questions[Math.floor(Math.random()*questions.length)]},
-{type:"exclamation",text:exclamations[Math.floor(Math.random()*exclamations.length)]}
+const originalPositions=[
+{top:"185px",left:"8%"},
+{top:"185px",left:"38%"},
+{top:"185px",left:"68%"}
 ];
+
+function randomItem(arr){
+return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function playSound(id){
+const audio=document.getElementById(id);
+audio.currentTime=0;
+audio.play().catch(()=>{});
+}
+
+function initTickets(){
+document.getElementById("msg").innerText="";
+
+let arr=[
+{type:"statement",text:randomItem(statements)},
+{type:"question",text:randomItem(questions)},
+{type:"exclamation",text:randomItem(exclamations)}
+];
+
 arr.sort(()=>Math.random()-0.5);
+
 for(let i=0;i<3;i++){
-let t=document.getElementById("ticket"+(i+1));
+const t=document.getElementById("ticket"+(i+1));
 t.innerText=arr[i].text;
 t.dataset.type=arr[i].type;
-tickets.push(t);
-dragElement(t);
+t.style.top=originalPositions[i].top;
+t.style.left=originalPositions[i].left;
+t.style.display="flex";
 }
 }
 
-// Load train in sequence
 function loadTrain(){
 attempts=0;
-const trainDiv=document.getElementById("train");
-let type=trainTypes[currentTrainIndex%3];
-let imgSrc="assets/"+type+"train.png";
-trainDiv.innerHTML='<img src="'+imgSrc+'">';
+const type=trainTypes[currentTrainIndex%3];
+const train=document.getElementById("train");
+train.classList.remove("depart");
+train.style.left="50%";
+train.innerHTML=`<img src="assets/${type}train.png">`;
 }
 
-// Check answer
-function checkAnswer(type){
-let trainType=trainTypes[currentTrainIndex%3];
-if(type===trainType){
-document.getElementById("correct").play();
-document.getElementById("whistle").play();
-document.getElementById("clap").play();
+function checkAnswer(ticket){
+const selectedType=ticket.dataset.type;
+const trainType=trainTypes[currentTrainIndex%3];
+
+if(selectedType===trainType){
+playSound("correct");
+playSound("whistle");
+playSound("clap");
+
 score++;
 document.getElementById("score").innerText="Score: "+score;
+document.getElementById("msg").innerText="Correct!";
+
+ticket.style.display="none";
 document.getElementById("train").classList.add("depart");
+
 setTimeout(()=>{
-document.getElementById("train").classList.remove("depart");
 currentTrainIndex++;
 loadTrain();
 initTickets();
-},800);
+},900);
+
 }else{
-document.getElementById("wrong").play();
+playSound("wrong");
 attempts++;
-document.getElementById("msg").innerText=(attempts<2?"Try Again!":"Correct Answer: "+trainType.toUpperCase());
-if(attempts>=2){
-currentTrainIndex++;
+ticket.classList.add("shake");
+setTimeout(()=>ticket.classList.remove("shake"),300);
+
+if(attempts<2){
+document.getElementById("msg").innerText="Try Again!";
+resetTicket(ticket);
+}else{
+document.getElementById("msg").innerText="Correct Answer: "+trainType.toUpperCase();
 setTimeout(()=>{
+currentTrainIndex++;
 loadTrain();
 initTickets();
-document.getElementById("msg").innerText="";
-},1200);
+},1300);
 }
 }
 }
 
-// Drag functionality
-function dragElement(el){
+function resetTicket(ticket){
+const id=Number(ticket.id.replace("ticket",""))-1;
+ticket.style.top=originalPositions[id].top;
+ticket.style.left=originalPositions[id].left;
+}
+
+function makeDraggable(el){
 let offsetX=0, offsetY=0;
-el.onmousedown=dragMouseDown;
-el.ontouchstart=dragMouseDown;
-function dragMouseDown(e){
-e=e||window.event;
-e.preventDefault();
-offsetX=(e.clientX||e.touches[0].clientX)-el.offsetLeft;
-offsetY=(e.clientY||e.touches[0].clientY)-el.offsetTop;
-document.onmouseup=closeDragElement;
-document.onmousemove=elementDrag;
-document.ontouchend=closeDragElement;
-document.ontouchmove=elementDrag;
-function elementDrag(ev){
-let clientX=ev.clientX||ev.touches[0].clientX;
-let clientY=ev.clientY||ev.touches[0].clientY;
-el.style.left=clientX-offsetX+"px";
-el.style.top=clientY-offsetY+"px";
+
+el.addEventListener("pointerdown",e=>{
+el.setPointerCapture(e.pointerId);
+offsetX=e.clientX-el.offsetLeft;
+offsetY=e.clientY-el.offsetTop;
+el.style.cursor="grabbing";
+});
+
+el.addEventListener("pointermove",e=>{
+if(e.buttons!==1)return;
+el.style.left=(e.clientX-offsetX)+"px";
+el.style.top=(e.clientY-offsetY)+"px";
+});
+
+el.addEventListener("pointerup",()=>{
+el.style.cursor="grab";
+
+const train=document.getElementById("train").getBoundingClientRect();
+const rect=el.getBoundingClientRect();
+
+const centerX=rect.left+rect.width/2;
+const centerY=rect.top+rect.height/2;
+
+if(centerX>train.left && centerX<train.right && centerY>train.top && centerY<train.bottom){
+checkAnswer(el);
+}else{
+resetTicket(el);
 }
-function closeDragElement(){
-document.onmouseup=null;
-document.onmousemove=null;
-document.ontouchend=null;
-document.ontouchmove=null;
-let trainDiv=document.getElementById("train");
-let rectTrain=trainDiv.getBoundingClientRect();
-let rectEl=el.getBoundingClientRect();
-if(rectEl.left+rectEl.width/2>rectTrain.left && rectEl.left+rectEl.width/2<rectTrain.right &&
-rectEl.top+rectEl.height/2>rectTrain.top && rectEl.top+rectEl.height/2<rectTrain.bottom){
-checkAnswer(el.dataset.type);
-}
-}
-}
+});
 }
 
-// Splash and start
+document.querySelectorAll(".ticket").forEach(makeDraggable);
+
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
 document.getElementById("instructions").style.display="block";
 document.getElementById("game").style.display="block";
-initTickets();
 loadTrain();
+initTickets();
 },5000);
 </script>
+
 </body>
 </html>
