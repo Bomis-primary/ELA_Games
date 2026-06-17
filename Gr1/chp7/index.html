@@ -2,204 +2,212 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Secret Identity Heroes</title>
-
+<title>Secret Identity Heroes – World Map LMS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
 body{
-margin:0;
-font-family:Arial;
-overflow:hidden;
+  margin:0;
+  font-family:Arial;
+  overflow:hidden;
 }
-
-/* THEME BACKGROUND */
 #bg{
-position:fixed;
-width:100%;
-height:100%;
-background:url("/mnt/data/d6a82c20-c864-449d-a793-886a79dc8012.png") no-repeat center center;
-background-size:cover;
-z-index:-2;
+  position:fixed;
+  width:100%;
+  height:100%;
+  background-size:cover;
+  background-position:center;
+  z-index:-2;
 }
-
-/* DARK OVERLAY FOR READABILITY */
 #overlay{
-position:fixed;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.25);
-z-index:-1;
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.25);
+  z-index:-1;
 }
-
 /* SPLASH */
 #splash{
-position:fixed;
-inset:0;
-background:white;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:9999;
+  position:fixed; inset:0;
+  background:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
 }
-#splash img{width:220px}
+#splash img{width:220px;}
 
 /* START SCREEN */
-#start{
-display:none;
-height:100vh;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
-color:white;
+#start, #instructions{
+  display:none;
+  height:100vh;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:20px;
+  color:white;
 }
-
 input{
-padding:10px;
-font-size:16px;
-border-radius:8px;
-border:none;
-margin:5px;
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  width:200px;
+  text-align:center;
+  margin:5px;
 }
-
 button{
-padding:10px 20px;
-border:none;
-border-radius:10px;
-background:#4caf50;
-color:white;
-font-size:16px;
-cursor:pointer;
-margin-top:10px;
+  padding:12px 18px;
+  border:none;
+  border-radius:10px;
+  background:#4caf50;
+  color:white;
+  font-size:16px;
+  margin-top:5px;
+  cursor:pointer;
 }
 
-/* GAME AREA */
+/* GAME */
 #game{
-display:none;
-height:100vh;
-flex-direction:column;
+  display:none;
+  height:100vh;
+  flex-direction:column;
 }
-
-/* TOP BAR */
 #top{
-display:flex;
-justify-content:space-between;
-padding:10px;
-background:rgba(255,255,255,0.85);
-font-weight:bold;
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  background:rgba(255,255,255,0.9);
+  font-weight:bold;
 }
 
 /* HERO */
 #hero{
-position:absolute;
-bottom:20px;
-left:10%;
-width:90px;
-transition:all 0.8s ease;
+  position:absolute;
+  bottom:20px;
+  left:10%;
+  width:90px;
+  transition:all 0.8s ease;
 }
 
-/* BUILDING */
+/* BUILDING / GOAL */
 #goal{
-position:absolute;
-right:20px;
-bottom:20px;
-width:120px;
+  position:absolute;
+  right:20px;
+  bottom:20px;
+  width:120px;
 }
 
-/* QUESTION BOX */
-#box{
-margin:auto;
-margin-top:60px;
-background:white;
-padding:18px;
-border-radius:16px;
-width:90%;
-max-width:520px;
-text-align:center;
+/* CARD */
+#card{
+  margin:auto;
+  margin-top:60px;
+  width:90%;
+  max-width:520px;
+  background:white;
+  padding:18px;
+  border-radius:16px;
+  text-align:center;
 }
 
 /* OPTIONS */
 #options{
-display:flex;
-flex-wrap:wrap;
-justify-content:center;
-gap:10px;
-margin-top:15px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+  margin-top:15px;
 }
-
 .opt{
-padding:12px 16px;
-border:none;
-border-radius:10px;
-background:#e3f2fd;
-font-size:16px;
-cursor:pointer;
+  padding:12px 16px;
+  border:none;
+  border-radius:10px;
+  background:#e3f2fd;
+  font-size:16px;
+  min-width:80px;
+  cursor:pointer;
+}
+.opt:active{transform:scale(0.96);}
+.correct{background:#c8e6c9!important;}
+.wrong{background:#ffcdd2!important;}
+#hint{
+  margin-top:8px;
+  font-size:14px;
+  color:#444;
+  min-height:20px;
+  text-align:center;
 }
 
 /* RESULT */
 #result{
-display:none;
-height:100vh;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-text-align:center;
-color:white;
+  display:none;
+  height:100vh;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  text-align:center;
+  color:white;
 }
 
 /* CONFETTI */
 .confetti{
-position:fixed;
-width:8px;
-height:8px;
-top:0;
-animation:fall 2s linear;
+  position:fixed;
+  width:8px;
+  height:8px;
+  top:0;
+  animation:fall 2s linear;
+}
+@keyframes fall{
+  0%{transform:translateY(-10px)}
+  100%{transform:translateY(100vh)}
 }
 
-@keyframes fall{
-0%{transform:translateY(-10px)}
-100%{transform:translateY(100vh)}
+@media(max-width:600px){
+#hero{width:70px;}
+#card{margin-top:40px;}
+.opt{font-size:14px;}
 }
 </style>
 </head>
-
 <body>
 
 <div id="bg"></div>
 <div id="overlay"></div>
 
 <!-- SPLASH -->
-<div id="splash">
-<img src="assets/innovine-logo.png">
-</div>
+<div id="splash"><img src="assets/innovine-logo.png"></div>
 
-<!-- START -->
+<!-- NAME -->
 <div id="start">
-<h2>🦸 Secret Identity Mission</h2>
-<input id="name" placeholder="Enter your hero name">
+<h2>Enter Your Hero Name</h2>
+<input id="nameInput" placeholder="Your name">
 <br>
 <button onclick="chooseGender('boy')">Boy Hero</button>
 <button onclick="chooseGender('girl')">Girl Hero</button>
 </div>
 
+<!-- INSTRUCTIONS -->
+<div id="instructions">
+<h2>🦸 Secret Identity Mission</h2>
+<p>Help restore the city’s secret identities by selecting the correct hero mask (pronoun) for each clue.</p>
+<button onclick="startGame()">Start Mission</button>
+</div>
+
 <!-- GAME -->
 <div id="game">
-
 <div id="top">
-<div id="pname"></div>
+<div id="player"></div>
 <div>Score: <span id="score">0</span></div>
+<div>Mission: <span id="qno">1</span></div>
 </div>
 
 <img id="hero">
 <img id="goal" src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
 
-<div id="box">
+<div id="card">
 <h2 id="q"></h2>
 <div id="options"></div>
-<div id="msg"></div>
+<div id="hint"></div>
 </div>
-
 </div>
 
 <!-- RESULT -->
@@ -213,130 +221,93 @@ animation:fall 2s linear;
 <audio id="clap" src="assets/clapping.mp3"></audio>
 
 <script>
-
-/* QUESTIONS */
-const data=[
-{q:"___ is a doctor", a:"He"},
-{q:"___ is a teacher", a:"She"},
-{q:"___ are friends", a:"They"},
-{q:"___ is a cat", a:"It"},
-{q:"___ am happy", a:"I"}
+let missions=[
+{q:"___ is a doctor", a:"He", hint:"Think male hero", theme:"city"},
+{q:"___ is a teacher", a:"She", hint:"Think female hero", theme:"city"},
+{q:"___ are friends", a:"They", hint:"Plural group", theme:"forest"},
+{q:"___ is a cat", a:"It", hint:"Animal", theme:"forest"},
+{q:"___ am happy", a:"I", hint:"First person", theme:"desert"},
+{q:"___ is a nurse", a:"She", hint:"Female worker", theme:"desert"},
+{q:"___ is a boy", a:"He", hint:"Male child", theme:"beach"},
+{q:"___ is a girl", a:"She", hint:"Female child", theme:"beach"}
 ];
 
-let i=0;
-let score=0;
-let heroX=10;
-let name="";
-let heroType="";
+const themeBackgrounds={
+city:"assets/background.jpg",
+forest:"assets/background.jpg",
+desert:"assets/background.jpg",
+beach:"assets/beach.png"
+};
+
+let data=[],i=0,score=0,attempt=0,heroX=10,name="",heroType="";
+
+const splash=document.getElementById("splash");
+const startScreen=document.getElementById("start");
+const instructions=document.getElementById("instructions");
+const game=document.getElementById("game");
+const clueBox=document.getElementById("q");
+const optionsBox=document.getElementById("options");
+const hintBox=document.getElementById("hint");
+const scoreBox=document.getElementById("score");
+const qnoBox=document.getElementById("qno");
+const finalScore=document.getElementById("final");
+const hero=document.getElementById("hero");
+const bg=document.getElementById("bg");
+
+setTimeout(()=>{
+splash.style.display="none";
+instructions.style.display="flex";
+},5000);
 
 function chooseGender(type){
-
-name=document.getElementById("name").value || "Hero";
 heroType=type;
-
-document.getElementById("start").style.display="none";
-document.getElementById("game").style.display="flex";
-
-document.getElementById("hero").src =
-type==="boy" ? "assets/boy-hero.png" : "assets/girl-hero.png";
-
-document.getElementById("hero").style.position="absolute";
-document.getElementById("hero").style.bottom="20px";
-document.getElementById("hero").style.left="10%";
-
-document.getElementById("pname").innerText="🦸 "+name;
-
-load();
+name=document.getElementById("nameInput").value || "Hero";
+startScreen.style.display="none";
+instructions.style.display="flex";
 }
 
-/* LOAD */
-function load(){
-
-if(i>=data.length){
-end();
-return;
+function startGame(){
+instructions.style.display="none";
+game.style.display="flex";
+hero.src=(heroType==="boy"?"assets/boy-hero.png":"assets/girl-hero.png");
+data=[...missions].sort(()=>Math.random()-0.5);
+i=0;score=0;heroX=10;
+document.getElementById("player").innerText="🦸 "+name;
+loadMission();
 }
 
-let q=data[i];
-
-document.getElementById("q").innerText=q.q;
-document.getElementById("score").innerText=score;
-
-let box=document.getElementById("options");
-box.innerHTML="";
-
-["He","She","It","They","I"].forEach(op=>{
+function loadMission(){
+if(i>=data.length){endGame();return;}
+attempt=0;
+let m=data[i];
+clueBox.innerText=m.q;
+scoreBox.innerText=score;
+qnoBox.innerText=i+1;
+hintBox.innerText="";
+bg.style.backgroundImage=`url('${themeBackgrounds[m.theme]}')`;
+optionsBox.innerHTML="";
+["He","She","It","They","I"].forEach(o=>{
 let b=document.createElement("button");
-b.className="opt";
-b.innerText=op;
-b.onclick=()=>check(op);
-box.appendChild(b);
+b.className="opt";b.innerText=o;b.onclick=()=>check(o);
+optionsBox.appendChild(b);
 });
 }
 
-/* CHECK */
 function check(ans){
-
-let q=data[i];
-
-if(ans===q.a){
-score++;
-play("correct");
-play("clap");
-moveHero();
-document.getElementById("msg").innerText="Correct!";
-}
-else{
-play("wrong");
-document.getElementById("msg").innerText="Try again!";
-return;
+let m=data[i];
+if(ans===m.a){score++;scoreBox.innerText=score;moveHero();play("correct");play("clap");hintBox.innerText="Correct!";}
+else{attempt++;play("wrong");hintBox.innerText=(attempt<2?m.hint:"Answer: "+m.a);if(attempt<2){return;}}
+i++;setTimeout(loadMission,900);
 }
 
-i++;
-setTimeout(load,800);
+function moveHero(){heroX+=18;hero.style.left=heroX+"%";}
+
+function endGame(){
+game.style.display="none";finalScore.innerText=`🎉 Well done ${name}! Score: ${score}/${data.length}`;document.getElementById("result").style.display="flex";confetti();
 }
 
-/* HERO MOVE */
-function moveHero(){
-heroX += 18;
-document.getElementById("hero").style.left = heroX + "%";
-}
-
-/* END */
-function end(){
-document.getElementById("game").style.display="none";
-document.getElementById("result").style.display="flex";
-document.getElementById("final").innerText =
-"🎉 Well done " + name + "! Score: " + score;
-confetti();
-}
-
-/* SOUND */
-function play(id){
-let a=document.getElementById(id);
-a.currentTime=0;
-a.play().catch(()=>{});
-}
-
-/* CONFETTI */
-function confetti(){
-for(let i=0;i<30;i++){
-let d=document.createElement("div");
-d.className="confetti";
-d.style.left=Math.random()*100+"vw";
-d.style.background=["#ff0","#0f0","#f00","#0ff"][Math.floor(Math.random()*4)];
-document.body.appendChild(d);
-setTimeout(()=>d.remove(),2000);
-}
-}
-
-/* SPLASH FLOW */
-setTimeout(()=>{
-document.getElementById("splash").style.display="none";
-document.getElementById("start").style.display="flex";
-},5000);
-
+function play(id){let a=document.getElementById(id);a.currentTime=0;a.play().catch(()=>{});}
+function confetti(){for(let i=0;i<30;i++){let d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=["#ff5252","#ffd740","#40c4ff","#69f0ae"][Math.floor(Math.random()*4)];document.body.appendChild(d);setTimeout(()=>d.remove(),2000);}}
 </script>
-
 </body>
 </html>
