@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sentence Express Station - Pro</title>
+<title>Sentence Express Station</title>
 
 <style>
 body{
@@ -21,7 +21,7 @@ background:white;
 display:flex;
 justify-content:center;
 align-items:center;
-z-index:999;
+z-index:9999;
 }
 
 /* INSTRUCTIONS */
@@ -31,7 +31,7 @@ position:absolute;
 top:0;
 width:100%;
 background:#fff3cd;
-padding:12px;
+padding:10px;
 font-weight:bold;
 text-align:center;
 z-index:10;
@@ -55,6 +55,7 @@ background:white;
 padding:10px;
 border-radius:10px;
 font-weight:bold;
+z-index:5;
 }
 
 /* TICKET */
@@ -72,18 +73,8 @@ justify-content:center;
 text-align:center;
 padding:15px;
 font-weight:bold;
-cursor:grab;
-transition:0.3s;
-}
-
-/* FLIP ANIMATION */
-.flip{
-animation:flipIn 0.4s ease;
-}
-
-@keyframes flipIn{
-from{transform:translateX(-50%) rotateY(90deg);}
-to{transform:translateX(-50%) rotateY(0);}
+cursor:pointer;
+z-index:6;
 }
 
 /* TRAINS */
@@ -91,6 +82,7 @@ to{transform:translateX(-50%) rotateY(0);}
 position:absolute;
 bottom:40px;
 width:210px;
+z-index:4;
 transition:0.4s;
 }
 
@@ -100,7 +92,7 @@ transition:0.4s;
 #questionTrain{left:40%;}
 #exclamationTrain{left:75%;}
 
-/* FEEDBACK */
+/* MSG */
 #msg{
 position:absolute;
 top:120px;
@@ -108,31 +100,22 @@ width:100%;
 text-align:center;
 font-size:22px;
 font-weight:bold;
-color:black;
+z-index:6;
 }
 
-/* CORRECT ANIMATION */
-.depart{
-animation:depart 0.8s ease;
-}
-
-@keyframes depart{
-0%{transform:translateY(0);}
-50%{transform:translateY(-20px);}
-100%{transform:translateX(200px);}
-}
-
-/* SHAKE */
-.shake{
-animation:shake 0.3s;
-}
-
+/* ANIMATIONS */
+.shake{animation:shake 0.3s;}
 @keyframes shake{
 0%{transform:translateX(-5px);}
 50%{transform:translateX(5px);}
 100%{transform:translateX(0);}
 }
 
+.depart{animation:depart 0.7s;}
+@keyframes depart{
+0%{transform:translateY(0);}
+100%{transform:translateX(300px);}
+}
 </style>
 </head>
 
@@ -140,7 +123,7 @@ animation:shake 0.3s;
 
 <!-- SPLASH -->
 <div id="splash">
-<img src="innovinelogo.png" style="width:300px;">
+    <img src="innovinelogo.png" style="width:280px;">
 </div>
 
 <!-- INSTRUCTIONS -->
@@ -182,41 +165,35 @@ let index=0;
 let attempts=0;
 
 const data=[
-{type:"statement", text:"The giraffee is a tall animal."},
-{type:"statement", text:"My brother plays football every evening."},
-{type:"statement", text:"We visited the zoo yesterday."},
-{type:"statement", text:"The flowers are blooming in the garden."},
-{type:"statement", text:"I enjoy reading storybooks."},
+{type:"statement",text:"The giraffee is a tall animal."},
+{type:"statement",text:"My brother plays football every evening."},
+{type:"statement",text:"We visited the zoo yesterday."},
+{type:"statement",text:"The flowers are blooming in the garden."},
+{type:"statement",text:"I enjoy reading storybooks."},
 
-{type:"question", text:"When is your birthday?"},
-{type:"question", text:"Why is the sky blue?"},
-{type:"question", text:"Can you help me?"},
-{type:"question", text:"Why are you laughing?"},
-{type:"question", text:"Did you finish your homework?"},
+{type:"question",text:"When is your birthday?"},
+{type:"question",text:"Why is the sky blue?"},
+{type:"question",text:"Can you help me?"},
+{type:"question",text:"Why are you laughing?"},
+{type:"question",text:"Did you finish your homework?"},
 
-{type:"exclamation", text:"What a beautiful rainbow!"},
-{type:"exclamation", text:"Hurray! We won the match!"},
-{type:"exclamation", text:"Wow! This cake is delicious!"},
-{type:"exclamation", text:"Oh no! I lost my pencil!"},
-{type:"exclamation", text:"What an amazing performance!"}
+{type:"exclamation",text:"What a beautiful rainbow!"},
+{type:"exclamation",text:"Hurray! We won the match!"},
+{type:"exclamation",text:"Wow! This cake is delicious!"},
+{type:"exclamation",text:"Oh no! I lost my pencil!"},
+{type:"exclamation",text:"What an amazing performance!"}
 ];
 
-const ticket=document.getElementById("ticket");
+let ticket=document.getElementById("ticket");
 
 function load(){
 attempts=0;
-ticket.classList.add("flip");
-
-setTimeout(()=>{
-ticket.classList.remove("flip");
 let q=data[index%data.length];
 ticket.innerText=q.text;
 ticket.dataset.type=q.type;
 document.getElementById("msg").innerText="";
-},200);
 }
 
-/* CHECK */
 function check(type){
 
 if(type===ticket.dataset.type){
@@ -232,21 +209,22 @@ document.getElementById(type+"Train").classList.add("depart");
 
 setTimeout(()=>{
 document.getElementById(type+"Train").classList.remove("depart");
-},800);
+},700);
 
 index++;
-setTimeout(load,900);
+setTimeout(load,800);
 
 }else{
 
 document.getElementById("wrong").play();
+
+attempts++;
+
 document.getElementById(type+"Train").classList.add("shake");
 
 setTimeout(()=>{
 document.getElementById(type+"Train").classList.remove("shake");
-},400);
-
-attempts++;
+},300);
 
 if(attempts<2){
 document.getElementById("msg").innerText="Try Again!";
@@ -258,44 +236,50 @@ setTimeout(load,1200);
 }
 }
 
-/* TAP */
 document.getElementById("statementTrain").onclick=()=>check("statement");
 document.getElementById("questionTrain").onclick=()=>check("question");
 document.getElementById("exclamationTrain").onclick=()=>check("exclamation");
 
-/* DRAG */
-ticket.addEventListener("mousedown",dragStart);
-ticket.addEventListener("touchstart",dragStart);
+/* DRAG FIXED */
+let active=false;
 
-function dragStart(e){
+ticket.addEventListener("mousedown",start);
+ticket.addEventListener("touchstart",start);
+
+function start(e){
+active=true;
 
 function move(ev){
+if(!active)return;
 let x=ev.touches?ev.touches[0].clientX:ev.clientX;
 let y=ev.touches?ev.touches[0].clientY:ev.clientY;
 ticket.style.left=x-110+"px";
 ticket.style.top=y-60+"px";
 }
 
-function stop(){
+function end(){
+active=false;
 document.removeEventListener("mousemove",move);
-document.removeEventListener("mouseup",stop);
+document.removeEventListener("mouseup",end);
 document.removeEventListener("touchmove",move);
-document.removeEventListener("touchend",stop);
+document.removeEventListener("touchend",end);
 }
 
 document.addEventListener("mousemove",move);
-document.addEventListener("mouseup",stop);
+document.addEventListener("mouseup",end);
 document.addEventListener("touchmove",move);
-document.addEventListener("touchend",stop);
+document.addEventListener("touchend",end);
 }
 
-/* START FLOW */
+/* SPLASH FIX */
+window.onload=function(){
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
 document.getElementById("instructions").style.display="block";
 document.getElementById("game").style.display="block";
 load();
 },5000);
+}
 
 </script>
 
