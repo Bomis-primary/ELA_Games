@@ -6,84 +6,84 @@
 
 <style>
 body{
-margin:0;
-font-family:Arial;
-overflow:hidden;
+  margin:0;
+  font-family:Arial;
+  overflow:hidden;
 }
 
 /* SPLASH */
 #splash{
-position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-background:white;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:9999;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
 }
 
 /* INSTRUCTIONS */
 #instructions{
-display:none;
-position:absolute;
-top:0;
-width:100%;
-background:#fff3cd;
-padding:12px;
-text-align:center;
-font-weight:bold;
-z-index:10;
+  display:none;
+  position:absolute;
+  top:0;
+  width:100%;
+  background:#fff3cd;
+  padding:12px;
+  text-align:center;
+  font-weight:bold;
+  z-index:10;
 }
 
 /* GAME AREA */
 #game{
-display:none;
-width:100%;
-height:100vh;
-background:url('railwaystationbackground.png') center/cover no-repeat;
-position:relative;
+  display:none;
+  width:100%;
+  height:100vh;
+  background:url('railwaystationbackground.png') center/cover no-repeat;
+  position:relative;
 }
 
 /* SCORE */
 #score{
-position:absolute;
-top:60px;
-left:10px;
-background:white;
-padding:10px;
-border-radius:10px;
-z-index:5;
-font-weight:bold;
+  position:absolute;
+  top:60px;
+  left:10px;
+  background:white;
+  padding:10px;
+  border-radius:10px;
+  z-index:5;
+  font-weight:bold;
 }
 
 /* TICKET */
 #ticket{
-position:absolute;
-bottom:42%;
-left:50%;
-transform:translateX(-50%);
-width:220px;
-min-height:110px;
-background:url('trainticket.png') center/cover no-repeat;
-display:flex;
-align-items:center;
-justify-content:center;
-text-align:center;
-padding:10px;
-font-weight:bold;
-z-index:6;
-cursor:grab;
-touch-action:none;
+  position:absolute;
+  bottom:42%;
+  left:50%;
+  transform:translateX(-50%);
+  width:220px;
+  min-height:110px;
+  background:url('trainticket.png') center/cover no-repeat;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:10px;
+  font-weight:bold;
+  z-index:6;
+  cursor:grab;
+  touch-action:none;
 }
 
 /* TRAINS */
 .train{
-position:absolute;
-bottom:40px;
-width:200px;
-z-index:4;
-transition:transform 1s ease;
+  position:absolute;
+  bottom:40px;
+  width:200px;
+  z-index:4;
+  transition:transform 1s ease;
 }
 
 #statementTrain{left:5%;}
@@ -91,36 +91,36 @@ transition:transform 1s ease;
 #exclamationTrain{left:75%;}
 
 .train img{
-width:100%;
+  width:100%;
 }
 
 /* MESSAGE */
 #msg{
-position:absolute;
-top:120px;
-width:100%;
-text-align:center;
-font-size:22px;
-font-weight:bold;
-z-index:6;
+  position:absolute;
+  top:120px;
+  width:100%;
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  z-index:6;
 }
 
 /* TRAIN MOVE ANIMATION */
 .moveRight{
-transform:translateX(400px);
+  transform:translateX(400px);
 }
 
 /* SHAKE */
 .shake{
-animation:shake 0.3s;
+  animation:shake 0.3s;
 }
 
 @keyframes shake{
-0%{transform:translateX(0);}
-25%{transform:translateX(-5px);}
-50%{transform:translateX(5px);}
-75%{transform:translateX(-5px);}
-100%{transform:translateX(0);}
+  0%{transform:translateX(0);}
+  25%{transform:translateX(-5px);}
+  50%{transform:translateX(5px);}
+  75%{transform:translateX(-5px);}
+  100%{transform:translateX(0);}
 }
 </style>
 </head>
@@ -162,84 +162,74 @@ animation:shake 0.3s;
 <audio id="correct" src="correct.mp3"></audio>
 <audio id="wrong" src="wrong.mp3"></audio>
 <audio id="whistle" src="trainwhistle.mp3"></audio>
+<audio id="clap" src="clapping.mp3"></audio>
 
 <script>
-
 let score = 0;
 let index = 0;
 let attempts = 0;
 
 const data = [
-{type:"statement", text:"The giraffee is a tall animal."},
-{type:"statement", text:"My brother plays football every evening."},
-{type:"statement", text:"We visited the zoo yesterday."},
-{type:"statement", text:"The flowers are blooming in the garden."},
-{type:"statement", text:"I enjoy reading storybooks."},
+{type:"statement",text:"The giraffee is a tall animal."},
+{type:"statement",text:"My brother plays football every evening."},
+{type:"statement",text:"We visited the zoo yesterday."},
+{type:"statement",text:"The flowers are blooming in the garden."},
+{type:"statement",text:"I enjoy reading storybooks."},
 
-{type:"question", text:"When is your birthday?"},
-{type:"question", text:"Why is the sky blue?"},
-{type:"question", text:"Can you help me?"},
-{type:"question", text:"Why are you laughing?"},
-{type:"question", text:"Did you finish your homework?"},
+{type:"question",text:"When is your birthday?"},
+{type:"question",text:"Why is the sky blue?"},
+{type:"question",text:"Can you help me?"},
+{type:"question",text:"Why are you laughing?"},
+{type:"question",text:"Did you finish your homework?"},
 
-{type:"exclamation", text:"What a beautiful rainbow!"},
-{type:"exclamation", text:"Hurray! We won the match!"},
-{type:"exclamation", text:"Wow! That is amazing!"},
-{type:"exclamation", text:"Oh no! I lost my pencil!"},
-{type:"exclamation", text:"What an amazing performance!"}
+{type:"exclamation",text:"What a beautiful rainbow!"},
+{type:"exclamation",text:"Hurray! We won the match!"},
+{type:"exclamation",text:"Wow! This cake is delicious!"},
+{type:"exclamation",text:"Oh no! I lost my pencil!"},
+{type:"exclamation",text:"What an amazing performance!"}
 ];
 
 let ticket = document.getElementById("ticket");
 
+/* LOAD QUESTION */
 function load(){
-attempts = 0;
-let q = data[index % data.length];
-ticket.innerText = q.text;
-ticket.dataset.type = q.type;
-document.getElementById("msg").innerText = "";
+  attempts = 0;
+  let q = data[index % data.length];
+  ticket.innerText = q.text;
+  ticket.dataset.type = q.type;
+  document.getElementById("msg").innerText = "";
 }
 
 /* CHECK ANSWER */
 function check(type){
+  let train = document.getElementById(type+"Train");
+  if(type === ticket.dataset.type){
+    document.getElementById("correct").play();
+    document.getElementById("whistle").play();
+    document.getElementById("clap").play();
 
-if(type === ticket.dataset.type){
+    score++;
+    document.getElementById("score").innerText = "Score: "+score;
 
-document.getElementById("correct").play();
-document.getElementById("whistle").play();
+    train.classList.add("moveRight");
+    setTimeout(()=>{train.classList.remove("moveRight");},1000);
 
-score++;
-document.getElementById("score").innerText = "Score: " + score;
+    index++;
+    setTimeout(load,1000);
+  } else {
+    document.getElementById("wrong").play();
+    attempts++;
+    train.classList.add("shake");
+    setTimeout(()=>{train.classList.remove("shake");},300);
 
-/* TRAIN MOVEMENT */
-let train = document.getElementById(type+"Train");
-train.classList.add("moveRight");
-
-setTimeout(()=>{
-train.classList.remove("moveRight");
-},1000);
-
-index++;
-setTimeout(load,1000);
-
-}else{
-
-document.getElementById("wrong").play();
-attempts++;
-
-document.getElementById(type+"Train").classList.add("shake");
-
-setTimeout(()=>{
-document.getElementById(type+"Train").classList.remove("shake");
-},300);
-
-if(attempts < 2){
-document.getElementById("msg").innerText = "Try Again!";
-}else{
-document.getElementById("msg").innerText = "Correct Answer: " + ticket.dataset.type.toUpperCase();
-index++;
-setTimeout(load,1200);
-}
-}
+    if(attempts < 2){
+      document.getElementById("msg").innerText = "Try Again!";
+    } else {
+      document.getElementById("msg").innerText = "Correct Answer: "+ticket.dataset.type.toUpperCase();
+      index++;
+      setTimeout(load,1200);
+    }
+  }
 }
 
 /* TAP */
@@ -247,44 +237,36 @@ document.getElementById("statementTrain").onclick = ()=>check("statement");
 document.getElementById("questionTrain").onclick = ()=>check("question");
 document.getElementById("exclamationTrain").onclick = ()=>check("exclamation");
 
-/* DRAG FIX (FULL STABLE) */
+/* DRAG */
 let dragging = false;
-
 ticket.addEventListener("pointerdown", startDrag);
 
 function startDrag(e){
-dragging = true;
-
-function move(ev){
-if(!dragging) return;
-
-ticket.style.left = (ev.clientX - 110) + "px";
-ticket.style.top = (ev.clientY - 60) + "px";
-ticket.style.transform = "none";
+  dragging = true;
+  function move(ev){
+    if(!dragging) return;
+    ticket.style.left = (ev.clientX - 110) + "px";
+    ticket.style.top = (ev.clientY - 60) + "px";
+    ticket.style.transform = "none";
+  }
+  function stop(){
+    dragging = false;
+    document.removeEventListener("pointermove",move);
+    document.removeEventListener("pointerup",stop);
+  }
+  document.addEventListener("pointermove",move);
+  document.addEventListener("pointerup",stop);
 }
 
-function stop(){
-dragging = false;
-document.removeEventListener("pointermove", move);
-document.removeEventListener("pointerup", stop);
-}
-
-document.addEventListener("pointermove", move);
-document.addEventListener("pointerup", stop);
-}
-
-/* FLOW CONTROL */
+/* SPLASH FLOW */
 window.onload = function(){
-
-setTimeout(()=>{
-document.getElementById("splash").style.display = "none";
-document.getElementById("instructions").style.display = "block";
-document.getElementById("game").style.display = "block";
-load();
-},5000);
-
-};
-
+  setTimeout(()=>{
+    document.getElementById("splash").style.display="none";
+    document.getElementById("instructions").style.display="block";
+    document.getElementById("game").style.display="block";
+    load();
+  },5000);
+}
 </script>
 
 </body>
