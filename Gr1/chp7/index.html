@@ -2,30 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pronoun Detective - Classroom Edition</title>
+<title>Pronoun Detective - Image Mode</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
     margin:0;
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     overflow:hidden;
-
-    /* CLASSROOM BACKGROUND (SAFE, NO IMAGE DEPENDENCY) */
-    background: linear-gradient(to bottom, #cfe9ff 0%, #ffffff 100%);
-}
-
-/* floating classroom pattern */
-body::before{
-    content:"";
-    position:fixed;
-    width:100%;
-    height:100%;
-    background:
-        radial-gradient(#00000005 2px, transparent 3px);
-    background-size:40px 40px;
-    pointer-events:none;
+    background: linear-gradient(to bottom,#d7f0ff,#ffffff);
 }
 
 /* SPLASH */
@@ -40,106 +26,96 @@ body::before{
     z-index:999;
 }
 
-#splash img{
-    width:220px;
-}
+#splash img{width:220px}
 
-/* HOME */
-#home{
-    display:none;
-    height:100vh;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-}
-
-.btn{
-    padding:16px 28px;
-    margin:10px;
-    font-size:18px;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-    background:#4caf50;
-    color:white;
-}
-
-/* TOP BAR */
-#top{
-    display:flex;
-    justify-content:space-between;
-    padding:12px;
-    background:#ffffffcc;
-    font-weight:bold;
-}
-
-/* GAME AREA */
+/* GAME */
 #game{
     display:none;
     height:100vh;
     flex-direction:column;
 }
 
-/* QUESTION CARD */
+#top{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    background:#ffffffcc;
+    font-weight:bold;
+}
+
+/* QUESTION */
 .card{
-    background:white;
     width:92%;
     max-width:520px;
     margin:auto;
-    padding:22px;
-    border-radius:18px;
-    box-shadow:0 6px 20px rgba(0,0,0,0.12);
+    background:white;
+    padding:18px;
+    border-radius:16px;
     text-align:center;
+    box-shadow:0 6px 20px rgba(0,0,0,0.12);
 }
 
-/* VISUAL TILE (NO EMOJI) */
-.visual{
-    width:140px;
-    height:140px;
-    margin:10px auto;
-    border-radius:20px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:28px;
-    font-weight:bold;
-    color:#333;
-    background:linear-gradient(135deg,#fff3e0,#e1f5fe);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
-}
-
-/* OPTIONS */
-.options{
+/* IMAGE GRID */
+.grid{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:12px;
     margin-top:15px;
 }
 
-.opt{
-    padding:16px;
-    border:none;
-    border-radius:12px;
-    background:#e3f2fd;
-    font-size:20px;
+/* IMAGE TILE (CROPPED FROM ONE PACK) */
+.tile{
+    height:140px;
+    border-radius:14px;
+    background-image:url("assets/a_collection_of_eight_educational_digital_illustra.png");
+    background-size:400px 400px;
     cursor:pointer;
+    border:3px solid transparent;
     transition:0.2s;
 }
 
-.opt:active{
-    transform:scale(0.96);
+.tile:hover{
+    transform:scale(1.03);
 }
 
-.opt.correct{
-    background:#c8e6c9 !important;
+/* CROPPED POSITIONS (FROM IMAGE GRID) */
+
+/* Doctor */
+.doc{ background-position:0px 0px; }
+
+/* Teacher */
+.teacher{ background-position:-200px 0px; }
+
+/* Cat */
+.cat{ background-position:-400px 0px; }
+
+/* Kids group */
+.group{ background-position:0px -200px; }
+
+/* Girl */
+.girl{ background-position:-200px -200px; }
+
+/* Boy */
+.boy{ background-position:-400px -200px; }
+
+/* OPTIONS */
+.options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:15px;
 }
 
-.opt.wrong{
-    background:#ffcdd2 !important;
+.opt{
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#e3f2fd;
+    font-size:18px;
 }
 
 #msg{
-    margin-top:12px;
+    margin-top:10px;
     font-weight:bold;
 }
 
@@ -162,8 +138,8 @@ body::before{
 }
 
 @keyframes fall{
-    0%{transform:translateY(-10px);}
-    100%{transform:translateY(100vh);}
+    0%{transform:translateY(-10px)}
+    100%{transform:translateY(100vh)}
 }
 
 </style>
@@ -176,12 +152,6 @@ body::before{
     <img src="assets/innovine-logo.png">
 </div>
 
-<!-- HOME -->
-<div id="home">
-    <h1>🧠 Pronoun Detective</h1>
-    <button class="btn" onclick="start()">Start Game</button>
-</div>
-
 <!-- GAME -->
 <div id="game">
 
@@ -191,22 +161,25 @@ body::before{
 </div>
 
 <div class="card">
+
     <h2 id="q"></h2>
 
-    <!-- VISUAL CARD (NO EMOJI DEPENDENCY) -->
-    <div class="visual" id="visual"></div>
+    <!-- IMAGE VISUAL -->
+    <div id="visual" class="tile doc"></div>
 
-    <div class="options" id="options"></div>
+    <div class="grid" id="grid"></div>
+
     <div id="msg"></div>
+
 </div>
 
 </div>
 
 <!-- RESULT -->
 <div id="result">
-    <h1>🎉 Good Job!</h1>
-    <h2>Your Score: <span id="final"></span></h2>
-    <button class="btn" onclick="location.reload()">Play Again</button>
+    <h1>🎉 Great Job!</h1>
+    <h2>Score: <span id="final"></span></h2>
+    <button onclick="location.reload()">Play Again</button>
 </div>
 
 <audio id="correct" src="assets/correct.mp3"></audio>
@@ -215,109 +188,112 @@ body::before{
 
 <script>
 
-/* SAFE QUESTION BANK (NO REPEATS) */
-let data = [
-{q:"___ is a doctor", a:"He", icon:"Doctor"},
-{q:"___ is a teacher", a:"She", icon:"Teacher"},
-{q:"___ is a cat", a:"It", icon:"Animal"},
-{q:"___ are friends", a:"They", icon:"Group"},
-{q:"___ am reading", a:"I", icon:"Me"},
-{q:"___ is my brother", a:"He", icon:"Boy"},
-{q:"___ is my sister", a:"She", icon:"Girl"}
+/* QUESTIONS */
+const data=[
+{q:"___ is a doctor", img:"doc", a:"He"},
+{q:"___ is a teacher", img:"teacher", a:"She"},
+{q:"___ is a cat", img:"cat", a:"It"},
+{q:"___ are friends", img:"group", a:"They"},
+{q:"___ is a girl", img:"girl", a:"She"},
+{q:"___ is a boy", img:"boy", a:"He"}
 ];
 
 let i=0;
 let score=0;
 let attempt=0;
 
-window.onload = () => {
-    setTimeout(()=>{
-        document.getElementById("splash").style.display="none";
-        document.getElementById("home").style.display="flex";
-    },5000);
+window.onload=()=>{
+setTimeout(()=>{
+document.getElementById("splash").style.display="none";
+document.getElementById("game").style.display="flex";
+load();
+},5000);
 };
 
-function start(){
-    document.getElementById("home").style.display="none";
-    document.getElementById("game").style.display="flex";
-    load();
-}
-
 function load(){
-    attempt=0;
 
-    if(i>=data.length){
-        end();
-        return;
-    }
+attempt=0;
 
-    let q=data[i];
-
-    document.getElementById("q").innerText=q.q;
-    document.getElementById("visual").innerText=q.icon;
-    document.getElementById("qno").innerText=i+1;
-    document.getElementById("score").innerText=score;
-
-    let box=document.getElementById("options");
-    box.innerHTML="";
-
-    ["He","She","It","They","I"].forEach(op=>{
-        let b=document.createElement("button");
-        b.className="opt";
-        b.innerText=op;
-        b.onclick=()=>check(b,op);
-        box.appendChild(b);
-    });
+if(i>=data.length){
+end();
+return;
 }
 
-function check(btn,ans){
-    let q=data[i];
+let q=data[i];
 
-    if(ans===q.a){
-        btn.classList.add("correct");
-        score++;
-        safe("correct");
-        safe("clap");
-        confetti();
+document.getElementById("q").innerText=q.q;
+document.getElementById("visual").className="tile "+q.img;
 
-        setTimeout(()=>{ i++; load(); },900);
-    }
-    else{
-        attempt++;
-        btn.classList.add("wrong");
-        safe("wrong");
+document.getElementById("qno").innerText=i+1;
+document.getElementById("score").innerText=score;
 
-        if(attempt>=2){
-            document.getElementById("msg").innerText="Answer: "+q.a;
-            setTimeout(()=>{ i++; load(); },900);
-        }
-    }
+let box=document.getElementById("grid");
+box.innerHTML="";
 
-    document.getElementById("score").innerText=score;
+["He","She","It","They","I"].forEach(op=>{
+
+let b=document.createElement("button");
+b.className="opt";
+b.innerText=op;
+b.onclick=()=>check(op);
+box.appendChild(b);
+
+});
+
+}
+
+function check(ans){
+
+let q=data[i];
+
+if(ans===q.a){
+score++;
+safe("correct");
+safe("clap");
+confetti();
+document.getElementById("msg").innerText="Correct!";
+
+setTimeout(()=>{
+i++;
+load();
+},900);
+
+}else{
+
+attempt++;
+safe("wrong");
+
+if(attempt>=2){
+document.getElementById("msg").innerText="Answer: "+q.a;
+setTimeout(()=>{i++;load();},900);
+}
+}
+
+document.getElementById("score").innerText=score;
 }
 
 function end(){
-    document.getElementById("game").style.display="none";
-    document.getElementById("result").style.display="flex";
-    document.getElementById("final").innerText=score;
-    confetti();
+document.getElementById("game").style.display="none";
+document.getElementById("result").style.display="flex";
+document.getElementById("final").innerText=score;
+confetti();
 }
 
 function safe(id){
-    let a=document.getElementById(id);
-    a.currentTime=0;
-    a.play().catch(()=>{});
+let a=document.getElementById(id);
+a.currentTime=0;
+a.play().catch(()=>{});
 }
 
 function confetti(){
-    for(let i=0;i<20;i++){
-        let d=document.createElement("div");
-        d.className="confetti";
-        d.style.left=Math.random()*100+"vw";
-        d.style.background=["#ff5252","#ffd740","#40c4ff","#69f0ae"][Math.floor(Math.random()*4)];
-        document.body.appendChild(d);
-        setTimeout(()=>d.remove(),2000);
-    }
+for(let i=0;i<25;i++){
+let d=document.createElement("div");
+d.className="confetti";
+d.style.left=Math.random()*100+"vw";
+d.style.background=["#ff5252","#ffd740","#40c4ff","#69f0ae"][Math.floor(Math.random()*4)];
+document.body.appendChild(d);
+setTimeout(()=>d.remove(),2000);
+}
 }
 
 </script>
