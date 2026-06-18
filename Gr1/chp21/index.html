@@ -10,7 +10,24 @@ body {
     margin: 0;
     overflow: hidden;
     font-family: Arial;
-    background: linear-gradient(to top, #cfefff, #ffffff);
+    background: linear-gradient(to top, #bfe9ff, #ffffff);
+}
+
+/* FLOATING BACKGROUND EFFECT */
+body::before {
+    content: "";
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.6) 10%, transparent 11%);
+    background-size: 80px 80px;
+    animation: floatBG 20s linear infinite;
+    opacity: 0.4;
+}
+
+@keyframes floatBG {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-200px); }
 }
 
 /* SPLASH */
@@ -22,7 +39,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+    z-index: 20;
 }
 
 /* TITLE SCREEN */
@@ -30,17 +47,24 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, #fff3c4, #cfefff);
     display: none;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 9;
+    background: linear-gradient(135deg, #fff7cc, #cfefff);
+    z-index: 10;
 }
 
-#titleScreen h1 {
-    font-size: 42px;
-    color: #333;
+.titleCard {
+    background: white;
+    padding: 40px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.titleCard h1 {
+    font-size: 38px;
+    margin-bottom: 20px;
 }
 
 /* GAME AREA */
@@ -55,33 +79,35 @@ body {
 /* SCORE */
 #score {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 20px;
+    top: 15px;
+    left: 15px;
+    font-size: 22px;
     font-weight: bold;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 /* BASKET */
 #basket {
     position: absolute;
-    bottom: 20px;
-    width: 120px;
-    height: 80px;
-    background: url('basket.jpg') no-repeat center;
-    background-size: contain;
+    bottom: 15px;
+    width: 130px;
     left: 50%;
     transform: translateX(-50%);
+    z-index: 5;
 }
 
-/* WORD */
+/* WORDS */
 .word {
     position: absolute;
     top: 0;
-    padding: 8px 14px;
-    border-radius: 12px;
-    font-size: 22px;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 24px;
     font-weight: bold;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
 }
 
 /* END SCREEN */
@@ -89,46 +115,53 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.6);
     color: white;
     display: none;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-size: 28px;
+    flex-direction: column;
+    font-size: 30px;
+    z-index: 50;
 }
+
 button {
-    padding: 10px 20px;
+    padding: 12px 22px;
     font-size: 18px;
     margin-top: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     border: none;
+    cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<!-- SPLASH -->
+<!-- SPLASH (LOGO FIXED) -->
 <div id="splash">
-    <img src="innovine-logo.png" style="width:220px;">
+    <img src="innovine-logo.png" style="width:260px; max-width:80%;">
 </div>
 
 <!-- TITLE -->
 <div id="titleScreen">
-    <h1>🎯 Sight Word Catcher</h1>
-    <button onclick="startGame()">Start</button>
+    <div class="titleCard">
+        <h1>🎯 Sight Word Catcher</h1>
+        <button onclick="startGame()">Start Game</button>
+    </div>
 </div>
 
 <!-- GAME -->
 <div id="gameArea">
     <div id="score">Caught: 0 / 10</div>
-    <div id="basket"></div>
+    
+    <!-- BASKET FIXED -->
+    <img id="basket" src="basket.jpg">
 </div>
 
 <!-- END -->
 <div id="endScreen">
-    <div>🎉 Great Job!</div>
+    🎉 Great Job!
     <button onclick="restartGame()">Play Again</button>
 </div>
 
@@ -137,63 +170,60 @@ button {
 
 <script>
 
-/* ---------------- WORD LISTS ---------------- */
 const sightWords = ["the","and","is","in","it","you","we","he","she","me"];
-
-const decodableWords = [
-    "cat","dog","sun","bat","pen","cup","map","tap","sit","run"
-];
+const decodableWords = ["cat","dog","sun","bat","pen","cup","map","tap","sit","run"];
 
 let caught = 0;
-let basketX = window.innerWidth/2 - 60;
-let gameRunning = false;
+let basketX = window.innerWidth/2 - 65;
+let running = false;
 
-/* ---------------- ELEMENTS ---------------- */
 const basket = document.getElementById("basket");
 const gameArea = document.getElementById("gameArea");
 const score = document.getElementById("score");
 
-/* ---------------- SPLASH FLOW ---------------- */
+/* SPLASH → TITLE */
 setTimeout(() => {
     document.getElementById("splash").style.display = "none";
     document.getElementById("titleScreen").style.display = "flex";
 }, 5000);
 
-/* ---------------- GAME START ---------------- */
+/* START */
 function startGame() {
     document.getElementById("titleScreen").style.display = "none";
     gameArea.style.display = "block";
-    gameRunning = true;
+    running = true;
     spawnWord();
 }
 
-/* ---------------- BASKET CONTROL ---------------- */
+/* BASKET CONTROL */
 document.addEventListener("keydown", (e) => {
-    if (!gameRunning) return;
-    if (e.key === "ArrowLeft") basketX -= 30;
-    if (e.key === "ArrowRight") basketX += 30;
-    basketX = Math.max(0, Math.min(window.innerWidth-120, basketX));
+    if (!running) return;
+    if (e.key === "ArrowLeft") basketX -= 35;
+    if (e.key === "ArrowRight") basketX += 35;
+
+    basketX = Math.max(0, Math.min(window.innerWidth-130, basketX));
     basket.style.left = basketX + "px";
 });
 
 /* TOUCH */
 let startX = 0;
 document.addEventListener("touchstart", e => startX = e.touches[0].clientX);
+
 document.addEventListener("touchmove", e => {
-    if (!gameRunning) return;
+    if (!running) return;
     let diff = e.touches[0].clientX - startX;
-    basketX += diff * 0.3;
-    basketX = Math.max(0, Math.min(window.innerWidth-120, basketX));
+    basketX += diff * 0.25;
+    basketX = Math.max(0, Math.min(window.innerWidth-130, basketX));
     basket.style.left = basketX + "px";
     startX = e.touches[0].clientX;
 });
 
-/* ---------------- WORD SPAWN ---------------- */
+/* WORD SPAWN */
 function spawnWord() {
 
-    if (!gameRunning) return;
+    if (!running) return;
 
-    let isSight = Math.random() > 0.35; // more sight words
+    let isSight = Math.random() > 0.35;
 
     let word = isSight ?
         sightWords[Math.floor(Math.random()*sightWords.length)] :
@@ -203,9 +233,7 @@ function spawnWord() {
     el.classList.add("word");
     el.innerText = word;
 
-    // color styling
-    el.style.background = isSight ?
-        "#b3f5ff" : "#ffd1dc";
+    el.style.background = isSight ? "#a8f0ff" : "#ffb3c6";
 
     let x = Math.random() * (window.innerWidth - 100);
     let y = 0;
@@ -214,18 +242,17 @@ function spawnWord() {
     gameArea.appendChild(el);
 
     function fall() {
-        if (!gameRunning) return;
+        if (!running) return;
 
-        y += 1.2; // slow fall
+        y += 1.1; // slow & gentle
         el.style.top = y + "px";
 
-        let basketTop = window.innerHeight - 100;
+        let basketTop = window.innerHeight - 120;
 
-        // COLLISION
         if (
             y > basketTop &&
             x > basketX - 50 &&
-            x < basketX + 120
+            x < basketX + 130
         ) {
             el.remove();
 
@@ -233,21 +260,16 @@ function spawnWord() {
                 caught++;
                 document.getElementById("clapSound").play();
                 score.innerText = `Caught: ${caught} / 10`;
-
-                if (caught >= 10) {
-                    endGame();
-                    return;
-                }
-
             } else {
                 document.getElementById("wrongSound").play();
             }
 
-            setTimeout(spawnWord, 600);
+            if (caught >= 10) return endGame();
+
+            setTimeout(spawnWord, 500);
             return;
         }
 
-        // MISS
         if (y > window.innerHeight) {
             el.remove();
             setTimeout(spawnWord, 400);
@@ -260,14 +282,14 @@ function spawnWord() {
     fall();
 }
 
-/* ---------------- END GAME ---------------- */
+/* END */
 function endGame() {
-    gameRunning = false;
+    running = false;
     document.getElementById("endScreen").style.display = "flex";
     gameArea.style.display = "none";
 }
 
-/* ---------------- RESTART ---------------- */
+/* RESTART */
 function restartGame() {
     location.reload();
 }
