@@ -94,12 +94,12 @@
         #ticker-track {
             position: absolute;
             display: flex;
-            gap: 60px; /* Space between moving images */
+            gap: 60px; 
             white-space: nowrap;
             will-change: transform;
         }
 
-        /* Image item scaled to ~1 inch height (approx 96 pixels) */
+        /* Exactly 1 inch high (approx 96 pixels) */
         .ticker-item {
             height: 96px; 
             width: auto;
@@ -116,7 +116,7 @@
             transform: scale(0.9);
         }
 
-        /* Score Display during gameplay */
+        /* Score Display */
         #live-score {
             font-size: 24px;
             font-weight: bold;
@@ -186,7 +186,7 @@
         </div>
 
         <div id="ticker-zone">
-            <div id="ticker-track" id="ticker-track"></div>
+            <div id="ticker-track"></div>
         </div>
 
         <div id="live-score">Score: 0 / 10</div>
@@ -199,11 +199,11 @@
     </div>
 
     <script>
-        // Game asset mapping from your directory list
+        // Exact names matching your file structure list
         const gameItems = [
-            { word: 'eat', src: 'eat_image_jpg' }, // adjusted extension flags handling below
+            { word: 'eat', src: 'eat_image.jpg' },
             { word: 'jump', src: 'jump_image.png' },
-            { word: 'read', src: 'read_image.png' }, // preferences png if dual, handling fallback below
+            { word: 'read', src: 'read_image.png' },
             { word: 'run', src: 'run_image.png' },
             { word: 'sing', src: 'sing_image.png' },
             { word: 'sit', src: 'sit_image.png' },
@@ -212,27 +212,13 @@
             { word: 'walk', src: 'walk_image.png' }
         ];
 
-        // Specific file corrections based on image metadata names
-        gameItems[0].src = 'eat_image_jpg'; // your list lists eat_image.jpg as eat_image_jpg or eat_image.jpg? Let's safeguard:
-        const fileMapping = {
-            'eat': 'eat_image.jpg',
-            'jump': 'jump_image.png',
-            'read': 'read_image.png',
-            'run': 'run_image.png',
-            'sing': 'sing_image.png',
-            'sit': 'sit_image.png',
-            'sleep': 'sleep_image.jpg',
-            'swim': 'swim_image.png',
-            'walk': 'walk_image.png'
-        };
-
         let currentTarget = {};
         let score = 0;
         let roundsPlayed = 0;
         const totalRounds = 10;
         
         let tickerPosition = 0;
-        let tickerSpeed = 2.5; // Custom speed of the ticker
+        const tickerSpeed = 2.5; 
         let animationFrameId;
 
         const introScreen = document.getElementById('intro-screen');
@@ -243,12 +229,11 @@
         const finalScoreText = document.getElementById('final-score-text');
         const tickerTrack = document.getElementById('ticker-track');
 
-        // Audio elements
         const soundCorrect = document.getElementById('sound-correct');
         const soundClapping = document.getElementById('sound-clapping');
         const soundWrong = document.getElementById('sound-wrong');
 
-        // Start countdown on page load
+        // 5 Second Introduction Logo Transition
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 introScreen.style.opacity = 0;
@@ -257,7 +242,7 @@
                     gameContainer.style.display = 'flex';
                     initGame();
                 }, 500);
-            }, 5000); // 5 Seconds introduction logo duration
+            }, 5000); 
         });
 
         function initGame() {
@@ -269,23 +254,25 @@
             animateTicker();
         }
 
-        // Generate dynamic ticker with random structural order loops
         function setupTicker() {
             tickerTrack.innerHTML = '';
             
-            // Duplicate the items array multiple times to ensure seamless infinite looping visual space
-            const tripleList = [...gameItems, ...gameItems, ...gameItems, ...gameItems];
-            // Shuffle array so it is a random ticker feed
-            tripleList.sort(() => Math.random() - 0.5);
+            // Generate multiple sets of the items to ensure a long continuous chain
+            let loopedList = [];
+            for (let i = 0; i < 5; i++) {
+                loopedList = loopedList.concat(gameItems);
+            }
+            
+            // Shuffle the order completely
+            loopedList.sort(() => Math.random() - 0.5);
 
-            tripleList.forEach(item => {
+            loopedList.forEach(item => {
                 const img = document.createElement('img');
-                img.src = fileMapping[item.word];
+                img.src = item.src; // Uses correct string format directly
                 img.className = 'ticker-item';
                 img.dataset.word = item.word;
                 
-                // Add click behavior
-                img.addEventListener('click', (e) => handleImageClick(e, item.word));
+                img.addEventListener('click', () => handleImageClick(item.word));
                 tickerTrack.appendChild(img);
             });
 
@@ -293,11 +280,10 @@
             tickerTrack.style.transform = `translateX(${tickerPosition}px)`;
         }
 
-        // Continuous Loop Animation Engine
         function animateTicker() {
             tickerPosition -= tickerSpeed;
             
-            // If the track moves all the way left, loop it smoothly back to center space balance
+            // Seamless infinite loop point
             if (Math.abs(tickerPosition) >= (tickerTrack.scrollWidth / 2)) {
                 tickerPosition = 0;
             }
@@ -312,22 +298,18 @@
                 return;
             }
 
-            // Select a random action target for this round
             const randomIndex = Math.floor(Math.random() * gameItems.length);
             currentTarget = gameItems[randomIndex];
             targetWordDisplay.innerText = currentTarget.word;
         }
 
-        function handleImageClick(event, clickedWord) {
+        function handleImageClick(clickedWord) {
             roundsPlayed++;
 
             if (clickedWord === currentTarget.word) {
                 score++;
-                // Flash feedback or play sounds
                 soundCorrect.currentTime = 0;
                 soundCorrect.play().catch(()=>{}); 
-                
-                // Extra satisfaction sound effect
                 soundClapping.currentTime = 0;
                 soundClapping.play().catch(()=>{});
             } else {
@@ -335,10 +317,7 @@
                 soundWrong.play().catch(()=>{});
             }
 
-            // Update user UI metrics
             liveScoreDisplay.innerText = `Score: ${score} / ${totalRounds}`;
-            
-            // Advance target text condition
             nextRound();
         }
 
