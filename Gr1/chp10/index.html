@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Word Blast Shooter FINAL</title>
+<title>Word Blast Shooter FINAL FIXED</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -25,6 +25,13 @@ body{
     z-index:9999;
 }
 
+#splash img{
+    max-width:260px;
+    width:70%;
+    height:auto;
+    display:block;
+}
+
 /* ================= INSTRUCTIONS ================= */
 #instructions{
     display:none;
@@ -40,6 +47,20 @@ body{
     padding:30px;
     box-sizing:border-box;
     z-index:9998;
+}
+
+#instructions h1{font-size:32px;}
+#instructions p{font-size:20px;font-weight:bold;}
+
+#startBtn{
+    display:none;
+    padding:15px 25px;
+    font-size:20px;
+    background:#444;
+    color:white;
+    border:none;
+    border-radius:10px;
+    margin-top:20px;
 }
 
 /* ================= TOP BAR ================= */
@@ -103,7 +124,7 @@ body{
     cursor:pointer;
 }
 
-/* ================= BLAST EFFECT (FIXED) ================= */
+/* ================= BLAST ================= */
 .blast{
     animation: explode 0.4s ease-out forwards;
 }
@@ -151,7 +172,7 @@ body{
 
 <!-- SPLASH -->
 <div id="splash">
-    <img src="assets/innovine-logo.png" style="max-width:250px;">
+    <img src="assets/innovine-logo.png">
 </div>
 
 <!-- INSTRUCTIONS -->
@@ -161,7 +182,7 @@ body{
     <button id="startBtn">START GAME</button>
 </div>
 
-<!-- TOP -->
+<!-- TOP BAR -->
 <div id="topBar">🎯 Tap word → aim → blast!</div>
 
 <!-- HUD -->
@@ -216,6 +237,9 @@ let words=[];
 let frozen=false;
 let lastTime=0;
 
+/* ================= PREVENT DOUBLE RENDER ISSUE ================= */
+let gameStarted = false;
+
 /* ================= START FLOW ================= */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
@@ -228,6 +252,9 @@ document.getElementById("startBtn").style.display="inline-block";
 
 /* ================= START ================= */
 document.getElementById("startBtn").onclick=()=>{
+if(gameStarted) return;
+gameStarted = true;
+
 document.getElementById("instructions").style.display="none";
 document.getElementById("topBar").style.display="block";
 document.getElementById("hud").style.display="flex";
@@ -245,7 +272,11 @@ document.querySelectorAll(".word").forEach(w=>w.remove());
 words=[];
 
 let q = questions[questionIndex];
-document.getElementById("target").innerText = q.obj;
+
+// FIX: CLEAN TARGET (NO DOUBLE TEXT ISSUE)
+let target = document.getElementById("target");
+target.innerHTML = "";
+target.innerText = q.obj;
 
 let options=[q.ans,...q.wrong].sort(()=>Math.random()-0.5);
 
@@ -266,7 +297,7 @@ words.push(div);
 });
 }
 
-/* ================= SMOOTH FALL ================= */
+/* ================= FALL ================= */
 function fall(timestamp){
 if(!lastTime) lastTime = timestamp;
 let delta = (timestamp - lastTime)/16;
