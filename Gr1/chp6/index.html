@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELA Action Words Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Intro Screen Style */
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: opacity 0.5s ease;
+        }
+
+        #intro-screen img {
+            max-height: 200px;
+            object-fit: contain;
+        }
+
+        /* Main Game Container */
+        #game-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        /* Top Prompt Section */
+        #prompt-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        #instruction {
+            font-size: 24px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        #target-word {
+            font-size: 64px;
+            font-weight: bold;
+            color: #ff4500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background-color: #fff;
+            padding: 10px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+
+        /* Ticker Track Zone */
+        #ticker-zone {
+            width: 100%;
+            height: 150px;
+            background-color: #ffe4b5;
+            border-top: 4px solid #ffa500;
+            border-bottom: 4px solid #ffa500;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        #ticker-track {
+            position: absolute;
+            display: flex;
+            gap: 60px; /* Space between moving images */
+            white-space: nowrap;
+            will-change: transform;
+        }
+
+        /* Image item scaled to ~1 inch height (approx 96 pixels) */
+        .ticker-item {
+            height: 96px; 
+            width: auto;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            object-fit: contain;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 4px;
+        }
+
+        .ticker-item:active {
+            transform: scale(0.9);
+        }
+
+        /* Score Display during gameplay */
+        #live-score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* End Scoreboard Screen */
+        #scoreboard {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            z-index: 5;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #scoreboard h1 {
+            font-size: 48px;
+            color: #2ed573;
+            margin-bottom: 20px;
+        }
+
+        #scoreboard p {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 22px;
+            font-weight: bold;
+            background-color: #ff4500;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255,69,0,0.4);
+        }
+
+        .btn:hover {
+            background-color: #e03d00;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="sound-correct" src="correct.mp3" preload="auto"></audio>
+    <audio id="sound-clapping" src="clapping.mp3" preload="auto"></audio>
+    <audio id="sound-wrong" src="wrong.mp3" preload="auto"></audio>
+
+    <div id="intro-screen">
+        <img src="innovine-logo.png" alt="Innovine Logo">
+    </div>
+
+    <div id="game-container">
+        <div id="prompt-container">
+            <div id="instruction">Read and Click the matching picture!</div>
+            <div id="target-word">START</div>
+        </div>
+
+        <div id="ticker-zone">
+            <div id="ticker-track" id="ticker-track"></div>
+        </div>
+
+        <div id="live-score">Score: 0 / 10</div>
+    </div>
+
+    <div id="scoreboard">
+        <h1>Game Over! 🎉</h1>
+        <p id="final-score-text">You scored: 0 out of 10</p>
+        <button class="btn" onclick="resetGame()">Play Again</button>
+    </div>
+
+    <script>
+        // Game asset mapping from your directory list
+        const gameItems = [
+            { word: 'eat', src: 'eat_image_jpg' }, // adjusted extension flags handling below
+            { word: 'jump', src: 'jump_image.png' },
+            { word: 'read', src: 'read_image.png' }, // preferences png if dual, handling fallback below
+            { word: 'run', src: 'run_image.png' },
+            { word: 'sing', src: 'sing_image.png' },
+            { word: 'sit', src: 'sit_image.png' },
+            { word: 'sleep', src: 'sleep_image.jpg' },
+            { word: 'swim', src: 'swim_image.png' },
+            { word: 'walk', src: 'walk_image.png' }
+        ];
+
+        // Specific file corrections based on image metadata names
+        gameItems[0].src = 'eat_image_jpg'; // your list lists eat_image.jpg as eat_image_jpg or eat_image.jpg? Let's safeguard:
+        const fileMapping = {
+            'eat': 'eat_image.jpg',
+            'jump': 'jump_image.png',
+            'read': 'read_image.png',
+            'run': 'run_image.png',
+            'sing': 'sing_image.png',
+            'sit': 'sit_image.png',
+            'sleep': 'sleep_image.jpg',
+            'swim': 'swim_image.png',
+            'walk': 'walk_image.png'
+        };
+
+        let currentTarget = {};
+        let score = 0;
+        let roundsPlayed = 0;
+        const totalRounds = 10;
+        
+        let tickerPosition = 0;
+        let tickerSpeed = 2.5; // Custom speed of the ticker
+        let animationFrameId;
+
+        const introScreen = document.getElementById('intro-screen');
+        const gameContainer = document.getElementById('game-container');
+        const scoreboard = document.getElementById('scoreboard');
+        const targetWordDisplay = document.getElementById('target-word');
+        const liveScoreDisplay = document.getElementById('live-score');
+        const finalScoreText = document.getElementById('final-score-text');
+        const tickerTrack = document.getElementById('ticker-track');
+
+        // Audio elements
+        const soundCorrect = document.getElementById('sound-correct');
+        const soundClapping = document.getElementById('sound-clapping');
+        const soundWrong = document.getElementById('sound-wrong');
+
+        // Start countdown on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                introScreen.style.opacity = 0;
+                setTimeout(() => {
+                    introScreen.style.display = 'none';
+                    gameContainer.style.display = 'flex';
+                    initGame();
+                }, 500);
+            }, 5000); // 5 Seconds introduction logo duration
+        });
+
+        function initGame() {
+            score = 0;
+            roundsPlayed = 0;
+            liveScoreDisplay.innerText = `Score: ${score} / ${totalRounds}`;
+            setupTicker();
+            nextRound();
+            animateTicker();
+        }
+
+        // Generate dynamic ticker with random structural order loops
+        function setupTicker() {
+            tickerTrack.innerHTML = '';
+            
+            // Duplicate the items array multiple times to ensure seamless infinite looping visual space
+            const tripleList = [...gameItems, ...gameItems, ...gameItems, ...gameItems];
+            // Shuffle array so it is a random ticker feed
+            tripleList.sort(() => Math.random() - 0.5);
+
+            tripleList.forEach(item => {
+                const img = document.createElement('img');
+                img.src = fileMapping[item.word];
+                img.className = 'ticker-item';
+                img.dataset.word = item.word;
+                
+                // Add click behavior
+                img.addEventListener('click', (e) => handleImageClick(e, item.word));
+                tickerTrack.appendChild(img);
+            });
+
+            tickerPosition = window.innerWidth;
+            tickerTrack.style.transform = `translateX(${tickerPosition}px)`;
+        }
+
+        // Continuous Loop Animation Engine
+        function animateTicker() {
+            tickerPosition -= tickerSpeed;
+            
+            // If the track moves all the way left, loop it smoothly back to center space balance
+            if (Math.abs(tickerPosition) >= (tickerTrack.scrollWidth / 2)) {
+                tickerPosition = 0;
+            }
+            
+            tickerTrack.style.transform = `translateX(${tickerPosition}px)`;
+            animationFrameId = requestAnimationFrame(animateTicker);
+        }
+
+        function nextRound() {
+            if (roundsPlayed >= totalRounds) {
+                endGame();
+                return;
+            }
+
+            // Select a random action target for this round
+            const randomIndex = Math.floor(Math.random() * gameItems.length);
+            currentTarget = gameItems[randomIndex];
+            targetWordDisplay.innerText = currentTarget.word;
+        }
+
+        function handleImageClick(event, clickedWord) {
+            roundsPlayed++;
+
+            if (clickedWord === currentTarget.word) {
+                score++;
+                // Flash feedback or play sounds
+                soundCorrect.currentTime = 0;
+                soundCorrect.play().catch(()=>{}); 
+                
+                // Extra satisfaction sound effect
+                soundClapping.currentTime = 0;
+                soundClapping.play().catch(()=>{});
+            } else {
+                soundWrong.currentTime = 0;
+                soundWrong.play().catch(()=>{});
+            }
+
+            // Update user UI metrics
+            liveScoreDisplay.innerText = `Score: ${score} / ${totalRounds}`;
+            
+            // Advance target text condition
+            nextRound();
+        }
+
+        function endGame() {
+            cancelAnimationFrame(animationFrameId);
+            gameContainer.style.display = 'none';
+            scoreboard.style.display = 'flex';
+            finalScoreText.innerText = `You scored: ${score} out of ${totalRounds}`;
+        }
+
+        function resetGame() {
+            scoreboard.style.display = 'none';
+            gameContainer.style.display = 'flex';
+            initGame();
+        }
+    </script>
+</body>
+</html>
