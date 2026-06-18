@@ -29,7 +29,7 @@ body {
     width: 250px;
 }
 
-/* GAME UI */
+/* GAME */
 #game {
     display: none;
 }
@@ -56,6 +56,7 @@ body {
     z-index: 5;
 }
 
+/* GAME AREA */
 #gameArea {
     position: absolute;
     width: 100%;
@@ -63,12 +64,22 @@ body {
     overflow: hidden;
 }
 
-/* MOVING ITEMS */
-.item {
+/* FIXED ROW LAYOUT */
+.row {
     position: absolute;
-    width: 90px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    top: 45%;
+}
+
+/* BIGGER IMAGES (~2 inches ≈ 180px) */
+.item {
+    width: 180px;
+    height: auto;
     cursor: pointer;
     transition: transform 0.2s;
+    z-index: 2;
 }
 
 .item:hover {
@@ -121,11 +132,10 @@ body {
 </div>
 
 <!-- AUDIO -->
-<audio id="correctSound" src="ELA_Games/Gr1/chp6/assets/clapping.mp3"></audio>
-<audio id="wrongSound" src="ELA_Games/Gr1/chp6/assets/wrong.mp3"></audio>
+<audio id="correctSound" src="assets/clapping.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
 
 <script>
-const assetsPath = "assets/";
 
 const images = [
     {word:"sleep", img:"sleep_image.jpg"},
@@ -150,56 +160,35 @@ const topWord = document.getElementById("topWord");
 const correctSound = document.getElementById("correctSound");
 const wrongSound = document.getElementById("wrongSound");
 
-let items = [];
+let row;
 
-/* SPLASH SCREEN */
+/* SPLASH */
 setTimeout(() => {
     document.getElementById("splash").style.display = "none";
     document.getElementById("game").style.display = "block";
     startGame();
 }, 5000);
 
-/* CREATE MOVING ITEMS */
-function createItems() {
-    images.forEach((data, i) => {
-        let div = document.createElement("img");
-        div.src = assetsPath + data.img;
-        div.className = "item";
-        div.dataset.word = data.word;
+/* CREATE ONE CLEAN ROW */
+function createRow() {
+    row = document.createElement("div");
+    row.className = "row";
+    gameArea.appendChild(row);
 
-        div.style.top = (80 + i * 60) + "px";
-        div.style.left = Math.random() * window.innerWidth + "px";
+    images.forEach((data) => {
+        let img = document.createElement("img");
+        img.src = "assets/" + data.img;
+        img.className = "item";
 
-        gameArea.appendChild(div);
+        img.dataset.word = data.word;
 
-        items.push({
-            el: div,
-            x: Math.random() * window.innerWidth,
-            y: 80 + i * 60,
-            speed: 0.6 + Math.random() * 0.5,
-            word: data.word
-        });
+        img.addEventListener("click", () => checkClick(data.word));
 
-        div.addEventListener("click", () => checkClick(data.word));
+        row.appendChild(img);
     });
 }
 
-/* MOVEMENT LOOP */
-function moveItems() {
-    items.forEach(obj => {
-        obj.x -= obj.speed;
-
-        if (obj.x < -120) {
-            obj.x = window.innerWidth + Math.random() * 200;
-        }
-
-        obj.el.style.left = obj.x + "px";
-    });
-
-    requestAnimationFrame(moveItems);
-}
-
-/* RANDOM WORD GENERATOR */
+/* CHANGE TARGET WORD */
 function setNewWord() {
     let random = images[Math.floor(Math.random() * images.length)];
     targetWord = random.word;
@@ -222,21 +211,21 @@ function checkClick(word) {
     if (score >= 10) endGame();
 }
 
-/* START GAME */
+/* START */
 function startGame() {
     gameRunning = true;
-    createItems();
+    createRow();
     setNewWord();
-    moveItems();
 }
 
-/* END GAME */
+/* END */
 function endGame() {
     gameRunning = false;
     document.getElementById("game").style.display = "none";
     document.getElementById("endScreen").style.display = "flex";
     document.getElementById("finalScore").innerText = "Score: " + score;
 }
+
 </script>
 
 </body>
