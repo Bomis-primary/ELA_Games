@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Action Word Ticker Game</title>
+<title>Superhero Action Word Mission</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -22,11 +22,43 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+    z-index: 50;
 }
 
 #splash img {
-    width: 250px;
+    width: 260px;
+}
+
+/* TITLE SCREEN */
+#titleScreen{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:#e3f2fd;
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    z-index:40;
+}
+
+#titleScreen h1{
+    font-size:42px;
+    color:#0d47a1;
+}
+
+#titleScreen p{
+    font-size:20px;
+    max-width:600px;
+    padding:10px;
+}
+
+#startBtn{
+    padding:12px 25px;
+    font-size:18px;
+    margin-top:20px;
+    display:none;
 }
 
 /* GAME AREA */
@@ -34,29 +66,32 @@ body {
     display: none;
 }
 
+/* TOP QUESTION */
 #topWord {
     position: absolute;
-    top: 20px;
+    top: 10px;
     width: 100%;
     text-align: center;
-    font-size: 42px;
+    font-size: 40px;
     font-weight: bold;
     color: #0d47a1;
     z-index: 5;
 }
 
-#scoreBoard {
+/* TOP BAR */
+#topBar {
     position: absolute;
-    top: 20px;
-    left: 20px;
-    background: white;
-    padding: 10px 15px;
-    border-radius: 10px;
-    z-index: 5;
+    top: 60px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
     font-size: 20px;
+    font-weight: bold;
+    z-index: 5;
 }
 
-/* TICKER STRIP */
+/* TICKER */
 #ticker {
     position: absolute;
     top: 45%;
@@ -66,13 +101,12 @@ body {
     white-space: nowrap;
 }
 
-/* IMAGE STYLE (2 inches approx) */
+/* IMAGE */
 .item {
-    height: 200px;   /* ~2 inches visual */
+    height: 200px;
     margin: 0 40px;
     cursor: pointer;
     display: inline-block;
-    vertical-align: middle;
     transition: transform 0.2s;
 }
 
@@ -80,7 +114,6 @@ body {
     transform: scale(1.1);
 }
 
-/* moving track */
 #track {
     display: inline-block;
     white-space: nowrap;
@@ -92,7 +125,7 @@ body {
     to { transform: translateX(-50%); }
 }
 
-/* END SCREEN */
+/* END */
 #endScreen {
     position: absolute;
     width: 100%;
@@ -102,12 +135,23 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    z-index: 20;
+    z-index: 100;
 }
 
-#endScreen h1 {
-    font-size: 50px;
-    color: green;
+/* CONFETTI */
+.confetti {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: red;
+    animation: fall 2s linear forwards;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(600px) rotate(360deg);
+        opacity: 0;
+    }
 }
 </style>
 </head>
@@ -119,14 +163,22 @@ body {
     <img src="assets/innovine-logo.png">
 </div>
 
+<!-- TITLE SCREEN -->
+<div id="titleScreen">
+    <h1>🦸 Superhero Training Camp</h1>
+    <p>Mission: Action Word Rescue! Tap the correct action word image to complete your hero training.</p>
+    <button id="startBtn">START MISSION</button>
+</div>
+
 <!-- GAME -->
 <div id="game">
 
-    <div id="scoreBoard">
-        Score: <span id="score">0</span>
-    </div>
-
     <div id="topWord">Loading...</div>
+
+    <div id="topBar">
+        <div id="counter">Mission: 0/10</div>
+        <div id="timer">⏱ 45</div>
+    </div>
 
     <div id="ticker">
         <div id="track"></div>
@@ -135,7 +187,7 @@ body {
 
 <!-- END -->
 <div id="endScreen">
-    <h1>Good Job!</h1>
+    <h1>Mission Complete! 🦸</h1>
     <p id="finalScore"></p>
 </div>
 
@@ -146,45 +198,58 @@ body {
 <script>
 
 const images = [
+    {word:"run", img:"run_image.png"},
+    {word:"jump", img:"jump_image.png"},
+    {word:"eat", img:"eat_image.jpg"},
     {word:"sleep", img:"sleep_image.jpg"},
     {word:"read", img:"read_image.png"},
-    {word:"run", img:"run_image.png"},
-    {word:"walk", img:"walk_image.png"},
-    {word:"eat", img:"eat_image.jpg"},
-    {word:"sit", img:"sit_image.png"},
     {word:"swim", img:"swim_image.png"},
-    {word:"jump", img:"jump_image.png"},
     {word:"sing", img:"sing_image.png"}
 ];
 
 let score = 0;
 let targetWord = "";
 let gameRunning = false;
+let questionIndex = 0;
+let time = 45;
 
 const track = document.getElementById("track");
-const scoreEl = document.getElementById("score");
 const topWord = document.getElementById("topWord");
+const counter = document.getElementById("counter");
+const timerEl = document.getElementById("timer");
 
 const correctSound = document.getElementById("correctSound");
 const wrongSound = document.getElementById("wrongSound");
 
-/* SPLASH */
+/* ================= SPLASH FLOW ================= */
 setTimeout(() => {
     document.getElementById("splash").style.display = "none";
-    document.getElementById("game").style.display = "block";
-    startGame();
+    document.getElementById("titleScreen").style.display = "flex";
+
+    setTimeout(()=>{
+        document.getElementById("startBtn").style.display="inline-block";
+    },3000);
+
 }, 5000);
 
-/* BUILD TICKER (duplicated for seamless loop) */
-function createTicker() {
+/* START */
+document.getElementById("startBtn").onclick = () => {
+    document.getElementById("titleScreen").style.display = "none";
+    document.getElementById("game").style.display = "block";
 
-    let list = [...images, ...images]; // duplicate for smooth loop
+    createTicker();
+    setNewWord();
+    startTimer();
+};
+
+/* TICKER */
+function createTicker() {
+    let list = [...images, ...images];
 
     list.forEach(data => {
         let img = document.createElement("img");
         img.src = "assets/" + data.img;
         img.className = "item";
-        img.dataset.word = data.word;
 
         img.addEventListener("click", () => checkClick(data.word));
 
@@ -196,38 +261,64 @@ function createTicker() {
 function setNewWord() {
     let random = images[Math.floor(Math.random() * images.length)];
     targetWord = random.word;
-    topWord.innerText = "Find: " + targetWord.toUpperCase();
+    topWord.innerText = "🦸 Find Action Word: " + targetWord.toUpperCase();
 }
 
-/* CLICK CHECK */
+/* CLICK */
 function checkClick(word) {
-    if (!gameRunning) return;
+    if (!gameRunning) gameRunning = true;
 
     if (word === targetWord) {
-        score++;
-        scoreEl.innerText = score;
-        correctSound.play();
-        setNewWord();
+
+        setTimeout(()=>{
+            correctSound.play();
+            score++;
+            questionIndex++;
+            counter.innerText = "Mission: " + questionIndex + "/10";
+            createConfetti();
+            setNewWord();
+        },1000);
+
     } else {
-        wrongSound.play();
+
+        setTimeout(()=>{
+            wrongSound.play();
+        },1000);
     }
 
-    if (score >= 10) endGame();
+    if (questionIndex >= 10) endGame();
 }
 
-/* START */
-function startGame() {
-    gameRunning = true;
-    createTicker();
-    setNewWord();
+/* TIMER */
+function startTimer() {
+    setInterval(() => {
+        time--;
+        timerEl.innerText = "⏱ " + time;
+
+        if (time <= 0) endGame();
+    }, 1000);
+}
+
+/* CONFETTI */
+function createConfetti(){
+    for(let i=0;i<20;i++){
+        let c=document.createElement("div");
+        c.className="confetti";
+        c.style.left=Math.random()*100+"%";
+        c.style.background=["red","blue","yellow","green"][i%4];
+        document.body.appendChild(c);
+
+        setTimeout(()=>c.remove(),2000);
+    }
 }
 
 /* END */
-function endGame() {
-    gameRunning = false;
-    document.getElementById("game").style.display = "none";
-    document.getElementById("endScreen").style.display = "flex";
-    document.getElementById("finalScore").innerText = "Score: " + score;
+function endGame(){
+    gameRunning=false;
+    document.getElementById("game").style.display="none";
+    document.getElementById("endScreen").style.display="flex";
+    document.getElementById("finalScore").innerText =
+        "Score: " + score + "/10 Missions Completed";
 }
 
 </script>
