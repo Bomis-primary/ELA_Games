@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Word Blast Shooter FINAL FIXED</title>
+<title>Word Blast Shooter FINAL</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -22,16 +22,16 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
+    z-index:9999;
 }
 
-/* ================= INSTRUCTIONS (CENTER FIXED) ================= */
+/* ================= INSTRUCTIONS ================= */
 #instructions{
     display:none;
     position:absolute;
     width:100%;
     height:100%;
     background:#fff8e1;
-
     display:flex;
     flex-direction:column;
     justify-content:center;
@@ -39,31 +39,10 @@ body{
     text-align:center;
     padding:30px;
     box-sizing:border-box;
+    z-index:9998;
 }
 
-#instructions h1{
-    font-size:32px;
-    margin:10px 0;
-}
-
-#instructions p{
-    font-size:20px;
-    font-weight:bold;
-    max-width:500px;
-}
-
-#startBtn{
-    display:none;
-    padding:15px 25px;
-    font-size:20px;
-    background:#444;
-    color:white;
-    border:none;
-    border-radius:10px;
-    margin-top:20px;
-}
-
-/* ================= TOP ================= */
+/* ================= TOP BAR ================= */
 #topBar{
     position:absolute;
     top:0;
@@ -82,13 +61,19 @@ body{
     top:40px;
     width:100%;
     display:none;
-    justify-content:space-around;
+    justify-content:space-between;
+    align-items:center;
     background:#eceff1;
-    padding:6px;
+    padding:8px 15px;
     font-weight:bold;
+    box-sizing:border-box;
 }
 
-/* ================= GAME ================= */
+#progress,#timerBox{
+    font-size:18px;
+}
+
+/* ================= GAME AREA ================= */
 #game{
     position:absolute;
     top:90px;
@@ -98,31 +83,48 @@ body{
     display:none;
 }
 
+/* ================= QUESTION CENTER FIX ================= */
 #target{
+    width:100%;
     text-align:center;
-    font-size:30px;
+    font-size:34px;
     font-weight:bold;
     margin-top:10px;
 }
 
-/* WORD */
+/* ================= WORD ================= */
 .word{
     position:absolute;
-    padding:12px 18px;
+    padding:14px 20px;
+    font-size:20px;
     background:#fff176;
     border-radius:20px;
     font-weight:bold;
     cursor:pointer;
 }
 
-/* BLAST */
+/* ================= BLAST EFFECT (FIXED) ================= */
 .blast{
-    transform:scale(2);
-    opacity:0;
-    transition:0.3s;
+    animation: explode 0.4s ease-out forwards;
 }
 
-/* CANNON */
+@keyframes explode{
+    0%{
+        transform:scale(1);
+        opacity:1;
+    }
+    50%{
+        transform:scale(2);
+        opacity:1;
+        filter:brightness(2);
+    }
+    100%{
+        transform:scale(2.5);
+        opacity:0;
+    }
+}
+
+/* ================= CANNON ================= */
 #cannon{
     position:absolute;
     bottom:10px;
@@ -132,14 +134,7 @@ body{
     transition:0.3s;
 }
 
-/* TIMER */
-#timer{
-    position:absolute;
-    right:10px;
-    top:5px;
-}
-
-/* END */
+/* ================= END ================= */
 #end{
     display:none;
     position:absolute;
@@ -156,7 +151,7 @@ body{
 
 <!-- SPLASH -->
 <div id="splash">
-    <img src="assets/innovine-logo.png">
+    <img src="assets/innovine-logo.png" style="max-width:250px;">
 </div>
 
 <!-- INSTRUCTIONS -->
@@ -172,7 +167,7 @@ body{
 <!-- HUD -->
 <div id="hud">
 <div id="progress">0/15</div>
-<div id="timer">30</div>
+<div id="timerBox">⏱ 30</div>
 </div>
 
 <!-- GAME -->
@@ -262,7 +257,6 @@ div.innerText=w;
 div.style.left=(15+i*20)+"%";
 div.style.top="120px";
 
-/* FIXED SPEED */
 div.speed = 0.4;
 
 div.onclick=()=>handleClick(div,w,q.ans);
@@ -270,11 +264,9 @@ div.onclick=()=>handleClick(div,w,q.ans);
 game.appendChild(div);
 words.push(div);
 });
-
-updateHUD();
 }
 
-/* ================= STABLE SMOOTH FALL (FIXED GLITCH) ================= */
+/* ================= SMOOTH FALL ================= */
 function fall(timestamp){
 if(!lastTime) lastTime = timestamp;
 let delta = (timestamp - lastTime)/16;
@@ -283,7 +275,7 @@ lastTime = timestamp;
 if(!frozen){
 words.forEach(w=>{
 let top=parseFloat(w.style.top);
-top += 0.4 * delta;   // CONSTANT SPEED ALWAYS
+top += 0.4 * delta;
 w.style.top = top + "px";
 });
 }
@@ -297,7 +289,6 @@ function handleClick(el,word,ans){
 if(frozen) return;
 frozen=true;
 
-/* cannon aim */
 let cannon=document.getElementById("cannon");
 cannon.style.transform="translateX(-50%) rotate(20deg)";
 
@@ -305,9 +296,10 @@ setTimeout(()=>{
 
 if(word===ans){
 correctCount++;
+document.getElementById("progress").innerText = correctCount + "/15";
 correct.play();
 el.classList.add("blast");
-setTimeout(()=>el.remove(),300);
+setTimeout(()=>el.remove(),400);
 }else{
 wrong.play();
 }
@@ -324,7 +316,6 @@ frozen=false;
 
 /* ================= NEXT ================= */
 function next(){
-
 questionIndex++;
 
 if(questionIndex>=15){
@@ -335,18 +326,13 @@ return;
 load();
 }
 
-/* ================= HUD ================= */
-function updateHUD(){
-document.getElementById("progress").innerText = correctCount + "/15";
-}
-
 /* ================= TIMER ================= */
 function startTimer(){
 let time=30;
 
 setInterval(()=>{
 time--;
-document.getElementById("timer").innerText=time;
+document.getElementById("timerBox").innerText="⏱ " + time;
 
 if(time<=0){
 next();
