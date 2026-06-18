@@ -9,85 +9,96 @@ body {
   margin: 0;
   overflow: hidden;
   font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom, #0b1d3a, #1c3f7a);
+  background: linear-gradient(to bottom, #001d3d, #003566);
 }
 
-/* SPLASH SCREEN */
-#splash, #startScreen, #gameOver {
+/* SPLASH */
+#splash {
   position: absolute;
   width: 100%;
   height: 100%;
+  background: white;
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  color: white;
-}
-
-#splash {
-  background: white;
-  z-index: 5;
+  z-index: 10;
 }
 
 #splash img {
-  width: 300px;
+  width: 280px;
 }
 
+/* START SCREEN */
 #startScreen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   background: rgba(0,0,0,0.6);
-  display: none;
-  z-index: 4;
-}
-
-#gameOver {
-  display: none;
-  background: rgba(0,0,0,0.8);
-  z-index: 6;
+  color: white;
+  z-index: 9;
 }
 
 button {
   padding: 15px 25px;
   font-size: 18px;
-  border: none;
   border-radius: 10px;
+  border: none;
   cursor: pointer;
 }
 
 /* HUD */
 #hud {
   position: absolute;
-  top: 10px;
   width: 100%;
+  top: 10px;
   display: flex;
   justify-content: space-between;
   color: white;
   font-size: 20px;
   padding: 0 20px;
-  z-index: 2;
+  z-index: 5;
 }
 
-/* CONTROL BUTTONS */
+/* GAME OVER */
+#gameOver {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  z-index: 20;
+}
+
+/* CONTROLS */
 #controls {
   position: absolute;
   bottom: 20px;
   width: 100%;
   text-align: center;
-  z-index: 2;
+  z-index: 5;
 }
 
 .ctrlBtn {
-  font-size: 30px;
-  margin: 10px;
+  font-size: 28px;
   padding: 10px 20px;
+  margin: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- SPLASH -->
+<!-- SPLASH SCREEN -->
 <div id="splash">
-  <img src="ELA_Games/Gr1/chp21/assets/innovine-logo.png">
+  <img src="assets/innovine-logo.png" alt="Innovine Logo">
 </div>
 
 <!-- START SCREEN -->
@@ -118,54 +129,67 @@ button {
 <canvas id="gameCanvas"></canvas>
 
 <!-- AUDIO -->
-<audio id="correctSound" src="ELA_Games/Gr1/chp21/assets/correct.mp3"></audio>
-<audio id="wrongSound" src="ELA_Games/Gr1/chp21/assets/wrong.mp3"></audio>
-<audio id="clapSound" src="ELA_Games/Gr1/chp21/assets/clapping.mp3"></audio>
+<audio id="correctSound" src="assets/correct.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
+<audio id="clapSound" src="assets/clapping.mp3"></audio>
 
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+/* FIX: proper resize handling */
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
 
+/* BASKET */
 let basketImg = new Image();
-basketImg.src = "ELA_Games/Gr1/chp21/assets/basket.jpg";
+basketImg.src = "assets/basket.jpg";
 
-let basket = { x: canvas.width/2, y: canvas.height-120, w: 120, h: 80 };
+let basket = {
+  x: canvas.width / 2 - 60,
+  y: canvas.height - 120,
+  w: 120,
+  h: 80
+};
 
+/* GAME STATE */
 let aliens = [];
 let score = 0;
 let timeLeft = 60;
 let gameRunning = false;
 
-const words = [
-  "cat","dog","sun","run","book","pen","apple","ball",
-  "fish","tree","car","milk","hat","cup"
-];
+/* WORDS */
+const words = ["cat","dog","sun","run","book","pen","apple","ball","fish","tree"];
 
+/* SPAWN */
 function spawnAlien() {
-  const word = words[Math.floor(Math.random()*words.length)];
   aliens.push({
-    x: Math.random() * (canvas.width - 100),
+    x: Math.random() * (canvas.width - 80),
     y: -50,
-    speed: 2 + Math.random()*2,
-    word: word
+    speed: 2 + Math.random() * 2,
+    word: words[Math.floor(Math.random() * words.length)]
   });
 }
 
+/* DRAW */
 function drawBasket() {
   ctx.drawImage(basketImg, basket.x, basket.y, basket.w, basket.h);
 }
 
 function drawAliens() {
   ctx.fillStyle = "white";
-  ctx.font = "20px Arial";
+  ctx.font = "22px Arial";
+
   aliens.forEach(a => {
     ctx.fillText("👽 " + a.word, a.x, a.y);
   });
 }
 
+/* UPDATE */
 function updateAliens() {
   aliens.forEach(a => {
     a.y += a.speed;
@@ -182,16 +206,16 @@ function updateAliens() {
     }
 
     if (a.y > canvas.height) {
-      document.getElementById("wrongSound").play();
       a.y = canvas.height + 100;
     }
   });
 }
 
+/* LOOP */
 function gameLoop() {
   if (!gameRunning) return;
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   drawBasket();
   drawAliens();
@@ -200,14 +224,20 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-setInterval(() => {
-  if (gameRunning) spawnAlien();
-}, 1200);
+/* SPAWN ENGINE */
+let spawnInterval;
+
+function startSpawning() {
+  spawnInterval = setInterval(() => {
+    if (gameRunning) spawnAlien();
+  }, 1200);
+}
 
 /* TIMER */
 function startTimer() {
   let t = setInterval(() => {
     if (!gameRunning) return;
+
     timeLeft--;
     document.getElementById("time").innerText = timeLeft;
 
@@ -215,42 +245,62 @@ function startTimer() {
       clearInterval(t);
       endGame();
     }
-  },1000);
+  }, 1000);
 }
 
 /* CONTROLS */
-function moveLeft(){ basket.x -= 30; }
-function moveRight(){ basket.x += 30; }
+function moveLeft() {
+  basket.x -= 40;
+  if (basket.x < 0) basket.x = 0;
+}
 
-/* GAME FLOW */
-function startGame(){
+function moveRight() {
+  basket.x += 40;
+  if (basket.x > canvas.width - basket.w)
+    basket.x = canvas.width - basket.w;
+}
+
+/* START GAME */
+function startGame() {
   document.getElementById("startScreen").style.display = "none";
-  gameRunning = true;
+
   score = 0;
   timeLeft = 60;
   aliens = [];
-  startTimer();
+
+  document.getElementById("score").innerText = score;
+  document.getElementById("time").innerText = timeLeft;
+
+  gameRunning = true;
+
   gameLoop();
+  startTimer();
+  startSpawning();
 }
 
-function endGame(){
+/* END GAME */
+function endGame() {
   gameRunning = false;
+
   document.getElementById("gameOver").style.display = "flex";
   document.getElementById("finalScore").innerText = "Score: " + score;
+
   document.getElementById("clapSound").play();
 }
 
-function restartGame(){
+/* RESTART */
+function restartGame() {
   document.getElementById("gameOver").style.display = "none";
   startGame();
 }
 
-/* SPLASH SCREEN */
-setTimeout(() => {
-  document.getElementById("splash").style.display = "none";
-  document.getElementById("startScreen").style.display = "flex";
-}, 5000);
-
+/* SPLASH → START SCREEN FLOW (FIXED) */
+window.onload = () => {
+  setTimeout(() => {
+    document.getElementById("splash").style.display = "none";
+    document.getElementById("startScreen").style.display = "flex";
+  }, 5000);
+};
 </script>
 
 </body>
