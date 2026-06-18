@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Action Word Adventure Ticker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial;
+    background: linear-gradient(#b3e5fc, #e1f5fe);
+}
+
+/* SPLASH */
+#splash {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
+/* GAME FRAME */
+#game {
+    display: none;
+    width: 92%;
+    height: 82%;
+    margin: 4% auto;
+    position: relative;
+    background: rgba(255,255,255,0.25);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* TITLE */
+#title {
+    position: absolute;
+    top: 8px;
+    width: 100%;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    color: #0d47a1;
+}
+
+/* INSTRUCTION (always visible) */
+#instruction {
+    position: absolute;
+    top: 45px;
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    color: #333;
+}
+
+/* SCORE */
+#scoreBoard {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+
+/* TIMER */
+#timer {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: #ffeb3b;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+/* WORD */
+#topWord {
+    position: absolute;
+    top: 85px;
+    width: 100%;
+    text-align: center;
+    font-size: 36px;
+    font-weight: bold;
+    color: #0d47a1;
+}
+
+/* TICKER AREA */
+#ticker {
+    position: absolute;
+    top: 52%;
+    width: 100%;
+    height: 220px;
+    transform: translateY(-50%);
+    overflow: hidden;
+}
+
+/* TRACK (SLOW SPEED) */
+#track {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 90s linear infinite; /* 🔥 VERY SLOW = 1 step/sec feel */
+}
+
+/* LOOP ANIMATION */
+@keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+/* IMAGES (2 inch approx) */
+.item {
+    height: 200px;
+    margin: 0 70px;
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.item:hover {
+    transform: scale(1.1);
+}
+
+/* END SCREEN */
+#endScreen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 30;
+}
+
+#endScreen h1 {
+    font-size: 50px;
+    color: green;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+    <img src="assets/innovine-logo.png">
+</div>
+
+<!-- GAME -->
+<div id="game">
+
+    <div id="title">🎯 Action Word Adventure Ticker</div>
+
+    <div id="instruction">
+        Watch the moving pictures carefully. Click the correct action word before time runs out!
+    </div>
+
+    <div id="scoreBoard">Score: <span id="score">0</span></div>
+    <div id="timer">60</div>
+
+    <div id="topWord">Loading...</div>
+
+    <div id="ticker">
+        <div id="track"></div>
+    </div>
+</div>
+
+<!-- END -->
+<div id="endScreen">
+    <h1>Good Job!</h1>
+    <p id="finalScore"></p>
+</div>
+
+<audio id="correctSound" src="assets/clapping.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
+
+<script>
+
+const baseImages = [
+    {word:"sleep", img:"sleep_image.jpg"},
+    {word:"read", img:"read_image.png"},
+    {word:"run", img:"run_image.png"},
+    {word:"walk", img:"walk_image.png"},
+    {word:"eat", img:"eat_image.jpg"},
+    {word:"sit", img:"sit_image.png"},
+    {word:"swim", img:"swim_image.png"},
+    {word:"jump", img:"jump_image.png"},
+    {word:"sing", img:"sing_image.png"}
+];
+
+let images = [];
+let score = 0;
+let targetWord = "";
+let time = 60;
+let retry = false;
+let timer;
+let gameRunning = false;
+
+const track = document.getElementById("track");
+const scoreEl = document.getElementById("score");
+const topWord = document.getElementById("topWord");
+const timerEl = document.getElementById("timer");
+
+const correctSound = document.getElementById("correctSound");
+const wrongSound = document.getElementById("wrongSound");
+
+/* SPLASH */
+setTimeout(() => {
+    document.getElementById("splash").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    startGame();
+}, 5000);
+
+/* SHUFFLE */
+function shuffle(arr) {
+    return arr.sort(() => Math.random() - 0.5);
+}
+
+/* BUILD TICKER (RESHUFFLE EACH TIME) */
+function buildTicker() {
+    track.innerHTML = "";
+
+    images = shuffle([...baseImages, ...baseImages]); // reshuffle every question
+
+    images.forEach(data => {
+        let img = document.createElement("img");
+        img.src = "assets/" + data.img;
+        img.className = "item";
+
+        img.onclick = () => checkAnswer(data.word);
+
+        track.appendChild(img);
+    });
+}
+
+/* NEW WORD */
+function newWord() {
+    let pick = baseImages[Math.floor(Math.random() * baseImages.length)];
+    targetWord = pick.word;
+    topWord.innerText = "Find: " + targetWord.toUpperCase();
+
+    resetTimer();
+}
+
+/* TIMER */
+function resetTimer() {
+    clearInterval(timer);
+    time = 60;
+    timerEl.innerText = time;
+
+    timer = setInterval(() => {
+        time--;
+        timerEl.innerText = time;
+
+        if (time <= 0) nextQuestion();
+    }, 1000);
+}
+
+/* CHECK ANSWER */
+function checkAnswer(word) {
+    if (!gameRunning) return;
+
+    if (word === targetWord) {
+        score++;
+        scoreEl.innerText = score;
+        correctSound.play();
+        retry = false;
+        nextQuestion();
+    } else {
+        wrongSound.play();
+        if (!retry) retry = true;
+        else nextQuestion();
+    }
+}
+
+/* NEXT QUESTION */
+function nextQuestion() {
+    buildTicker();   // 🔥 reshuffle each word
+    retry = false;
+    newWord();
+}
+
+/* START */
+function startGame() {
+    gameRunning = true;
+    buildTicker();
+    newWord();
+}
+
+/* END */
+function endGame() {
+    gameRunning = false;
+    document.getElementById("game").style.display = "none";
+    document.getElementById("endScreen").style.display = "flex";
+    document.getElementById("finalScore").innerText = "Score: " + score;
+}
+
+</script>
+
+</body>
+</html>
