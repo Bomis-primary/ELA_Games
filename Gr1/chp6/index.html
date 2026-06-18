@@ -25,11 +25,7 @@ body {
     z-index: 50;
 }
 
-#splash img {
-    width: 260px;
-}
-
-/* TITLE SCREEN */
+/* TITLE */
 #titleScreen{
     position:absolute;
     width:100%;
@@ -51,7 +47,6 @@ body {
 #titleScreen p{
     font-size:20px;
     max-width:600px;
-    padding:10px;
 }
 
 #startBtn{
@@ -61,27 +56,27 @@ body {
     display:none;
 }
 
-/* GAME AREA */
-#game {
-    display: none;
+/* GAME */
+#game{
+    display:none;
 }
 
-/* TOP QUESTION */
+/* ✅ QUESTION FIX (BOLD + BIG + CENTER) */
 #topWord {
     position: absolute;
     top: 10px;
     width: 100%;
     text-align: center;
-    font-size: 40px;
-    font-weight: bold;
+    font-size: 44px;
+    font-weight: 900;
     color: #0d47a1;
     z-index: 5;
 }
 
-/* TOP BAR */
+/* TOP BAR FIX (RESPONSIVE) */
 #topBar {
     position: absolute;
-    top: 60px;
+    top: 70px;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -89,6 +84,12 @@ body {
     font-size: 20px;
     font-weight: bold;
     z-index: 5;
+    box-sizing: border-box;
+}
+
+/* TIMER SAFE */
+#timer {
+    white-space: nowrap;
 }
 
 /* TICKER */
@@ -101,7 +102,6 @@ body {
     white-space: nowrap;
 }
 
-/* IMAGE */
 .item {
     height: 200px;
     margin: 0 40px;
@@ -137,22 +137,6 @@ body {
     flex-direction: column;
     z-index: 100;
 }
-
-/* CONFETTI */
-.confetti {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: red;
-    animation: fall 2s linear forwards;
-}
-
-@keyframes fall {
-    to {
-        transform: translateY(600px) rotate(360deg);
-        opacity: 0;
-    }
-}
 </style>
 </head>
 
@@ -166,14 +150,14 @@ body {
 <!-- TITLE SCREEN -->
 <div id="titleScreen">
     <h1>🦸 Superhero Training Camp</h1>
-    <p>Mission: Action Word Rescue! Tap the correct action word image to complete your hero training.</p>
+    <p><b>Read the action word carefully and tap the correct image to complete your mission!</b></p>
     <button id="startBtn">START MISSION</button>
 </div>
 
 <!-- GAME -->
 <div id="game">
 
-    <div id="topWord">Loading...</div>
+    <div id="topWord"></div>
 
     <div id="topBar">
         <div id="counter">Mission: 0/10</div>
@@ -198,30 +182,23 @@ body {
 <script>
 
 const images = [
-    {word:"run", img:"run_image.png"},
-    {word:"jump", img:"jump_image.png"},
-    {word:"eat", img:"eat_image.jpg"},
     {word:"sleep", img:"sleep_image.jpg"},
     {word:"read", img:"read_image.png"},
+    {word:"run", img:"run_image.png"},
+    {word:"walk", img:"walk_image.png"},
+    {word:"eat", img:"eat_image.jpg"},
+    {word:"sit", img:"sit_image.png"},
     {word:"swim", img:"swim_image.png"},
+    {word:"jump", img:"jump_image.png"},
     {word:"sing", img:"sing_image.png"}
 ];
 
 let score = 0;
 let targetWord = "";
-let gameRunning = false;
 let questionIndex = 0;
 let time = 45;
 
-const track = document.getElementById("track");
-const topWord = document.getElementById("topWord");
-const counter = document.getElementById("counter");
-const timerEl = document.getElementById("timer");
-
-const correctSound = document.getElementById("correctSound");
-const wrongSound = document.getElementById("wrongSound");
-
-/* ================= SPLASH FLOW ================= */
+/* SPLASH FLOW */
 setTimeout(() => {
     document.getElementById("splash").style.display = "none";
     document.getElementById("titleScreen").style.display = "flex";
@@ -234,6 +211,7 @@ setTimeout(() => {
 
 /* START */
 document.getElementById("startBtn").onclick = () => {
+
     document.getElementById("titleScreen").style.display = "none";
     document.getElementById("game").style.display = "block";
 
@@ -251,74 +229,62 @@ function createTicker() {
         img.src = "assets/" + data.img;
         img.className = "item";
 
-        img.addEventListener("click", () => checkClick(data.word));
+        img.onclick = () => checkClick(data.word);
 
-        track.appendChild(img);
+        document.getElementById("track").appendChild(img);
     });
 }
 
-/* NEW WORD */
+/* QUESTION */
 function setNewWord() {
     let random = images[Math.floor(Math.random() * images.length)];
     targetWord = random.word;
-    topWord.innerText = "🦸 Find Action Word: " + targetWord.toUpperCase();
+
+    document.getElementById("topWord").innerHTML =
+        "🦸 <b>Find Action Word: " + targetWord.toUpperCase() + "</b>";
 }
 
-/* CLICK */
+/* CLICK FIX (MAIN BUG FIX) */
 function checkClick(word) {
-    if (!gameRunning) gameRunning = true;
 
     if (word === targetWord) {
 
-        setTimeout(()=>{
-            correctSound.play();
+        setTimeout(() => {
+            document.getElementById("correctSound").play();
             score++;
             questionIndex++;
-            counter.innerText = "Mission: " + questionIndex + "/10";
-            createConfetti();
+
+            document.getElementById("counter").innerText =
+                "Mission: " + questionIndex + "/10";
+
             setNewWord();
-        },1000);
+        }, 500);
 
     } else {
-
-        setTimeout(()=>{
-            wrongSound.play();
-        },1000);
+        setTimeout(() => {
+            document.getElementById("wrongSound").play();
+        }, 500);
     }
 
     if (questionIndex >= 10) endGame();
 }
 
-/* TIMER */
+/* TIMER FIX (SAFE MOBILE) */
 function startTimer() {
     setInterval(() => {
         time--;
-        timerEl.innerText = "⏱ " + time;
+        document.getElementById("timer").innerText = "⏱ " + time;
 
         if (time <= 0) endGame();
     }, 1000);
 }
 
-/* CONFETTI */
-function createConfetti(){
-    for(let i=0;i<20;i++){
-        let c=document.createElement("div");
-        c.className="confetti";
-        c.style.left=Math.random()*100+"%";
-        c.style.background=["red","blue","yellow","green"][i%4];
-        document.body.appendChild(c);
-
-        setTimeout(()=>c.remove(),2000);
-    }
-}
-
 /* END */
-function endGame(){
-    gameRunning=false;
-    document.getElementById("game").style.display="none";
-    document.getElementById("endScreen").style.display="flex";
+function endGame() {
+    document.getElementById("game").style.display = "none";
+    document.getElementById("endScreen").style.display = "flex";
     document.getElementById("finalScore").innerText =
-        "Score: " + score + "/10 Missions Completed";
+        "Score: " + score + "/10";
 }
 
 </script>
