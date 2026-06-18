@@ -199,7 +199,6 @@
 <body>
 
 <div id="game-container">
-    <!-- HUD -->
     <div class="hud">
         <div class="hud-panel">
             <div>Score: <span id="score-display">0</span></div>
@@ -210,10 +209,8 @@
         </div>
     </div>
 
-    <!-- Gameplay Canvas -->
     <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-    <!-- Legend -->
     <div class="legend">
         <div class="legend-item">
             <div class="dot" style="background: var(--sight-color);"></div> Catch: Sight Words
@@ -223,31 +220,27 @@
         </div>
     </div>
 
-    <!-- Config controls -->
     <div class="controls">
-        <label for="speed-select">Speed:</label>
+        <label for="speed-select">Speed Level:</label>
         <select id="speed-select">
-            <option value="0.7">Easy</option>
-            <option value="1.2" selected>Medium</option>
-            <option value="1.8">Hard</option>
+            <option value="1">Easy (Very Slow)</option>
+            <option value="1.5">Medium</option>
+            <option value="2.2">Hard</option>
         </select>
     </div>
 
-    <!-- Splash Screen 1: Innovine Logo -->
     <div id="splash-logo-screen" class="screen" style="background: #ffffff;">
         <div id="logo-container">
-            <img src="./innovine-logo.png" alt="Innovine Logo">
+            <img src="innovine-logo.png" alt="Innovine Logo" onerror="console.error('Logo failed to load from current directory.')">
         </div>
     </div>
 
-    <!-- Splash Screen 2: Game Intro -->
     <div id="start-screen" class="screen hidden">
-        <h1>Sight Word Sky Catch!</h1>
-        <p>Catch the tricky, non-decodable <b>Sight Words</b> in your basket. Leave the regular, phonics-based <b>Decodable Words</b> to fall safely to the ground!</p>
-        <button class="btn" onclick="startGame()">Start Game</button>
+        <h1 id="game-title" style="opacity: 0; transition: opacity 0.5s ease;">Sight Word Sky Catch!</h1>
+        <p id="game-desc" style="opacity: 0; transition: opacity 0.5s ease;">Catch the tricky, non-decodable <b>Sight Words</b> in your basket. Leave the regular, phonics-based <b>Decodable Words</b> to fall safely to the ground!</p>
+        <button id="game-btn" class="btn" style="opacity: 0; transition: opacity 0.5s ease;" onclick="startGame()">Start Game</button>
     </div>
 
-    <!-- Victory Screen -->
     <div id="victory-screen" class="screen hidden">
         <h1>🎉 You Win! 🎉</h1>
         <p>Fantastic job! You caught the right words, protected your streak, and hit the target goal score!</p>
@@ -267,9 +260,13 @@
     const victoryScreen = document.getElementById('victory-screen');
     const speedSelect = document.getElementById('speed-select');
 
-    // Audio Elements
-    const sndCorrect = new Audio('./correct.mp3');
-    const sndWrong = new Audio('./wrong.mp3');
+    // Audio Elements using relative directory paths
+    const sndCorrect = new Audio('correct.mp3');
+    const sndWrong = new Audio('wrong.mp3');
+
+    // Preload setup to handle browser constraints
+    sndCorrect.preload = 'auto';
+    sndWrong.preload = 'auto';
 
     // Word Banks
     const SIGHT_WORDS = ["the", "was", "said", "of", "they", "have", "from", "you", "are", "what", "to", "do", "some", "come"];
@@ -292,26 +289,34 @@
         targetX: canvas.width / 2 - 60
     };
 
-    // Clouds for decorative background animation
     const clouds = [
         {x: 100, y: 80, size: 40, speed: 0.2},
         {x: 450, y: 150, size: 60, speed: 0.1},
         {x: 700, y: 90, size: 35, speed: 0.3}
     ];
 
-    // Splash Timing Sequence
+    // Splash Timing Sequence 
+    // Logo for 5 seconds -> Title screen appears -> Title elements fade in over 2 seconds
     window.addEventListener('DOMContentLoaded', () => {
-        // Show logo for 5 seconds
         setTimeout(() => {
             splashLogoScreen.classList.add('hidden');
             startScreen.classList.remove('hidden');
             
-            // Keep game title active for 2 seconds before buttons can interact smoothly
-            // (The title screen stays until user clicks 'Start Game')
-        }, 5000);
+            // Staggered game screen introduction over 2 seconds
+            setTimeout(() => {
+                document.getElementById('game-title').style.opacity = '1';
+                setTimeout(() => {
+                    document.getElementById('game-desc').style.opacity = '1';
+                    setTimeout(() => {
+                        document.getElementById('game-btn').style.opacity = '1';
+                    }, 500);
+                }, 500);
+            }, 200);
+
+        }, 5000); 
     });
 
-    // Listeners
+    // Interaction Listeners
     canvas.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
         basket.targetX = e.clientX - rect.left - basket.width / 2;
@@ -329,223 +334,9 @@
     });
 
     class FallingWord {
-        constructor() {
-            this.isSightWord = Math.random() < 0.5;
-            this.text = this.isSightWord 
-                ? SIGHT_WORDS[Math.floor(Math.random() * SIGHT_WORDS.length)]
-                : DECODABLE_WORDS[Math.floor(Math.random() * DECODABLE_WORDS.length)];
-            
-            ctx.font = "bold 20px Segoe UI";
-            this.width = ctx.measureText(this.text).width + 30; 
-            this.height = 34;
-            
-            this.x = Math.random() * (canvas.width - this.width) + this.width / 2;
-            this.y = -40;
-            // Calibrated speed targeting Grade 1 pacing limits
-            this.speed = (Math.random() * 0.4 + 1.2) * speedMultiplier;
-            this.pulse = Math.random() * Math.PI;
-        }
-
-        update() {
-            this.y += this.speed;
-            this.pulse += 0.05;
-        }
-
-        draw() {
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            
-            const scale = 1 + Math.sin(this.pulse) * 0.03;
-            ctx.scale(scale, scale);
-
-            ctx.beginPath();
-            const w = this.width;
-            const h = this.height;
-            ctx.roundRect(-w/2, -h/2, w, h, 15);
-            
-            if (this.isSightWord) {
-                ctx.fillStyle = 'rgba(255, 94, 98, 0.95)';
-                ctx.strokeStyle = '#fff';
+        constructor(forcedType = null) {
+            // Balanced assignment: fallback logic guarantees type distribution alternation
+            if(forcedType !== null) {
+                this.isSightWord = forcedType;
             } else {
-                ctx.fillStyle = 'rgba(32, 191, 107, 0.95)';
-                ctx.strokeStyle = '#fff';
-            }
-            
-            ctx.lineWidth = 2;
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = "bold 18px 'Segoe UI', sans-serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-            ctx.shadowBlur = 4;
-            ctx.fillText(this.text, 0, 0);
-            
-            ctx.restore();
-        }
-    }
-
-    class Particle {
-        constructor(x, y, color) {
-            this.x = x;
-            this.y = y;
-            this.color = color;
-            this.vx = (Math.random() - 0.5) * 6;
-            this.vy = (Math.random() - 0.5) * 6 - 2;
-            this.radius = Math.random() * 4 + 2;
-            this.alpha = 1;
-            this.decay = Math.random() * 0.02 + 0.01;
-        }
-
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            this.vy += 0.1;
-            this.alpha -= this.decay;
-        }
-
-        draw() {
-            ctx.save();
-            ctx.globalAlpha = this.alpha;
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-    }
-
-    function createExplosion(x, y, color) {
-        for(let i = 0; i < 15; i++) {
-            particles.push(new Particle(x, y, color));
-        }
-    }
-
-    function playAudio(audioElem) {
-        audioElem.currentTime = 0;
-        audioElem.play().catch(() => { /* Handle auto-play blocking quirks if necessary */ });
-    }
-
-    function drawBasket() {
-        basket.x += (basket.targetX - basket.x) * 0.25;
-        
-        if (basket.x < 0) basket.x = 0;
-        if (basket.x > canvas.width - basket.width) basket.x = canvas.width - basket.width;
-
-        ctx.save();
-        ctx.fillStyle = '#d35400';
-        ctx.beginPath();
-        ctx.roundRect(basket.x, basket.y, basket.width, 8, 4);
-        ctx.fill();
-
-        ctx.fillStyle = '#e67e22';
-        ctx.beginPath();
-        ctx.roundRect(basket.x + 8, basket.y + 8, basket.width - 16, basket.height, [0, 0, 12, 12]);
-        ctx.fill();
-        
-        ctx.fillStyle = '#f1c40f';
-        ctx.fillRect(basket.x + 15, basket.y + 12, basket.width - 30, 4);
-        ctx.restore();
-    }
-
-    function drawClouds() {
-        ctx.fillStyle = 'rgba(255,255,255,0.35)';
-        clouds.forEach(cloud => {
-            cloud.x += cloud.speed;
-            if (cloud.x - cloud.size * 2 > canvas.width) cloud.x = -cloud.size * 2;
-            
-            ctx.beginPath();
-            ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
-            ctx.arc(cloud.x + cloud.size * 0.6, cloud.y - cloud.size * 0.4, cloud.size * 0.8, 0, Math.PI * 2);
-            ctx.arc(cloud.x + cloud.size * 1.2, cloud.y, cloud.size * 0.6, 0, Math.PI * 2);
-            ctx.fill();
-        });
-    }
-
-    let spawnTimer = 0;
-    function gameLoop() {
-        if (!isPlaying) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawClouds();
-
-        spawnTimer++;
-        const spawnInterval = Math.max(50, 100 - (speedMultiplier * 15));
-        if (spawnTimer > spawnInterval) {
-            words.push(new FallingWord());
-            spawnTimer = 0;
-        }
-
-        for (let i = words.length - 1; i >= 0; i--) {
-            const w = words[i];
-            w.update();
-            w.draw();
-
-            const withinX = (w.x + w.width/4 > basket.x) && (w.x - w.width/4 < basket.x + basket.width);
-            const withinY = (w.y + w.height/2 >= basket.y) && (w.y - w.height/2 <= basket.y + 12);
-
-            if (withinX && withinY) {
-                if (w.isSightWord) {
-                    score += 10;
-                    streak += 1;
-                    createExplosion(w.x, basket.y, '#fff');
-                    playAudio(sndCorrect);
-                } else {
-                    score = Math.max(0, score - 5);
-                    streak = 0;
-                    createExplosion(w.x, basket.y, '#2c3e50');
-                    playAudio(sndWrong);
-                }
-                updateHUD();
-                words.splice(i, 1);
-                checkWinCondition();
-                continue;
-            }
-
-            if (w.y > canvas.height + 40) {
-                if (w.isSightWord) {
-                    streak = 0;
-                    updateHUD();
-                }
-                words.splice(i, 1);
-            }
-        }
-
-        for (let i = particles.length - 1; i >= 0; i--) {
-            particles[i].update();
-            particles[i].draw();
-            if (particles[i].alpha <= 0) particles.splice(i, 1);
-        }
-
-        drawBasket();
-        requestAnimationFrame(gameLoop);
-    }
-
-    function updateHUD() {
-        scoreDisplay.textContent = score;
-        streakDisplay.textContent = streak;
-    }
-
-    function checkWinCondition() {
-        if (score >= 100) {
-            isPlaying = false;
-            victoryScreen.classList.remove('hidden');
-        }
-    }
-
-    function startGame() {
-        score = 0;
-        streak = 0;
-        words = [];
-        particles = [];
-        updateHUD();
-        startScreen.classList.add('hidden');
-        victoryScreen.classList.add('hidden');
-        isPlaying = true;
-        gameLoop();
-    }
-</script>
-</body>
-</html>
+                this.isSightWord = Math.random() < 0.5;
