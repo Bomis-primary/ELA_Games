@@ -133,13 +133,15 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(161, 196, 253, 0.95);
             z-index: 10;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.5s ease, visibility 0.5s;
+            opacity: 1;
+            visibility: visible;
         }
 
         .screen.hidden {
             opacity: 0;
+            visibility: hidden;
             pointer-events: none;
         }
 
@@ -199,6 +201,7 @@
 <body>
 
 <div id="game-container">
+    <!-- HUD -->
     <div class="hud">
         <div class="hud-panel">
             <div>Score: <span id="score-display">0</span></div>
@@ -209,8 +212,10 @@
         </div>
     </div>
 
+    <!-- Gameplay Canvas -->
     <canvas id="gameCanvas" width="800" height="600"></canvas>
 
+    <!-- Legend -->
     <div class="legend">
         <div class="legend-item">
             <div class="dot" style="background: var(--sight-color);"></div> Catch: Sight Words
@@ -220,28 +225,33 @@
         </div>
     </div>
 
+    <!-- Config controls -->
     <div class="controls">
         <label for="speed-select">Speed Level:</label>
         <select id="speed-select">
-            <option value="1">Easy (Very Slow)</option>
+            <option value="1" selected>Easy (Very Slow)</option>
             <option value="1.5">Medium</option>
             <option value="2.2">Hard</option>
         </select>
     </div>
 
+    <!-- Splash Screen 1: Innovine Logo -->
     <div id="splash-logo-screen" class="screen" style="background: #ffffff;">
         <div id="logo-container">
-            <img src="innovine-logo.png" alt="Innovine Logo" onerror="console.error('Logo failed to load from current directory.')">
+            <img src="innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <h1 id="logo-fallback" style="display: none; color: #2c3e50;">INNOVINE</h1>
         </div>
     </div>
 
-    <div id="start-screen" class="screen hidden">
+    <!-- Splash Screen 2: Game Intro -->
+    <div id="start-screen" class="screen hidden" style="background: rgba(161, 196, 253, 0.95);">
         <h1 id="game-title" style="opacity: 0; transition: opacity 0.5s ease;">Sight Word Sky Catch!</h1>
         <p id="game-desc" style="opacity: 0; transition: opacity 0.5s ease;">Catch the tricky, non-decodable <b>Sight Words</b> in your basket. Leave the regular, phonics-based <b>Decodable Words</b> to fall safely to the ground!</p>
         <button id="game-btn" class="btn" style="opacity: 0; transition: opacity 0.5s ease;" onclick="startGame()">Start Game</button>
     </div>
 
-    <div id="victory-screen" class="screen hidden">
+    <!-- Victory Screen -->
+    <div id="victory-screen" class="screen hidden" style="background: rgba(161, 196, 253, 0.95);">
         <h1>🎉 You Win! 🎉</h1>
         <p>Fantastic job! You caught the right words, protected your streak, and hit the target goal score!</p>
         <button class="btn" onclick="startGame()">Play Again</button>
@@ -260,11 +270,9 @@
     const victoryScreen = document.getElementById('victory-screen');
     const speedSelect = document.getElementById('speed-select');
 
-    // Audio Elements using relative directory paths
+    // Audio Setup
     const sndCorrect = new Audio('correct.mp3');
     const sndWrong = new Audio('wrong.mp3');
-
-    // Preload setup to handle browser constraints
     sndCorrect.preload = 'auto';
     sndWrong.preload = 'auto';
 
@@ -295,28 +303,24 @@
         {x: 700, y: 90, size: 35, speed: 0.3}
     ];
 
-    // Splash Timing Sequence 
-    // Logo for 5 seconds -> Title screen appears -> Title elements fade in over 2 seconds
-    window.addEventListener('DOMContentLoaded', () => {
+    // Running Splash Transition sequence directly (Bulletproof fix for loading)
+    setTimeout(() => {
+        splashLogoScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+        
+        // Staggered Title screen reveal over exactly 2 seconds
         setTimeout(() => {
-            splashLogoScreen.classList.add('hidden');
-            startScreen.classList.remove('hidden');
-            
-            // Staggered game screen introduction over 2 seconds
+            document.getElementById('game-title').style.opacity = '1';
             setTimeout(() => {
-                document.getElementById('game-title').style.opacity = '1';
+                document.getElementById('game-desc').style.opacity = '1';
                 setTimeout(() => {
-                    document.getElementById('game-desc').style.opacity = '1';
-                    setTimeout(() => {
-                        document.getElementById('game-btn').style.opacity = '1';
-                    }, 500);
-                }, 500);
-            }, 200);
+                    document.getElementById('game-btn').style.opacity = '1';
+                }, 600);
+            }, 600);
+        }, 300);
+    }, 5000);
 
-        }, 5000); 
-    });
-
-    // Interaction Listeners
+    // Controls listeners
     canvas.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
         basket.targetX = e.clientX - rect.left - basket.width / 2;
@@ -333,10 +337,239 @@
         speedMultiplier = parseFloat(e.target.value);
     });
 
+    // Highly compatible rounded rectangle helper (Avoids roundRect engine crashes)
+    function drawRoundedRect(x, y, width, height, radius, fillStyle, strokeStyle) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        if (fillStyle) {
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+        }
+        if (strokeStyle) {
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+    }
+
     class FallingWord {
         constructor(forcedType = null) {
-            // Balanced assignment: fallback logic guarantees type distribution alternation
             if(forcedType !== null) {
                 this.isSightWord = forcedType;
             } else {
                 this.isSightWord = Math.random() < 0.5;
+            }
+
+            this.text = this.isSightWord 
+                ? SIGHT_WORDS[Math.floor(Math.random() * SIGHT_WORDS.length)]
+                : DECODABLE_WORDS[Math.floor(Math.random() * DECODABLE_WORDS.length)];
+            
+            ctx.font = "bold 20px Segoe UI";
+            this.width = ctx.measureText(this.text).width + 30; 
+            this.height = 34;
+            
+            this.x = Math.random() * (canvas.width - this.width) + this.width / 2;
+            this.y = -40;
+
+            // Pacing calibrated perfectly for ~4.5 seconds travel time down the screen
+            this.speed = 1.35 * speedMultiplier;
+            this.pulse = Math.random() * Math.PI;
+        }
+
+        update() {
+            this.y += this.speed;
+            this.pulse += 0.05;
+        }
+
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            
+            const scale = 1 + Math.sin(this.pulse) * 0.03;
+            ctx.scale(scale, scale);
+
+            const bubbleColor = this.isSightWord ? 'rgba(255, 94, 98, 0.95)' : 'rgba(32, 191, 107, 0.95)';
+            drawRoundedRect(-this.width / 2, -this.height / 2, this.width, this.height, 15, bubbleColor, '#ffffff');
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "bold 18px 'Segoe UI', sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+            ctx.shadowBlur = 4;
+            ctx.fillText(this.text, 0, 0);
+            
+            ctx.restore();
+        }
+    }
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.vx = (Math.random() - 0.5) * 6;
+            this.vy = (Math.random() - 0.5) * 6 - 2;
+            this.radius = Math.random() * 4 + 2;
+            this.alpha = 1;
+            this.decay = Math.random() * 0.02 + 0.01;
+        }
+
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vy += 0.1;
+            this.alpha -= this.decay;
+        }
+
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    function createExplosion(x, y, color) {
+        for(let i = 0; i < 15; i++) {
+            particles.push(new Particle(x, y, color));
+        }
+    }
+
+    function playAudio(audioElem) {
+        audioElem.currentTime = 0;
+        audioElem.play().catch(e => console.log("Audio waiting for player initialization gesture.", e));
+    }
+
+    function drawBasket() {
+        basket.x += (basket.targetX - basket.x) * 0.25;
+        
+        if (basket.x < 0) basket.x = 0;
+        if (basket.x > canvas.width - basket.width) basket.x = canvas.width - basket.width;
+
+        ctx.save();
+        drawRoundedRect(basket.x, basket.y, basket.width, 8, 4, '#d35400', null);
+        drawRoundedRect(basket.x + 8, basket.y + 8, basket.width - 16, basket.height, 10, '#e67e22', null);
+        
+        ctx.fillStyle = '#f1c40f';
+        ctx.fillRect(basket.x + 15, basket.y + 12, basket.width - 30, 4);
+        ctx.restore();
+    }
+
+    function drawClouds() {
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        clouds.forEach(cloud => {
+            cloud.x += cloud.speed;
+            if (cloud.x - cloud.size * 2 > canvas.width) cloud.x = -cloud.size * 2;
+            
+            ctx.beginPath();
+            ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
+            ctx.arc(cloud.x + cloud.size * 0.6, cloud.y - cloud.size * 0.4, cloud.size * 0.8, 0, Math.PI * 2);
+            ctx.arc(cloud.x + cloud.size * 1.2, cloud.y, cloud.size * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    function gameLoop() {
+        if (!isPlaying) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawClouds();
+
+        // STRICT 2-WORD MAXIMUM FALLING CONSTRAINT
+        if (words.length < 2) {
+            if (words.length === 0) {
+                words.push(new FallingWord());
+            } else if (words[0].y > 220) { 
+                const opposingType = !words[0].isSightWord;
+                words.push(new FallingWord(opposingType));
+            }
+        }
+
+        for (let i = words.length - 1; i >= 0; i--) {
+            const w = words[i];
+            w.update();
+            w.draw();
+
+            const withinX = (w.x + w.width/4 > basket.x) && (w.x - w.width/4 < basket.x + basket.width);
+            const withinY = (w.y + w.height/2 >= basket.y) && (w.y - w.height/2 <= basket.y + 12);
+
+            if (withinX && withinY) {
+                if (w.isSightWord) {
+                    score += 10;
+                    streak += 1;
+                    createExplosion(w.x, basket.y, '#fff');
+                    playAudio(sndCorrect);
+                } else {
+                    score = Math.max(0, score - 5);
+                    streak = 0;
+                    createExplosion(w.x, basket.y, '#2c3e50');
+                    playAudio(sndWrong);
+                }
+                updateHUD();
+                words.splice(i, 1);
+                checkWinCondition();
+                continue;
+            }
+
+            if (w.y > canvas.height + 40) {
+                if (w.isSightWord) {
+                    streak = 0;
+                    updateHUD();
+                }
+                words.splice(i, 1);
+            }
+        }
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+            particles[i].update();
+            particles[i].draw();
+            if (particles[i].alpha <= 0) particles.splice(i, 1);
+        }
+
+        drawBasket();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function updateHUD() {
+        scoreDisplay.textContent = score;
+        streakDisplay.textContent = streak;
+    }
+
+    function checkWinCondition() {
+        if (score >= 100) {
+            isPlaying = false;
+            victoryScreen.classList.remove('hidden');
+        }
+    }
+
+    function startGame() {
+        // Unlocks audio contexts inside constrained browser security scopes
+        sndCorrect.play().then(() => { sndCorrect.pause(); }).catch(()=>{});
+        sndWrong.play().then(() => { sndWrong.pause(); }).catch(()=>{});
+
+        score = 0;
+        streak = 0;
+        words = [];
+        particles = [];
+        updateHUD();
+        startScreen.classList.add('hidden');
+        victoryScreen.classList.add('hidden');
+        isPlaying = true;
+        gameLoop();
+    }
+</script>
+</body>
+</html>
