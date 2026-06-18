@@ -25,7 +25,11 @@ body {
     z-index: 50;
 }
 
-/* TITLE */
+#splash img{
+    width:240px;
+}
+
+/* TITLE SCREEN */
 #titleScreen{
     position:absolute;
     width:100%;
@@ -40,91 +44,79 @@ body {
     z-index:40;
 }
 
+#titleScreen h1{
+    font-size:34px;
+}
+
 /* GAME */
 #game{
     display:none;
 }
 
-/* ================= QUESTION (SMALLER BY 2pt) ================= */
+/* QUESTION (REDUCED FONT SIZE - FIX 1) */
 #topWord {
     position: absolute;
     top: 10px;
     width: 100%;
     text-align: center;
-    font-size: 36px; /* reduced */
-    font-weight: 900;
+    font-size: 32px; /* reduced */
+    font-weight: 800;
     color: #ffffff;
     padding: 0 10px;
+    box-sizing:border-box;
 }
 
-/* ================= HINT (MOVED DOWN TO AVOID OVERLAP) ================= */
-#clueWord{
-    position:absolute;
-    top:85px; /* FIXED LOWER */
-    width:100%;
-    text-align:center;
-    font-size:20px;
-    font-weight:bold;
-    color:#ffeb3b;
-    padding: 0 10px;
-}
-
-/* ================= TOP BAR (MOBILE SAFE) ================= */
+/* TOP BAR (MOBILE SAFE SMALLER) */
 #topBar {
     position: absolute;
-    top: 140px;
+    top: 85px;
     width: 100%;
     display: flex;
     justify-content: space-between;
     padding: 0 12px;
     font-size: 16px;
     font-weight: bold;
-    box-sizing:border-box;
     color:white;
+    box-sizing:border-box;
 }
 
-#timer, #counter {
-    background: rgba(0,0,0,0.4);
+#counter, #timer{
+    background: rgba(0,0,0,0.35);
     padding: 5px 8px;
     border-radius: 6px;
 }
 
-/* ================= TICKER AREA ================= */
+/* ================= TICKER ================= */
 #ticker {
     position: absolute;
-    top: 52%;
+    top: 48%;
     width: 100%;
-    height: 200px;
+    height: 180px;
     overflow: hidden;
-}
-
-/* ================= TICKER TRACK (CONTINUOUS LOOP FIX) ================= */
-#track {
-    display: inline-flex;
     white-space: nowrap;
-    animation: scroll 14s linear infinite; /* smooth loop */
 }
 
-/* images */
+/* IMAGE SIZE (RESPONSIVE) */
 .item {
-    height: 160px;
+    height: 140px; /* smaller for mobile */
     margin: 0 25px;
     cursor: pointer;
-    flex-shrink: 0;
-    transition: transform 0.2s;
+    display: inline-block;
 }
 
-.item:hover {
-    transform: scale(1.05);
+/* CONTINUOUS LOOP TICKER (FIX 2) */
+#track {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 12s linear infinite; /* faster loop so repetition visible */
 }
 
-/* loop animation */
 @keyframes scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
 }
 
-/* END */
+/* END SCREEN */
 #endScreen {
     position: absolute;
     width: 100%;
@@ -142,7 +134,7 @@ body {
 
 <!-- SPLASH -->
 <div id="splash">
-    <img src="assets/innovine-logo.png" style="width:240px;">
+    <img src="assets/innovine-logo.png">
 </div>
 
 <!-- TITLE -->
@@ -153,14 +145,15 @@ body {
 <!-- GAME -->
 <div id="game">
 
+    <!-- QUESTION ONLY (NO HINT - FIX 3) -->
     <div id="topWord"></div>
-    <div id="clueWord"></div>
 
     <div id="topBar">
         <div id="counter">Mission: 0/10</div>
         <div id="timer">⏱ 45</div>
     </div>
 
+    <!-- TICKER -->
     <div id="ticker">
         <div id="track"></div>
     </div>
@@ -174,18 +167,18 @@ body {
 
 <script>
 
-/* ================= MISSIONS ================= */
+/* ================= DATA ================= */
 const missions = [
-{q:"After superhero training, what helps you rest?", ans:"sleep"},
-{q:"A hero must move fast to rescue people. Which action?", ans:"run"},
-{q:"To understand secret plans, heroes must...", ans:"read"},
-{q:"To regain strength after saving city, heroes must...", ans:"eat"},
+{q:"After superhero training, what helps a hero recover energy?", ans:"sleep"},
+{q:"A hero must move fast to save people. Which action shows speed?", ans:"run"},
+{q:"To understand secret missions, heroes must carefully...", ans:"read"},
+{q:"After saving the city, heroes must regain energy by...", ans:"eat"},
 {q:"To reach high places quickly, heroes must...", ans:"jump"},
-{q:"To rescue underwater victims, heroes must...", ans:"swim"},
+{q:"Underwater rescue heroes must...", ans:"swim"},
 {q:"To alert teammates, heroes may...", ans:"sing"}
 ];
 
-/* ================= IMAGES ================= */
+/* IMAGES */
 const images = [
 {word:"sleep", img:"sleep_image.jpg"},
 {word:"read", img:"read_image.png"},
@@ -198,10 +191,10 @@ const images = [
 {word:"sing", img:"sing_image.png"}
 ];
 
-let index=0;
-let targetWord="";
+let index = 0;
+let target = "";
 
-/* ================= FLOW ================= */
+/* ================= SPLASH FLOW ================= */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
 document.getElementById("titleScreen").style.display="flex";
@@ -209,10 +202,8 @@ document.getElementById("titleScreen").style.display="flex";
 setTimeout(()=>{
 document.getElementById("titleScreen").style.display="none";
 document.getElementById("game").style.display="block";
-
 startMission();
 startTimer();
-
 },3000);
 
 },5000);
@@ -221,35 +212,36 @@ startTimer();
 function startMission(){
 
 let m = missions[index];
-targetWord = m.ans;
+target = m.ans;
 
+/* QUESTION ONLY */
 document.getElementById("topWord").innerHTML =
-"🦸 MISSION: <b>" + m.q + "</b>";
+"🦸 " + m.q;
 
-document.getElementById("clueWord").innerHTML =
-"TARGET ACTION: <b>" + targetWord.toUpperCase() + "</b>";
-
+/* BUILD CONTINUOUS TICKER */
 buildTicker();
 }
 
-/* ================= CONTINUOUS TICKER (FIXED) ================= */
+/* ================= CONTINUOUS LOOP TICKER FIX ================= */
 function buildTicker(){
 
 let track = document.getElementById("track");
 track.innerHTML="";
 
-/* ONLY 5 IMAGES PER ROUND */
-let pool = [...images].sort(()=>Math.random()-0.5).slice(0,5);
+/* EXACT 5 ITEMS ONLY */
+let pool = [...images]
+.sort(()=>Math.random()-0.5)
+.slice(0,5);
 
 /* DUPLICATE FOR CONTINUOUS LOOP */
-let loopSet = [...pool, ...pool];
+let loop = pool.concat(pool);
 
-loopSet.forEach(data=>{
+loop.forEach(data=>{
 let img = document.createElement("img");
-img.src = "assets/"+data.img;
-img.className="item";
+img.src = "assets/" + data.img;
+img.className = "item";
 
-img.onclick=()=>check(data.word);
+img.onclick = ()=>check(data.word);
 
 track.appendChild(img);
 });
@@ -258,21 +250,26 @@ track.appendChild(img);
 /* ================= CHECK ================= */
 function check(word){
 
-if(word === targetWord){
+if(word === target){
 document.getElementById("correctSound").play();
+
 index++;
+document.getElementById("counter").innerText =
+"Mission: " + index + "/10";
+
 setTimeout(()=>startMission(),1000);
+
 }else{
 document.getElementById("wrongSound").play();
 }
 }
 
 /* ================= TIMER ================= */
-let time=45;
+let time = 45;
 function startTimer(){
 setInterval(()=>{
 time--;
-document.getElementById("timer").innerText="⏱ "+time;
+document.getElementById("timer").innerText="⏱ " + time;
 
 if(time<=0){
 index++;
