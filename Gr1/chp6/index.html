@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Superhero Training Camp - Action Words</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    text-align:center;
+    background:linear-gradient(to bottom,#0d1b2a,#1b263b);
+    color:white;
+    overflow-x:hidden;
+}
+
+/* ---------------- LOGO SCREEN ---------------- */
+
+#logoScreen{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100dvh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(to bottom,#0d1b2a,#1b263b);
+    z-index:9999;
+}
+
+#logoImage{
+    width:80%;
+    max-width:350px;
+    background:white;
+    padding:20px;
+    border-radius:20px;
+    border:6px solid #ffd60a;
+}
+
+/* ---------------- TITLE SCREEN ---------------- */
+
+#titleScreen{
+    display:none;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+#titleScreen h1{
+    font-size:3rem;
+    color:#ffd60a;
+    margin-bottom:10px;
+}
+
+#titleScreen p{
+    font-size:1.5rem;
+    max-width:700px;
+}
+
+.startBtn{
+    margin-top:30px;
+    padding:18px 40px;
+    font-size:1.5rem;
+    font-weight:bold;
+    border:none;
+    border-radius:15px;
+    cursor:pointer;
+    background:#ffd60a;
+    color:#001d3d;
+}
+
+/* ---------------- GAME ---------------- */
+
+#gameContainer{
+    display:none;
+    max-width:1000px;
+    margin:auto;
+    padding:20px;
+}
+
+#questionCounter{
+    position:fixed;
+    left:15px;
+    top:15px;
+    background:#ffd60a;
+    color:#001d3d;
+    padding:10px 18px;
+    border-radius:10px;
+    font-size:24px;
+    font-weight:bold;
+}
+
+#timer{
+    position:fixed;
+    right:15px;
+    top:15px;
+    background:#ffd60a;
+    color:#001d3d;
+    padding:10px 18px;
+    border-radius:10px;
+    font-size:24px;
+    font-weight:bold;
+}
+
+#hero{
+    font-size:90px;
+    margin-top:50px;
+}
+
+#instruction{
+    font-size:36px;
+    font-weight:bold;
+    margin:20px;
+}
+
+#actionImage{
+    width:100%;
+    max-width:450px;
+    height:auto;
+    border-radius:20px;
+    border:5px solid white;
+    margin:20px auto;
+    display:block;
+}
+
+.option{
+    display:block;
+    width:320px;
+    max-width:90%;
+    margin:15px auto;
+    padding:18px;
+    font-size:32px;
+    font-weight:bold;
+    border:none;
+    border-radius:15px;
+    cursor:pointer;
+    background:#ffd60a;
+    color:#001d3d;
+}
+
+.option:hover{
+    transform:scale(1.05);
+}
+
+#message{
+    min-height:50px;
+    font-size:30px;
+    font-weight:bold;
+    margin-top:20px;
+}
+
+#powerBox{
+    font-size:28px;
+    color:#ffd60a;
+    margin-top:10px;
+    min-height:40px;
+}
+
+/* ---------------- GAME OVER ---------------- */
+
+#gameOver{
+    display:none;
+    margin-top:50px;
+}
+
+#gameOver h2{
+    font-size:3rem;
+    color:#ffd60a;
+}
+
+#finalScore{
+    font-size:3rem;
+    margin:20px;
+}
+
+/* ---------------- MOBILE ---------------- */
+
+@media(max-width:768px){
+
+    #titleScreen h1{
+        font-size:2rem;
+    }
+
+    #titleScreen p{
+        font-size:1.1rem;
+    }
+
+    #instruction{
+        font-size:24px;
+    }
+
+    #hero{
+        font-size:65px;
+    }
+
+    .option{
+        font-size:24px;
+        width:85%;
+    }
+
+    #questionCounter,
+    #timer{
+        font-size:18px;
+    }
+
+    #message{
+        font-size:22px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- AUDIO -->
+
+<audio id="correctSound" preload="auto">
+    <source src="assets/correct.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="wrongSound" preload="auto">
+    <source src="assets/wrong.mp3" type="audio/mpeg">
+</audio>
+
+<!-- LOGO -->
+
+<div id="logoScreen">
+    <img src="assets/innovine-logo.png" id="logoImage" alt="Innovine Logo">
+</div>
+
+<!-- TITLE -->
+
+<div id="titleScreen">
+
+    <h1>🦸 SUPERHERO TRAINING CAMP 🦸</h1>
+
+    <p>
+        Complete the Action Missions and Unlock Hero Powers!
+    </p>
+
+    <button class="startBtn" onclick="startGame()">
+        START TRAINING
+    </button>
+
+</div>
+
+<!-- GAME -->
+
+<div id="gameContainer">
+
+    <div id="questionCounter">Mission 1 of 10</div>
+
+    <div id="timer">60</div>
+
+    <div id="hero">🦸</div>
+
+    <div id="instruction">
+        What is the superhero doing?
+    </div>
+
+    <img id="actionImage" src="" alt="Action Word">
+
+    <div id="options"></div>
+
+    <div id="message"></div>
+
+    <div id="powerBox"></div>
+
+    <div id="gameOver">
+
+        <h2>🏆 HERO TRAINING COMPLETE!</h2>
+
+        <div id="finalScore"></div>
+
+        <button class="startBtn" onclick="location.reload()">
+            Train Again
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+/* ---------------- QUESTION BANK ---------------- */
+
+const actions = [
+
+{
+word:"eat",
+image:"assets/eat_image.jpg"
+},
+
+{
+word:"jump",
+image:"assets/jump_image.png"
+},
+
+{
+word:"read",
+image:"assets/read_image.jpg"
+},
+
+{
+word:"run",
+image:"assets/run_image.png"
+},
+
+{
+word:"sing",
+image:"assets/sing_image.png"
+},
+
+{
+word:"sit",
+image:"assets/sit_image.png"
+},
+
+{
+word:"sleep",
+image:"assets/sleep_image.jpg"
+},
+
+{
+word:"swim",
+image:"assets/swim_image.png"
+},
+
+{
+word:"walk",
+image:"assets/walk_image.png"
+},
+
+{
+word:"run",
+image:"assets/run_image.png"
+}
+
+];
+
+/* ---------------- VARIABLES ---------------- */
+
+let score = 0;
+let currentQuestion = 0;
+let timer;
+let timeLeft = 60;
+let questions = [];
+let currentAnswer = "";
+
+/* ---------------- HELPERS ---------------- */
+
+function shuffle(array){
+    return array.sort(() => Math.random() - 0.5);
+}
+
+/* ---------------- START ---------------- */
+
+window.onload = function(){
+
+    setTimeout(() => {
+
+        document.getElementById("logoScreen").style.display = "none";
+        document.getElementById("titleScreen").style.display = "flex";
+
+    },5000);
+
+};
+
+/* ---------------- GAME ---------------- */
+
+function startGame(){
+
+    document.getElementById("titleScreen").style.display = "none";
+    document.getElementById("gameContainer").style.display = "block";
+
+    score = 0;
+    currentQuestion = 0;
+
+    questions = shuffle([...actions]).slice(0,10);
+
+    loadQuestion();
+}
+
+function loadQuestion(){
+
+    if(currentQuestion >= 10){
+        endGame();
+        return;
+    }
+
+    document.getElementById("questionCounter").textContent =
+    `Mission ${currentQuestion+1} of 10`;
+
+    document.getElementById("message").textContent = "";
+    document.getElementById("powerBox").textContent = "";
+
+    const q = questions[currentQuestion];
+
+    currentAnswer = q.word;
+
+    document.getElementById("actionImage").src = q.image;
+
+    let wrongAnswer;
+
+    do{
+
+        wrongAnswer =
+        actions[Math.floor(Math.random()*actions.length)].word;
+
+    }while(wrongAnswer === currentAnswer);
+
+    const options =
+    shuffle([currentAnswer,wrongAnswer]);
+
+    let html = "";
+
+    options.forEach(option=>{
+
+        html += `
+        <button class="option"
+        onclick="checkAnswer('${option}')">
+        ${option}
+        </button>
+        `;
+
+    });
+
+    document.getElementById("options").innerHTML = html;
+
+    startTimer();
+}
+
+function startTimer(){
+
+    clearInterval(timer);
+
+    timeLeft = 60;
+
+    document.getElementById("timer").textContent = timeLeft;
+
+    timer = setInterval(()=>{
+
+        timeLeft--;
+
+        document.getElementById("timer").textContent = timeLeft;
+
+        if(timeLeft <= 0){
+
+            clearInterval(timer);
+
+            document.getElementById("message").innerHTML =
+            "⏰ Mission Failed!";
+
+            disableButtons();
+
+            setTimeout(()=>{
+
+                currentQuestion++;
+                loadQuestion();
+
+            },1200);
+        }
+
+    },1000);
+}
+
+function checkAnswer(answer){
+
+    clearInterval(timer);
+
+    if(answer === currentAnswer){
+
+        document.getElementById("correctSound").currentTime = 0;
+        document.getElementById("correctSound").play();
+
+        score++;
+
+        document.getElementById("message").innerHTML =
+        "⭐ Power Unlocked!";
+
+        updatePower();
+
+    }
+
+    else{
+
+        document.getElementById("wrongSound").currentTime = 0;
+        document.getElementById("wrongSound").play();
+
+        document.getElementById("message").innerHTML =
+        "❌ Try the Next Mission!";
+    }
+
+    disableButtons();
+
+    setTimeout(()=>{
+
+        currentQuestion++;
+        loadQuestion();
+
+    },1200);
+}
+
+function disableButtons(){
+
+    document.querySelectorAll(".option")
+    .forEach(btn=>{
+
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+
+    });
+}
+
+function updatePower(){
+
+    let power = "";
+
+    if(score >= 10){
+
+        power = "🌟 Superhero Master";
+
+    }else if(score >= 7){
+
+        power = "💥 Mega Strength";
+
+    }else if(score >= 5){
+
+        power = "⚡ Speed Power";
+
+    }else if(score >= 3){
+
+        power = "🦸 Cape Unlocked";
+
+    }else{
+
+        power = "🦸 Mask Unlocked";
+    }
+
+    document.getElementById("powerBox").textContent = power;
+}
+
+function endGame(){
+
+    clearInterval(timer);
+
+    document.getElementById("actionImage").style.display = "none";
+    document.getElementById("options").style.display = "none";
+    document.getElementById("instruction").style.display = "none";
+    document.getElementById("message").style.display = "none";
+    document.getElementById("powerBox").style.display = "none";
+    document.getElementById("hero").style.display = "none";
+
+    document.getElementById("gameOver").style.display = "block";
+
+    let stars = "";
+
+    if(score >= 9){
+        stars = "⭐⭐⭐⭐⭐";
+    }
+    else if(score >= 7){
+        stars = "⭐⭐⭐⭐";
+    }
+    else if(score >= 5){
+        stars = "⭐⭐⭐";
+    }
+    else if(score >= 3){
+        stars = "⭐⭐";
+    }
+    else{
+        stars = "⭐";
+    }
+
+    document.getElementById("finalScore").innerHTML = `
+        Hero Score<br><br>
+        ${score} / 10
+        <br><br>
+        ${stars}
+    `;
+}
+
+</script>
+
+</body>
+</html>
