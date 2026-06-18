@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alien Translator - Sight Words</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial, sans-serif;
+    text-align:center;
+    background:linear-gradient(to bottom,#001d3d,#003566);
+    color:white;
+    min-height:100vh;
+}
+
+/* SPLASH SCREEN */
+
+#splashScreen{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+#logoContainer{
+    border:10px solid #003566;
+    border-radius:30px;
+    padding:30px;
+    background:white;
+    box-shadow:0 0 30px rgba(0,0,0,0.35);
+}
+
+#logoContainer img{
+    max-width:380px;
+    width:80vw;
+    height:auto;
+}
+
+/* GAME */
+
+#gameContent{
+    display:none;
+    padding:15px;
+}
+
+h1{
+    color:#ffd60a;
+    font-size:clamp(2rem,5vw,3.5rem);
+    margin-top:20px;
+}
+
+#timer{
+    position:fixed;
+    top:10px;
+    right:10px;
+    background:#ffd60a;
+    color:#001d3d;
+    padding:10px 18px;
+    border-radius:12px;
+    font-size:clamp(1rem,3vw,1.8rem);
+    font-weight:bold;
+    z-index:100;
+}
+
+#score{
+    font-size:clamp(1rem,3vw,1.6rem);
+    font-weight:bold;
+    margin-top:15px;
+}
+
+#questionCounter{
+    font-size:clamp(1rem,3vw,1.6rem);
+    font-weight:bold;
+    margin-top:10px;
+}
+
+#instruction{
+    font-size:clamp(1.3rem,4vw,2.3rem);
+    font-weight:bold;
+    margin:20px auto;
+    max-width:900px;
+}
+
+#alien{
+    font-size:clamp(4rem,12vw,8rem);
+    margin:15px 0;
+}
+
+#alienWord{
+    font-size:clamp(2rem,8vw,4rem);
+    background:white;
+    color:#001d3d;
+    display:inline-block;
+    padding:20px 40px;
+    border-radius:20px;
+    margin:20px;
+    font-weight:bold;
+}
+
+.option{
+    display:block;
+    width:min(90%,320px);
+    margin:15px auto;
+    padding:16px;
+    font-size:clamp(1.4rem,4vw,2rem);
+    font-weight:bold;
+    border:none;
+    border-radius:15px;
+    cursor:pointer;
+    background:#ffd60a;
+    color:#001d3d;
+    transition:0.3s;
+}
+
+.option:hover{
+    transform:scale(1.04);
+}
+
+#message{
+    min-height:50px;
+    font-size:clamp(1.2rem,4vw,2rem);
+    font-weight:bold;
+    margin-top:20px;
+}
+
+#gameOver{
+    display:none;
+    font-size:clamp(1.8rem,5vw,3rem);
+    margin-top:40px;
+    padding:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="splashScreen">
+    <div id="logoContainer">
+        <img src="Gr1/chp21/assets/innovine-logo.png" alt="Innovine Logo">
+    </div>
+</div>
+
+<!-- ✅ ONLY FIXED PATHS BELOW -->
+
+<audio id="correctSound" preload="auto">
+    <source src="Gr1/chp21/assets/correct.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="wrongSound" preload="auto">
+    <source src="Gr1/chp21/assets/wrong.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="clappingSound" preload="auto">
+    <source src="Gr1/chp21/assets/clapping.mp3" type="audio/mpeg">
+</audio>
+
+<div id="gameContent">
+
+<div id="timer">60</div>
+
+<h1>👽 Alien Translator 👽</h1>
+
+<div id="score">Score: 0</div>
+
+<div id="questionCounter">
+Question 1 of 10
+</div>
+
+<div id="alien">👾</div>
+
+<p id="instruction">
+Translate the Alien Word! Click on the Sight Word.
+</p>
+
+<div id="alienWord"></div>
+
+<div id="options"></div>
+
+<div id="message"></div>
+
+<div id="gameOver"></div>
+
+</div>
+
+<script>
+
+const sightWords = [
+    "the","and","is","it","to",
+    "in","you","we","can","see",
+    "go","like","come","here","look"
+];
+
+const alienDictionary = {
+    "the":"☉✦☾",
+    "and":"✧☍✦",
+    "is":"☾☾",
+    "it":"✦☉",
+    "to":"☉☉",
+    "in":"✧☾",
+    "you":"☍✦☉",
+    "we":"☉✧",
+    "can":"☾✦☍",
+    "see":"✦✦☉",
+    "go":"☍☍",
+    "like":"☉☾✦",
+    "come":"✧☉☍",
+    "here":"☾☉✧",
+    "look":"✦☍☾"
+};
+
+const distractorPool = [
+    "cat","dog","hat","sun","map",
+    "bat","cup","bed","box","van",
+    "run","hop","sit","jump","tap",
+    "dig","hug","mix","pack","kick",
+    "big","red","hot","sad","fat",
+    "mad","wet","dim","soft","fast"
+];
+
+const correctSound = document.getElementById("correctSound");
+const wrongSound = document.getElementById("wrongSound");
+const clappingSound = document.getElementById("clappingSound");
+
+let score = 0;
+let currentQuestion = 0;
+let currentWord = "";
+let gameQuestions = [];
+let timer;
+let timeLeft = 60;
+
+function shuffle(array){
+    return array.sort(() => Math.random() - 0.5);
+}
+
+function startGame(){
+    gameQuestions = shuffle([...sightWords]).slice(0,10);
+    loadQuestion();
+}
+
+function startTimer(){
+    clearInterval(timer);
+    timeLeft = 60;
+
+    document.getElementById("timer").textContent = timeLeft;
+
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = timeLeft;
+
+        if(timeLeft <= 0){
+            clearInterval(timer);
+            document.getElementById("message").innerHTML = "⏰ Time's Up!";
+            disableButtons();
+
+            setTimeout(() => {
+                currentQuestion++;
+                loadQuestion();
+            },1000);
+        }
+
+    },1000);
+}
+
+function loadQuestion(){
+
+    if(currentQuestion >= 10){
+        endGame();
+        return;
+    }
+
+    document.getElementById("questionCounter").textContent =
+    `Question ${currentQuestion + 1} of 10`;
+
+    document.getElementById("message").textContent = "";
+
+    currentWord = gameQuestions[currentQuestion];
+
+    document.getElementById("alienWord").textContent =
+    alienDictionary[currentWord];
+
+    let wrongWord =
+    distractorPool[Math.floor(Math.random() * distractorPool.length)];
+
+    let options = shuffle([currentWord, wrongWord]);
+
+    let html = "";
+
+    options.forEach(word => {
+        html += `
+        <button class="option" onclick="checkAnswer('${word}')">
+        ${word}
+        </button>
+        `;
+    });
+
+    document.getElementById("options").innerHTML = html;
+
+    startTimer();
+}
+
+function checkAnswer(selected){
+
+    clearInterval(timer);
+
+    if(selected === currentWord){
+
+        correctSound.currentTime = 0;
+        correctSound.play();
+
+        clappingSound.currentTime = 0;
+        clappingSound.play();
+
+        score++;
+
+        document.getElementById("score").textContent =
+        "Score: " + score;
+
+        document.getElementById("message").innerHTML = "🎉 Correct!";
+        document.getElementById("alien").textContent = "😊👽";
+    }
+    else{
+
+        wrongSound.currentTime = 0;
+        wrongSound.play();
+
+        document.getElementById("message").innerHTML =
+        "❌ Try Again Next Time!";
+
+        document.getElementById("alien").textContent = "😕👽";
+    }
+
+    disableButtons();
+
+    setTimeout(() => {
+        document.getElementById("alien").textContent = "👾";
+        currentQuestion++;
+        loadQuestion();
+    },1000);
+}
+
+function disableButtons(){
+    document.querySelectorAll(".option").forEach(button => {
+        button.disabled = true;
+        button.style.opacity = "0.6";
+    });
+}
+
+function endGame(){
+
+    clearInterval(timer);
+
+    document.getElementById("alienWord").style.display = "none";
+    document.getElementById("options").style.display = "none";
+    document.getElementById("message").style.display = "none";
+    document.getElementById("instruction").style.display = "none";
+    document.getElementById("alien").style.display = "none";
+    document.getElementById("gameOver").style.display = "block";
+
+    if(score >= 6){
+        correctSound.currentTime = 0;
+        correctSound.play();
+    }
+
+    if(score >= 7){
+        clappingSound.currentTime = 0;
+        clappingSound.play();
+    }
+
+    document.getElementById("gameOver").innerHTML = `
+        🚀 Mission Complete!<br><br>
+        You Scored<br>
+        ${score} / 10
+        <br><br>
+        <button class="option" onclick="location.reload()">
+        Play Again
+        </button>
+    `;
+}
+
+setTimeout(() => {
+    document.getElementById("splashScreen").style.display = "none";
+    document.getElementById("gameContent").style.display = "block";
+    startGame();
+},5000);
+
+</script>
+
+</body>
+</html>
