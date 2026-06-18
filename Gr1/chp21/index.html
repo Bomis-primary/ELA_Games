@@ -2,305 +2,224 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Alien Catcher Game</title>
+<title>Sight Words Catch Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
-  margin: 0;
-  overflow: hidden;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom, #001d3d, #003566);
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to top, #87CEEB, #ffffff);
 }
 
-/* SPLASH */
-#splash {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
+/* Top Score Board */
+#scoreBoard {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
 }
 
-#splash img {
-  width: 280px;
+/* Game Area */
+#gameArea {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 
-/* START SCREEN */
-#startScreen {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  background: rgba(0,0,0,0.6);
-  color: white;
-  z-index: 9;
+/* Basket */
+#basket {
+    position: absolute;
+    bottom: 20px;
+    width: 100px;
+    height: 60px;
+    background: url('https://i.imgur.com/3XjQZQp.png'); /* simple basket image */
+    background-size: cover;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Falling word */
+.word {
+    position: absolute;
+    top: 0;
+    font-size: 22px;
+    font-weight: bold;
+    background: #fff;
+    padding: 5px 10px;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+/* End screen */
+#endScreen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    font-size: 28px;
 }
 
 button {
-  padding: 15px 25px;
-  font-size: 18px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-}
-
-/* HUD */
-#hud {
-  position: absolute;
-  width: 100%;
-  top: 10px;
-  display: flex;
-  justify-content: space-between;
-  color: white;
-  font-size: 20px;
-  padding: 0 20px;
-  z-index: 5;
-}
-
-/* GAME OVER */
-#gameOver {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  background: rgba(0,0,0,0.8);
-  color: white;
-  z-index: 20;
-}
-
-/* CONTROLS */
-#controls {
-  position: absolute;
-  bottom: 20px;
-  width: 100%;
-  text-align: center;
-  z-index: 5;
-}
-
-.ctrlBtn {
-  font-size: 28px;
-  padding: 10px 20px;
-  margin: 10px;
+    padding: 10px 20px;
+    font-size: 18px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<!-- SPLASH SCREEN -->
-<div id="splash">
-  <img src="assets/innovine-logo.png" alt="Innovine Logo">
+<div id="scoreBoard">Caught: 0 / 10</div>
+
+<div id="gameArea">
+    <div id="basket"></div>
 </div>
 
-<!-- START SCREEN -->
-<div id="startScreen">
-  <h1>👾 Alien Catcher</h1>
-  <button onclick="startGame()">START</button>
+<div id="endScreen">
+    <div id="endText">Great Job!</div>
+    <button onclick="restartGame()">Play Again</button>
 </div>
-
-<!-- HUD -->
-<div id="hud">
-  <div>Score: <span id="score">0</span></div>
-  <div>Time: <span id="time">60</span></div>
-</div>
-
-<!-- GAME OVER -->
-<div id="gameOver">
-  <h1>Game Over</h1>
-  <h2 id="finalScore"></h2>
-  <button onclick="restartGame()">Play Again</button>
-</div>
-
-<!-- CONTROLS -->
-<div id="controls">
-  <button class="ctrlBtn" onclick="moveLeft()">⬅</button>
-  <button class="ctrlBtn" onclick="moveRight()">➡</button>
-</div>
-
-<canvas id="gameCanvas"></canvas>
-
-<!-- AUDIO -->
-<audio id="correctSound" src="assets/correct.mp3"></audio>
-<audio id="wrongSound" src="assets/wrong.mp3"></audio>
-<audio id="clapSound" src="assets/clapping.mp3"></audio>
 
 <script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+// ===== SIGHT WORDS =====
+const words = ["the", "and", "is", "in", "it", "you", "he", "she", "we", "me"];
 
-/* FIX: proper resize handling */
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+let currentIndex = 0;
+let caught = 0;
+let basketX = window.innerWidth / 2 - 50;
+
+const basket = document.getElementById("basket");
+const gameArea = document.getElementById("gameArea");
+const scoreBoard = document.getElementById("scoreBoard");
+const endScreen = document.getElementById("endScreen");
+
+// position basket
+function updateBasket() {
+    basket.style.left = basketX + "px";
 }
-resize();
-window.addEventListener("resize", resize);
+updateBasket();
 
-/* BASKET */
-let basketImg = new Image();
-basketImg.src = "assets/basket.jpg";
+// ===== KEYBOARD CONTROL =====
+document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") basketX -= 30;
+    if (e.key === "ArrowRight") basketX += 30;
 
-let basket = {
-  x: canvas.width / 2 - 60,
-  y: canvas.height - 120,
-  w: 120,
-  h: 80
-};
+    // boundaries
+    basketX = Math.max(0, Math.min(window.innerWidth - 100, basketX));
+    updateBasket();
+});
 
-/* GAME STATE */
-let aliens = [];
-let score = 0;
-let timeLeft = 60;
-let gameRunning = false;
+// ===== TOUCH SWIPE CONTROL =====
+let startX = 0;
 
-/* WORDS */
-const words = ["cat","dog","sun","run","book","pen","apple","ball","fish","tree"];
+document.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+});
 
-/* SPAWN */
-function spawnAlien() {
-  aliens.push({
-    x: Math.random() * (canvas.width - 80),
-    y: -50,
-    speed: 2 + Math.random() * 2,
-    word: words[Math.floor(Math.random() * words.length)]
-  });
-}
+document.addEventListener("touchmove", (e) => {
+    let moveX = e.touches[0].clientX;
+    let diff = moveX - startX;
 
-/* DRAW */
-function drawBasket() {
-  ctx.drawImage(basketImg, basket.x, basket.y, basket.w, basket.h);
-}
+    basketX += diff * 0.3;
 
-function drawAliens() {
-  ctx.fillStyle = "white";
-  ctx.font = "22px Arial";
+    basketX = Math.max(0, Math.min(window.innerWidth - 100, basketX));
+    updateBasket();
 
-  aliens.forEach(a => {
-    ctx.fillText("👽 " + a.word, a.x, a.y);
-  });
-}
+    startX = moveX;
+});
 
-/* UPDATE */
-function updateAliens() {
-  aliens.forEach(a => {
-    a.y += a.speed;
+// ===== CREATE FALLING WORD =====
+function createWord(text) {
+    const el = document.createElement("div");
+    el.classList.add("word");
+    el.innerText = text;
 
-    if (
-      a.y > basket.y &&
-      a.x > basket.x &&
-      a.x < basket.x + basket.w
-    ) {
-      document.getElementById("correctSound").play();
-      score++;
-      document.getElementById("score").innerText = score;
-      a.y = canvas.height + 100;
+    let x = Math.random() * (window.innerWidth - 100);
+    let y = 0;
+
+    el.style.left = x + "px";
+    gameArea.appendChild(el);
+
+    let fallSpeed = 1.2; // slow for grade 1
+
+    function fall() {
+        y += fallSpeed;
+        el.style.top = y + "px";
+
+        // collision with basket
+        let basketTop = window.innerHeight - 80;
+
+        if (
+            y >= basketTop &&
+            x > basketX - 50 &&
+            x < basketX + 100
+        ) {
+            caught++;
+            scoreBoard.innerText = `Caught: ${caught} / 10`;
+            el.remove();
+            nextWord();
+            return;
+        }
+
+        // miss
+        if (y > window.innerHeight) {
+            el.remove();
+            nextWord();
+            return;
+        }
+
+        requestAnimationFrame(fall);
     }
 
-    if (a.y > canvas.height) {
-      a.y = canvas.height + 100;
+    fall();
+}
+
+// ===== GAME FLOW =====
+function nextWord() {
+    if (currentIndex >= words.length) {
+        endGame();
+        return;
     }
-  });
+
+    let word = words[currentIndex];
+    currentIndex++;
+
+    setTimeout(() => {
+        createWord(word);
+    }, 800);
 }
 
-/* LOOP */
-function gameLoop() {
-  if (!gameRunning) return;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  drawBasket();
-  drawAliens();
-  updateAliens();
-
-  requestAnimationFrame(gameLoop);
-}
-
-/* SPAWN ENGINE */
-let spawnInterval;
-
-function startSpawning() {
-  spawnInterval = setInterval(() => {
-    if (gameRunning) spawnAlien();
-  }, 1200);
-}
-
-/* TIMER */
-function startTimer() {
-  let t = setInterval(() => {
-    if (!gameRunning) return;
-
-    timeLeft--;
-    document.getElementById("time").innerText = timeLeft;
-
-    if (timeLeft <= 0) {
-      clearInterval(t);
-      endGame();
-    }
-  }, 1000);
-}
-
-/* CONTROLS */
-function moveLeft() {
-  basket.x -= 40;
-  if (basket.x < 0) basket.x = 0;
-}
-
-function moveRight() {
-  basket.x += 40;
-  if (basket.x > canvas.width - basket.w)
-    basket.x = canvas.width - basket.w;
-}
-
-/* START GAME */
 function startGame() {
-  document.getElementById("startScreen").style.display = "none";
-
-  score = 0;
-  timeLeft = 60;
-  aliens = [];
-
-  document.getElementById("score").innerText = score;
-  document.getElementById("time").innerText = timeLeft;
-
-  gameRunning = true;
-
-  gameLoop();
-  startTimer();
-  startSpawning();
+    currentIndex = 0;
+    caught = 0;
+    scoreBoard.innerText = "Caught: 0 / 10";
+    nextWord();
 }
 
-/* END GAME */
 function endGame() {
-  gameRunning = false;
-
-  document.getElementById("gameOver").style.display = "flex";
-  document.getElementById("finalScore").innerText = "Score: " + score;
-
-  document.getElementById("clapSound").play();
+    endScreen.style.display = "flex";
 }
 
-/* RESTART */
 function restartGame() {
-  document.getElementById("gameOver").style.display = "none";
-  startGame();
+    endScreen.style.display = "none";
+    startGame();
 }
 
-/* SPLASH → START SCREEN FLOW (FIXED) */
-window.onload = () => {
-  setTimeout(() => {
-    document.getElementById("splash").style.display = "none";
-    document.getElementById("startScreen").style.display = "flex";
-  }, 5000);
-};
+// start automatically
+startGame();
 </script>
 
 </body>
