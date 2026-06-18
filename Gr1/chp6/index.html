@@ -50,7 +50,7 @@ body {
     display:none;
 }
 
-/* MAIN QUESTION */
+/* QUESTION */
 #topWord {
     position: absolute;
     top: 10px;
@@ -61,7 +61,7 @@ body {
     color: #ffffff;
 }
 
-/* SUB QUESTION */
+/* CLUE */
 #clueWord{
     position:absolute;
     top:70px;
@@ -86,7 +86,6 @@ body {
     box-sizing:border-box;
 }
 
-/* TIMER / COUNTER */
 #timer, #counter {
     background: rgba(0,0,0,0.4);
     padding: 6px 10px;
@@ -118,7 +117,7 @@ body {
 #track {
     display: inline-block;
     white-space: nowrap;
-    animation: scroll 45s linear infinite; /* ✅ ONLY CHANGE: slower speed */
+    animation: scroll 45s linear infinite;
 }
 
 @keyframes scroll {
@@ -147,7 +146,7 @@ body {
     <img src="assets/innovine-logo.png" style="width:260px;">
 </div>
 
-<!-- TITLE SCREEN -->
+<!-- TITLE -->
 <div id="titleScreen">
     <h1>🦸 SUPERHERO TRAINING CAMP</h1>
     <p>Unlock your hero powers by mastering ACTION WORD MISSIONS!</p>
@@ -175,7 +174,7 @@ body {
 
 <script>
 
-/* MISSIONS */
+/* ================= MISSIONS ================= */
 const missions = [
 {
 q:"After intense superhero training, what action helps restore energy and strength?",
@@ -207,7 +206,7 @@ ans:"sing"
 }
 ];
 
-/* IMAGES (5 PER ROUND LOGIC HANDLED IN JS) */
+/* ================= IMAGES ================= */
 const images = [
 {word:"sleep", img:"sleep_image.jpg"},
 {word:"read", img:"read_image.png"},
@@ -220,11 +219,11 @@ const images = [
 {word:"sing", img:"sing_image.png"}
 ];
 
-let index=0;
-let targetWord="";
-let score=0;
+let index = 0;
+let targetWord = "";
+let score = 0;
 
-/* FLOW */
+/* ================= FLOW ================= */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
 document.getElementById("titleScreen").style.display="flex";
@@ -235,14 +234,12 @@ document.getElementById("game").style.display="block";
 startMission();
 startTimer();
 },3000);
-
 },5000);
 
-/* MISSION */
+/* ================= MISSION ================= */
 function startMission(){
 
 let m = missions[index];
-
 targetWord = m.ans;
 
 document.getElementById("topWord").innerHTML =
@@ -254,7 +251,7 @@ document.getElementById("clueWord").innerHTML =
 buildTicker();
 }
 
-/* TICKER (5 IMAGES ONLY) */
+/* ================= TICKER ================= */
 function buildTicker(){
 
 let track = document.getElementById("track");
@@ -273,7 +270,7 @@ track.appendChild(img);
 });
 }
 
-/* CHECK */
+/* ================= CHECK ================= */
 function check(word){
 
 if(word === targetWord){
@@ -294,8 +291,9 @@ document.getElementById("wrongSound").play();
 }
 }
 
-/* TIMER */
-let time=45;
+/* ================= TIMER ================= */
+let time = 45;
+
 function startTimer(){
 setInterval(()=>{
 time--;
