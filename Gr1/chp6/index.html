@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Action Word Catch Game</title>
+<title>Action Word Ticker Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
     overflow: hidden;
+    font-family: Arial;
     background: linear-gradient(#b3e5fc, #e1f5fe);
 }
 
@@ -29,7 +29,7 @@ body {
     width: 250px;
 }
 
-/* GAME */
+/* GAME AREA */
 #game {
     display: none;
 }
@@ -39,7 +39,7 @@ body {
     top: 20px;
     width: 100%;
     text-align: center;
-    font-size: 40px;
+    font-size: 42px;
     font-weight: bold;
     color: #0d47a1;
     z-index: 5;
@@ -49,41 +49,47 @@ body {
     position: absolute;
     top: 20px;
     left: 20px;
-    font-size: 20px;
-    background: #fff;
+    background: white;
     padding: 10px 15px;
     border-radius: 10px;
     z-index: 5;
+    font-size: 20px;
 }
 
-/* GAME AREA */
-#gameArea {
+/* TICKER STRIP */
+#ticker {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-
-/* FIXED ROW LAYOUT */
-.row {
-    position: absolute;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
     top: 45%;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
-/* BIGGER IMAGES (~2 inches ≈ 180px) */
+/* IMAGE STYLE (2 inches approx) */
 .item {
-    width: 180px;
-    height: auto;
+    height: 200px;   /* ~2 inches visual */
+    margin: 0 40px;
     cursor: pointer;
+    display: inline-block;
+    vertical-align: middle;
     transition: transform 0.2s;
-    z-index: 2;
 }
 
 .item:hover {
     transform: scale(1.1);
+}
+
+/* moving track */
+#track {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 18s linear infinite;
+}
+
+@keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
 }
 
 /* END SCREEN */
@@ -93,9 +99,9 @@ body {
     height: 100%;
     background: rgba(255,255,255,0.95);
     display: none;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     z-index: 20;
 }
 
@@ -110,7 +116,7 @@ body {
 
 <!-- SPLASH -->
 <div id="splash">
-    <img src="assets/innovine-logo.png" alt="logo">
+    <img src="assets/innovine-logo.png">
 </div>
 
 <!-- GAME -->
@@ -122,10 +128,12 @@ body {
 
     <div id="topWord">Loading...</div>
 
-    <div id="gameArea"></div>
+    <div id="ticker">
+        <div id="track"></div>
+    </div>
 </div>
 
-<!-- END SCREEN -->
+<!-- END -->
 <div id="endScreen">
     <h1>Good Job!</h1>
     <p id="finalScore"></p>
@@ -153,14 +161,12 @@ let score = 0;
 let targetWord = "";
 let gameRunning = false;
 
-const gameArea = document.getElementById("gameArea");
+const track = document.getElementById("track");
 const scoreEl = document.getElementById("score");
 const topWord = document.getElementById("topWord");
 
 const correctSound = document.getElementById("correctSound");
 const wrongSound = document.getElementById("wrongSound");
-
-let row;
 
 /* SPLASH */
 setTimeout(() => {
@@ -169,26 +175,24 @@ setTimeout(() => {
     startGame();
 }, 5000);
 
-/* CREATE ONE CLEAN ROW */
-function createRow() {
-    row = document.createElement("div");
-    row.className = "row";
-    gameArea.appendChild(row);
+/* BUILD TICKER (duplicated for seamless loop) */
+function createTicker() {
 
-    images.forEach((data) => {
+    let list = [...images, ...images]; // duplicate for smooth loop
+
+    list.forEach(data => {
         let img = document.createElement("img");
         img.src = "assets/" + data.img;
         img.className = "item";
-
         img.dataset.word = data.word;
 
         img.addEventListener("click", () => checkClick(data.word));
 
-        row.appendChild(img);
+        track.appendChild(img);
     });
 }
 
-/* CHANGE TARGET WORD */
+/* NEW WORD */
 function setNewWord() {
     let random = images[Math.floor(Math.random() * images.length)];
     targetWord = random.word;
@@ -201,8 +205,8 @@ function checkClick(word) {
 
     if (word === targetWord) {
         score++;
-        correctSound.play();
         scoreEl.innerText = score;
+        correctSound.play();
         setNewWord();
     } else {
         wrongSound.play();
@@ -214,7 +218,7 @@ function checkClick(word) {
 /* START */
 function startGame() {
     gameRunning = true;
-    createRow();
+    createTicker();
     setNewWord();
 }
 
