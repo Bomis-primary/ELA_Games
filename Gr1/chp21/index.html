@@ -1,318 +1,523 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Sight Word Sky Catch!</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sight Word Sky Catch</title>
+    <style>
+        :root {
+            --bg-gradient-start: #a1c4fd;
+            --bg-gradient-end: #c2e9fb;
+            --panel-bg: rgba(255, 255, 255, 0.9);
+            --sight-color: #ff5e62;
+            --decodable-color: #20bf6b;
+            --text-dark: #2d3436;
+        }
 
-<style>
-body {
-    margin: 0;
-    overflow: hidden;
-    font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-    background: linear-gradient(to top, #87CEEB, #e0f6ff);
-    user-select: none;
-}
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
 
-/* Splash Screen */
-#splashScreen {
-    position: absolute;
-    width: 100vw;
-    height: 100vh;
-    background: #ffffff;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-    transition: opacity 0.5s ease;
-}
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
 
-#splashScreen img {
-    max-width: 200px;
-    margin-bottom: 20px;
-}
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: transparent;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 4px solid #ffffff;
+        }
 
-#splashScreen h1 {
-    font-size: 36px;
-    color: #ff5722;
-    text-shadow: 2px 2px #ffe0b2;
-    margin: 0;
-}
+        canvas {
+            display: block;
+            background: transparent;
+        }
 
-/* Top Score Board */
-#scoreBoard {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    font-size: 24px;
-    font-weight: bold;
-    color: #2c3e50;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 8px 15px;
-    border-radius: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    z-index: 5;
-}
+        /* UI Overlays */
+        .hud {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
 
-/* Game Area */
-#gameArea {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-}
+        .hud-panel {
+            background: var(--panel-bg);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--text-dark);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+        }
 
-/* Basket using image from asset folder */
-#basket {
-    position: absolute;
-    bottom: 20px;
-    width: 110px;
-    height: 75px;
-    background: url('basket.jpg') no-repeat center center;
-    background-size: contain;
-    left: 50%;
-    transform: translateX(-50%);
-    transition: transform 0.1s ease-out;
-}
+        .legend {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: var(--panel-bg);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: flex;
+            gap: 15px;
+            pointer-events: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
 
-/* Falling word box with attractive colors */
-.word {
-    position: absolute;
-    top: 0;
-    font-size: 24px;
-    font-weight: bold;
-    padding: 8px 16px;
-    border-radius: 15px;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
-    text-align: center;
-    color: white;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-}
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
 
-/* End screen */
-#endScreen {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    color: white;
-    font-size: 32px;
-    z-index: 8;
-}
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
 
-button {
-    padding: 12px 30px;
-    font-size: 20px;
-    font-weight: bold;
-    margin-top: 25px;
-    border: none;
-    border-radius: 25px;
-    background-color: #ff5722;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 5px #e64a19;
-}
+        /* Controls Panel */
+        .controls {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: var(--panel-bg);
+            padding: 8px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
 
-button:active {
-    box-shadow: 0 2px #e64a19;
-    transform: translateY(3px);
-}
-</style>
+        select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(161, 196, 253, 0.95);
+            z-index: 10;
+            transition: opacity 0.3s ease;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 42px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        p {
+            font-size: 18px;
+            color: #34495e;
+            max-width: 500px;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            background: #ff7675;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 118, 117, 0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(255, 118, 117, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+    </style>
 </head>
-
 <body>
 
-<!-- 5-Second Splash Screen -->
-<div id="splashScreen">
-    <img src="innovine-logo.png" alt="Innovine Logo">
-    <h1>Sight Word Sky Catch!</h1>
+<div id="game-container">
+    <!-- HUD -->
+    <div class="hud">
+        <div class="hud-panel">
+            <div>Score: <span id="score-display">0</span></div>
+            <div>Streak: <span id="streak-display">0</span>🔥</div>
+        </div>
+        <div class="hud-panel" style="font-size: 16px; color: #7f8c8d;">
+            Target: 100 Pts
+        </div>
+    </div>
+
+    <!-- Gameplay Canvas -->
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-item">
+            <div class="dot" style="background: var(--sight-color);"></div> Catch: Sight Words
+        </div>
+        <div class="legend-item">
+            <div class="dot" style="background: var(--decodable-color);"></div> Avoid: Decodable Words
+        </div>
+    </div>
+
+    <!-- Config controls -->
+    <div class="controls">
+        <label for="speed-select">Speed:</label>
+        <select id="speed-select">
+            <option value="1.5">Easy</option>
+            <option value="2.5" selected>Medium</option>
+            <option value="4">Hard</option>
+        </select>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen">
+        <h1>Sight Word Sky Catch!</h1>
+        <p>Catch the tricky, non-decodable <b>Sight Words</b> in your basket. Leave the regular, phonics-based <b>Decodable Words</b> to fall safely to the ground!</p>
+        <button class="btn" onclick="startGame()">Start Game</button>
+    </div>
+
+    <!-- Victory Screen -->
+    <div id="victory-screen" class="screen hidden">
+        <h1>🎉 You Win! 🎉</h1>
+        <p>Fantastic job! You caught the right words, protected your streak, and hit the target goal score!</p>
+        <button class="btn" onclick="startGame()">Play Again</button>
+    </div>
 </div>
-
-<div id="scoreBoard">Score: 0</div>
-
-<div id="gameArea">
-    <div id="basket"></div>
-</div>
-
-<div id="endScreen">
-    <div id="endText">Great Job!</div>
-    <div id="finalScore" style="font-size: 24px; margin-top: 10px;"></div>
-    <button onclick="restartGame()">Play Again</button>
-</div>
-
-<!-- Audio Assets -->
-<audio id="soundClapping" src="clapping.mp3"></audio>
-<audio id="soundCorrect" src="correct.mp3"></audio>
-<audio id="soundWrong" src="wrong.mp3"></audio>
 
 <script>
-// ===== WORD GAME DATABASE =====
-// Sight words = Catch them! Decodable words = Avoid them!
-const gameItems = [
-    { text: "the", type: "sight" },
-    { text: "cat", type: "decodable" },
-    { text: "and", type: "sight" },
-    { text: "sit", type: "decodable" },
-    { text: "is", type: "sight" },
-    { text: "map", type: "decodable" },
-    { text: "in", type: "sight" },
-    { text: "run", type: "decodable" },
-    { text: "it", type: "sight" },
-    { text: "hop", type: "decodable" },
-    { text: "you", type: "sight" },
-    { text: "pen", type: "decodable" },
-    { text: "he", type: "sight" },
-    { text: "she", type: "sight" },
-    { text: "we", type: "sight" },
-    { text: "me", type: "sight" }
-];
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-// Vibrant background colors for the word boxes
-const boxColors = ["#FF5722", "#4CAF50", "#9C27B0", "#FF9800", "#E91E63", "#00BCD4"];
+    // UI Updates
+    const scoreDisplay = document.getElementById('score-display');
+    const streakDisplay = document.getElementById('streak-display');
+    const startScreen = document.getElementById('start-screen');
+    const victoryScreen = document.getElementById('victory-screen');
+    const speedSelect = document.getElementById('speed-select');
 
-let currentIndex = 0;
-let score = 0;
-let basketX = window.innerWidth / 2 - 55;
+    // Word Banks
+    const SIGHT_WORDS = ["the", "was", "said", "of", "they", "have", "from", "you", "are", "what", "to", "do", "some", "come"];
+    const DECODABLE_WORDS = ["cat", "sit", "jump", "hop", "fin", "net", "rug", "mop", "can", "zip", "best", "lamp", "fast", "frog"];
 
-const basket = document.getElementById("basket");
-const gameArea = document.getElementById("gameArea");
-const scoreBoard = document.getElementById("scoreBoard");
-const endScreen = document.getElementById("endScreen");
-const splashScreen = document.getElementById("splashScreen");
+    // Game variables
+    let score = 0;
+    let streak = 0;
+    let isPlaying = false;
+    let words = [];
+    let particles = [];
+    let speedMultiplier = parseFloat(speedSelect.value);
 
-// Audio Elements
-const sndClapping = document.getElementById("soundClapping");
-const sndCorrect = document.getElementById("soundCorrect");
-const sndWrong = document.getElementById("soundWrong");
+    // Basket Properties
+    const basket = {
+        x: canvas.width / 2 - 60,
+        y: canvas.height - 75,
+        width: 120,
+        height: 30,
+        targetX: canvas.width / 2 - 60
+    };
 
-function updateBasket() {
-    basket.style.left = basketX + "px";
-}
-updateBasket();
+    // Clouds for decorative background animation
+    const clouds = [
+        {x: 100, y: 80, size: 40, speed: 0.2},
+        {x: 450, y: 150, size: 60, speed: 0.1},
+        {x: 700, y: 90, size: 35, speed: 0.3}
+    ];
 
-// ===== CONTROLS =====
-document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") basketX -= 40;
-    if (e.key === "ArrowRight") basketX += 40;
-    basketX = Math.max(0, Math.min(window.innerWidth - 110, basketX));
-    updateBasket();
-});
+    // Listeners
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        basket.targetX = e.clientX - rect.left - basket.width / 2;
+    });
 
-let startX = 0;
-document.addEventListener("touchstart", (e) => { startX = e.touches[0].clientX; });
-document.addEventListener("touchmove", (e) => {
-    let moveX = e.touches[0].clientX;
-    let diff = moveX - startX;
-    basketX += diff * 0.4;
-    basketX = Math.max(0, Math.min(window.innerWidth - 110, basketX));
-    updateBasket();
-    startX = moveX;
-});
+    canvas.addEventListener('touchmove', (e) => {
+        if(e.touches.length > 0) {
+            const rect = canvas.getBoundingClientRect();
+            basket.targetX = e.touches[0].clientX - rect.left - basket.width / 2;
+        }
+    }, { passive: true });
 
-// ===== GAME LOGIC =====
-function createWord(item) {
-    const el = document.createElement("div");
-    el.classList.add("word");
-    el.innerText = item.text;
-    
-    // Assign random background color
-    el.style.backgroundColor = boxColors[Math.floor(Math.random() * boxColors.length)];
+    speedSelect.addEventListener('change', (e) => {
+        speedMultiplier = parseFloat(e.target.value);
+    });
 
-    let x = Math.random() * (window.innerWidth - 120);
-    let y = -50;
+    class FallingWord {
+        constructor() {
+            this.isSightWord = Math.random() < 0.5;
+            this.text = this.isSightWord 
+                ? SIGHT_WORDS[Math.floor(Math.random() * SIGHT_WORDS.length)]
+                : DECODABLE_WORDS[Math.floor(Math.random() * DECODABLE_WORDS.length)];
+            
+            ctx.font = "bold 20px Segoe UI";
+            this.width = ctx.measureText(this.text).width + 30; // added padding
+            this.height = 34;
+            
+            this.x = Math.random() * (canvas.width - this.width) + this.width / 2;
+            this.y = -40;
+            this.speed = (Math.random() * 1 + 1) * speedMultiplier;
+            this.pulse = Math.random() * Math.PI;
+        }
 
-    el.style.left = x + "px";
-    gameArea.appendChild(el);
+        update() {
+            this.y += this.speed;
+            this.pulse += 0.05;
+        }
 
-    let fallSpeed = 1.5; 
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            
+            // Subtle floating scaling effect
+            const scale = 1 + Math.sin(this.pulse) * 0.03;
+            ctx.scale(scale, scale);
 
-    function fall() {
-        y += fallSpeed;
-        el.style.top = y + "px";
-
-        let basketTop = window.innerHeight - 95;
-
-        // Collision detection
-        if (y >= basketTop && y <= basketTop + 20 && x > basketX - 40 && x < basketX + 110) {
-            el.remove();
-            if (item.type === "sight") {
-                score += 10;
-                sndClapping.currentTime = 0;
-                sndClapping.play().catch(() => {});
+            // Draw bubble bubble container
+            ctx.beginPath();
+            const w = this.width;
+            const h = this.height;
+            ctx.roundRect(-w/2, -h/2, w, h, 15);
+            
+            if (this.isSightWord) {
+                ctx.fillStyle = 'rgba(255, 94, 98, 0.95)';
+                ctx.strokeStyle = '#fff';
             } else {
-                score = Math.max(0, score - 5); // penalty for decodable word
-                sndWrong.currentTime = 0;
-                sndWrong.play().catch(() => {});
+                ctx.fillStyle = 'rgba(32, 191, 107, 0.95)';
+                ctx.strokeStyle = '#fff';
             }
-            scoreBoard.innerText = `Score: ${score}`;
-            nextWord();
-            return;
+            
+            ctx.lineWidth = 2;
+            ctx.fill();
+            ctx.stroke();
+
+            // Text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "bold 18px 'Segoe UI', sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+            ctx.shadowBlur = 4;
+            ctx.fillText(this.text, 0, 0);
+            
+            ctx.restore();
         }
-
-        // Missed word (reaches the bottom)
-        if (y > window.innerHeight) {
-            el.remove();
-            if (item.type === "decodable") {
-                // Good job letting a decodable word pass!
-                sndCorrect.currentTime = 0;
-                sndCorrect.play().catch(() => {});
-            }
-            nextWord();
-            return;
-        }
-
-        requestAnimationFrame(fall);
-    }
-    fall();
-}
-
-function nextWord() {
-    if (currentIndex >= gameItems.length) {
-        endGame();
-        return;
     }
 
-    let item = gameItems[currentIndex];
-    currentIndex++;
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.vx = (Math.random() - 0.5) * 6;
+            this.vy = (Math.random() - 0.5) * 6 - 2;
+            this.radius = Math.random() * 4 + 2;
+            this.alpha = 1;
+            this.decay = Math.random() * 0.02 + 0.01;
+        }
 
-    setTimeout(() => {
-        createWord(item);
-    }, 1000);
-}
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vy += 0.1; // gravity
+            this.alpha -= this.decay;
+        }
 
-function startGame() {
-    currentIndex = 0;
-    score = 0;
-    scoreBoard.innerText = "Score: 0";
-    nextWord();
-}
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
 
-function endGame() {
-    document.getElementById("finalScore").innerText = `Your Final Score: ${score}`;
-    endScreen.style.display = "flex";
-}
+    function createExplosion(x, y, color) {
+        for(let i = 0; i < 15; i++) {
+            particles.push(new Particle(x, y, color));
+        }
+    }
 
-function restartGame() {
-    endScreen.style.display = "none";
-    startGame();
-}
+    function drawBasket() {
+        // Linear interpolation smoothly glides basket towards mouse/finger positioning
+        basket.x += (basket.targetX - basket.x) * 0.25;
+        
+        // Bounds limit
+        if (basket.x < 0) basket.x = 0;
+        if (basket.x > canvas.width - basket.width) basket.x = canvas.width - basket.width;
 
-// ===== INITIAL TIMEOUT FOR SPLASH SCREEN =====
-window.onload = () => {
-    setTimeout(() => {
-        splashScreen.style.opacity = 0;
-        setTimeout(() => {
-            splashScreen.style.display = "none";
-            startGame();
-        }, 500);
-    }, 5000); // 5 seconds display duration
-};
+        ctx.save();
+        // Basket Rim
+        ctx.fillStyle = '#d35400';
+        ctx.beginPath();
+        ctx.roundRect(basket.x, basket.y, basket.width, 8, 4);
+        ctx.fill();
+
+        // Basket Body (Woven grid stylized mesh)
+        ctx.fillStyle = '#e67e22';
+        ctx.beginPath();
+        ctx.roundRect(basket.x + 8, basket.y + 8, basket.width - 16, basket.height, [0, 0, 12, 12]);
+        ctx.fill();
+        
+        // Basket Rim Stripe Accent
+        ctx.fillStyle = '#f1c40f';
+        ctx.fillRect(basket.x + 15, basket.y + 12, basket.width - 30, 4);
+        ctx.restore();
+    }
+
+    function drawClouds() {
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        clouds.forEach(cloud => {
+            cloud.x += cloud.speed;
+            if (cloud.x - cloud.size * 2 > canvas.width) cloud.x = -cloud.size * 2;
+            
+            ctx.beginPath();
+            ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
+            ctx.arc(cloud.x + cloud.size * 0.6, cloud.y - cloud.size * 0.4, cloud.size * 0.8, 0, Math.PI * 2);
+            ctx.arc(cloud.x + cloud.size * 1.2, cloud.y, cloud.size * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    let spawnTimer = 0;
+    function gameLoop() {
+        if (!isPlaying) return;
+
+        // Clear view clear frame
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Environment visuals
+        drawClouds();
+
+        // Words Spawning logic
+        spawnTimer++;
+        const spawnInterval = Math.max(35, 75 - (speedMultiplier * 8));
+        if (spawnTimer > spawnInterval) {
+            words.push(new FallingWord());
+            spawnTimer = 0;
+        }
+
+        // Loop and manage falling items
+        for (let i = words.length - 1; i >= 0; i--) {
+            const w = words[i];
+            w.update();
+            w.draw();
+
+            // Basket catching collision bounding limits check
+            const withinX = (w.x + w.width/4 > basket.x) && (w.x - w.width/4 < basket.x + basket.width);
+            const withinY = (w.y + w.height/2 >= basket.y) && (w.y - w.height/2 <= basket.y + 12);
+
+            if (withinX && withinY) {
+                if (w.isSightWord) {
+                    score += 10;
+                    streak += 1;
+                    createExplosion(w.x, basket.y, '#fff');
+                } else {
+                    score = Math.max(0, score - 5);
+                    streak = 0;
+                    createExplosion(w.x, basket.y, '#2c3e50');
+                }
+                updateHUD();
+                words.splice(i, 1);
+                checkWinCondition();
+                continue;
+            }
+
+            // Fall past baseline limits check
+            if (w.y > canvas.height + 40) {
+                // Penalize if player lets an absolute sight word get away missing
+                if (w.isSightWord) {
+                    streak = 0;
+                    updateHUD();
+                }
+                words.splice(i, 1);
+            }
+        }
+
+        // Handle particle trails animation safely updating stack 
+        for (let i = particles.length - 1; i >= 0; i--) {
+            particles[i].update();
+            particles[i].draw();
+            if (particles[i].alpha <= 0) particles.splice(i, 1);
+        }
+
+        drawBasket();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function updateHUD() {
+        scoreDisplay.textContent = score;
+        streakDisplay.textContent = streak;
+    }
+
+    function checkWinCondition() {
+        if (score >= 100) {
+            isPlaying = false;
+            victoryScreen.classList.remove('hidden');
+        }
+    }
+
+    function startGame() {
+        score = 0;
+        streak = 0;
+        words = [];
+        particles = [];
+        updateHUD();
+        startScreen.classList.add('hidden');
+        victoryScreen.classList.add('hidden');
+        isPlaying = true;
+        gameLoop();
+    }
 </script>
-
 </body>
 </html>
