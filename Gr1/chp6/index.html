@@ -41,7 +41,7 @@ body {
 /* GAME */
 #game{ display:none; }
 
-/* QUESTION */
+/* ================= QUESTION (RESTORED) ================= */
 #topWord {
     position: absolute;
     top: 10px;
@@ -52,18 +52,7 @@ body {
     color: #ffffff;
 }
 
-/* CLUE */
-#clueWord{
-    position:absolute;
-    top:70px;
-    width:100%;
-    text-align:center;
-    font-size:22px;
-    font-weight:bold;
-    color:#ffeb3b;
-}
-
-/* TOP BAR */
+/* ================= HUD RESTORED ================= */
 #topBar {
     position: absolute;
     top: 120px;
@@ -75,9 +64,28 @@ body {
     font-weight: bold;
     color:white;
     box-sizing:border-box;
+    z-index:10;
 }
 
-/* TICKER */
+/* HUD BOXES */
+#counter, #timer {
+    background: rgba(0,0,0,0.4);
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+/* ================= CLUE ================= */
+#clueWord{
+    position:absolute;
+    top:70px;
+    width:100%;
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    color:#ffeb3b;
+}
+
+/* ================= TICKER ================= */
 #ticker {
     position: absolute;
     top: 50%;
@@ -87,7 +95,6 @@ body {
     white-space: nowrap;
 }
 
-/* TRACK */
 #track {
     display: inline-block;
     white-space: nowrap;
@@ -99,7 +106,6 @@ body {
     to { transform: translateX(-50%); }
 }
 
-/* IMAGE */
 .item {
     height: 180px;
     margin: 0 30px;
@@ -129,9 +135,11 @@ body {
 <!-- GAME -->
 <div id="game">
 
+    <!-- RESTORED QUESTION -->
     <div id="topWord"></div>
     <div id="clueWord"></div>
 
+    <!-- RESTORED COUNTER + TIMER -->
     <div id="topBar">
         <div id="counter">Mission: 0/10</div>
         <div id="timer">⏱ 45</div>
@@ -145,9 +153,8 @@ body {
 <script>
 
 //////////////////////////////////////////////////////////////////
-// ✅ HERO MISSIONS (RESTORED EXACTLY AS YOU PROVIDED)
+// HERO MISSIONS (UNCHANGED)
 //////////////////////////////////////////////////////////////////
-
 const missions = [
 {
 q:"After intense superhero training, what action helps restore energy and strength?",
@@ -180,9 +187,8 @@ ans:"sing"
 ];
 
 //////////////////////////////////////////////////////////////////
-// ACTION IMAGES
+// IMAGES
 //////////////////////////////////////////////////////////////////
-
 const images = [
 {word:"sleep", img:"sleep_image.jpg"},
 {word:"read", img:"read_image.png"},
@@ -197,8 +203,12 @@ const images = [
 
 let index = 0;
 let targetWord = "";
+let score = 0;
+let time = 45;
 
-/* ================= SPLASH FLOW ================= */
+//////////////////////////////////////////////////////////////////
+// SPLASH FLOW
+//////////////////////////////////////////////////////////////////
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
 document.getElementById("titleScreen").style.display="flex";
@@ -206,38 +216,47 @@ document.getElementById("titleScreen").style.display="flex";
 setTimeout(()=>{
 document.getElementById("titleScreen").style.display="none";
 document.getElementById("game").style.display="block";
+
 startMission();
 startTimer();
+
 },3000);
 
 },5000);
 
-/* ================= START MISSION ================= */
+//////////////////////////////////////////////////////////////////
+// START MISSION (RESTORED FULL LOGIC)
+//////////////////////////////////////////////////////////////////
 function startMission(){
 
 let m = missions[index];
 targetWord = m.ans;
 
+/* QUESTION */
 document.getElementById("topWord").innerHTML =
 "🦸 <b>MISSION:</b> " + m.q;
 
+/* CLUE */
 document.getElementById("clueWord").innerHTML =
 "TARGET ACTION: <b>" + targetWord.toUpperCase() + "</b>";
+
+/* COUNTER RESTORED */
+document.getElementById("counter").innerText =
+"Mission: " + index + "/10";
 
 buildTicker();
 }
 
-/* ================= TICKER (5 IMAGES LOOP FIXED) ================= */
+//////////////////////////////////////////////////////////////////
+// TICKER (UNCHANGED CORE BEHAVIOR)
+//////////////////////////////////////////////////////////////////
 function buildTicker(){
 
 let track = document.getElementById("track");
 track.innerHTML="";
 
-/* pick 5 images */
 let pool = [...images].sort(()=>Math.random()-0.5).slice(0,5);
-
-/* duplicate for continuous loop */
-let loop = [...pool, ...pool];
+let loop = [...pool, ...pool]; // continuous effect
 
 loop.forEach(data=>{
 let img = document.createElement("img");
@@ -250,27 +269,37 @@ track.appendChild(img);
 });
 }
 
-/* ================= CHECK ANSWER ================= */
+//////////////////////////////////////////////////////////////////
+// CHECK ANSWER
+//////////////////////////////////////////////////////////////////
 function check(word){
 
 if(word === targetWord){
+
 index++;
+score++;
+
+/* UPDATE COUNTER */
+document.getElementById("counter").innerText =
+"Mission: " + index + "/10";
+
 setTimeout(()=> startMission(), 500);
+
 }
 }
 
-/* ================= TIMER ================= */
-let time = 45;
-
+//////////////////////////////////////////////////////////////////
+// TIMER RESTORED
+//////////////////////////////////////////////////////////////////
 function startTimer(){
 setInterval(()=>{
 time--;
-document.getElementById("timer").innerText="⏱ " + time;
+document.getElementById("timer").innerText = "⏱ " + time;
 
-if(time<=0){
+if(time <= 0){
 index++;
 startMission();
-time=45;
+time = 45;
 }
 },1000);
 }
