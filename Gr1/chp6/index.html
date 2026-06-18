@@ -10,7 +10,7 @@ body {
     margin: 0;
     overflow: hidden;
     font-family: Arial;
-    background: linear-gradient(#b3e5fc, #e1f5fe);
+    background: linear-gradient(#0d47a1, #e3f2fd); /* SUPERHERO THEME FIX */
 }
 
 /* SPLASH */
@@ -25,12 +25,13 @@ body {
     z-index: 50;
 }
 
-/* TITLE */
+/* TITLE SCREEN */
 #titleScreen{
     position:absolute;
     width:100%;
     height:100%;
-    background:#e3f2fd;
+    background:#0d47a1;
+    color:white;
     display:none;
     flex-direction:column;
     justify-content:center;
@@ -40,58 +41,59 @@ body {
 }
 
 #titleScreen h1{
-    font-size:42px;
-    color:#0d47a1;
+    font-size:44px;
+    font-weight:bold;
 }
 
-#startBtn{
-    padding:12px 25px;
-    font-size:18px;
-    margin-top:20px;
-    display:none;
-}
-
-/* GAME */
+/* GAME AREA */
 #game{
     display:none;
 }
 
-/* QUESTION */
+/* MAIN QUESTION (FIXED + BOLD) */
 #topWord {
     position: absolute;
     top: 10px;
     width: 100%;
     text-align: center;
-    font-size: 40px;
+    font-size: 38px;
     font-weight: 900;
-    color: #0d47a1;
+    color: #ffffff;
 }
 
-/* CLUE WORD (BELOW QUESTION) */
+/* SUB QUESTION (MISSION STYLE) */
 #clueWord{
     position:absolute;
     top:70px;
     width:100%;
     text-align:center;
-    font-size:28px;
+    font-size:22px;
     font-weight:bold;
-    color:#1565c0;
+    color:#ffeb3b;
 }
 
-/* TOP BAR */
+/* TOP BAR (FIXED MOBILE SAFE) */
 #topBar {
     position: absolute;
     top: 120px;
     width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 0 20px;
-    font-size: 20px;
+    padding: 0 15px;
+    font-size: 18px;
     font-weight: bold;
+    color:white;
     box-sizing:border-box;
 }
 
-/* TICKER */
+/* TIMER SAFE FIX */
+#timer, #counter {
+    background: rgba(0,0,0,0.4);
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+/* TICKER AREA */
 #ticker {
     position: absolute;
     top: 50%;
@@ -103,21 +105,22 @@ body {
 
 /* IMAGE */
 .item {
-    height: 200px;
-    margin: 0 40px;
+    height: 180px;
+    margin: 0 30px;
     cursor: pointer;
     display: inline-block;
     transition: transform 0.2s;
 }
 
 .item:hover {
-    transform: scale(1.1);
+    transform: scale(1.08);
 }
 
+/* 🔥 FIXED SLOWER TICKER */
 #track {
     display: inline-block;
     white-space: nowrap;
-    animation: scroll 18s linear infinite;
+    animation: scroll 30s linear infinite; /* FIX: slower */
 }
 
 @keyframes scroll {
@@ -125,7 +128,7 @@ body {
     to { transform: translateX(-50%); }
 }
 
-/* END */
+/* END SCREEN */
 #endScreen {
     position: absolute;
     width: 100%;
@@ -143,19 +146,19 @@ body {
 
 <!-- SPLASH -->
 <div id="splash">
-    <img src="assets/innovine-logo.png" style="width:250px;">
+    <img src="assets/innovine-logo.png" style="width:260px;">
 </div>
 
-<!-- TITLE SCREEN -->
+<!-- TITLE -->
 <div id="titleScreen">
-    <h1>🦸 Superhero Training Camp</h1>
-    <button id="startBtn">START MISSION</button>
+    <h1>🦸 SUPERHERO TRAINING CAMP</h1>
+    <p>Unlock your hero powers by mastering ACTION WORD MISSIONS!</p>
 </div>
 
 <!-- GAME -->
 <div id="game">
 
-    <div id="topWord"></div>
+    <div id="topWord"><b>Loading Mission...</b></div>
     <div id="clueWord"></div>
 
     <div id="topBar">
@@ -168,49 +171,45 @@ body {
     </div>
 </div>
 
-<!-- END -->
-<div id="endScreen">
-    <h1>Mission Complete! 🦸</h1>
-</div>
-
+<!-- AUDIO -->
 <audio id="correctSound" src="assets/clapping.mp3"></audio>
 <audio id="wrongSound" src="assets/wrong.mp3"></audio>
 
 <script>
 
-/* ================= HERO QUESTIONS ================= */
+/* HERO MISSIONS */
 const missions = [
 {
-q:"After a long day of superhero training, which action is needed to rest and recover?",
+q:"After intense superhero training, what action helps restore energy and strength?",
 ans:"sleep"
 },
 {
-q:"A hero must move fast to save people. Which action shows speed?",
+q:"A hero must move fast to rescue people. Which action shows speed?",
 ans:"run"
 },
 {
-q:"To understand secret missions, what should a hero do carefully?",
+q:"To decode secret missions, a hero must carefully...",
 ans:"read"
 },
 {
-q:"After saving the city, what should a hero do to regain energy?",
+q:"After saving the city, heroes must regain energy by...",
 ans:"eat"
 },
 {
-q:"To reach a tall building quickly, which action is needed?",
+q:"To reach high buildings quickly, heroes must...",
 ans:"jump"
 },
 {
-q:"A hero under water rescue mission must be able to...",
+q:"During underwater rescue missions heroes must...",
 ans:"swim"
 },
 {
-q:"To call teammates during danger, a hero should...",
+q:"To alert teammates in danger, heroes may...",
 ans:"sing"
 }
 ];
 
-/* ================= ACTION IMAGES ================= */
+/* IMAGES (FIXED 5 PER ROUND) */
 const images = [
 {word:"sleep", img:"sleep_image.jpg"},
 {word:"read", img:"read_image.png"},
@@ -227,53 +226,48 @@ let index=0;
 let targetWord="";
 let score=0;
 
-/* SPLASH */
+/* SPLASH FLOW */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
 document.getElementById("titleScreen").style.display="flex";
 
 setTimeout(()=>{
-document.getElementById("startBtn").style.display="inline-block";
+document.getElementById("titleScreen").style.display="none";
+document.getElementById("game").style.display="block";
+startMission();
+startTimer();
 },3000);
 
 },5000);
 
-/* START */
-document.getElementById("startBtn").onclick=()=>{
-document.getElementById("titleScreen").style.display="none";
-document.getElementById("game").style.display="block";
-
-nextMission();
-startTimer();
-};
-
-/* ================= MISSION ================= */
-function nextMission(){
+/* START MISSION */
+function startMission(){
 
 let m = missions[index];
+
 targetWord = m.ans;
 
+/* FIX: BOLD QUESTION ALWAYS */
 document.getElementById("topWord").innerHTML =
-"🦸 Mission: " + m.q;
+"<b>🦸 MISSION: " + m.q + "</b>";
 
 document.getElementById("clueWord").innerHTML =
-"Target Action: <b>" + targetWord.toUpperCase() + "</b>";
+"TARGET ACTION: <b>" + targetWord.toUpperCase() + "</b>";
 
 buildTicker();
-
 }
 
-/* ================= TICKER (ONLY 5 IMAGES) ================= */
+/* TICKER (5 IMAGES ONLY) */
 function buildTicker(){
 
 let track = document.getElementById("track");
 track.innerHTML="";
 
-let shuffled = [...images].sort(()=>Math.random()-0.5).slice(0,5);
+let pool = [...images].sort(()=>Math.random()-0.5).slice(0,5);
 
-shuffled.forEach(data=>{
+pool.forEach(data=>{
 let img = document.createElement("img");
-img.src="assets/"+data.img;
+img.src = "assets/"+data.img;
 img.className="item";
 
 img.onclick=()=>check(data.word);
@@ -282,16 +276,20 @@ track.appendChild(img);
 });
 }
 
-/* ================= CHECK ================= */
+/* CLICK */
 function check(word){
 
-if(word===targetWord){
+if(word === targetWord){
+
 document.getElementById("correctSound").play();
 score++;
 index++;
 
+document.getElementById("counter").innerText =
+"Mission: " + index + "/10";
+
 setTimeout(()=>{
-nextMission();
+startMission();
 },1000);
 
 }else{
@@ -299,7 +297,7 @@ document.getElementById("wrongSound").play();
 }
 }
 
-/* ================= TIMER ================= */
+/* TIMER (SAFE MOBILE FIX) */
 let time=45;
 function startTimer(){
 setInterval(()=>{
@@ -308,7 +306,7 @@ document.getElementById("timer").innerText="⏱ "+time;
 
 if(time<=0){
 index++;
-nextMission();
+startMission();
 time=45;
 }
 },1000);
