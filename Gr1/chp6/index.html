@@ -44,11 +44,6 @@ body {
     color:#0d47a1;
 }
 
-#titleScreen p{
-    font-size:20px;
-    max-width:600px;
-}
-
 #startBtn{
     padding:12px 25px;
     font-size:18px;
@@ -61,47 +56,52 @@ body {
     display:none;
 }
 
-/* ✅ QUESTION FIX (BOLD + BIG + CENTER) */
+/* QUESTION */
 #topWord {
     position: absolute;
     top: 10px;
     width: 100%;
     text-align: center;
-    font-size: 44px;
+    font-size: 40px;
     font-weight: 900;
     color: #0d47a1;
-    z-index: 5;
 }
 
-/* TOP BAR FIX (RESPONSIVE) */
+/* CLUE WORD (BELOW QUESTION) */
+#clueWord{
+    position:absolute;
+    top:70px;
+    width:100%;
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+    color:#1565c0;
+}
+
+/* TOP BAR */
 #topBar {
     position: absolute;
-    top: 70px;
+    top: 120px;
     width: 100%;
     display: flex;
     justify-content: space-between;
     padding: 0 20px;
     font-size: 20px;
     font-weight: bold;
-    z-index: 5;
-    box-sizing: border-box;
-}
-
-/* TIMER SAFE */
-#timer {
-    white-space: nowrap;
+    box-sizing:border-box;
 }
 
 /* TICKER */
 #ticker {
     position: absolute;
-    top: 45%;
+    top: 50%;
     width: 100%;
     height: 220px;
     overflow: hidden;
     white-space: nowrap;
 }
 
+/* IMAGE */
 .item {
     height: 200px;
     margin: 0 40px;
@@ -135,7 +135,6 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    z-index: 100;
 }
 </style>
 </head>
@@ -144,13 +143,12 @@ body {
 
 <!-- SPLASH -->
 <div id="splash">
-    <img src="assets/innovine-logo.png">
+    <img src="assets/innovine-logo.png" style="width:250px;">
 </div>
 
 <!-- TITLE SCREEN -->
 <div id="titleScreen">
     <h1>🦸 Superhero Training Camp</h1>
-    <p><b>Read the action word carefully and tap the correct image to complete your mission!</b></p>
     <button id="startBtn">START MISSION</button>
 </div>
 
@@ -158,6 +156,7 @@ body {
 <div id="game">
 
     <div id="topWord"></div>
+    <div id="clueWord"></div>
 
     <div id="topBar">
         <div id="counter">Mission: 0/10</div>
@@ -172,119 +171,147 @@ body {
 <!-- END -->
 <div id="endScreen">
     <h1>Mission Complete! 🦸</h1>
-    <p id="finalScore"></p>
 </div>
 
-<!-- AUDIO -->
 <audio id="correctSound" src="assets/clapping.mp3"></audio>
 <audio id="wrongSound" src="assets/wrong.mp3"></audio>
 
 <script>
 
-const images = [
-    {word:"sleep", img:"sleep_image.jpg"},
-    {word:"read", img:"read_image.png"},
-    {word:"run", img:"run_image.png"},
-    {word:"walk", img:"walk_image.png"},
-    {word:"eat", img:"eat_image.jpg"},
-    {word:"sit", img:"sit_image.png"},
-    {word:"swim", img:"swim_image.png"},
-    {word:"jump", img:"jump_image.png"},
-    {word:"sing", img:"sing_image.png"}
+/* ================= HERO QUESTIONS ================= */
+const missions = [
+{
+q:"After a long day of superhero training, which action is needed to rest and recover?",
+ans:"sleep"
+},
+{
+q:"A hero must move fast to save people. Which action shows speed?",
+ans:"run"
+},
+{
+q:"To understand secret missions, what should a hero do carefully?",
+ans:"read"
+},
+{
+q:"After saving the city, what should a hero do to regain energy?",
+ans:"eat"
+},
+{
+q:"To reach a tall building quickly, which action is needed?",
+ans:"jump"
+},
+{
+q:"A hero under water rescue mission must be able to...",
+ans:"swim"
+},
+{
+q:"To call teammates during danger, a hero should...",
+ans:"sing"
+}
 ];
 
-let score = 0;
-let targetWord = "";
-let questionIndex = 0;
-let time = 45;
+/* ================= ACTION IMAGES ================= */
+const images = [
+{word:"sleep", img:"sleep_image.jpg"},
+{word:"read", img:"read_image.png"},
+{word:"run", img:"run_image.png"},
+{word:"walk", img:"walk_image.png"},
+{word:"eat", img:"eat_image.jpg"},
+{word:"sit", img:"sit_image.png"},
+{word:"swim", img:"swim_image.png"},
+{word:"jump", img:"jump_image.png"},
+{word:"sing", img:"sing_image.png"}
+];
 
-/* SPLASH FLOW */
-setTimeout(() => {
-    document.getElementById("splash").style.display = "none";
-    document.getElementById("titleScreen").style.display = "flex";
+let index=0;
+let targetWord="";
+let score=0;
 
-    setTimeout(()=>{
-        document.getElementById("startBtn").style.display="inline-block";
-    },3000);
+/* SPLASH */
+setTimeout(()=>{
+document.getElementById("splash").style.display="none";
+document.getElementById("titleScreen").style.display="flex";
 
-}, 5000);
+setTimeout(()=>{
+document.getElementById("startBtn").style.display="inline-block";
+},3000);
+
+},5000);
 
 /* START */
-document.getElementById("startBtn").onclick = () => {
+document.getElementById("startBtn").onclick=()=>{
+document.getElementById("titleScreen").style.display="none";
+document.getElementById("game").style.display="block";
 
-    document.getElementById("titleScreen").style.display = "none";
-    document.getElementById("game").style.display = "block";
-
-    createTicker();
-    setNewWord();
-    startTimer();
+nextMission();
+startTimer();
 };
 
-/* TICKER */
-function createTicker() {
-    let list = [...images, ...images];
+/* ================= MISSION ================= */
+function nextMission(){
 
-    list.forEach(data => {
-        let img = document.createElement("img");
-        img.src = "assets/" + data.img;
-        img.className = "item";
+let m = missions[index];
+targetWord = m.ans;
 
-        img.onclick = () => checkClick(data.word);
+document.getElementById("topWord").innerHTML =
+"🦸 Mission: " + m.q;
 
-        document.getElementById("track").appendChild(img);
-    });
+document.getElementById("clueWord").innerHTML =
+"Target Action: <b>" + targetWord.toUpperCase() + "</b>";
+
+buildTicker();
+
 }
 
-/* QUESTION */
-function setNewWord() {
-    let random = images[Math.floor(Math.random() * images.length)];
-    targetWord = random.word;
+/* ================= TICKER (ONLY 5 IMAGES) ================= */
+function buildTicker(){
 
-    document.getElementById("topWord").innerHTML =
-        "🦸 <b>Find Action Word: " + targetWord.toUpperCase() + "</b>";
+let track = document.getElementById("track");
+track.innerHTML="";
+
+let shuffled = [...images].sort(()=>Math.random()-0.5).slice(0,5);
+
+shuffled.forEach(data=>{
+let img = document.createElement("img");
+img.src="assets/"+data.img;
+img.className="item";
+
+img.onclick=()=>check(data.word);
+
+track.appendChild(img);
+});
 }
 
-/* CLICK FIX (MAIN BUG FIX) */
-function checkClick(word) {
+/* ================= CHECK ================= */
+function check(word){
 
-    if (word === targetWord) {
+if(word===targetWord){
+document.getElementById("correctSound").play();
+score++;
+index++;
 
-        setTimeout(() => {
-            document.getElementById("correctSound").play();
-            score++;
-            questionIndex++;
+setTimeout(()=>{
+nextMission();
+},1000);
 
-            document.getElementById("counter").innerText =
-                "Mission: " + questionIndex + "/10";
-
-            setNewWord();
-        }, 500);
-
-    } else {
-        setTimeout(() => {
-            document.getElementById("wrongSound").play();
-        }, 500);
-    }
-
-    if (questionIndex >= 10) endGame();
+}else{
+document.getElementById("wrongSound").play();
+}
 }
 
-/* TIMER FIX (SAFE MOBILE) */
-function startTimer() {
-    setInterval(() => {
-        time--;
-        document.getElementById("timer").innerText = "⏱ " + time;
+/* ================= TIMER ================= */
+let time=45;
+function startTimer(){
+setInterval(()=>{
+time--;
+document.getElementById("timer").innerText="⏱ "+time;
 
-        if (time <= 0) endGame();
-    }, 1000);
+if(time<=0){
+index++;
+nextMission();
+time=45;
 }
-
-/* END */
-function endGame() {
-    document.getElementById("game").style.display = "none";
-    document.getElementById("endScreen").style.display = "flex";
-    document.getElementById("finalScore").innerText =
-        "Score: " + score + "/10";
+},1000);
 }
 
 </script>
