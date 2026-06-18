@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Action Word Ticker Game</title>
+<title>Action Word Ticker Adventure</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -22,74 +22,111 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+    z-index: 20;
 }
 
 #splash img {
     width: 250px;
 }
 
-/* GAME AREA */
+/* GAME WRAPPER (smaller screen) */
 #game {
     display: none;
+    width: 90%;
+    height: 80%;
+    margin: 5% auto;
+    position: relative;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.3);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
 }
 
-#topWord {
+/* TITLE */
+#title {
     position: absolute;
-    top: 20px;
+    top: 5px;
     width: 100%;
     text-align: center;
-    font-size: 42px;
+    font-size: 28px;
     font-weight: bold;
     color: #0d47a1;
-    z-index: 5;
 }
 
+/* INSTRUCTIONS (ALWAYS ON SCREEN) */
+#instruction {
+    position: absolute;
+    top: 40px;
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    color: #333;
+}
+
+/* TIMER */
+#timer {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background: #ffeb3b;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+/* SCORE */
 #scoreBoard {
     position: absolute;
-    top: 20px;
+    top: 10px;
     left: 20px;
     background: white;
-    padding: 10px 15px;
+    padding: 8px 12px;
     border-radius: 10px;
-    z-index: 5;
-    font-size: 20px;
 }
 
-/* TICKER STRIP */
+/* WORD */
+#topWord {
+    position: absolute;
+    top: 80px;
+    width: 100%;
+    text-align: center;
+    font-size: 34px;
+    font-weight: bold;
+    color: #0d47a1;
+}
+
+/* TICKER */
 #ticker {
     position: absolute;
-    top: 45%;
+    top: 50%;
     width: 100%;
-    height: 220px;
+    height: 200px;
     overflow: hidden;
-    white-space: nowrap;
+    transform: translateY(-50%);
 }
 
-/* IMAGE STYLE (2 inches approx) */
-.item {
-    height: 200px;   /* ~2 inches visual */
-    margin: 0 40px;
-    cursor: pointer;
-    display: inline-block;
-    vertical-align: middle;
-    transition: transform 0.2s;
-}
-
-.item:hover {
-    transform: scale(1.1);
-}
-
-/* moving track */
 #track {
     display: inline-block;
     white-space: nowrap;
-    animation: scroll 18s linear infinite;
+    animation: scroll 36s linear infinite; /* ⬅ HALF SPEED */
 }
 
 @keyframes scroll {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
+}
+
+/* IMAGES */
+.item {
+    height: 200px;
+    margin: 0 60px; /* 1–2 inch spacing */
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.item:hover {
+    transform: scale(1.1);
 }
 
 /* END SCREEN */
@@ -102,7 +139,7 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    z-index: 20;
+    z-index: 30;
 }
 
 #endScreen h1 {
@@ -122,9 +159,15 @@ body {
 <!-- GAME -->
 <div id="game">
 
-    <div id="scoreBoard">
-        Score: <span id="score">0</span>
+    <div id="title">🎯 Action Word Ticker Adventure</div>
+
+    <div id="instruction">
+        Read the word and click the correct action image. You have 60 seconds and 1 retry!
     </div>
+
+    <div id="scoreBoard">Score: <span id="score">0</span></div>
+
+    <div id="timer">60</div>
 
     <div id="topWord">Loading...</div>
 
@@ -139,13 +182,12 @@ body {
     <p id="finalScore"></p>
 </div>
 
-<!-- AUDIO -->
 <audio id="correctSound" src="assets/clapping.mp3"></audio>
 <audio id="wrongSound" src="assets/wrong.mp3"></audio>
 
 <script>
 
-const images = [
+const imagesBase = [
     {word:"sleep", img:"sleep_image.jpg"},
     {word:"read", img:"read_image.png"},
     {word:"run", img:"run_image.png"},
@@ -157,13 +199,18 @@ const images = [
     {word:"sing", img:"sing_image.png"}
 ];
 
+let images = [];
 let score = 0;
 let targetWord = "";
+let time = 60;
+let timer;
+let retry = false;
 let gameRunning = false;
 
 const track = document.getElementById("track");
 const scoreEl = document.getElementById("score");
 const topWord = document.getElementById("topWord");
+const timerEl = document.getElementById("timer");
 
 const correctSound = document.getElementById("correctSound");
 const wrongSound = document.getElementById("wrongSound");
@@ -175,51 +222,85 @@ setTimeout(() => {
     startGame();
 }, 5000);
 
-/* BUILD TICKER (duplicated for seamless loop) */
-function createTicker() {
+/* SHUFFLE FUNCTION */
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
 
-    let list = [...images, ...images]; // duplicate for smooth loop
+/* BUILD TICKER */
+function buildTicker() {
+    track.innerHTML = "";
+    images = shuffle([...imagesBase, ...imagesBase]);
 
-    list.forEach(data => {
+    images.forEach(data => {
         let img = document.createElement("img");
         img.src = "assets/" + data.img;
         img.className = "item";
-        img.dataset.word = data.word;
 
-        img.addEventListener("click", () => checkClick(data.word));
+        img.addEventListener("click", () => checkAnswer(data.word));
 
         track.appendChild(img);
     });
 }
 
 /* NEW WORD */
-function setNewWord() {
-    let random = images[Math.floor(Math.random() * images.length)];
-    targetWord = random.word;
+function newWord() {
+    let pick = imagesBase[Math.floor(Math.random() * imagesBase.length)];
+    targetWord = pick.word;
     topWord.innerText = "Find: " + targetWord.toUpperCase();
+
+    resetTimer();
 }
 
-/* CLICK CHECK */
-function checkClick(word) {
+/* TIMER */
+function resetTimer() {
+    clearInterval(timer);
+    time = 60;
+    timerEl.innerText = time;
+
+    timer = setInterval(() => {
+        time--;
+        timerEl.innerText = time;
+
+        if (time <= 0) {
+            nextQuestion();
+        }
+    }, 1000);
+}
+
+/* ANSWER CHECK */
+function checkAnswer(word) {
     if (!gameRunning) return;
 
     if (word === targetWord) {
         score++;
-        scoreEl.innerText = score;
         correctSound.play();
-        setNewWord();
+        scoreEl.innerText = score;
+        retry = false;
+        nextQuestion();
     } else {
         wrongSound.play();
-    }
 
-    if (score >= 10) endGame();
+        if (!retry) {
+            retry = true; // one retry allowed
+        } else {
+            nextQuestion();
+        }
+    }
+}
+
+/* NEXT QUESTION */
+function nextQuestion() {
+    buildTicker();   // shuffle ticker every question
+    retry = false;
+    newWord();
 }
 
 /* START */
 function startGame() {
     gameRunning = true;
-    createTicker();
-    setNewWord();
+    buildTicker();
+    newWord();
 }
 
 /* END */
