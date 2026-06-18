@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Superhero Training Camp - Action Words</title>
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;font-family:Arial,sans-serif;text-align:center;color:white;
+background:linear-gradient(to bottom,#ff6b35,#f7931e);
+overflow-x:hidden;
+}
+#logoScreen{
+position:fixed;inset:0;display:flex;justify-content:center;align-items:center;
+background:linear-gradient(to bottom,#ff6b35,#f7931e);z-index:9999;
+}
+#logoImage{
+width:80%;max-width:350px;background:white;padding:20px;border-radius:20px;border:6px solid #ffd60a;
+}
+#titleScreen{
+display:none;height:100dvh;flex-direction:column;justify-content:center;align-items:center;padding:20px;
+}
+#titleScreen h1{font-size:3rem;color:#fff}
+#titleScreen p{font-size:1.5rem;max-width:700px}
+.startBtn,.option{
+background:#ffd60a;color:#7a1f00;border:none;border-radius:15px;font-weight:bold;cursor:pointer;
+}
+.startBtn{padding:18px 40px;font-size:1.5rem}
+#gameContainer{display:none;max-width:1000px;margin:auto;padding:20px}
+#questionCounter,#timer{
+position:fixed;top:15px;background:#fff;color:#d9480f;padding:10px 18px;border-radius:10px;font-size:24px;font-weight:bold;
+}
+#questionCounter{left:15px}
+#timer{right:15px}
+#hero{font-size:90px;margin-top:50px}
+#instruction{font-size:36px;font-weight:bold;margin:20px}
+#actionImage{
+width:100%;max-width:450px;border-radius:20px;border:5px solid white;margin:20px auto;display:block;
+}
+.option{
+display:block;width:320px;max-width:90%;margin:15px auto;padding:18px;font-size:32px;
+}
+#message{min-height:50px;font-size:30px;font-weight:bold}
+#powerBox{font-size:28px;color:#fff8c6;min-height:40px}
+#gameOver{display:none;margin-top:50px}
+@media(max-width:768px){
+#instruction{font-size:24px}
+.option{font-size:24px;width:85%}
+#questionCounter,#timer{font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<audio id="correctSound" preload="auto"><source src="assets/correct.mp3" type="audio/mpeg"></audio>
+<audio id="wrongSound" preload="auto"><source src="assets/wrong.mp3" type="audio/mpeg"></audio>
+
+<div id="logoScreen">
+<img src="assets/innovine-logo.png" id="logoImage">
+</div>
+
+<div id="titleScreen">
+<h1>🦸 SUPERHERO TRAINING CAMP 🦸</h1>
+<p>Complete the Action Missions and Unlock Hero Powers!</p>
+<button class="startBtn" onclick="startGame()">START TRAINING</button>
+</div>
+
+<div id="gameContainer">
+<div id="questionCounter">Mission 1 of 10</div>
+<div id="timer">60</div>
+<div id="hero">🦸</div>
+<div id="instruction">Which action is helping the hero train?</div>
+<img id="actionImage" src="">
+<div id="options"></div>
+<div id="message"></div>
+<div id="powerBox"></div>
+<div id="gameOver"></div>
+</div>
+
+<script>
+const actions=[
+{word:"eating",image:"assets/eat_image.jpg"},
+{word:"jumping",image:"assets/jump_image.png"},
+{word:"reading",image:"assets/read_image.jpg"},
+{word:"running",image:"assets/run_image.png"},
+{word:"singing",image:"assets/sing_image.png"},
+{word:"sitting",image:"assets/sit_image.png"},
+{word:"sleeping",image:"assets/sleep_image.jpg"},
+{word:"swimming",image:"assets/swim_image.png"},
+{word:"walking",image:"assets/walk_image.png"},
+{word:"running",image:"assets/run_image.png"}
+];
+
+let score=0,currentQuestion=0,timer,timeLeft=60,questions=[],currentAnswer="";
+
+function shuffle(a){return a.sort(()=>Math.random()-0.5);}
+
+window.onload=()=>{
+setTimeout(()=>{
+document.getElementById("logoScreen").style.display="none";
+document.getElementById("titleScreen").style.display="flex";
+},5000);
+};
+
+function startGame(){
+document.getElementById("titleScreen").style.display="none";
+document.getElementById("gameContainer").style.display="block";
+questions=shuffle([...actions]).slice(0,10);
+score=0;currentQuestion=0;
+loadQuestion();
+}
+
+function loadQuestion(){
+if(currentQuestion>=10){endGame();return;}
+document.getElementById("questionCounter").textContent=`Mission ${currentQuestion+1} of 10`;
+document.getElementById("message").textContent="";
+document.getElementById("powerBox").textContent="";
+const q=questions[currentQuestion];
+currentAnswer=q.word;
+document.getElementById("actionImage").src=q.image;
+
+let wrong;
+do{wrong=actions[Math.floor(Math.random()*actions.length)].word;}
+while(wrong===currentAnswer);
+
+const opts=shuffle([currentAnswer,wrong]);
+document.getElementById("options").innerHTML=opts.map(o=>`<button class="option" onclick="checkAnswer('${o}')">${o}</button>`).join("");
+startTimer();
+}
+
+function startTimer(){
+clearInterval(timer);
+timeLeft=60;
+document.getElementById("timer").textContent=timeLeft;
+timer=setInterval(()=>{
+timeLeft--;
+document.getElementById("timer").textContent=timeLeft;
+if(timeLeft<=0){
+clearInterval(timer);
+document.getElementById("message").textContent="⏰ Mission Failed!";
+disableButtons();
+setTimeout(()=>{currentQuestion++;loadQuestion();},1200);
+}
+},1000);
+}
+
+function checkAnswer(ans){
+clearInterval(timer);
+if(ans===currentAnswer){
+document.getElementById("correctSound").play();
+score++;
+document.getElementById("message").textContent="⭐ Power Unlocked!";
+}else{
+document.getElementById("wrongSound").play();
+document.getElementById("message").textContent="❌ Try the Next Mission!";
+}
+disableButtons();
+setTimeout(()=>{currentQuestion++;loadQuestion();},1200);
+}
+
+function disableButtons(){
+document.querySelectorAll(".option").forEach(b=>b.disabled=true);
+}
+
+function endGame(){
+clearInterval(timer);
+document.getElementById("actionImage").style.display="none";
+document.getElementById("options").style.display="none";
+document.getElementById("instruction").style.display="none";
+document.getElementById("message").style.display="none";
+document.getElementById("powerBox").style.display="none";
+document.getElementById("hero").style.display="none";
+
+const stars=score>=9?"⭐⭐⭐⭐⭐":score>=7?"⭐⭐⭐⭐":score>=5?"⭐⭐⭐":score>=3?"⭐⭐":"⭐";
+
+document.getElementById("gameOver").style.display="block";
+document.getElementById("gameOver").innerHTML=`
+<h2>🏆 HERO TRAINING COMPLETE!</h2>
+<div style="font-size:3rem">${score} / 10</div>
+<div style="font-size:2rem">${stars}</div>
+<br>
+<button class="startBtn" onclick="location.reload()">Train Again</button>`;
+}
+</script>
+</body>
+</html>
