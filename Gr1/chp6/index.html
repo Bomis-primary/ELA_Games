@@ -10,7 +10,7 @@ body {
     margin: 0;
     overflow: hidden;
     font-family: Arial;
-    background: linear-gradient(#0d47a1, #e3f2fd);
+    background: linear-gradient(#0d47a1, #e3f2fd); /* SUPERHERO THEME FIX */
 }
 
 /* SPLASH */
@@ -50,7 +50,7 @@ body {
     display:none;
 }
 
-/* QUESTION */
+/* MAIN QUESTION (FIXED + BOLD) */
 #topWord {
     position: absolute;
     top: 10px;
@@ -61,7 +61,7 @@ body {
     color: #ffffff;
 }
 
-/* CLUE */
+/* SUB QUESTION (MISSION STYLE) */
 #clueWord{
     position:absolute;
     top:70px;
@@ -72,7 +72,7 @@ body {
     color:#ffeb3b;
 }
 
-/* TOP BAR */
+/* TOP BAR (FIXED MOBILE SAFE) */
 #topBar {
     position: absolute;
     top: 120px;
@@ -86,13 +86,14 @@ body {
     box-sizing:border-box;
 }
 
+/* TIMER SAFE FIX */
 #timer, #counter {
     background: rgba(0,0,0,0.4);
     padding: 6px 10px;
     border-radius: 8px;
 }
 
-/* TICKER */
+/* TICKER AREA */
 #ticker {
     position: absolute;
     top: 50%;
@@ -102,6 +103,7 @@ body {
     white-space: nowrap;
 }
 
+/* IMAGE */
 .item {
     height: 180px;
     margin: 0 30px;
@@ -114,10 +116,11 @@ body {
     transform: scale(1.08);
 }
 
+/* 🔥 FIXED SLOWER TICKER */
 #track {
     display: inline-block;
     white-space: nowrap;
-    animation: scroll 45s linear infinite;
+    animation: scroll 30s linear infinite; /* FIX: slower */
 }
 
 @keyframes scroll {
@@ -174,7 +177,7 @@ body {
 
 <script>
 
-/* ================= MISSIONS ================= */
+/* HERO MISSIONS */
 const missions = [
 {
 q:"After intense superhero training, what action helps restore energy and strength?",
@@ -206,7 +209,7 @@ ans:"sing"
 }
 ];
 
-/* ================= IMAGES ================= */
+/* IMAGES (FIXED 5 PER ROUND) */
 const images = [
 {word:"sleep", img:"sleep_image.jpg"},
 {word:"read", img:"read_image.png"},
@@ -219,11 +222,11 @@ const images = [
 {word:"sing", img:"sing_image.png"}
 ];
 
-let index = 0;
-let targetWord = "";
-let score = 0;
+let index=0;
+let targetWord="";
+let score=0;
 
-/* ================= FLOW ================= */
+/* SPLASH FLOW */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
 document.getElementById("titleScreen").style.display="flex";
@@ -234,14 +237,17 @@ document.getElementById("game").style.display="block";
 startMission();
 startTimer();
 },3000);
+
 },5000);
 
-/* ================= MISSION ================= */
+/* START MISSION */
 function startMission(){
 
 let m = missions[index];
+
 targetWord = m.ans;
 
+/* FIX: BOLD QUESTION ALWAYS */
 document.getElementById("topWord").innerHTML =
 "<b>🦸 MISSION: " + m.q + "</b>";
 
@@ -251,7 +257,7 @@ document.getElementById("clueWord").innerHTML =
 buildTicker();
 }
 
-/* ================= TICKER ================= */
+/* TICKER (5 IMAGES ONLY) */
 function buildTicker(){
 
 let track = document.getElementById("track");
@@ -270,7 +276,7 @@ track.appendChild(img);
 });
 }
 
-/* ================= CHECK ================= */
+/* CLICK */
 function check(word){
 
 if(word === targetWord){
@@ -291,9 +297,8 @@ document.getElementById("wrongSound").play();
 }
 }
 
-/* ================= TIMER ================= */
-let time = 45;
-
+/* TIMER (SAFE MOBILE FIX) */
+let time=45;
 function startTimer(){
 setInterval(()=>{
 time--;
