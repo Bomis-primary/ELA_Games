@@ -6,239 +6,267 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+
+/* ================= GLOBAL ================= */
 body{
     margin:0;
-    overflow:hidden;
     font-family:"Comic Sans MS", Arial;
-    background:linear-gradient(#b9f6ca,#e8f5e9);
+    overflow:hidden;
+    background:#b3e5fc;
 }
 
-/* CONTAINER */
-#gameContainer{
-    width:100%;
-    height:100vh;
-    position:relative;
-}
-
-/* SPLASH */
-#logoScreen{
-    position:absolute;
-    width:100%;
-    height:100%;
-    background:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:1000;
-}
-
-/* TITLE */
-#titleScreen{
+/* ================= SCREEN SYSTEM (EVS STYLE) ================= */
+.screen{
     position:absolute;
     width:100%;
     height:100%;
     display:none;
-    flex-direction:column;
     justify-content:center;
     align-items:center;
-    background:linear-gradient(#a5d6a7,#e8f5e9);
-    z-index:900;
+    flex-direction:column;
 }
 
-#titleScreen h1{
-    font-size:32px;
-    text-align:center;
+#splash{
+    background:white;
+    display:flex;
 }
 
-/* HUD */
+#titleScreen{
+    background:linear-gradient(#c8e6c9,#e8f5e9);
+}
+
+#gameScreen{
+    background:linear-gradient(#b9f6ca,#e8f5e9);
+}
+
+/* ================= HUD (FIXED LIKE EVS GAME) ================= */
 #hud{
     position:absolute;
-    top:10px;
+    top:0;
     width:100%;
     display:flex;
     justify-content:space-between;
-    padding:10px;
+    padding:10px 15px;
     box-sizing:border-box;
+    background:rgba(255,255,255,0.9);
+    font-weight:bold;
     z-index:10;
 }
 
-.box{
-    background:white;
-    padding:8px 12px;
-    border-radius:10px;
-    font-weight:bold;
-}
-
-/* QUESTION */
+/* ================= QUESTION BAR ================= */
 #question{
     position:absolute;
-    top:70px;
+    top:55px;
     width:100%;
     text-align:center;
-    font-size:20px;
+    font-size:22px;
     font-weight:bold;
+    color:#1b5e20;
 }
 
-/* GAME AREA */
-#game{
+/* ================= GAME AREA ================= */
+#arena{
     position:absolute;
     width:100%;
     height:100%;
     overflow:hidden;
 }
 
-/* MONKEY */
+/* ================= MONKEY (FIXED + FRIENDLY) ================= */
 #monkey{
     position:absolute;
     bottom:120px;
     left:50%;
     transform:translateX(-50%);
-    font-size:60px;
+    font-size:70px;
 }
 
-/* OBJECTS */
+/* replace scary face with soft one */
+.monkeySafe{
+    filter: saturate(1.1);
+}
+
+/* ================= OBJECTS ================= */
 .obj{
     position:absolute;
-    font-size:40px;
+    font-size:38px;
 }
 
-/* BUTTON */
-#startBtn{
-    padding:12px 20px;
+/* ================= CONTROLS (EVS STYLE) ================= */
+#controls{
+    position:absolute;
+    bottom:10px;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    gap:20px;
+}
+
+.btn{
+    padding:12px 25px;
     font-size:18px;
-    margin-top:20px;
+    border:none;
+    border-radius:10px;
+    background:white;
+    font-weight:bold;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* ================= END ================= */
+#end{
+    position:absolute;
+    width:100%;
+    height:100%;
+    display:none;
+    background:white;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
 }
 </style>
 </head>
 
 <body>
 
-<div id="gameContainer">
-
-<!-- SPLASH -->
-<div id="logoScreen">
-    <img src="assets/innovine-logo.png" style="width:220px;">
+<!-- ================= SPLASH ================= -->
+<div id="splash" class="screen">
+    <img src="assets/innovine-logo.png" style="width:240px;">
 </div>
 
-<!-- TITLE -->
-<div id="titleScreen">
+<!-- ================= TITLE ================= -->
+<div id="titleScreen" class="screen">
     <h1>🐵 Monkey Jungle Grammar Explorer</h1>
-    <button id="startBtn">START GAME</button>
+    <button onclick="startGame()" style="padding:12px 20px;">START</button>
 </div>
 
-<!-- HUD -->
+<!-- ================= GAME ================= -->
+<div id="gameScreen" class="screen">
+
 <div id="hud">
-    <div class="box">Score: <span id="score">0</span>/15</div>
-    <div class="box">⏱ <span id="timer">45</span></div>
+<div>Score: <span id="score">0</span>/15</div>
+<div>⏱ <span id="timer">45</span></div>
 </div>
 
 <div id="question">Loading...</div>
 
-<div id="game">
-    <div id="monkey">🐵</div>
+<div id="arena">
+
+<div id="monkey" class="monkeySafe">🐵</div>
+
+<div id="controls">
+<button class="btn" onclick="move(-1)">⬅ Left</button>
+<button class="btn" onclick="move(1)">Right ➡</button>
 </div>
 
+</div>
+
+</div>
+
+<!-- ================= END ================= -->
+<div id="end" class="screen">
+<h1>🎉 Jungle Master!</h1>
 </div>
 
 <script>
 
-/* ================= SAFETY INIT ================= */
-let gameStarted = false;
+/* ================= ENGINE STATE ================= */
+let screen = "splash";
 let score = 0;
 let x = 50;
 let questions = [];
-let index = 0;
+let i = 0;
 
-const bank = [
+/* ================= QUESTION BANK ================= */
+const bank=[
 {q:"A banana is near you. Which word?",a:"THIS"},
 {q:"Bananas near you. Which word?",a:"THESE"},
-{q:"Object far away. Which word?",a:"THAT"},
-{q:"Objects far away. Which word?",a:"THOSE"},
-{q:"One near thing?",a:"THIS"},
-{q:"Many near things?",a:"THESE"},
+{q:"Far object. Which word?",a:"THAT"},
+{q:"Far objects. Which word?",a:"THOSE"},
+{q:"One close thing?",a:"THIS"},
+{q:"Many close things?",a:"THESE"},
 {q:"One far thing?",a:"THAT"},
-{q:"Many far things?",a:"THOSE"}
+{q:"Many far things?",a:"THOSE"},
+{q:"Jungle fruit near you?",a:"THIS"},
+{q:"Jungle fruits near you?",a:"THESE"},
+{q:"Animal far away?",a:"THAT"},
+{q:"Animals far away?",a:"THOSE"},
+{q:"Single object close?",a:"THIS"},
+{q:"Multiple objects close?",a:"THESE"},
+{q:"Single object far?",a:"THAT"},
+{q:"Multiple objects far?",a:"THOSE"}
 ];
 
-/* ================= FIXED START FLOW ================= */
-window.addEventListener("load",()=>{
+/* ================= SCREEN ENGINE (FIXED FLOW) ================= */
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
+document.getElementById(id).style.display="flex";
+screen=id;
+}
+
+/* ================= SPLASH FLOW (FIXED 5 SEC GUARANTEE) ================= */
+window.onload=()=>{
+
+show("splash");
 
 setTimeout(()=>{
-document.getElementById("logoScreen").style.display="none";
-document.getElementById("titleScreen").style.display="flex";
+show("titleScreen");
 },5000);
-
-/* SAFE BUTTON BINDING (IMPORTANT FIX) */
-document.getElementById("startBtn").addEventListener("click",startGame);
-
-});
+};
 
 /* ================= START GAME ================= */
 function startGame(){
-
-if(gameStarted) return;
-gameStarted = true;
-
-document.getElementById("titleScreen").style.display="none";
+show("gameScreen");
 
 questions = bank.sort(()=>Math.random()-0.5).slice(0,15);
 
 document.getElementById("question").innerText = questions[0].q;
 
-spawnLoop();
 timer();
+spawnLoop();
 }
 
 /* ================= MOVE MONKEY ================= */
-document.addEventListener("keydown",(e)=>{
+function move(dir){
+x += dir*6;
+if(x<0)x=0;
+if(x>95)x=95;
+document.getElementById("monkey").style.left=x+"%";
+}
 
-if(!gameStarted) return;
-
-if(e.key==="ArrowLeft") x-=5;
-if(e.key==="ArrowRight") x+=5;
-
-if(x<0) x=0;
-if(x>95) x=95;
-
-document.getElementById("monkey").style.left = x + "%";
-});
-
-/* ================= SPAWN OBJECTS ================= */
+/* ================= SPAWN SYSTEM ================= */
 function spawnLoop(){
 
-if(index>=questions.length){
-end();
+if(i>=questions.length){
+endGame();
 return;
 }
 
-document.getElementById("question").innerText = questions[index].q;
+document.getElementById("question").innerText = questions[i].q;
 
-/* create 4 objects */
+/* spawn 4 options */
 ["THIS","THAT","THESE","THOSE"].forEach(opt=>{
 
 let o=document.createElement("div");
 o.className="obj";
 o.innerText=opt;
 
-o.style.left = Math.random()*85 + "%";
-o.style.top = "-50px";
+o.style.left=Math.random()*90+"%";
+o.style.top="-40px";
 
-document.getElementById("game").appendChild(o);
+document.getElementById("arena").appendChild(o);
 
-/* fall */
 let fall=setInterval(()=>{
 
 let top=parseFloat(o.style.top);
 top += 3;
-o.style.top = top + "px";
+o.style.top=top+"px";
 
-/* collision */
 let m=document.getElementById("monkey").getBoundingClientRect();
 let r=o.getBoundingClientRect();
 
 if(r.bottom>m.top && r.left<m.right && r.right>m.left){
 
-if(o.innerText === questions[index].a){
+if(opt===questions[i].a){
 score++;
 document.getElementById("score").innerText=score;
 }
@@ -256,9 +284,8 @@ clearInterval(fall);
 
 });
 
-/* next question */
 setTimeout(()=>{
-index++;
+i++;
 spawnLoop();
 },5000);
 }
@@ -267,24 +294,23 @@ spawnLoop();
 function timer(){
 let t=45;
 
-let interval=setInterval(()=>{
-if(!gameStarted) return;
+let x=setInterval(()=>{
+if(screen!=="gameScreen") return;
 
 t--;
 document.getElementById("timer").innerText=t;
 
 if(t<=0){
-clearInterval(interval);
-end();
+clearInterval(x);
+endGame();
 }
 
 },1000);
 }
 
 /* ================= END ================= */
-function end(){
-document.getElementById("game").innerHTML =
-"<h1 style='text-align:center;margin-top:200px;'>🎉 Game Over</h1>";
+function endGame(){
+show("end");
 }
 
 </script>
