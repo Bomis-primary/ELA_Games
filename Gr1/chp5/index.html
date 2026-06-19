@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Monkey Jungle Grammar Explorer - FIXED</title>
+<title>Monkey Jungle Grammar Explorer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 
-/* ================= BASE ================= */
+/* ================= GLOBAL ================= */
 body{
     margin:0;
     overflow:hidden;
@@ -15,7 +15,7 @@ body{
     background:linear-gradient(#b9f6ca,#e8f5e9);
 }
 
-/* ================= SCREEN SYSTEM ================= */
+/* ================= SCREENS ================= */
 .screen{
     position:absolute;
     width:100%;
@@ -26,19 +26,11 @@ body{
     flex-direction:column;
 }
 
-#splash{
-    background:white;
-}
+#splash{ background:white; }
+#title{ background:linear-gradient(#c8e6c9,#e8f5e9); }
+#game{ background:linear-gradient(#b3e5fc,#e8f5e9); }
 
-#title{
-    background:linear-gradient(#c8e6c9,#e8f5e9);
-}
-
-#game{
-    background:linear-gradient(#b3e5fc,#e8f5e9);
-}
-
-/* ================= HUD (EVS STYLE CLEAN) ================= */
+/* ================= HUD ================= */
 #hud{
     position:absolute;
     top:0;
@@ -47,7 +39,7 @@ body{
     justify-content:space-between;
     padding:10px 15px;
     box-sizing:border-box;
-    background:rgba(255,255,255,0.9);
+    background:rgba(255,255,255,0.95);
     font-weight:bold;
     z-index:10;
 }
@@ -66,39 +58,31 @@ body{
     text-align:center;
     font-size:22px;
     font-weight:bold;
+    color:#1b5e20;
 }
 
-/* ================= GAME AREA ================= */
+/* ================= ARENA ================= */
 #arena{
     position:absolute;
-    top:120px;
     width:100%;
-    height:70%;
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
+    height:100%;
+    overflow:hidden;
 }
 
-/* LANE */
-.lane{
-    position:relative;
-    border-left:1px dashed rgba(0,0,0,0.1);
-}
-
-/* OBJECT */
-.obj{
-    position:absolute;
-    font-size:35px;
-    left:50%;
-    transform:translateX(-50%);
-}
-
-/* ================= MONKEY (FRIENDLY SVG STYLE) ================= */
+/* ================= MONKEY (GIF FIXED) ================= */
 #monkey{
     position:absolute;
     bottom:120px;
     left:50%;
+    width:90px;
     transform:translateX(-50%);
-    font-size:75px;
+    transition:transform 0.2s ease;
+}
+
+/* ================= OBJECTS ================= */
+.obj{
+    position:absolute;
+    font-size:38px;
 }
 
 /* ================= CONTROLS ================= */
@@ -124,18 +108,18 @@ body{
 
 <body>
 
-<!-- SPLASH -->
+<!-- ================= SPLASH ================= -->
 <div id="splash" class="screen">
-    <img src="assets/innovine-logo.png" style="width:220px;">
+    <img src="assets/innovine-logo_Final.png" style="width:240px;">
 </div>
 
-<!-- TITLE -->
+<!-- ================= TITLE ================= -->
 <div id="title" class="screen">
-    <h1>🐵 Monkey Jungle Grammar Explorer</h1>
-    <button onclick="startGame()">START</button>
+    <h1>🐵 Jungle Grammar Explorer</h1>
+    <button onclick="startGame()" style="padding:12px 20px;">START</button>
 </div>
 
-<!-- GAME -->
+<!-- ================= GAME ================= -->
 <div id="game" class="screen">
 
 <div id="hud">
@@ -146,13 +130,8 @@ body{
 <div id="question"></div>
 
 <div id="arena">
-<div class="lane"></div>
-<div class="lane"></div>
-<div class="lane"></div>
-<div class="lane"></div>
-</div>
 
-<div id="monkey">🐵</div>
+<img id="monkey" src="assets/monkey.gif">
 
 <div id="controls">
 <button class="btn" onclick="move(-1)">⬅ Left</button>
@@ -161,92 +140,179 @@ body{
 
 </div>
 
+</div>
+
+<!-- ================= END ================= -->
+<div id="end" class="screen">
+<h1>🎉 Jungle Master!</h1>
+</div>
+
+<!-- ================= AUDIO ================= -->
+<audio id="correct" src="assets/correct.mp3"></audio>
+<audio id="wrong" src="assets/wrong.mp3"></audio>
+<audio id="clap" src="assets/clapping.mp3"></audio>
+
 <script>
 
-/* ================= ENGINE ================= */
-let score=0;
-let x=50;
-let qIndex=0;
+/* ================= GAME STATE ================= */
+let score = 0;
+let x = 50;
+let index = 0;
+let questions = [];
+let facing = "right";
 
-const bank=[
-{q:"A banana is near you?",a:"THIS"},
-{q:"Bananas near you?",a:"THESE"},
-{q:"Far object?",a:"THAT"},
-{q:"Far objects?",a:"THOSE"},
-{q:"One near thing?",a:"THIS"},
-{q:"Many near things?",a:"THESE"},
-{q:"One far thing?",a:"THAT"},
-{q:"Many far things?",a:"THOSE"}
+/* ================= QUESTION BANK ================= */
+const bank = [
+{q:"A banana is near you. Which word?", a:"THIS"},
+{q:"Bananas near you. Which word?", a:"THESE"},
+{q:"Object far away. Which word?", a:"THAT"},
+{q:"Objects far away. Which word?", a:"THOSE"},
+{q:"One near thing?", a:"THIS"},
+{q:"Many near things?", a:"THESE"},
+{q:"One far thing?", a:"THAT"},
+{q:"Many far things?", a:"THOSE"},
+{q:"Jungle fruit near you?", a:"THIS"},
+{q:"Jungle fruits near you?", a:"THESE"},
+{q:"Far animal?", a:"THAT"},
+{q:"Far animals?", a:"THOSE"},
+{q:"Close object?", a:"THIS"},
+{q:"Close objects?", a:"THESE"},
+{q:"Distant object?", a:"THAT"},
+{q:"Distant objects?", a:"THOSE"}
 ];
 
-let current=[];
+/* ================= FLOW CONTROL ================= */
+window.onload = () => {
 
-/* ================= START ================= */
+setTimeout(()=>{
+document.getElementById("splash").style.display="none";
+document.getElementById("title").style.display="flex";
+},5000);
+
+};
+
+/* ================= START GAME ================= */
 function startGame(){
 
-document.getElementById("splash").style.display="none";
 document.getElementById("title").style.display="none";
-document.getElementById("game").style.display="block";
+document.getElementById("game").style.display="flex";
 
-current = bank.sort(()=>Math.random()-0.5).slice(0,15);
+questions = bank.sort(()=>Math.random()-0.5).slice(0,15);
 
-nextQ();
+loadQ();
+spawnLoop();
+timer();
 }
 
-/* ================= MOVE ================= */
+/* ================= MONKEY MOVE + DIRECTION FIX ================= */
 function move(dir){
-x += dir*10;
-if(x<0)x=0;
-if(x>100)x=100;
-document.getElementById("monkey").style.left=x+"%";
+
+x += dir * 6;
+
+if(x < 0) x = 0;
+if(x > 95) x = 95;
+
+document.getElementById("monkey").style.left = x + "%";
+
+/* FACE DIRECTION */
+if(dir < 0){
+    facing = "left";
+    document.getElementById("monkey").style.transform =
+    "translateX(-50%) scaleX(-1)";
+}
+else{
+    facing = "right";
+    document.getElementById("monkey").style.transform =
+    "translateX(-50%) scaleX(1)";
+}
 }
 
-/* ================= FIXED LANE SPAWN ================= */
-function spawn(){
+/* ================= QUESTION ================= */
+function loadQ(){
+document.getElementById("question").innerText = questions[index].q;
+}
 
-let lanes=document.querySelectorAll(".lane");
+/* ================= SPAWN OBJECTS ================= */
+function spawnLoop(){
 
-["THIS","THAT","THESE","THOSE"].forEach((w,i)=>{
+if(index >= questions.length){
+endGame();
+return;
+}
 
-let o=document.createElement("div");
-o.className="obj";
-o.innerText=w;
+loadQ();
 
-o.style.top="-40px";
+["THIS","THAT","THESE","THOSE"].forEach(opt=>{
 
-lanes[i].appendChild(o);
+let o = document.createElement("div");
+o.className = "obj";
+o.innerText = opt;
 
-/* smooth fall (controlled) */
-let y=0;
+o.style.left = Math.random()*90 + "%";
+o.style.top = "-50px";
 
-let t=setInterval(()=>{
+document.getElementById("arena").appendChild(o);
 
-y += 2;
-o.style.top=y+"px";
+let fall = setInterval(()=>{
 
-if(y>500){
+let top = parseFloat(o.style.top);
+top += 3;
+o.style.top = top + "px";
+
+let m = document.getElementById("monkey").getBoundingClientRect();
+let r = o.getBoundingClientRect();
+
+if(r.bottom > m.top && r.left < m.right && r.right > m.left){
+
+if(opt === questions[index].a){
+score++;
+document.getElementById("score").innerText = score;
+document.getElementById("correct").play();
+}
+else{
+document.getElementById("wrong").play();
+}
+
 o.remove();
-clearInterval(t);
+clearInterval(fall);
+}
+
+if(top > 700){
+o.remove();
+clearInterval(fall);
 }
 
 },30);
 
 });
 
+setTimeout(()=>{
+index++;
+spawnLoop();
+},5000);
 }
 
-/* ================= QUESTION ================= */
-function nextQ(){
+/* ================= TIMER ================= */
+function timer(){
+let t = 45;
 
-if(qIndex>=current.length){
-return;
+let x = setInterval(()=>{
+
+t--;
+if(t <= 0){
+clearInterval(x);
+endGame();
 }
 
-document.getElementById("question").innerText=current[qIndex].q;
+},1000);
+}
 
-spawn();
+/* ================= END ================= */
+function endGame(){
+document.getElementById("game").innerHTML =
+"<div style='text-align:center;margin-top:200px;font-size:30px;'>🎉 Game Over</div>";
 
-qIndex++;
+document.getElementById("clap").play();
 }
 
 </script>
