@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Monkey Banana Grab - This That These Those</title>
+<title>Monkey Banana Grab Arcade</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
     margin:0;
-    font-family:Arial;
-    background:linear-gradient(#d0f0c0,#f0fff0);
     overflow:hidden;
+    font-family:Arial;
+    background:linear-gradient(#c8facc,#e8fff0);
 }
 
-/* ================= SPLASH ================= */
+/* SPLASH */
 #splash{
     position:absolute;
     width:100%;
@@ -25,7 +25,7 @@ body{
     z-index:9999;
 }
 
-/* ================= INSTRUCTIONS ================= */
+/* INSTRUCTIONS */
 #instructions{
     display:none;
     position:absolute;
@@ -36,97 +36,55 @@ body{
     justify-content:center;
     align-items:center;
     text-align:center;
-    padding:20px;
-    box-sizing:border-box;
-    z-index:9998;
 }
 
-#instructions h1{
-    font-size:34px;
+/* GAME */
+#game{
+    display:none;
 }
 
-#startBtn{
-    padding:12px 20px;
-    font-size:18px;
-    margin-top:20px;
-}
-
-/* ================= HUD ================= */
+/* HUD */
 #hud{
     position:absolute;
     top:0;
     width:100%;
     display:flex;
     justify-content:space-between;
-    padding:10px 15px;
+    padding:10px;
     background:#2e7d32;
     color:white;
     font-weight:bold;
     box-sizing:border-box;
 }
 
-#questionBox{
+/* QUESTION */
+#question{
     position:absolute;
-    top:55px;
+    top:60px;
     width:100%;
     text-align:center;
-    font-size:26px;
+    font-size:22px;
     font-weight:bold;
-    color:#1b5e20;
-}
-
-/* ================= GAME AREA ================= */
-#game{
-    display:none;
 }
 
 /* MONKEY */
 #monkey{
     position:absolute;
     bottom:20px;
-    left:20px;
+    left:50%;
+    transform:translateX(-50%);
     font-size:70px;
 }
 
-/* SCENE */
-#scene{
+/* BANANA FALLING ITEMS */
+.banana{
     position:absolute;
-    width:100%;
-    height:60%;
-    top:120px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-/* OBJECT */
-.object{
-    font-size:60px;
-    margin:20px;
-    cursor:pointer;
-}
-
-/* OPTIONS */
-#options{
-    position:absolute;
-    bottom:120px;
-    width:100%;
-    display:flex;
-    justify-content:center;
-    gap:20px;
-}
-
-.opt{
-    padding:15px 25px;
-    background:#fff;
-    border-radius:10px;
-    font-size:22px;
-    cursor:pointer;
-    border:2px solid #2e7d32;
+    font-size:35px;
+    top:-50px;
 }
 
 /* END */
-#endScreen{
+#end{
     display:none;
     position:absolute;
     width:100%;
@@ -135,22 +93,6 @@ body{
     justify-content:center;
     align-items:center;
     flex-direction:column;
-}
-
-/* CONFETTI */
-.confetti{
-    position:absolute;
-    width:8px;
-    height:8px;
-    background:red;
-    animation:fall 1.5s linear forwards;
-}
-
-@keyframes fall{
-    to{
-        transform:translateY(600px);
-        opacity:0;
-    }
 }
 </style>
 </head>
@@ -165,35 +107,28 @@ body{
 <!-- INSTRUCTIONS -->
 <div id="instructions">
     <h1>🐵 Monkey Banana Grab</h1>
-    <p>Learn This / That / These / Those by helping the monkey grab bananas correctly!</p>
+    <p>Move the monkey left and right to catch the correct grammar banana!</p>
     <button id="startBtn">START GAME</button>
 </div>
 
-<!-- HUD -->
-<div id="hud">
-    <div id="score">Score: 0/15</div>
-    <div id="muteBtn">🔊</div>
-</div>
-
-<div id="questionBox"></div>
-
+<!-- GAME -->
 <div id="game">
+
+    <div id="hud">
+        <div id="score">Score: 0/15</div>
+        <div id="timer">⏱ 45</div>
+    </div>
+
+    <div id="question"></div>
+
     <div id="monkey">🐵</div>
 
-    <div id="scene"></div>
-
-    <div id="options">
-        <div class="opt" onclick="check('THIS')">THIS</div>
-        <div class="opt" onclick="check('THAT')">THAT</div>
-        <div class="opt" onclick="check('THESE')">THESE</div>
-        <div class="opt" onclick="check('THOSE')">THOSE</div>
-    </div>
 </div>
 
 <!-- END -->
-<div id="endScreen">
+<div id="end">
     <h1>🎉 Great Job!</h1>
-    <p id="finalScore"></p>
+    <p id="final"></p>
 </div>
 
 <!-- AUDIO -->
@@ -203,103 +138,159 @@ body{
 
 <script>
 
-/* ================= 20 QUESTION BANK ================= */
+/* ================= DATA ================= */
 const bank = [
-{q:"A banana is near the monkey. Which word fits?", ans:"THIS"},
-{q:"Bananas are near the monkey. Which word fits?", ans:"THESE"},
-{q:"A banana is far away. Which word fits?", ans:"THAT"},
-{q:"Bananas are far away. Which word fits?", ans:"THOSE"},
-{q:"The monkey is holding a banana. Which word fits?", ans:"THIS"},
-{q:"Monkeys are holding bananas together. Which word fits?", ans:"THESE"},
-{q:"Bananas are in a distant tree. Which word fits?", ans:"THOSE"},
-{q:"A banana is right in front of you. Which word fits?", ans:"THIS"},
-{q:"Several bananas are close to you. Which word fits?", ans:"THESE"},
-{q:"A banana is over there far away. Which word fits?", ans:"THAT"},
-{q:"Many bananas are far away. Which word fits?", ans:"THOSE"},
-{q:"The banana next to monkey is ___?", ans:"THIS"},
-{q:"Bananas next to monkey are ___?", ans:"THESE"},
-{q:"The banana across the river is ___?", ans:"THAT"},
-{q:"Bananas across the river are ___?", ans:"THOSE"},
-{q:"Monkey sees one banana near him. Which word?", ans:"THIS"},
-{q:"Monkey sees many bananas near him. Which word?", ans:"THESE"},
-{q:"Monkey sees one banana far away. Which word?", ans:"THAT"},
-{q:"Monkey sees many bananas far away. Which word?", ans:"THOSE"},
-{q:"A banana is right here. Which word fits?", ans:"THIS"}
+{q:"Which word shows something near you?", ans:"THIS"},
+{q:"Which word shows many near things?", ans:"THESE"},
+{q:"Which word shows far object?", ans:"THAT"},
+{q:"Which word shows far objects?", ans:"THOSE"},
+{q:"Pick correct near object word", ans:"THIS"},
+{q:"Pick correct plural near objects word", ans:"THESE"},
+{q:"Pick correct far object word", ans:"THAT"},
+{q:"Pick correct far plural objects word", ans:"THOSE"},
+{q:"What do you use for one close thing?", ans:"THIS"},
+{q:"What do you use for many close things?", ans:"THESE"},
+{q:"What do you use for one far thing?", ans:"THAT"},
+{q:"What do you use for many far things?", ans:"THOSE"},
+{q:"A single nearby banana uses which word?", ans:"THIS"},
+{q:"Many nearby bananas use which word?", ans:"THESE"},
+{q:"A banana far away uses which word?", ans:"THAT"},
+{q:"Many bananas far away use which word?", ans:"THOSE"},
+{q:"Near object singular word?", ans:"THIS"},
+{q:"Near objects plural word?", ans:"THESE"},
+{q:"Far object singular word?", ans:"THAT"},
+{q:"Far objects plural word?", ans:"THOSE"}
 ];
 
-let questions=[];
+const options = ["THIS","THAT","THESE","THOSE"];
+
+let gameQuestions=[];
 let index=0;
 let score=0;
+let monkeyX=50;
 
-/* ================= SPLASH FLOW ================= */
+/* ================= START ================= */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
 document.getElementById("instructions").style.display="flex";
 },5000);
 
-/* START */
 document.getElementById("startBtn").onclick=()=>{
 document.getElementById("instructions").style.display="none";
 document.getElementById("game").style.display="block";
 
-questions = bank.sort(()=>Math.random()-0.5).slice(0,15);
-loadQ();
+gameQuestions = bank.sort(()=>Math.random()-0.5).slice(0,15);
+
+spawnLoop();
+startTimer();
 };
 
-/* ================= LOAD QUESTION ================= */
-function loadQ(){
-if(index>=questions.length){
+/* ================= MONKEY MOVE ================= */
+document.addEventListener("keydown",(e)=>{
+if(e.key==="ArrowLeft") monkeyX-=5;
+if(e.key==="ArrowRight") monkeyX+=5;
+
+if(monkeyX<0) monkeyX=0;
+if(monkeyX>100) monkeyX=100;
+
+document.getElementById("monkey").style.left=monkeyX+"%";
+});
+
+/* ================= SPAWN BANANAS ================= */
+function spawnLoop(){
+if(index>=gameQuestions.length){
 endGame();
 return;
 }
 
-document.getElementById("questionBox").innerText = questions[index].q;
+document.getElementById("question").innerText =
+gameQuestions[index].q;
 
-let scene = document.getElementById("scene");
-scene.innerHTML="";
+let correct = gameQuestions[index].ans;
 
-/* simple visual */
-for(let i=0;i<1+(index%3);i++){
-let banana=document.createElement("div");
-banana.className="object";
-banana.innerText="🍌";
-scene.appendChild(banana);
+/* spawn 4 bananas */
+for(let i=0;i<4;i++){
+let b=document.createElement("div");
+b.className="banana";
+b.innerText=options[i];
+
+b.style.left=(10+i*20)+"%";
+b.style.top="-50px";
+
+b.speed = 2 + Math.random()*2;
+
+document.getElementById("game").appendChild(b);
+
+fall(b, correct);
 }
+
+setTimeout(()=>{
+index++;
+spawnLoop();
+},4000);
 }
 
-/* ================= CHECK ================= */
-function check(ans){
+/* ================= FALL ================= */
+function fall(el, correct){
 
-if(ans === questions[index].ans){
-document.getElementById("correct").play();
+let fallInt = setInterval(()=>{
+
+let top = parseFloat(el.style.top);
+top += 4;
+el.style.top = top+"px";
+
+/* collision */
+let monkey = document.getElementById("monkey").getBoundingClientRect();
+let rect = el.getBoundingClientRect();
+
+if(rect.bottom > monkey.top &&
+rect.left < monkey.right &&
+rect.right > monkey.left){
+
+if(el.innerText === correct){
 score++;
-document.getElementById("score").innerText = "Score: "+score+"/15";
-confetti();
+document.getElementById("correct").play();
+document.getElementById("score").innerText =
+"Score: "+score+"/15";
 }else{
 document.getElementById("wrong").play();
 }
 
-index++;
-setTimeout(loadQ,800);
+el.remove();
+clearInterval(fallInt);
 }
 
-/* ================= CONFETTI ================= */
-function confetti(){
-for(let i=0;i<20;i++){
-let c=document.createElement("div");
-c.className="confetti";
-c.style.left=Math.random()*100+"%";
-c.style.background=["red","blue","yellow","green"][i%4];
-document.body.appendChild(c);
-setTimeout(()=>c.remove(),1500);
+if(top>600){
+el.remove();
+clearInterval(fallInt);
 }
+
+},30);
+}
+
+/* ================= TIMER ================= */
+function startTimer(){
+let time=45;
+
+let t=setInterval(()=>{
+time--;
+document.getElementById("timer").innerText="⏱ "+time;
+
+if(time<=0){
+clearInterval(t);
+endGame();
+}
+},1000);
 }
 
 /* ================= END ================= */
 function endGame(){
 document.getElementById("game").style.display="none";
-document.getElementById("endScreen").style.display="flex";
-document.getElementById("finalScore").innerText="Score: "+score+"/15";
+document.getElementById("end").style.display="flex";
+
+document.getElementById("final").innerText =
+"Score: "+score+"/15";
+
 document.getElementById("clap").play();
 }
 
