@@ -1,264 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Monkey Mission + Treasure Hunt</title>
-
-<style>
-body{
-    margin:0;
-    font-family:Arial;
-    overflow:hidden;
-    background:#d0f0ff;
-}
-
-/* SPLASH */
-#splash{
-    position:absolute;
-    width:100%;
-    height:100%;
-    background:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:10;
-}
-
-/* GAME 1 */
-#game1, #game2{
+#game1{
     display:none;
     width:100%;
     height:100%;
+    position:relative;
+    overflow:hidden;
 }
 
-/* MONKEY AREA */
 #monkeyArea{
     position:relative;
-    height:55%;
+    width:100%;
+    height:100%;
     background:linear-gradient(#b3e5fc,#e1f5fe);
+    overflow:hidden;
 }
 
-#tree{
-    position:absolute;
-    left:40%;
-    bottom:0;
-    font-size:120px;
-}
-
-#monkey{
-    position:absolute;
-    left:42%;
-    top:10%;
-    font-size:60px;
-}
-
+/* FIX: prompt separation */
 #prompt{
     position:absolute;
     top:20px;
     width:100%;
     text-align:center;
-    font-size:28px;
+    font-size:30px;
     font-weight:bold;
+    z-index:5;
 }
 
-/* FRUITS */
+/* FIX: monkey placement */
+#monkey{
+    position:absolute;
+    left:45%;
+    top:15%;
+    font-size:70px;
+    z-index:5;
+}
+
+/* FIX: tree placement */
+#tree{
+    position:absolute;
+    left:42%;
+    bottom:5%;
+    font-size:120px;
+    z-index:1;
+}
+
+/* FIX: fruits spread properly */
 .fruit{
     position:absolute;
-    font-size:40px;
+    font-size:45px;
     cursor:pointer;
+    z-index:3;
 }
-
-/* TREASURE GAME */
-#treasure{
-    display:none;
-    height:100%;
-    background:url('') center/cover; /* placeholder */
-}
-
-#storyBox{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    background:white;
-    padding:15px;
-    font-size:20px;
-}
-
-#topBar{
-    position:absolute;
-    top:0;
-    width:100%;
-    display:flex;
-    justify-content:space-between;
-    padding:10px;
-    font-weight:bold;
-    background:#fff;
-}
-
-</style>
-</head>
-
-<body>
-
-<!-- SPLASH -->
-<div id="splash">
-    <img src="ELA_Games/Gr1/chp5/assets/innovine-logo_Final.png" width="250">
-</div>
-
-<!-- GAME 1 -->
-<div id="game1">
-    <div id="monkeyArea">
-        <div id="prompt">Loading...</div>
-        <div id="monkey">🐒</div>
-        <div id="tree">🌳</div>
-    </div>
-</div>
-
-<!-- GAME 2 -->
-<div id="game2">
-
-    <div id="topBar">
-        <div id="counter">1/10</div>
-        <div id="timer">80</div>
-    </div>
-
-    <div id="storyBox"></div>
-
-</div>
-
-<audio id="correct" src="ELA_Games/Gr1/chp5/assets/correct.mp3"></audio>
-<audio id="wrong" src="ELA_Games/Gr1/chp5/assets/wrong.mp3"></audio>
-<audio id="clap" src="ELA_Games/Gr1/chp5/assets/clapping.mp3"></audio>
-
-<script>
-
-/* ================= GAME 1 DATA ================= */
-const prompts = [
-"near-few","near-many","far-few","far-many"
-];
-
-let fruitTypes = ["🍎","🍌","🍊"];
-let correctCount = 0;
-
-/* ================= SPLASH ================= */
-setTimeout(()=>{
-document.getElementById("splash").style.display="none";
-startGame1();
-},5000);
-
-/* ================= GAME 1 ================= */
-function startGame1(){
-document.getElementById("game1").style.display="block";
-nextFruitRound();
-}
-
-/* ROUND */
-function nextFruitRound(){
-
-document.querySelectorAll(".fruit").forEach(f=>f.remove());
-
-let fruit = fruitTypes[Math.floor(Math.random()*fruitTypes.length)];
-let prompt = prompts[Math.floor(Math.random()*prompts.length)];
-
-document.getElementById("prompt").innerText =
-"Find: " + prompt;
-
-for(let i=0;i<5;i++){
-let f = document.createElement("div");
-f.className="fruit";
-f.innerText=fruit;
-
-f.style.left = Math.random()*80 + "%";
-f.style.top = (60 + Math.random()*30) + "%";
-
-f.onclick=()=>eatFruit(prompt);
-
-document.getElementById("monkeyArea").appendChild(f);
-}
-}
-
-/* CLICK FRUIT */
-function eatFruit(prompt){
-
-document.getElementById("correct").play();
-correctCount++;
-
-if(correctCount>=3){
-startGame2();
-return;
-}
-
-setTimeout(()=>{
-nextFruitRound();
-},1000);
-}
-
-/* ================= GAME 2 ================= */
-let storyIndex=0;
-
-const story = [
-"Two friends, Riya and Kabir, were playing in the playground after school.",
-"Look! What is this paper under the bench? It looks like a map!",
-"They slowly opened the folded paper.",
-"Is this really a treasure map? It shows our playground!",
-"They reached the swing area and looked around carefully.",
-"Those trees look familiar. Maybe clue is here!",
-"Behind the tree they found a shiny key!",
-"We must go back to play area again.",
-"Is that seesaw the final spot?",
-"We did it! Treasure found!"
-];
-
-function startGame2(){
-document.getElementById("game1").style.display="none";
-document.getElementById("game2").style.display="block";
-
-showStory();
-startTimer();
-}
-
-/* STORY */
-function showStory(){
-document.getElementById("storyBox").innerText = story[storyIndex];
-document.getElementById("counter").innerText = (storyIndex+1)+"/10";
-}
-
-/* NEXT STORY */
-function nextStory(){
-storyIndex++;
-
-if(storyIndex>=10){
-endGame();
-return;
-}
-
-showStory();
-}
-
-/* TIMER */
-let time=80;
-
-function startTimer(){
-setInterval(()=>{
-time--;
-document.getElementById("timer").innerText=time;
-
-if(time<=0){
-time=80;
-nextStory();
-}
-},1000);
-}
-
-/* END */
-function endGame(){
-document.getElementById("game2").innerHTML =
-"<h1 style='text-align:center;margin-top:40%'>🎉 Treasure Found!</h1>";
-
-document.getElementById("clap").play();
-}
-
-</script>
-
-</body>
-</html>
