@@ -7,7 +7,7 @@
     <style>
         body {
             margin: 0;
-            padding: 10px;
+            padding: 20px;
             background: #1a1a1a;
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -19,14 +19,14 @@
             box-sizing: border-box;
             overflow-x: hidden;
         }
-        h1 { margin: 5px; font-size: 1.3rem; color: #4caf50; text-align: center; }
-        #status { font-size: 1rem; margin-bottom: 10px; font-weight: bold; height: auto; text-align: center; max-width: 90%; }
+        h1 { margin: 10px; font-size: 2rem; color: #4caf50; text-align: center; }
+        #status { font-size: 1.3rem; margin-bottom: 15px; font-weight: bold; height: auto; text-align: center; max-width: 90%; color: #ffb300; }
         
-        /* Responsive Container */
+        /* Large Full-Scale Container */
         #game-container { 
             position: relative; 
             width: 100%;
-            max-width: 800px;
+            max-width: 1000px;
             aspect-ratio: 2 / 1;
         }
         
@@ -34,9 +34,9 @@
             width: 100%;
             height: 100%;
             display: block;
-            border: 6px solid #5c3a21;
-            border-radius: 8px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border: 8px solid #5c3a21;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
             background: #2e7d32;
             cursor: crosshair;
             box-sizing: border-box;
@@ -53,26 +53,26 @@
             justify-content: center;
             z-index: 9999;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             box-sizing: border-box;
         }
         
         #splash-screen img {
-            max-width: 40%;
+            max-width: 45%;
             height: auto;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         #splash-screen .logo-text {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: bold;
             color: #ffffff;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
 
         /* Instructions Screen UI */
-        #instruction-screen h2 { color: #4caf50; font-size: 2rem; margin-bottom: 10px; }
-        #instruction-screen ul { text-align: left; max-width: 500px; font-size: 1.1rem; line-height: 1.6; margin-bottom: 25px; }
-        #instruction-screen li { margin-bottom: 8px; }
+        #instruction-screen h2 { color: #4caf50; font-size: 2.8rem; margin-bottom: 15px; }
+        #instruction-screen ul { text-align: left; max-width: 650px; font-size: 1.4rem; line-height: 1.8; margin-bottom: 35px; }
+        #instruction-screen li { margin-bottom: 12px; }
 
         /* Trophy & Scoreboard Popping Effects */
         .pop-animation {
@@ -82,9 +82,9 @@
             0% { transform: scale(0.3); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .trophy-icon { font-size: 5rem; margin-bottom: 10px; }
-        .award-banner { background: #ffb300; color: #111; font-weight: bold; padding: 8px 20px; border-radius: 20px; font-size: 1.4rem; margin-bottom: 20px; display: inline-block; }
-        .score-box { background: #222; border: 2px solid #444; padding: 15px 30px; border-radius: 10px; font-size: 1.2rem; margin-bottom: 10px; }
+        .trophy-icon { font-size: 7rem; margin-bottom: 15px; }
+        .award-banner { background: #ffb300; color: #111; font-weight: bold; padding: 12px 30px; border-radius: 30px; font-size: 2rem; margin-bottom: 25px; display: inline-block; box-shadow: 0 5px 15px rgba(255,179,0,0.4); }
+        .score-box { background: #222; border: 3px solid #444; padding: 25px 40px; border-radius: 15px; font-size: 1.6rem; margin-bottom: 20px; }
 
         /* Quiz Overlay */
         #quiz-overlay {
@@ -97,78 +97,80 @@
             justify-content: center;
             border-radius: 8px;
             box-sizing: border-box;
-            padding: 15px;
+            padding: 25px;
             transition: all 0.3s ease;
         }
         .hidden { display: none !important; }
         #question-box {
-            font-size: 1.1rem;
-            font-weight: bold; /* Bolded questions for clear reading */
-            margin-bottom: 15px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 25px;
             text-align: center;
-            max-width: 90%;
-            line-height: 1.4;
+            max-width: 85%;
+            line-height: 1.5;
             color: #fff;
         }
         .options-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 90%;
+            gap: 15px;
+            width: 85%;
         }
         
         /* Unified Action Buttons */
         .action-btn {
-            padding: 12px 30px;
-            font-size: 1.2rem;
+            padding: 16px 40px;
+            font-size: 1.5rem;
             font-weight: bold;
             background: #4caf50;
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 35px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(76,175,80,0.4);
-            transition: transform 0.2s;
+            box-shadow: 0 5px 20px rgba(76,175,80,0.5);
+            transition: transform 0.2s, background 0.2s;
         }
-        .action-btn:hover { transform: scale(1.05); }
+        .action-btn:hover { transform: scale(1.05); background: #43a047; }
 
         button.quiz-btn {
-            padding: 10px;
-            font-size: 0.9rem;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
             background: #333;
             color: white;
             border: 2px solid #555;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, border-color 0.2s;
         }
-        button.quiz-btn:hover { background: #555; }
+        button.quiz-btn:hover { background: #444; border-color: #4caf50; }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 1.1rem; }
-            #status { font-size: 0.85rem; }
-            #question-box { font-size: 0.95rem; margin-bottom: 10px; }
-            button.quiz-btn { padding: 6px; font-size: 0.8rem; }
-            canvas { border: 4px solid #5c3a21; }
-            #instruction-screen h2 { font-size: 1.5rem; }
-            #instruction-screen ul { font-size: 0.9rem; padding: 0 15px; }
+        @media (max-width: 768px) {
+            h1 { font-size: 1.5rem; }
+            #status { font-size: 1rem; }
+            #question-box { font-size: 1.2rem; margin-bottom: 15px; }
+            button.quiz-btn { padding: 10px; font-size: 1rem; }
+            #instruction-screen h2 { font-size: 1.8rem; }
+            #instruction-screen ul { font-size: 1.1rem; padding: 0 10px; }
+            .award-banner { font-size: 1.4rem; }
+            .score-box { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
     <div id="splash-screen" class="fullscreen-overlay">
-        <img src="innovine-logo_Final.png" alt="Innovine Logo">
+        <img src="innovine-logo_Final.png" alt="Innovine Logo" onerror="this.style.display='none';">
         <div class="logo-text">INNOVINE</div>
     </div>
 
     <div id="instruction-screen" class="fullscreen-overlay hidden">
         <h2>🎱 Grammar Pool Academy:<br>Shot Masters!</h2>
         <ul>
-            <li>💡 Answer the grammar question correctly to win your turn.</li>
-            <li>🟢 **If you are correct:** You get to aim and shoot the white ball!</li>
-            <li>🤖 **If you are wrong:** The computer gets to take a shot instead.</li>
-            <li>🏆 Try to pocket as many colored balls as you can in 15 rounds!</li>
+            <li>💡 Answer the grammar question correctly to earn your shot layout turn.</li>
+            <li>🟢 <strong>If you are correct:</strong> You get to aim and execute the white cue ball!</li>
+            <li>🤖 <strong>If you are wrong:</strong> The automated computer system shoots instantly.</li>
+            <li>🏆 Clear out the pool table and try to pocket as many colored balls as possible in 15 rounds!</li>
         </ul>
         <button class="action-btn" onclick="startGameSession()">Start Game</button>
     </div>
@@ -178,18 +180,18 @@
             <div class="trophy-icon">🏆</div>
             <div id="award-title" class="award-banner">POOL CHAMPION</div>
             <div class="score-box">
-                <p style="margin: 5px 0;">📝 Quiz Answers: <span id="final-answers-score" style="color:#4caf50; font-weight:bold;">0</span> / 15</p>
-                <p style="margin: 5px 0;">🔴 Balls Pocketed: <span id="final-pocket-score" style="color:#ffb300; font-weight:bold;">0</span></p>
+                <p style="margin: 10px 0;">📝 Quiz Answers: <span id="final-answers-score" style="color:#4caf50; font-weight:bold;">0</span> / 15</p>
+                <p style="margin: 10px 0;">🔴 Balls Pocketed: <span id="final-pocket-score" style="color:#ffb300; font-weight:bold;">0</span></p>
             </div>
             <button class="action-btn" onclick="window.location.reload();">Play Again</button>
         </div>
     </div>
 
-    <h1>🎱 Quiz Pool Arcade</h1>
-    <div id="status">Loading game...</div>
+    <h1>🎱 Grammar Pool Academy</h1>
+    <div id="status">Loading game graphics context...</div>
 
     <div id="game-container">
-        <canvas id="poolCanvas" width="800" height="400"></canvas>
+        <canvas id="poolCanvas" width="1000" height="500"></canvas>
         
         <div id="quiz-overlay" class="hidden">
             <div id="question-box">Question Loading...</div>
@@ -217,7 +219,7 @@ const finalPocketScore = document.getElementById('final-pocket-score');
 const correctSound = new Audio('correct.mp3');
 const wrongSound = new Audio('wrong.mp3');
 const clappingSound = new Audio('clapping.mp3');
-const shotSound = new Audio('shot.mp3'); // Pool ball hitting sound
+const shotSound = new Audio('shot.mp3');
 
 // --- GAME CONFIG & STATE ---
 const FRICTION = 0.985;
@@ -230,30 +232,30 @@ let isMovingState = false;
 let correctAnswersCount = 0;
 let totalBallsPocketed = 0;
 
-const awardBannersList = ["POOL CHAMPION", "GRAMMAR WIZARD", "SUPER STRIKER", "CUE MASTER"];
+const awardBannersList = ["POOL CHAMPION", "GRAMMAR WIZARD", "SUPER StRIKER", "CUE MASTER"];
 
 // Grade 1 Grammar Pool (20 Questions)
 const questionBank = [
-    { q: "Look at the pencil in my hand. ______ is my favorite red pencil.", a: ["This", "That", "These", "Those"], correct: 0 },
-    { q: "Look at the sky! You see ______ beautiful birds flying far away?", a: ["This", "That", "These", "Those"], correct: 3 },
-    { q: "I am carrying ______ sweet apples in my basket to make a pie.", a: ["This", "That", "These", "Those"], correct: 2 },
-    { q: "Look at the sky over the mountain. ______ star in the sky is shining so bright!", a: ["This", "That", "These", "Those"], correct: 1 },
+    { q: "Look at my hand! ______ is my favorite red pencil.", a: ["This", "That", "These", "Those"], correct: 0 },
+    { q: "Point to the sky! Look at ______ beautiful birds flying far away.", a: ["This", "That", "These", "Those"], correct: 3 },
+    { q: "I am holding ______ sweet apples right here in my basket.", a: ["This", "That", "These", "Those"], correct: 2 },
+    { q: "Look over there at the mountain. ______ star is shining so bright!", a: ["This", "That", "These", "Those"], correct: 1 },
     { q: "Ouch! ______ shoes I am wearing today are hurting my feet.", a: ["This", "That", "These", "Those"], correct: 2 },
     { q: "Can you see ______ big airplane high up in the clouds?", a: ["This", "That", "These", "Those"], correct: 1 },
-    { q: "Yum! ______ cake that i'm eating tastes amazing!", a: ["This", "That", "These", "Those"], correct: 0 },
-    { q: "Look across the street. Who are ______ children in the park?", a: ["This", "That", "These", "Those"], correct: 3 },
-    { q: "I love ______ little kitten sleeping on my lap.", a: ["This", "That", "These", "Those"], correct: 0 },
-    { q: "You see the back wall of the classroom? Is ______ your drawing?", a: ["This", "That", "These", "Those"], correct: 1 },
-    { q: "My hands are full! ______ books I am carrying are very heavy.", a: ["This", "That", "These", "Those"], correct: 2 },
-    { q: "______ ships, far out in the ocean, are moving very slowly.", a: ["This", "That", "These", "Those"], correct: 3 },
-    { q: "______ ring on my little finger belongs to my grandmother.", a: ["This", "That", "These", "Those"], correct: 0 },
-    { q: "Do you see ______ yellow leaves on the trees across the yard?", a: ["This", "That", "These", "Those"], correct: 3 },
+    { q: "Yum! ______ cake on my plate right now tastes amazing!", a: ["This", "That", "These", "Those"], correct: 0 },
+    { q: "Look across the street. Who are ______ kids playing in the park?", a: ["This", "That", "These", "Those"], correct: 3 },
+    { q: "I love ______ little kitten sleeping here on my lap.", a: ["This", "That", "These", "Those"], correct: 0 },
+    { q: "Look at the back wall of the classroom. Is ______ your drawing?", a: ["This", "That", "These", "Those"], correct: 1 },
+    { q: "My hands are full! ______ books I am carrying are super heavy.", a: ["This", "That", "These", "Those"], correct: 2 },
+    { q: "Look far out into the ocean! ______ ships are moving so slowly.", a: ["This", "That", "These", "Those"], correct: 3 },
+    { q: "______ ring right here on my tiny finger belongs to my mom.", a: ["This", "That", "These", "Those"], correct: 0 },
+    { q: "Point to the tree across the yard. Do you see ______ yellow leaves?", a: ["This", "That", "These", "Those"], correct: 3 },
     { q: "______ toy cars right next to my foot are fun to play with.", a: ["This", "That", "These", "Those"], correct: 2 },
-    { q: "Look all the way at the top of the hill. ______ tree is huge, isn't it!", a: ["This", "That", "These", "Those"], correct: 1 },
-    { q: "______ blue hat I am wearing right now is a gift from my aunt.", a: ["This", "That", "These", "Those"], correct: 0 },
-    { q: "Can you pass me ______ remote control? It's too far. I can't reach it.", a: ["This", "That", "These", "Those"], correct: 1 },
+    { q: "Look all the way at the top of the hill. ______ tree is huge!", a: ["This", "That", "These", "Those"], correct: 1 },
+    { q: "I am pointing at my head. ______ is my new blue hat!", a: ["This", "That", "These", "Those"], correct: 0 },
+    { q: "Can you pass me ______ remote control sitting way over there on the TV stand?", a: ["This", "That", "These", "Those"], correct: 1 },
     { q: "Wow, ______ flowers I am holding smell wonderful!", a: ["This", "That", "These", "Those"], correct: 2 },
-    { q: "Look at the frogs at the far side of the pond. ______ frogs are enjoying the rains!", a: ["This", "That", "These", "Those"], correct: 3 }
+    { q: "Look at the far side of the pond. ______ frogs are jumping around!", a: ["This", "That", "These", "Those"], correct: 3 }
 ];
 
 let activeQuestions = [];
@@ -299,15 +301,15 @@ const pockets = [
 let balls = [];
 function initGame() {
     balls = [];
-    balls.push(new Ball(150, canvas.height / 2, 12, 'white', true));
-    let startX = 550, startY = canvas.height / 2;
+    balls.push(new Ball(180, canvas.height / 2, 14, 'white', true));
+    let startX = 680, startY = canvas.height / 2;
     let colors = ['#e53935', '#ffb300', '#1e88e5', '#8e24aa', '#3949ab'];
     let index = 0;
     for (let col = 0; col < 3; col++) {
         for (let row = 0; row <= col; row++) {
-            let bx = startX + col * 22;
-            let by = startY + (row - col / 2) * 25;
-            balls.push(new Ball(bx, by, 12, colors[index % colors.length]));
+            let bx = startX + col * 26;
+            let by = startY + (row - col / 2) * 28;
+            balls.push(new Ball(bx, by, 14, colors[index % colors.length]));
             index++;
         }
     }
@@ -323,6 +325,14 @@ function initGame() {
 }
 
 function startGameSession() {
+    // FIXED: Corrected syntax structure inside audio unlocking engine
+    [correctSound, wrongSound, clappingSound, shotSound].forEach(sound => {
+        sound.play().then(() => {
+            sound.pause();
+            sound.currentTime = 0;
+        }).catch(() => {});
+    });
+    
     instructionScreen.classList.add('hidden');
     triggerNextQuiz();
 }
@@ -346,13 +356,13 @@ function update() {
         if (!ball.active) return;
         pockets.forEach(pocket => {
             let dist = Math.hypot(ball.x - pocket.x, ball.y - pocket.y);
-            if (dist < 22) {
+            if (dist < 26) {
                 ball.active = false;
-                clappingSound.play().catch(e => console.log("Audio blocked"));
+                clappingSound.play().catch(e => console.log("Audio pipeline blocked"));
                 if (!ball.isCue) {
                     totalBallsPocketed++;
                 } else { 
-                    setTimeout(() => { ball.x = 150; ball.y = canvas.height/2; ball.vx=0; ball.vy=0; ball.active=true; }, 1000);
+                    setTimeout(() => { ball.x = 180; ball.y = canvas.height/2; ball.vx=0; ball.vy=0; ball.active=true; }, 1000);
                 }
             }
         });
@@ -393,7 +403,7 @@ function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     pockets.forEach(p => {
-        ctx.beginPath(); ctx.arc(p.x, p.y, 22, 0, Math.PI * 2);
+        ctx.beginPath(); ctx.arc(p.x, p.y, 26, 0, Math.PI * 2);
         ctx.fillStyle = '#111'; ctx.fill(); ctx.closePath();
     });
 
@@ -402,9 +412,10 @@ function render() {
     if (currentTurn === 'player_shoot' && balls[0].active) {
         ctx.beginPath();
         ctx.moveTo(balls[0].x, balls[0].y);
-        ctx.lineTo(balls[0].x + Math.cos(aimAngle) * 100, balls[0].y + Math.sin(aimAngle) * 100);
-        ctx.strokeStyle = 'white';
-        ctx.setLineDash([5, 5]);
+        ctx.lineTo(balls[0].x + Math.cos(aimAngle) * 120, balls[0].y + Math.sin(aimAngle) * 120);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([6, 6]);
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.closePath();
@@ -441,12 +452,12 @@ function handleAnswer(isCorrect) {
     
     if (isCorrect) {
         correctAnswersCount++;
-        correctSound.play().catch(e => console.log("Audio play blocked"));
+        correctSound.play().catch(e => console.log("Audio asset initialization required"));
         statusDiv.innerHTML = "✅ Correct! Tap/Click on the table to aim & shoot!";
         currentTurn = 'player_shoot';
         isAiming = true; 
     } else {
-        wrongSound.play().catch(e => console.log("Audio play blocked"));
+        wrongSound.play().catch(e => console.log("Audio asset initialization required"));
         statusDiv.innerHTML = "❌ Wrong! Computer gets to shoot this turn.";
         currentTurn = 'computer';
         setTimeout(executeComputerTurn, 400);
@@ -464,10 +475,10 @@ function executeComputerTurn() {
     }
 
     let angle = Math.atan2(target.y - cue.y, target.x - cue.x) + (Math.random() * 0.2 - 0.1);
-    let power = 13 + Math.random() * 6;
+    let power = 14 + Math.random() * 6;
 
     isMovingState = true;
-    shotSound.play().catch(e => console.log("Audio blocked"));
+    shotSound.play().catch(e => console.log("Audio target failed"));
     cue.vx = Math.cos(angle) * power;
     cue.vy = Math.sin(angle) * power;
     statusDiv.innerHTML = "🤖 Computer Shot!";
@@ -488,15 +499,12 @@ function checkTurnCycle() {
 // --- TERMINATION BANNER SCREEN ---
 function endMatchGame() {
     statusDiv.innerHTML = "🏁 Match Completed!";
-    // Pick random award banner from backend variations
     let chosenAward = awardBannersList[Math.floor(Math.random() * awardBannersList.length)];
     awardTitle.innerText = chosenAward;
     
-    // Inject running score metrics
     finalAnswersScore.innerText = correctAnswersCount;
     finalPocketScore.innerText = totalBallsPocketed;
     
-    // Reveal animated presentation slide 3
     endScreen.classList.remove('hidden');
 }
 
@@ -519,7 +527,7 @@ function handlePointerMove(e) {
 
 function handlePointerClick(e) {
     if (currentTurn !== 'player_shoot') return;
-    let power = 15; 
+    let power = 16; 
     isMovingState = true;
     shotSound.play().catch(e => console.log("Audio blocked"));
     balls[0].vx = Math.cos(aimAngle) * power;
