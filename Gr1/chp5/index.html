@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Monkey Jungle Grammar Explorer</title>
+<title>Monkey Jungle Grammar Explorer - FIXED</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 
-/* ================= GLOBAL ================= */
+/* ================= BASE ================= */
 body{
     margin:0;
-    font-family:"Comic Sans MS", Arial;
     overflow:hidden;
-    background:#b3e5fc;
+    font-family:"Comic Sans MS", Arial;
+    background:linear-gradient(#b9f6ca,#e8f5e9);
 }
 
-/* ================= SCREEN SYSTEM (EVS STYLE) ================= */
+/* ================= SCREEN SYSTEM ================= */
 .screen{
     position:absolute;
     width:100%;
@@ -28,18 +28,17 @@ body{
 
 #splash{
     background:white;
-    display:flex;
 }
 
-#titleScreen{
+#title{
     background:linear-gradient(#c8e6c9,#e8f5e9);
 }
 
-#gameScreen{
-    background:linear-gradient(#b9f6ca,#e8f5e9);
+#game{
+    background:linear-gradient(#b3e5fc,#e8f5e9);
 }
 
-/* ================= HUD (FIXED LIKE EVS GAME) ================= */
+/* ================= HUD (EVS STYLE CLEAN) ================= */
 #hud{
     position:absolute;
     top:0;
@@ -53,46 +52,56 @@ body{
     z-index:10;
 }
 
-/* ================= QUESTION BAR ================= */
+.box{
+    background:white;
+    padding:8px 12px;
+    border-radius:10px;
+}
+
+/* ================= QUESTION ================= */
 #question{
     position:absolute;
-    top:55px;
+    top:60px;
     width:100%;
     text-align:center;
     font-size:22px;
     font-weight:bold;
-    color:#1b5e20;
 }
 
 /* ================= GAME AREA ================= */
 #arena{
     position:absolute;
+    top:120px;
     width:100%;
-    height:100%;
-    overflow:hidden;
+    height:70%;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
 }
 
-/* ================= MONKEY (FIXED + FRIENDLY) ================= */
+/* LANE */
+.lane{
+    position:relative;
+    border-left:1px dashed rgba(0,0,0,0.1);
+}
+
+/* OBJECT */
+.obj{
+    position:absolute;
+    font-size:35px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+/* ================= MONKEY (FRIENDLY SVG STYLE) ================= */
 #monkey{
     position:absolute;
     bottom:120px;
     left:50%;
     transform:translateX(-50%);
-    font-size:70px;
+    font-size:75px;
 }
 
-/* replace scary face with soft one */
-.monkeySafe{
-    filter: saturate(1.1);
-}
-
-/* ================= OBJECTS ================= */
-.obj{
-    position:absolute;
-    font-size:38px;
-}
-
-/* ================= CONTROLS (EVS STYLE) ================= */
+/* ================= CONTROLS ================= */
 #controls{
     position:absolute;
     bottom:10px;
@@ -104,54 +113,46 @@ body{
 
 .btn{
     padding:12px 25px;
-    font-size:18px;
     border:none;
-    border-radius:10px;
+    border-radius:12px;
     background:white;
     font-weight:bold;
     box-shadow:0 2px 6px rgba(0,0,0,0.2);
-}
-
-/* ================= END ================= */
-#end{
-    position:absolute;
-    width:100%;
-    height:100%;
-    display:none;
-    background:white;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ================= SPLASH ================= -->
+<!-- SPLASH -->
 <div id="splash" class="screen">
-    <img src="assets/innovine-logo.png" style="width:240px;">
+    <img src="assets/innovine-logo.png" style="width:220px;">
 </div>
 
-<!-- ================= TITLE ================= -->
-<div id="titleScreen" class="screen">
+<!-- TITLE -->
+<div id="title" class="screen">
     <h1>🐵 Monkey Jungle Grammar Explorer</h1>
-    <button onclick="startGame()" style="padding:12px 20px;">START</button>
+    <button onclick="startGame()">START</button>
 </div>
 
-<!-- ================= GAME ================= -->
-<div id="gameScreen" class="screen">
+<!-- GAME -->
+<div id="game" class="screen">
 
 <div id="hud">
-<div>Score: <span id="score">0</span>/15</div>
-<div>⏱ <span id="timer">45</span></div>
+<div class="box">Score: <span id="score">0</span>/15</div>
+<div class="box">⏱ 45</div>
 </div>
 
-<div id="question">Loading...</div>
+<div id="question"></div>
 
 <div id="arena">
+<div class="lane"></div>
+<div class="lane"></div>
+<div class="lane"></div>
+<div class="lane"></div>
+</div>
 
-<div id="monkey" class="monkeySafe">🐵</div>
+<div id="monkey">🐵</div>
 
 <div id="controls">
 <button class="btn" onclick="move(-1)">⬅ Left</button>
@@ -160,157 +161,92 @@ body{
 
 </div>
 
-</div>
-
-<!-- ================= END ================= -->
-<div id="end" class="screen">
-<h1>🎉 Jungle Master!</h1>
-</div>
-
 <script>
 
-/* ================= ENGINE STATE ================= */
-let screen = "splash";
-let score = 0;
-let x = 50;
-let questions = [];
-let i = 0;
+/* ================= ENGINE ================= */
+let score=0;
+let x=50;
+let qIndex=0;
 
-/* ================= QUESTION BANK ================= */
 const bank=[
-{q:"A banana is near you. Which word?",a:"THIS"},
-{q:"Bananas near you. Which word?",a:"THESE"},
-{q:"Far object. Which word?",a:"THAT"},
-{q:"Far objects. Which word?",a:"THOSE"},
-{q:"One close thing?",a:"THIS"},
-{q:"Many close things?",a:"THESE"},
+{q:"A banana is near you?",a:"THIS"},
+{q:"Bananas near you?",a:"THESE"},
+{q:"Far object?",a:"THAT"},
+{q:"Far objects?",a:"THOSE"},
+{q:"One near thing?",a:"THIS"},
+{q:"Many near things?",a:"THESE"},
 {q:"One far thing?",a:"THAT"},
-{q:"Many far things?",a:"THOSE"},
-{q:"Jungle fruit near you?",a:"THIS"},
-{q:"Jungle fruits near you?",a:"THESE"},
-{q:"Animal far away?",a:"THAT"},
-{q:"Animals far away?",a:"THOSE"},
-{q:"Single object close?",a:"THIS"},
-{q:"Multiple objects close?",a:"THESE"},
-{q:"Single object far?",a:"THAT"},
-{q:"Multiple objects far?",a:"THOSE"}
+{q:"Many far things?",a:"THOSE"}
 ];
 
-/* ================= SCREEN ENGINE (FIXED FLOW) ================= */
-function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
-document.getElementById(id).style.display="flex";
-screen=id;
-}
+let current=[];
 
-/* ================= SPLASH FLOW (FIXED 5 SEC GUARANTEE) ================= */
-window.onload=()=>{
-
-show("splash");
-
-setTimeout(()=>{
-show("titleScreen");
-},5000);
-};
-
-/* ================= START GAME ================= */
+/* ================= START ================= */
 function startGame(){
-show("gameScreen");
 
-questions = bank.sort(()=>Math.random()-0.5).slice(0,15);
+document.getElementById("splash").style.display="none";
+document.getElementById("title").style.display="none";
+document.getElementById("game").style.display="block";
 
-document.getElementById("question").innerText = questions[0].q;
+current = bank.sort(()=>Math.random()-0.5).slice(0,15);
 
-timer();
-spawnLoop();
+nextQ();
 }
 
-/* ================= MOVE MONKEY ================= */
+/* ================= MOVE ================= */
 function move(dir){
-x += dir*6;
+x += dir*10;
 if(x<0)x=0;
-if(x>95)x=95;
+if(x>100)x=100;
 document.getElementById("monkey").style.left=x+"%";
 }
 
-/* ================= SPAWN SYSTEM ================= */
-function spawnLoop(){
+/* ================= FIXED LANE SPAWN ================= */
+function spawn(){
 
-if(i>=questions.length){
-endGame();
-return;
-}
+let lanes=document.querySelectorAll(".lane");
 
-document.getElementById("question").innerText = questions[i].q;
-
-/* spawn 4 options */
-["THIS","THAT","THESE","THOSE"].forEach(opt=>{
+["THIS","THAT","THESE","THOSE"].forEach((w,i)=>{
 
 let o=document.createElement("div");
 o.className="obj";
-o.innerText=opt;
+o.innerText=w;
 
-o.style.left=Math.random()*90+"%";
 o.style.top="-40px";
 
-document.getElementById("arena").appendChild(o);
+lanes[i].appendChild(o);
 
-let fall=setInterval(()=>{
+/* smooth fall (controlled) */
+let y=0;
 
-let top=parseFloat(o.style.top);
-top += 3;
-o.style.top=top+"px";
+let t=setInterval(()=>{
 
-let m=document.getElementById("monkey").getBoundingClientRect();
-let r=o.getBoundingClientRect();
+y += 2;
+o.style.top=y+"px";
 
-if(r.bottom>m.top && r.left<m.right && r.right>m.left){
-
-if(opt===questions[i].a){
-score++;
-document.getElementById("score").innerText=score;
-}
-
+if(y>500){
 o.remove();
-clearInterval(fall);
-}
-
-if(top>700){
-o.remove();
-clearInterval(fall);
+clearInterval(t);
 }
 
 },30);
 
 });
 
-setTimeout(()=>{
-i++;
-spawnLoop();
-},5000);
 }
 
-/* ================= TIMER ================= */
-function timer(){
-let t=45;
+/* ================= QUESTION ================= */
+function nextQ(){
 
-let x=setInterval(()=>{
-if(screen!=="gameScreen") return;
-
-t--;
-document.getElementById("timer").innerText=t;
-
-if(t<=0){
-clearInterval(x);
-endGame();
+if(qIndex>=current.length){
+return;
 }
 
-},1000);
-}
+document.getElementById("question").innerText=current[qIndex].q;
 
-/* ================= END ================= */
-function endGame(){
-show("end");
+spawn();
+
+qIndex++;
 }
 
 </script>
