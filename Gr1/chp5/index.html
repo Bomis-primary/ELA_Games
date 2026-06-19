@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Monkey Banana Grab - This That These Those</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(#d0f0c0,#f0fff0);
+    overflow:hidden;
+}
+
+/* ================= SPLASH ================= */
+#splash{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+/* ================= INSTRUCTIONS ================= */
+#instructions{
+    display:none;
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:#fff8e1;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:20px;
+    box-sizing:border-box;
+    z-index:9998;
+}
+
+#instructions h1{
+    font-size:34px;
+}
+
+#startBtn{
+    padding:12px 20px;
+    font-size:18px;
+    margin-top:20px;
+}
+
+/* ================= HUD ================= */
+#hud{
+    position:absolute;
+    top:0;
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    padding:10px 15px;
+    background:#2e7d32;
+    color:white;
+    font-weight:bold;
+    box-sizing:border-box;
+}
+
+#questionBox{
+    position:absolute;
+    top:55px;
+    width:100%;
+    text-align:center;
+    font-size:26px;
+    font-weight:bold;
+    color:#1b5e20;
+}
+
+/* ================= GAME AREA ================= */
+#game{
+    display:none;
+}
+
+/* MONKEY */
+#monkey{
+    position:absolute;
+    bottom:20px;
+    left:20px;
+    font-size:70px;
+}
+
+/* SCENE */
+#scene{
+    position:absolute;
+    width:100%;
+    height:60%;
+    top:120px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* OBJECT */
+.object{
+    font-size:60px;
+    margin:20px;
+    cursor:pointer;
+}
+
+/* OPTIONS */
+#options{
+    position:absolute;
+    bottom:120px;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    gap:20px;
+}
+
+.opt{
+    padding:15px 25px;
+    background:#fff;
+    border-radius:10px;
+    font-size:22px;
+    cursor:pointer;
+    border:2px solid #2e7d32;
+}
+
+/* END */
+#endScreen{
+    display:none;
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:white;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+}
+
+/* CONFETTI */
+.confetti{
+    position:absolute;
+    width:8px;
+    height:8px;
+    background:red;
+    animation:fall 1.5s linear forwards;
+}
+
+@keyframes fall{
+    to{
+        transform:translateY(600px);
+        opacity:0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+    <img src="assets/innovine-logo_Final.png" style="width:250px;">
+</div>
+
+<!-- INSTRUCTIONS -->
+<div id="instructions">
+    <h1>🐵 Monkey Banana Grab</h1>
+    <p>Learn This / That / These / Those by helping the monkey grab bananas correctly!</p>
+    <button id="startBtn">START GAME</button>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+    <div id="score">Score: 0/15</div>
+    <div id="muteBtn">🔊</div>
+</div>
+
+<div id="questionBox"></div>
+
+<div id="game">
+    <div id="monkey">🐵</div>
+
+    <div id="scene"></div>
+
+    <div id="options">
+        <div class="opt" onclick="check('THIS')">THIS</div>
+        <div class="opt" onclick="check('THAT')">THAT</div>
+        <div class="opt" onclick="check('THESE')">THESE</div>
+        <div class="opt" onclick="check('THOSE')">THOSE</div>
+    </div>
+</div>
+
+<!-- END -->
+<div id="endScreen">
+    <h1>🎉 Great Job!</h1>
+    <p id="finalScore"></p>
+</div>
+
+<!-- AUDIO -->
+<audio id="correct" src="assets/correct.mp3"></audio>
+<audio id="wrong" src="assets/wrong.mp3"></audio>
+<audio id="clap" src="assets/clapping.mp3"></audio>
+
+<script>
+
+/* ================= 20 QUESTION BANK ================= */
+const bank = [
+{q:"A banana is near the monkey. Which word fits?", ans:"THIS"},
+{q:"Bananas are near the monkey. Which word fits?", ans:"THESE"},
+{q:"A banana is far away. Which word fits?", ans:"THAT"},
+{q:"Bananas are far away. Which word fits?", ans:"THOSE"},
+{q:"The monkey is holding a banana. Which word fits?", ans:"THIS"},
+{q:"Monkeys are holding bananas together. Which word fits?", ans:"THESE"},
+{q:"Bananas are in a distant tree. Which word fits?", ans:"THOSE"},
+{q:"A banana is right in front of you. Which word fits?", ans:"THIS"},
+{q:"Several bananas are close to you. Which word fits?", ans:"THESE"},
+{q:"A banana is over there far away. Which word fits?", ans:"THAT"},
+{q:"Many bananas are far away. Which word fits?", ans:"THOSE"},
+{q:"The banana next to monkey is ___?", ans:"THIS"},
+{q:"Bananas next to monkey are ___?", ans:"THESE"},
+{q:"The banana across the river is ___?", ans:"THAT"},
+{q:"Bananas across the river are ___?", ans:"THOSE"},
+{q:"Monkey sees one banana near him. Which word?", ans:"THIS"},
+{q:"Monkey sees many bananas near him. Which word?", ans:"THESE"},
+{q:"Monkey sees one banana far away. Which word?", ans:"THAT"},
+{q:"Monkey sees many bananas far away. Which word?", ans:"THOSE"},
+{q:"A banana is right here. Which word fits?", ans:"THIS"}
+];
+
+let questions=[];
+let index=0;
+let score=0;
+
+/* ================= SPLASH FLOW ================= */
+setTimeout(()=>{
+document.getElementById("splash").style.display="none";
+document.getElementById("instructions").style.display="flex";
+},5000);
+
+/* START */
+document.getElementById("startBtn").onclick=()=>{
+document.getElementById("instructions").style.display="none";
+document.getElementById("game").style.display="block";
+
+questions = bank.sort(()=>Math.random()-0.5).slice(0,15);
+loadQ();
+};
+
+/* ================= LOAD QUESTION ================= */
+function loadQ(){
+if(index>=questions.length){
+endGame();
+return;
+}
+
+document.getElementById("questionBox").innerText = questions[index].q;
+
+let scene = document.getElementById("scene");
+scene.innerHTML="";
+
+/* simple visual */
+for(let i=0;i<1+(index%3);i++){
+let banana=document.createElement("div");
+banana.className="object";
+banana.innerText="🍌";
+scene.appendChild(banana);
+}
+}
+
+/* ================= CHECK ================= */
+function check(ans){
+
+if(ans === questions[index].ans){
+document.getElementById("correct").play();
+score++;
+document.getElementById("score").innerText = "Score: "+score+"/15";
+confetti();
+}else{
+document.getElementById("wrong").play();
+}
+
+index++;
+setTimeout(loadQ,800);
+}
+
+/* ================= CONFETTI ================= */
+function confetti(){
+for(let i=0;i<20;i++){
+let c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*100+"%";
+c.style.background=["red","blue","yellow","green"][i%4];
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),1500);
+}
+}
+
+/* ================= END ================= */
+function endGame(){
+document.getElementById("game").style.display="none";
+document.getElementById("endScreen").style.display="flex";
+document.getElementById("finalScore").innerText="Score: "+score+"/15";
+document.getElementById("clap").play();
+}
+
+</script>
+
+</body>
+</html>
