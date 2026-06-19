@@ -2,98 +2,140 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Monkey Banana Catch Arcade</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monkey Jungle Grammar Explorer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
+
 body{
-    margin:0;
+    width:100%;
+    height:100%;
     overflow:hidden;
-    font-family:Arial;
-    background:linear-gradient(#c8facc,#e8fff0);
+    background:#bae1ff;
+    font-family:"Comic Sans MS", sans-serif;
 }
 
-/* SPLASH */
-#splash{
+/* 📦 MAIN GAME CONTAINER (REFERENCE STYLE) */
+#gameContainer{
+    position:relative;
+    width:100%;
+    height:100%;
+    max-width:600px;
+    max-height:900px;
+    margin:0 auto;
+    background:linear-gradient(#b9f6ca,#e8f5e9);
+    overflow:hidden;
+}
+
+/* 🌟 SPLASH */
+.screen{
     position:absolute;
     width:100%;
     height:100%;
-    background:white;
     display:flex;
     justify-content:center;
     align-items:center;
-    z-index:9999;
+    flex-direction:column;
 }
 
-/* INSTRUCTIONS */
-#instructions{
+#logoScreen{
+    background:#fff;
+    z-index:100;
+}
+
+#titleScreen{
     display:none;
-    position:absolute;
-    width:100%;
-    height:100%;
-    background:#fff8e1;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
+    background:linear-gradient(#a5d6a7,#e8f5e9);
+    z-index:90;
     text-align:center;
 }
 
-/* HUD */
+#titleScreen h1{
+    font-size:34px;
+    color:#1b5e20;
+}
+
+/* 🎮 HUD */
 #hud{
     position:absolute;
-    top:0;
+    top:10px;
     width:100%;
     display:flex;
     justify-content:space-between;
     padding:10px;
-    background:#2e7d32;
-    color:white;
-    font-weight:bold;
-    box-sizing:border-box;
+    z-index:10;
 }
 
-/* QUESTION */
+.hudBox{
+    background:rgba(255,255,255,0.9);
+    padding:10px 15px;
+    border-radius:12px;
+    font-weight:bold;
+    font-size:16px;
+}
+
+/* 🧠 QUESTION */
 #question{
     position:absolute;
-    top:60px;
+    top:70px;
     width:100%;
     text-align:center;
-    font-size:24px;
+    font-size:20px;
     font-weight:bold;
+    color:#1b5e20;
+    padding:10px;
 }
 
-/* GAME AREA */
+/* 🎮 GAME AREA */
 #game{
-    display:none;
     position:absolute;
     width:100%;
     height:100%;
-    overflow:hidden;
 }
 
-/* 🐵 FULL MONKEY GIF */
+/* 🐵 MONKEY */
 #monkey{
     position:absolute;
-    bottom:20px;
+    bottom:120px;
     left:50%;
     transform:translateX(-50%);
-    width:120px;
+    font-size:60px;
 }
 
-/* 🍌 BANANA */
-.banana{
+/* 🌿 OBJECTS */
+.obj{
     position:absolute;
-    font-size:35px;
-    top:-50px;
+    font-size:40px;
+}
+
+/* 📱 CONTROLS (REFERENCE STYLE) */
+#controls{
+    position:absolute;
+    bottom:0;
+    width:100%;
+    display:flex;
+    justify-content:space-around;
+    padding:10px;
+    background:rgba(255,255,255,0.9);
+}
+
+.btn{
+    width:45%;
+    padding:15px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    font-weight:bold;
 }
 
 /* END */
 #end{
-    display:none;
     position:absolute;
     width:100%;
     height:100%;
-    background:white;
+    background:#fff;
+    display:none;
     justify-content:center;
     align-items:center;
     flex-direction:column;
@@ -103,184 +145,157 @@ body{
 
 <body>
 
+<div id="gameContainer">
+
 <!-- SPLASH -->
-<div id="splash">
-    <img src="assets/innovine-logo_Final.png" style="width:250px;">
+<div id="logoScreen">
+    <img src="assets/innovine-logo.png" style="width:220px;">
 </div>
 
-<!-- INSTRUCTIONS -->
-<div id="instructions">
-    <h1>🐵 Monkey Banana Catch</h1>
-    <p>Move the monkey using ⬅ ➡ keys and catch the correct answer!</p>
-    <button id="startBtn">START GAME</button>
+<!-- TITLE -->
+<div id="titleScreen">
+    <h1>🐵 Monkey Jungle Grammar Explorer</h1>
+    <button onclick="startGame()" style="padding:12px 20px;margin-top:20px;">START</button>
 </div>
 
 <!-- HUD -->
 <div id="hud">
-    <div id="score">Score: 0/15</div>
-    <div id="timer">⏱ 45</div>
+    <div class="hudBox">Score: <span id="score">0</span>/15</div>
+    <div class="hudBox">⏱ <span id="timer">45</span></div>
 </div>
 
-<div id="question"></div>
+<!-- QUESTION -->
+<div id="question">Loading...</div>
 
+<!-- GAME -->
 <div id="game">
+    <div id="monkey">🐵</div>
 
-    <!-- 🐵 FULL BODY MONKEY GIF -->
-    <img id="monkey" src="assets/monkey_full.gif">
-
+    <div id="controls">
+        <button class="btn" onclick="move(-1)">⬅ Left</button>
+        <button class="btn" onclick="move(1)">Right ➡</button>
+    </div>
 </div>
 
 <!-- END -->
 <div id="end">
-    <h1>🎉 Great Job!</h1>
-    <p id="final"></p>
+    <h1>🎉 Jungle Master!</h1>
 </div>
 
-<!-- AUDIO -->
-<audio id="correct" src="assets/correct.mp3"></audio>
-<audio id="wrong" src="assets/wrong.mp3"></audio>
-<audio id="clap" src="assets/clapping.mp3"></audio>
+</div>
 
 <script>
 
-/* ================= QUESTION BANK ================= */
-const bank = [
-{q:"Which word shows something near you?", ans:"THIS"},
-{q:"Which word shows many near things?", ans:"THESE"},
-{q:"Which word shows far object?", ans:"THAT"},
-{q:"Which word shows far objects?", ans:"THOSE"},
-{q:"What do you use for one close thing?", ans:"THIS"},
-{q:"What do you use for many close things?", ans:"THESE"},
-{q:"What do you use for far thing?", ans:"THAT"},
-{q:"What do you use for many far things?", ans:"THOSE"}
+/* 🎯 BANK (20 → 15 random) */
+const bank=[
+{q:"A banana is near you. Which word?",a:"THIS"},
+{q:"Bananas near you. Which word?",a:"THESE"},
+{q:"Something far away. Which word?",a:"THAT"},
+{q:"Many things far away. Which word?",a:"THOSE"},
+{q:"One object close. Which word?",a:"THIS"},
+{q:"Many objects close. Which word?",a:"THESE"},
+{q:"Object far away. Which word?",a:"THAT"},
+{q:"Objects far away. Which word?",a:"THOSE"},
+{q:"Near jungle fruit. Which word?",a:"THIS"},
+{q:"Near jungle fruits. Which word?",a:"THESE"},
+{q:"Far jungle tree. Which word?",a:"THAT"},
+{q:"Far jungle trees. Which word?",a:"THOSE"},
+{q:"Close animal. Which word?",a:"THIS"},
+{q:"Close animals. Which word?",a:"THESE"},
+{q:"Distant animal. Which word?",a:"THAT"},
+{q:"Distant animals. Which word?",a:"THOSE"},
+{q:"One banana here. Which word?",a:"THIS"},
+{q:"Many bananas here. Which word?",a:"THESE"},
+{q:"One tiger far. Which word?",a:"THAT"},
+{q:"Many tigers far. Which word?",a:"THOSE"}
 ];
 
-const options=["THIS","THAT","THESE","THOSE"];
-
-let questions=[];
-let index=0;
+let qlist=[];
+let i=0;
 let score=0;
-let monkeyX=50;
+let x=50;
 
-/* ================= START ================= */
+/* 🚀 INIT */
+window.onload=()=>{
 setTimeout(()=>{
-document.getElementById("splash").style.display="none";
-document.getElementById("instructions").style.display="flex";
+document.getElementById("logoScreen").style.display="none";
+document.getElementById("titleScreen").style.display="flex";
 },5000);
-
-document.getElementById("startBtn").onclick=()=>{
-document.getElementById("instructions").style.display="none";
-document.getElementById("game").style.display="block";
-
-questions = bank.sort(()=>Math.random()-0.5).slice(0,15);
-
-spawn();
-startTimer();
 };
 
-/* ================= MONKEY MOVE ================= */
-document.addEventListener("keydown",(e)=>{
-if(e.key==="ArrowLeft") monkeyX-=6;
-if(e.key==="ArrowRight") monkeyX+=6;
+function startGame(){
+document.getElementById("titleScreen").style.display="none";
 
-if(monkeyX<0) monkeyX=0;
-if(monkeyX>100) monkeyX=100;
+qlist = bank.sort(()=>Math.random()-0.5).slice(0,15);
 
-document.getElementById("monkey").style.left=monkeyX+"%";
-});
+document.getElementById("question").innerText=qlist[0].q;
 
-/* ================= SPAWN BANANAS ================= */
-function spawn(){
+spawnLoop();
+timer();
+}
 
-if(index>=questions.length){
-endGame();
+/* 🐵 MOVE */
+function move(dir){
+x+=dir*5;
+if(x<0)x=0;
+if(x>90)x=90;
+document.getElementById("monkey").style.left=x+"%";
+}
+
+/* 🌿 SPAWN OBJECTS */
+function spawnLoop(){
+
+if(i>=qlist.length){
+end();
 return;
 }
 
-document.getElementById("question").innerText = questions[index].q;
+document.getElementById("question").innerText=qlist[i].q;
 
-/* 4 falling options */
-options.forEach((opt,i)=>{
+for(let j=0;j<5;j++){
 
-let b=document.createElement("div");
-b.className="banana";
-b.innerText=opt;
+let o=document.createElement("div");
+o.className="obj";
 
-b.style.left=(10+i*20)+"%";
-b.style.top="-60px";
+let items=["🍌","🍃","🪨","🐒","🌿"];
+o.innerText=items[Math.floor(Math.random()*items.length)];
 
-document.getElementById("game").appendChild(b);
+o.style.left=Math.random()*90+"%";
+o.style.top="-50px";
 
-fall(b, questions[index].ans);
+document.getElementById("game").appendChild(o);
 
-});
+/* lifetime 5 sec */
+setTimeout(()=>o.remove(),5000);
 
-setTimeout(()=>{
-index++;
-spawn();
-},4000);
-}
-
-/* ================= FALL + COLLISION ================= */
-function fall(el, correct){
-
-let t=setInterval(()=>{
-
-let top=parseFloat(el.style.top);
-top += 4;
-el.style.top=top+"px";
-
-let monkey = document.getElementById("monkey").getBoundingClientRect();
-let rect = el.getBoundingClientRect();
-
-if(rect.bottom > monkey.top &&
-rect.left < monkey.right &&
-rect.right > monkey.left){
-
-if(el.innerText === correct){
+o.onclick=()=>{
+if(o.innerText==="🍌"){
 score++;
-document.getElementById("correct").play();
-document.getElementById("score").innerText="Score: "+score+"/15";
-}else{
-document.getElementById("wrong").play();
+document.getElementById("score").innerText=score;
+}
+o.remove();
+};
+
 }
 
-el.remove();
-clearInterval(t);
+i++;
+setTimeout(spawnLoop,5000);
 }
 
-if(top>700){
-el.remove();
-clearInterval(t);
-}
-
-},30);
-}
-
-/* ================= TIMER ================= */
-function startTimer(){
-let time=45;
-
-let t=setInterval(()=>{
-time--;
-document.getElementById("timer").innerText="⏱ "+time;
-
-if(time<=0){
-clearInterval(t);
-endGame();
-}
+/* ⏱ TIMER */
+let t=45;
+function timer(){
+setInterval(()=>{
+t--;
+document.getElementById("timer").innerText=t;
+if(t<=0)end();
 },1000);
 }
 
-/* ================= END ================= */
-function endGame(){
+/* 🏁 END */
+function end(){
 document.getElementById("game").style.display="none";
 document.getElementById("end").style.display="flex";
-
-document.getElementById("final").innerText =
-"Score: "+score+"/15";
-
-document.getElementById("clap").play();
 }
 
 </script>
