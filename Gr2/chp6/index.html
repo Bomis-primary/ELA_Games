@@ -9,6 +9,225 @@
 body{
     margin:0;
     font-family: Arial, sans-serif;
+    background:#f4f6ff;
+    text-align:center;
+    overflow:hidden;
+}
+
+/* SPLASH */
+#splash{
+    position:fixed;
+    inset:0;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+}
+
+/* SCREENS */
+.screen{
+    display:none;
+    padding:10px;
+}
+
+/* IMAGE */
+.game-img{
+    width:92%;
+    max-width:850px;
+    border-radius:12px;
+    margin-top:10px;
+}
+
+/* SENTENCE BOX */
+#sentenceBox{
+    position:relative;
+    margin-top:20px;
+    height:120px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* FLOATING SENTENCE */
+.sentence{
+    position:absolute;
+    font-size:22px;
+    font-weight:bold;
+    background:white;
+    padding:14px 20px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.15);
+    opacity:0;
+    transform:translateY(40px);
+    animation: floatUp 2.2s ease forwards;
+    max-width:90%;
+}
+
+@keyframes floatUp{
+    0%{opacity:0; transform:translateY(40px);}
+    20%{opacity:1;}
+    70%{opacity:1;}
+    100%{opacity:0; transform:translateY(-40px);}
+}
+
+/* BUTTON */
+button{
+    margin-top:15px;
+    padding:10px 20px;
+    font-size:18px;
+    border:none;
+    border-radius:8px;
+    background:#4CAF50;
+    color:white;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+    <img src="assets/innovinelogo.png" style="max-width:300px;">
+</div>
+
+<!-- INSTRUCTIONS -->
+<div id="instruction" class="screen">
+    <h2>Look at the picture carefully</h2>
+    <p>Read the sentences one by one. Listen carefully and observe.</p>
+    <img src="assets/image2.jpg" class="game-img">
+    <br>
+    <button onclick="startGame()">Start Game</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game" class="screen">
+
+    <img id="mainImage" src="assets/image1.jpg" class="game-img">
+
+    <div id="sentenceBox"></div>
+
+</div>
+
+<!-- AUDIO -->
+<audio id="correctSound" src="assets/correct.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
+<audio id="clapSound" src="assets/clapping.mp3"></audio>
+
+<script>
+
+/* ---------------- SPLASH ---------------- */
+setTimeout(()=>{
+    document.getElementById("splash").style.display="none";
+    document.getElementById("instruction").style.display="block";
+},5000);
+
+/* ---------------- DATA ---------------- */
+
+let gameData = [
+{
+    image:"assets/image1.jpg",
+    sentences:[
+        {text:"This girl is reading a book.", correct:true},
+        {text:"Those birds are flying above the school building.", correct:true},
+        {text:"This children are playing football in the field.", correct:false},
+        {text:"These flowers are bright and beautiful.", correct:true},
+        {text:"Those bag are colourful.", correct:false},
+        {text:"That school building has a red roof.", correct:true},
+        {text:"That boy is watering the flowers.", correct:true}
+    ]
+},
+{
+    image:"assets/image2.jpg",
+    sentences:[
+        {text:"This market is full of colourful shops and people.", correct:true},
+        {text:"These fruits and vegetables are fresh.", correct:true},
+        {text:"These girl is looking at the flowers.", correct:false},
+        {text:"That woman is buying vegetables from the shopkeeper.", correct:true},
+        {text:"Those children are going towards the book store.", correct:true},
+        {text:"This clothing shop is selling bright dresses and traditional clothes.", correct:true},
+        {text:"Those kid have balloons in their hand.", correct:false}
+    ]
+}
+];
+
+let gameIndex = 0;
+let sentenceIndex = 0;
+
+/* ---------------- START ---------------- */
+function startGame(){
+    document.getElementById("instruction").style.display="none";
+    document.getElementById("game").style.display="block";
+
+    loadImageSet();
+}
+
+/* ---------------- LOAD IMAGE ---------------- */
+function loadImageSet(){
+    document.getElementById("mainImage").src = gameData[gameIndex].image;
+    sentenceIndex = 0;
+    showSentence();
+}
+
+/* ---------------- SHOW SENTENCE ---------------- */
+function showSentence(){
+
+    let box = document.getElementById("sentenceBox");
+    box.innerHTML = "";
+
+    if(sentenceIndex >= gameData[gameIndex].sentences.length){
+        nextGame();
+        return;
+    }
+
+    let s = gameData[gameIndex].sentences[sentenceIndex];
+
+    let div = document.createElement("div");
+    div.className = "sentence";
+    div.innerText = s.text;
+
+    box.appendChild(div);
+
+    /* SOUND LOGIC */
+    if(s.correct){
+        document.getElementById("correctSound").play();
+        document.getElementById("clapSound").play();
+    } else {
+        document.getElementById("wrongSound").play();
+    }
+
+    sentenceIndex++;
+
+    setTimeout(showSentence, 2200);
+}
+
+/* ---------------- NEXT IMAGE SET ---------------- */
+function nextGame(){
+    gameIndex++;
+
+    if(gameIndex >= gameData.length){
+        document.getElementById("sentenceBox").innerHTML =
+        "<h2>🎉 Great Job! Activity Completed 🎉</h2>";
+        return;
+    }
+
+    loadImageSet();
+}
+
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sentence Adventure Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
     background:#f5f7ff;
     text-align:center;
 }
