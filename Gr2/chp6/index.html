@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sentence Adventure Game</title>
+<title>Sentence Adventure Click Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
     margin:0;
-    font-family: Arial, sans-serif;
-    background:#f4f6ff;
+    font-family:Arial;
+    background:#f2f6ff;
     text-align:center;
     overflow:hidden;
 }
@@ -25,61 +25,81 @@ body{
     z-index:999;
 }
 
-/* SCREENS */
-.screen{
-    display:none;
-    padding:10px;
-}
+/* SCREEN */
+.screen{display:none;padding:10px}
 
 /* IMAGE */
-.game-img{
-    width:92%;
+img{
+    width:90%;
     max-width:850px;
     border-radius:12px;
     margin-top:10px;
 }
 
-/* SENTENCE BOX */
-#sentenceBox{
-    position:relative;
-    margin-top:20px;
-    height:120px;
+/* SCOREBOARD */
+#scoreBoard{
     display:flex;
-    align-items:center;
     justify-content:center;
+    gap:30px;
+    font-size:22px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+/* MARQUEE AREA */
+#flowArea{
+    position:relative;
+    height:180px;
+    margin-top:20px;
+    overflow:hidden;
+    background:#ffffff;
+    border-radius:12px;
 }
 
 /* FLOATING SENTENCE */
 .sentence{
     position:absolute;
-    font-size:22px;
+    white-space:nowrap;
+    font-size:18px;
     font-weight:bold;
-    background:white;
-    padding:14px 20px;
-    border-radius:12px;
-    box-shadow:0 3px 10px rgba(0,0,0,0.15);
-    opacity:0;
-    transform:translateY(40px);
-    animation: floatUp 2.2s ease forwards;
-    max-width:90%;
+    padding:10px 18px;
+    background:#fff;
+    border-radius:10px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.15);
+    cursor:pointer;
+    top:20px;
+    animation: moveLeft 8s linear forwards;
 }
 
-@keyframes floatUp{
-    0%{opacity:0; transform:translateY(40px);}
-    20%{opacity:1;}
-    70%{opacity:1;}
-    100%{opacity:0; transform:translateY(-40px);}
+/* LEFT TO RIGHT FLOW */
+@keyframes moveLeft{
+    from{left:100%;}
+    to{left:-300px;}
 }
 
 /* BUTTON */
 button{
-    margin-top:15px;
-    padding:10px 20px;
-    font-size:18px;
+    margin-top:10px;
+    padding:10px 18px;
+    font-size:16px;
     border:none;
-    border-radius:8px;
     background:#4CAF50;
     color:white;
+    border-radius:8px;
+}
+
+/* CONFETTI */
+.confetti{
+    position:fixed;
+    width:8px;
+    height:8px;
+    background:red;
+    top:0;
+    animation: fall 2s linear infinite;
+}
+
+@keyframes fall{
+    to{transform:translateY(100vh) rotate(360deg);}
 }
 </style>
 </head>
@@ -91,21 +111,26 @@ button{
     <img src="assets/innovinelogo.png" style="max-width:300px;">
 </div>
 
-<!-- INSTRUCTIONS -->
+<!-- INSTRUCTION -->
 <div id="instruction" class="screen">
-    <h2>Look at the picture carefully</h2>
-    <p>Read the sentences one by one. Listen carefully and observe.</p>
-    <img src="assets/image2.jpg" class="game-img">
+    <h2>Click the correct sentences</h2>
+    <p>Observe the picture carefully and select correct sentences.</p>
+    <img src="assets/image2.jpg">
     <br>
     <button onclick="startGame()">Start Game</button>
 </div>
 
-<!-- GAME SCREEN -->
+<!-- GAME -->
 <div id="game" class="screen">
 
-    <img id="mainImage" src="assets/image1.jpg" class="game-img">
+    <img id="mainImg" src="assets/image1.jpg">
 
-    <div id="sentenceBox"></div>
+    <div id="scoreBoard">
+        <div>✔ <span id="correctCount">0</span></div>
+        <div>✖ <span id="wrongCount">0</span></div>
+    </div>
+
+    <div id="flowArea"></div>
 
 </div>
 
@@ -116,14 +141,13 @@ button{
 
 <script>
 
-/* ---------------- SPLASH ---------------- */
+/* SPLASH */
 setTimeout(()=>{
     document.getElementById("splash").style.display="none";
     document.getElementById("instruction").style.display="block";
 },5000);
 
-/* ---------------- DATA ---------------- */
-
+/* DATA */
 let gameData = [
 {
     image:"assets/image1.jpg",
@@ -145,73 +169,123 @@ let gameData = [
         {text:"These girl is looking at the flowers.", correct:false},
         {text:"That woman is buying vegetables from the shopkeeper.", correct:true},
         {text:"Those children are going towards the book store.", correct:true},
-        {text:"This clothing shop is selling bright dresses and traditional clothes.", correct:true},
+        {text:"This clothing shop is selling bright dresses.", correct:true},
         {text:"Those kid have balloons in their hand.", correct:false}
     ]
-}
-];
+}];
 
-let gameIndex = 0;
-let sentenceIndex = 0;
+let level = 0;
+let correct = 0;
+let wrong = 0;
+let index = 0;
+let flowInterval;
 
-/* ---------------- START ---------------- */
+/* START */
 function startGame(){
     document.getElementById("instruction").style.display="none";
     document.getElementById("game").style.display="block";
 
-    loadImageSet();
+    loadLevel();
 }
 
-/* ---------------- LOAD IMAGE ---------------- */
-function loadImageSet(){
-    document.getElementById("mainImage").src = gameData[gameIndex].image;
-    sentenceIndex = 0;
-    showSentence();
+/* LOAD LEVEL */
+function loadLevel(){
+    document.getElementById("mainImg").src = gameData[level].image;
+
+    let arr = shuffle([...gameData[level].sentences]);
+
+    index = 0;
+    startFlow(arr);
 }
 
-/* ---------------- SHOW SENTENCE ---------------- */
-function showSentence(){
+/* SHUFFLE */
+function shuffle(a){
+    return a.sort(()=>Math.random()-0.5);
+}
 
-    let box = document.getElementById("sentenceBox");
-    box.innerHTML = "";
+/* FLOW SENTENCES */
+function startFlow(arr){
 
-    if(sentenceIndex >= gameData[gameIndex].sentences.length){
-        nextGame();
-        return;
-    }
+    let area = document.getElementById("flowArea");
+    area.innerHTML = "";
 
-    let s = gameData[gameIndex].sentences[sentenceIndex];
+    flowInterval = setInterval(()=>{
 
-    let div = document.createElement("div");
-    div.className = "sentence";
-    div.innerText = s.text;
+        if(index >= arr.length){
+            clearInterval(flowInterval);
+            nextLevel();
+            return;
+        }
 
-    box.appendChild(div);
+        let s = arr[index];
 
-    /* SOUND LOGIC */
-    if(s.correct){
-        document.getElementById("correctSound").play();
-        document.getElementById("clapSound").play();
+        let div = document.createElement("div");
+        div.className="sentence";
+        div.innerText = s.text;
+
+        div.onclick = ()=>{
+
+            if(s.correct){
+                correct++;
+                document.getElementById("correctSound").play();
+                document.getElementById("clapSound").play();
+            } else {
+                wrong++;
+                document.getElementById("wrongSound").play();
+            }
+
+            updateScore();
+            div.remove();
+        };
+
+        area.appendChild(div);
+
+        index++;
+
+    },1200);
+}
+
+/* SCORE */
+function updateScore(){
+    document.getElementById("correctCount").innerText = correct;
+    document.getElementById("wrongCount").innerText = wrong;
+}
+
+/* NEXT LEVEL */
+function nextLevel(){
+
+    if(level === 0){
+        level = 1;
+        loadLevel();
     } else {
-        document.getElementById("wrongSound").play();
+        endGame();
     }
-
-    sentenceIndex++;
-
-    setTimeout(showSentence, 2200);
 }
 
-/* ---------------- NEXT IMAGE SET ---------------- */
-function nextGame(){
-    gameIndex++;
+/* END GAME */
+function endGame(){
 
-    if(gameIndex >= gameData.length){
-        document.getElementById("sentenceBox").innerHTML =
-        "<h2>🎉 Great Job! Activity Completed 🎉</h2>";
-        return;
+    document.getElementById("flowArea").innerHTML =
+    "<h2>🎉 Game Completed 🎉</h2>";
+
+    if(correct >= 10){
+        launchConfetti();
+        document.getElementById("clapSound").play();
     }
+}
 
-    loadImageSet();
+/* CONFETTI */
+function launchConfetti(){
+
+    for(let i=0;i<80;i++){
+        let c = document.createElement("div");
+        c.className="confetti";
+        c.style.left = Math.random()*100 + "vw";
+        c.style.background = ["#ff0","#0ff","#f0f","#0f0","#f66"][Math.floor(Math.random()*5)];
+        document.body.appendChild(c);
+
+        setTimeout(()=>c.remove(),2000);
+    }
 }
 
 </script>
