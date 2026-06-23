@@ -25,43 +25,7 @@ align-items:center;
 z-index:2000;
 }
 
-/* TITLE SCREEN */
-#titleScreen{
-position:fixed;
-width:100%;
-height:100%;
-background:#e3f2fd;
-display:none;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
-z-index:1999;
-padding:20px;
-}
-
-#titleScreen h1{
-font-size:28px;
-color:#0d47a1;
-margin-bottom:10px;
-}
-
-#titleScreen p{
-font-size:18px;
-margin-bottom:20px;
-}
-
-#startBtn{
-padding:12px 20px;
-font-size:18px;
-border:none;
-background:#0d47a1;
-color:white;
-border-radius:10px;
-cursor:pointer;
-}
-
-/* GAME FRAME */
+/* FRAME */
 #frame{
 position:absolute;
 top:50%;
@@ -90,26 +54,14 @@ color:#0d47a1;
 margin-top:10px;
 }
 
-/* POP IMAGE (NEW FEATURE) */
-#popImg{
-position:absolute;
-top:30%;
-left:50%;
-transform:translate(-50%,-50%);
-width:200px;
-height:200px;
-display:none;
-z-index:3000;
-}
-
-/* TICKER (BIGGER NOW) */
+/* TICKER */
 #ticker{
 position:absolute;
 bottom:60px;
 width:100%;
 overflow:hidden;
 background:#2c3e50;
-padding:25px 0;   /* increased height */
+padding:25px 0;
 border-radius:10px;
 }
 
@@ -124,7 +76,6 @@ from{transform:translateX(0)}
 to{transform:translateX(-50%)}
 }
 
-/* BIGGER IMAGES */
 .option{
 display:inline-block;
 margin:0 70px;
@@ -132,7 +83,7 @@ cursor:pointer;
 }
 
 .option img{
-height:110px;   /* increased size */
+height:110px;
 width:110px;
 object-fit:contain;
 }
@@ -149,7 +100,7 @@ background:rgba(0,0,0,0.05);
 z-index:999;
 }
 
-/* RESULT */
+/* RESULT SCREEN */
 #result{
 position:absolute;
 top:40%;
@@ -167,22 +118,12 @@ text-align:center;
 
 <body>
 
-<!-- LOGO -->
+<!-- SPLASH -->
 <div id="splash">
 <img src="assets/innovine-logo.png" style="width:220px;">
 </div>
 
-<!-- TITLE SCREEN -->
-<div id="titleScreen">
-<h1>🎯 Action Word Adventure</h1>
-<p>Watch the pictures and choose the correct action word!</p>
-<button id="startBtn">START GAME</button>
-</div>
-
-<!-- POP IMAGE -->
-<img id="popImg">
-
-<!-- GAME -->
+<!-- FRAME -->
 <div id="frame">
 
 <div id="topBar">
@@ -226,27 +167,33 @@ let questions=[...bank].sort(()=>Math.random()-0.5).slice(0,10);
 let index=0;
 let timer=30;
 let locked=false;
+let gameEnded=false;
 
-/* ================= FLOW ================= */
+/* ================= SPLASH ================= */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
-setTimeout(()=>{
-document.getElementById("titleScreen").style.display="flex";
-},2000);
+load();
 },5000);
 
-/* START GAME */
-document.getElementById("startBtn").onclick=()=>{
-document.getElementById("titleScreen").style.display="none";
-load();
-};
-
-/* LOAD */
+/* ================= LOAD ================= */
 function load(){
 
+if(gameEnded) return;
+
 if(index>=10){
-document.getElementById("result").style.display="block";
-document.getElementById("result").innerHTML="🎉 Great Job!";
+gameEnded=true;
+
+/* STOP TICKER */
+document.getElementById("track").innerHTML="";
+document.getElementById("question").innerText="";
+
+setTimeout(()=>{
+document.getElementById("question").innerText="🎮 GAME OVER!";
+
+setTimeout(showScoreBoard,1000);
+
+},500);
+
 return;
 }
 
@@ -260,7 +207,7 @@ document.getElementById("question").innerText=q.q;
 buildTicker(q.ans);
 }
 
-/* TICKER */
+/* ================= TICKER ================= */
 function buildTicker(correct){
 
 let track=document.getElementById("track");
@@ -274,7 +221,7 @@ pool[Math.floor(Math.random()*pool.length)],
 pool[Math.floor(Math.random()*pool.length)]
 ].sort(()=>Math.random()-0.5);
 
-/* duplicate loop */
+/* loop effect */
 let loop=[...options,...options];
 
 loop.forEach(img=>{
@@ -289,22 +236,7 @@ track.appendChild(div);
 });
 }
 
-/* CONFETTI */
-function confetti(){
-for(let i=0;i<30;i++){
-let c=document.createElement("div");
-c.style.position="absolute";
-c.style.width="6px";
-c.style.height="6px";
-c.style.background=["#ff0","#f0f","#0ff","#0f0"][Math.floor(Math.random()*4)];
-c.style.left=Math.random()*100+"%";
-c.style.top=Math.random()*40+"%";
-document.body.appendChild(c);
-setTimeout(()=>c.remove(),800);
-}
-}
-
-/* CHECK + POP */
+/* ================= CHECK ================= */
 function check(val,correct){
 
 if(locked) return;
@@ -313,38 +245,24 @@ locked=true;
 /* FREEZE */
 document.getElementById("freeze").style.display="block";
 
-/* POP IMAGE */
-let pop=document.getElementById("popImg");
-
 if(val===correct){
-
-scoreEffect = true;
-
 document.getElementById("correctSound").play();
 document.getElementById("clappingSound").play();
-
-/* show big pop image */
-pop.src="assets/"+correct;
-pop.style.display="block";
-
-confetti();
-
 }else{
 document.getElementById("wrongSound").play();
 }
 
 setTimeout(()=>{
-pop.style.display="none";
 document.getElementById("freeze").style.display="none";
 index++;
 load();
 },1000);
 }
 
-/* TIMER */
+/* ================= TIMER ================= */
 setInterval(()=>{
 
-if(locked) return;
+if(locked || gameEnded) return;
 
 timer--;
 document.getElementById("timer").innerText=timer;
@@ -355,6 +273,28 @@ load();
 }
 
 },1000);
+
+/* ================= SCOREBOARD ================= */
+function showScoreBoard(){
+
+let score=index; // completed rounds
+
+let msg="";
+
+if(score>=8){
+msg="🌟 Excellent Work!";
+}
+else if(score>=5){
+msg="👍 Good Job!";
+}
+else{
+msg="📘 Keep Practicing!";
+}
+
+document.getElementById("result").style.display="block";
+document.getElementById("result").innerHTML=
+`🎯 Score: ${score}/10<br>${msg}`;
+}
 
 </script>
 
