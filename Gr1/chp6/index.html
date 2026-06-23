@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -13,7 +13,55 @@ background:#dff3ff;
 overflow:hidden;
 }
 
-/* CENTER GAME FRAME (FIX FOR LAPTOP + MOBILE) */
+/* SPLASH */
+#splash{
+position:fixed;
+width:100%;
+height:100%;
+background:white;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:2000;
+}
+
+/* TITLE SCREEN */
+#titleScreen{
+position:fixed;
+width:100%;
+height:100%;
+background:#e3f2fd;
+display:none;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+z-index:1999;
+padding:20px;
+}
+
+#titleScreen h1{
+font-size:28px;
+color:#0d47a1;
+margin-bottom:10px;
+}
+
+#titleScreen p{
+font-size:18px;
+margin-bottom:20px;
+}
+
+#startBtn{
+padding:12px 20px;
+font-size:18px;
+border:none;
+background:#0d47a1;
+color:white;
+border-radius:10px;
+cursor:pointer;
+}
+
+/* GAME FRAME */
 #frame{
 position:absolute;
 top:50%;
@@ -24,7 +72,7 @@ max-width:900px;
 height:90vh;
 }
 
-/* TOP BAR FIXED INSIDE FRAME */
+/* TOP BAR */
 #topBar{
 display:flex;
 justify-content:space-between;
@@ -33,7 +81,7 @@ font-weight:bold;
 padding:5px 10px;
 }
 
-/* QUESTION (LESS GAP FIX) */
+/* QUESTION */
 #question{
 text-align:center;
 font-size:20px;
@@ -42,14 +90,26 @@ color:#0d47a1;
 margin-top:10px;
 }
 
-/* TICKER AREA */
+/* POP IMAGE (NEW FEATURE) */
+#popImg{
+position:absolute;
+top:30%;
+left:50%;
+transform:translate(-50%,-50%);
+width:200px;
+height:200px;
+display:none;
+z-index:3000;
+}
+
+/* TICKER (BIGGER NOW) */
 #ticker{
 position:absolute;
 bottom:60px;
 width:100%;
 overflow:hidden;
 background:#2c3e50;
-padding:15px 0;
+padding:25px 0;   /* increased height */
 border-radius:10px;
 }
 
@@ -64,6 +124,7 @@ from{transform:translateX(0)}
 to{transform:translateX(-50%)}
 }
 
+/* BIGGER IMAGES */
 .option{
 display:inline-block;
 margin:0 70px;
@@ -71,21 +132,12 @@ cursor:pointer;
 }
 
 .option img{
-height:80px;
-width:80px;
+height:110px;   /* increased size */
+width:110px;
 object-fit:contain;
 }
 
-/* BOX (NOT USED MUCH NOW BUT KEPT SAFE) */
-#box{
-position:absolute;
-top:120px;
-left:50%;
-transform:translateX(-50%);
-font-size:70px;
-}
-
-/* FREEZE OVERLAY (FIXED) */
+/* FREEZE */
 #freeze{
 position:absolute;
 top:0;
@@ -110,29 +162,27 @@ display:none;
 font-size:20px;
 text-align:center;
 }
-
-/* SPLASH LOGO */
-#splash{
-position:fixed;
-width:100%;
-height:100%;
-background:white;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:2000;
-}
 </style>
 </head>
 
 <body>
 
-<!-- LOGO RESTORED -->
+<!-- LOGO -->
 <div id="splash">
 <img src="assets/innovine-logo.png" style="width:220px;">
 </div>
 
-<!-- GAME FRAME -->
+<!-- TITLE SCREEN -->
+<div id="titleScreen">
+<h1>🎯 Action Word Adventure</h1>
+<p>Watch the pictures and choose the correct action word!</p>
+<button id="startBtn">START GAME</button>
+</div>
+
+<!-- POP IMAGE -->
+<img id="popImg">
+
+<!-- GAME -->
 <div id="frame">
 
 <div id="topBar">
@@ -161,14 +211,14 @@ z-index:2000;
 
 /* ================= DATA ================= */
 const bank=[
-{q:"The child is jumping with joy. What action is this?",ans:"jump_image.png"},
-{q:"The boy is running fast. What is he doing?",ans:"run_image.png"},
-{q:"The girl is sleeping peacefully. What action is this?",ans:"sleep_image.jpg"},
-{q:"The child is eating food. What is happening?",ans:"eat_image.jpg"},
-{q:"The student is reading a book. What action is this?",ans:"read_image.png"},
-{q:"The children are singing. What are they doing?",ans:"sing_image.png"},
-{q:"The boy is swimming. What action is this?",ans:"swim_image.png"},
-{q:"The girl is walking. What is she doing?",ans:"walk_image.png"}
+{q:"The child is jumping happily.",ans:"jump_image.png"},
+{q:"The boy is running fast.",ans:"run_image.png"},
+{q:"The girl is sleeping peacefully.",ans:"sleep_image.jpg"},
+{q:"The child is eating food.",ans:"eat_image.jpg"},
+{q:"The student is reading a book.",ans:"read_image.png"},
+{q:"The children are singing.",ans:"sing_image.png"},
+{q:"The boy is swimming.",ans:"swim_image.png"},
+{q:"The girl is walking.",ans:"walk_image.png"}
 ];
 
 let questions=[...bank].sort(()=>Math.random()-0.5).slice(0,10);
@@ -177,18 +227,26 @@ let index=0;
 let timer=30;
 let locked=false;
 
-/* REMOVE SPLASH */
+/* ================= FLOW ================= */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
-load();
+setTimeout(()=>{
+document.getElementById("titleScreen").style.display="flex";
+},2000);
 },5000);
+
+/* START GAME */
+document.getElementById("startBtn").onclick=()=>{
+document.getElementById("titleScreen").style.display="none";
+load();
+};
 
 /* LOAD */
 function load(){
 
 if(index>=10){
 document.getElementById("result").style.display="block";
-document.getElementById("result").innerHTML="🎉 Game Over!";
+document.getElementById("result").innerHTML="🎉 Great Job!";
 return;
 }
 
@@ -216,7 +274,7 @@ pool[Math.floor(Math.random()*pool.length)],
 pool[Math.floor(Math.random()*pool.length)]
 ].sort(()=>Math.random()-0.5);
 
-/* duplicate for smooth loop */
+/* duplicate loop */
 let loop=[...options,...options];
 
 loop.forEach(img=>{
@@ -231,39 +289,52 @@ track.appendChild(div);
 });
 }
 
-/* CONFETTI FIX */
+/* CONFETTI */
 function confetti(){
-for(let i=0;i<25;i++){
+for(let i=0;i<30;i++){
 let c=document.createElement("div");
 c.style.position="absolute";
 c.style.width="6px";
 c.style.height="6px";
 c.style.background=["#ff0","#f0f","#0ff","#0f0"][Math.floor(Math.random()*4)];
 c.style.left=Math.random()*100+"%";
-c.style.top=Math.random()*50+"%";
+c.style.top=Math.random()*40+"%";
 document.body.appendChild(c);
 setTimeout(()=>c.remove(),800);
 }
 }
 
-/* CHECK */
+/* CHECK + POP */
 function check(val,correct){
 
 if(locked) return;
 locked=true;
 
-/* FREEZE SCREEN */
+/* FREEZE */
 document.getElementById("freeze").style.display="block";
 
+/* POP IMAGE */
+let pop=document.getElementById("popImg");
+
 if(val===correct){
+
+scoreEffect = true;
+
 document.getElementById("correctSound").play();
 document.getElementById("clappingSound").play();
+
+/* show big pop image */
+pop.src="assets/"+correct;
+pop.style.display="block";
+
 confetti();
+
 }else{
 document.getElementById("wrongSound").play();
 }
 
 setTimeout(()=>{
+pop.style.display="none";
 document.getElementById("freeze").style.display="none";
 index++;
 load();
