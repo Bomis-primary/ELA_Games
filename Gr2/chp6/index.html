@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CBQ Sentence Game Fixed</title>
+<title>Sentence CBQ Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -19,8 +19,8 @@ body{
     inset:0;
     background:white;
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:center;
     z-index:999;
 }
 
@@ -28,7 +28,7 @@ body{
 #instruction{
     display:none;
     text-align:center;
-    padding:10px;
+    padding:12px;
     font-weight:bold;
     background:#fff3c4;
 }
@@ -64,29 +64,23 @@ body{
     overflow:hidden;
 }
 
-/* TRACK */
 #tickerTrack{
     display:flex;
-    gap:18px;
+    gap:20px;
     width:max-content;
-    animation: scroll 10s linear infinite; /* 🔥 FASTER */
+    animation: scroll 14s linear infinite; /* 🔥 SLOWER + READABLE */
 }
 
-/* FAST SMOOTH LOOP */
 @keyframes scroll{
-    0%{
-        transform:translateX(100%);
-    }
-    100%{
-        transform:translateX(-100%);
-    }
+    0%{transform:translateX(100%);}
+    100%{transform:translateX(-100%);}
 }
 
 /* SENTENCE */
 .sentence{
     display:inline-block;
     background:#fff;
-    padding:10px 14px;
+    padding:10px 15px;
     border-radius:10px;
     font-size:17px;
     font-weight:bold;
@@ -99,9 +93,24 @@ body{
 .correctGlow{background:#c8f7c5 !important;}
 .wrongGlow{background:#ffcccc !important;}
 
+/* END SCREEN */
+#endScreen{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:white;
+    text-align:center;
+    padding-top:120px;
+}
+
 button{
-    padding:10px 15px;
-    margin:5px;
+    padding:12px 20px;
+    font-size:16px;
+    margin-top:20px;
+    border:none;
+    border-radius:8px;
+    background:#4CAF50;
+    color:white;
 }
 
 </style>
@@ -116,7 +125,7 @@ button{
 
 <!-- INSTRUCTION -->
 <div id="instruction">
-    📌 Click correct sentences while they move fast
+    📌 Click correct sentences while they move slowly
 </div>
 
 <!-- GAME -->
@@ -133,6 +142,13 @@ button{
 <!-- TICKER -->
 <div id="tickerContainer">
     <div id="tickerTrack"></div>
+</div>
+
+<!-- END SCREEN -->
+<div id="endScreen">
+    <h2>🎉 Game Completed 🎉</h2>
+    <h3 id="finalScore"></h3>
+    <button onclick="location.reload()">Play Again</button>
 </div>
 
 <!-- AUDIO -->
@@ -193,19 +209,17 @@ function loadLevel(){
 
  document.getElementById("mainImg").src=levels[level].image;
 
- let arr=[...levels[level].sentences]
- .sort(()=>Math.random()-0.5);
+ let arr=[...levels[level].sentences].sort(()=>Math.random()-0.5);
 
  buildTicker(arr);
 }
 
-/* BUILD TICKER */
+/* TICKER */
 function buildTicker(arr){
 
  let track=document.getElementById("tickerTrack");
  track.innerHTML="";
 
-/* DUPLICATE LIST → FIXES MID STOP ISSUE */
  let loopArr=[...arr, ...arr];
 
  loopArr.forEach(item=>{
@@ -233,7 +247,7 @@ function buildTicker(arr){
  track.appendChild(div);
  });
 
- /* AUTO NEXT LEVEL */
+ /* LEVEL TIMER */
  setTimeout(()=>{
  level++;
  if(level>=levels.length){
@@ -241,7 +255,7 @@ function buildTicker(arr){
  }else{
  loadLevel();
  }
- },12000);
+ },16000); /* 🔥 MORE TIME = EASIER READING */
 }
 
 /* SCORE */
@@ -250,12 +264,18 @@ function updateScore(){
  document.getElementById("w").innerText=wrong;
 }
 
-/* END */
+/* END GAME */
 function endGame(){
- document.getElementById("tickerContainer").innerHTML=
- `<h2>🎉 Game Completed</h2>
- <h3>Score: ${correct} ✔ | ${wrong} ✖</h3>
- <button onclick="location.reload()">Play Again</button>`;
+
+ document.getElementById("game").style.display="none";
+ document.getElementById("endScreen").style.display="block";
+
+ document.getElementById("finalScore").innerText =
+ "Score: " + correct + " ✔ | " + wrong + " ✖";
+
+ if(correct >= 10){
+ document.getElementById("clapSound").play();
+ }
 }
 
 </script>
