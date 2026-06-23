@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CBQ Sentence Adventure</title>
+<title>CBQ Sentence Game Fixed</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -30,7 +30,7 @@ body{
     text-align:center;
     padding:10px;
     font-weight:bold;
-    background:#fff6d8;
+    background:#fff3c4;
 }
 
 /* GAME */
@@ -51,37 +51,6 @@ body{
 #score{
     font-size:20px;
     font-weight:bold;
-    margin-top:5px;
-}
-
-/* PROGRESS BAR */
-#progressBar{
-    width:80%;
-    height:12px;
-    background:#ddd;
-    margin:10px auto;
-    border-radius:20px;
-    overflow:hidden;
-}
-#progress{
-    height:100%;
-    width:0%;
-    background:#4CAF50;
-    transition:width 0.5s;
-}
-
-/* CONTROLS */
-#controls{
-    margin-top:10px;
-}
-button{
-    padding:8px 14px;
-    margin:5px;
-    font-size:14px;
-    border:none;
-    border-radius:6px;
-    background:#4CAF50;
-    color:white;
 }
 
 /* TICKER */
@@ -95,40 +64,46 @@ button{
     overflow:hidden;
 }
 
+/* TRACK */
 #tickerTrack{
     display:flex;
-    gap:20px;
-    padding-left:100%;
+    gap:18px;
+    width:max-content;
+    animation: scroll 10s linear infinite; /* 🔥 FASTER */
+}
+
+/* FAST SMOOTH LOOP */
+@keyframes scroll{
+    0%{
+        transform:translateX(100%);
+    }
+    100%{
+        transform:translateX(-100%);
+    }
 }
 
 /* SENTENCE */
 .sentence{
     display:inline-block;
     background:#fff;
-    padding:10px 16px;
+    padding:10px 14px;
     border-radius:10px;
-    font-weight:bold;
     font-size:17px;
+    font-weight:bold;
     box-shadow:0 2px 6px rgba(0,0,0,0.15);
     cursor:pointer;
     white-space:nowrap;
-    animation:move 14s linear forwards;
 }
 
-@keyframes move{
-    from{transform:translateX(0);}
-    to{transform:translateX(-120%);}
+/* HIGHLIGHTS */
+.correctGlow{background:#c8f7c5 !important;}
+.wrongGlow{background:#ffcccc !important;}
+
+button{
+    padding:10px 15px;
+    margin:5px;
 }
 
-/* HIGHLIGHT CORRECT */
-.correctGlow{
-    background:#c8f7c5 !important;
-}
-
-/* WRONG */
-.wrongGlow{
-    background:#ffcccc !important;
-}
 </style>
 </head>
 
@@ -141,23 +116,17 @@ button{
 
 <!-- INSTRUCTION -->
 <div id="instruction">
-    📌 Read carefully and click ONLY correct sentences
+    📌 Click correct sentences while they move fast
 </div>
 
 <!-- GAME -->
 <div id="game">
 
-    <div id="score">✔ <span id="c">0</span> | ✖ <span id="w">0</span></div>
-
-    <div id="progressBar">
-        <div id="progress"></div>
+    <div id="score">
+        ✔ <span id="c">0</span> | ✖ <span id="w">0</span>
     </div>
 
-    <img id="mainImg" src="">
-
-    <div id="controls">
-        <button onclick="toggleTicker()">⏸ Pause / ▶ Play</button>
-    </div>
+    <img id="mainImg">
 
 </div>
 
@@ -177,7 +146,7 @@ button{
 setTimeout(()=>{
     document.getElementById("splash").style.display="none";
     document.getElementById("instruction").style.display="block";
-    setTimeout(startGame,3000);
+    setTimeout(startGame,2500);
 },5000);
 
 /* DATA */
@@ -211,7 +180,6 @@ let levels=[
 let level=0;
 let correct=0;
 let wrong=0;
-let running=true;
 
 /* START */
 function startGame(){
@@ -220,30 +188,27 @@ function startGame(){
  loadLevel();
 }
 
-/* LOAD */
+/* LOAD LEVEL */
 function loadLevel(){
 
  document.getElementById("mainImg").src=levels[level].image;
 
- let arr=[...levels[level].sentences].sort(()=>Math.random()-0.5);
+ let arr=[...levels[level].sentences]
+ .sort(()=>Math.random()-0.5);
 
  buildTicker(arr);
- updateProgress();
 }
 
-/* PROGRESS */
-function updateProgress(){
- let p = ((level)/levels.length)*100;
- document.getElementById("progress").style.width=p+"%";
-}
-
-/* TICKER */
+/* BUILD TICKER */
 function buildTicker(arr){
 
  let track=document.getElementById("tickerTrack");
  track.innerHTML="";
 
- arr.forEach(item=>{
+/* DUPLICATE LIST → FIXES MID STOP ISSUE */
+ let loopArr=[...arr, ...arr];
+
+ loopArr.forEach(item=>{
 
  let div=document.createElement("div");
  div.className="sentence";
@@ -268,21 +233,15 @@ function buildTicker(arr){
  track.appendChild(div);
  });
 
- /* AUTO HIGHLIGHT AFTER TIMEOUT */
+ /* AUTO NEXT LEVEL */
  setTimeout(()=>{
- highlightAnswers(arr);
- nextLevel();
- },15000);
-}
-
-/* HIGHLIGHT */
-function highlightAnswers(arr){
-
- document.querySelectorAll(".sentence").forEach((el,i)=>{
- if(arr[i].c){
- el.classList.add("correctGlow");
+ level++;
+ if(level>=levels.length){
+ endGame();
+ }else{
+ loadLevel();
  }
- });
+ },12000);
 }
 
 /* SCORE */
@@ -291,41 +250,12 @@ function updateScore(){
  document.getElementById("w").innerText=wrong;
 }
 
-/* NEXT */
-function nextLevel(){
- level++;
- if(level>=levels.length){
- endGame();
- return;
- }
- loadLevel();
-}
-
-/* END GAME */
+/* END */
 function endGame(){
- document.getElementById("tickerTrack").innerHTML="";
-
- document.getElementById("game").innerHTML+=`
- <h2>🎉 Game Completed</h2>
+ document.getElementById("tickerContainer").innerHTML=
+ `<h2>🎉 Game Completed</h2>
  <h3>Score: ${correct} ✔ | ${wrong} ✖</h3>
- <button onclick="location.reload()">Play Again</button>
- `;
-
- if(correct>8){
- document.getElementById("clapSound").play();
- }
-}
-
-/* PAUSE PLAY */
-function toggleTicker(){
- let track=document.getElementById("tickerTrack");
- if(running){
- track.style.animationPlayState="paused";
- running=false;
- }else{
- track.style.animationPlayState="running";
- running=true;
- }
+ <button onclick="location.reload()">Play Again</button>`;
 }
 
 </script>
