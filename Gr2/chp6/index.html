@@ -1,1 +1,159 @@
-aaaaa
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sentence Adventure Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#f5f7ff;
+    text-align:center;
+}
+
+/* SPLASH */
+#splash{
+    position:fixed;
+    top:0; left:0;
+    width:100%;
+    height:100%;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:10;
+}
+
+/* INSTRUCTION SCREEN */
+.screen{
+    display:none;
+    padding:10px;
+}
+
+/* IMAGE */
+.game-img{
+    width:90%;
+    max-width:800px;
+    border-radius:12px;
+    margin-top:10px;
+}
+
+/* SENTENCE BOX */
+#sentenceBox{
+    margin-top:20px;
+    font-size:22px;
+    font-weight:bold;
+    background:#ffffff;
+    display:inline-block;
+    padding:15px 25px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    min-width:60%;
+    opacity:0;
+    transition: opacity 0.8s ease;
+}
+
+/* BUTTON */
+button{
+    margin-top:20px;
+    padding:10px 20px;
+    font-size:18px;
+    border:none;
+    border-radius:8px;
+    background:#4CAF50;
+    color:white;
+}
+
+/* FADE CLASS */
+.show{
+    opacity:1 !important;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+    <img src="assets/innovinelogo.png" style="max-width:300px;">
+</div>
+
+<!-- INSTRUCTION SCREEN -->
+<div id="instruction" class="screen">
+    <h2>Look at the picture carefully</h2>
+    <p>Read the sentences one by one</p>
+    <img src="assets/image2.jpg" class="game-img">
+    <br>
+    <button onclick="startGame()">Start Game</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game" class="screen">
+
+    <img src="assets/image1.jpg" class="game-img">
+
+    <div id="sentenceBox"></div>
+
+    <br>
+    <button onclick="nextSentence()">Next Sentence</button>
+
+    <!-- AUDIO -->
+    <audio id="correctSound" src="assets/correct.mp3"></audio>
+    <audio id="wrongSound" src="assets/wrong.mp3"></audio>
+    <audio id="clapSound" src="assets/clapping.mp3"></audio>
+
+</div>
+
+<script>
+
+let sentences = [
+    "This is a colorful and lively scene shown in the picture.",
+    "These children are looking very happy in the picture.",
+    "That building can be seen standing in the background.",
+    "Those trees are giving shade to the area in the image.",
+    "This place looks very bright and full of activity.",
+    "These objects in the picture make the scene beautiful and interesting."
+];
+
+let index = 0;
+
+// SPLASH TIMER
+setTimeout(()=>{
+    document.getElementById("splash").style.display="none";
+    document.getElementById("instruction").style.display="block";
+},5000);
+
+function startGame(){
+    document.getElementById("instruction").style.display="none";
+    document.getElementById("game").style.display="block";
+    showSentence();
+}
+
+function showSentence(){
+    let box = document.getElementById("sentenceBox");
+    box.classList.remove("show");
+
+    setTimeout(()=>{
+        box.innerText = sentences[index];
+        box.classList.add("show");
+    },200);
+}
+
+function nextSentence(){
+    index++;
+
+    if(index >= sentences.length){
+        document.getElementById("sentenceBox").innerText = "Great Job!";
+        document.getElementById("clapSound").play();
+        return;
+    }
+
+    showSentence();
+}
+
+</script>
+
+</body>
+</html>
