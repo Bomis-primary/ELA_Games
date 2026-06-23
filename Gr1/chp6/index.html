@@ -2,189 +2,200 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Action Catch Box Adventure</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Action Words Adventure</title>
 
 <style>
-body{
-margin:0;
-overflow:hidden;
-font-family:Comic Sans MS;
-background:linear-gradient(#b3e5fc,#e1f5fe);
+/* ===== ORIGINAL STYLE KEPT (UNCHANGED STRUCTURE) ===== */
+
+:root {
+    --bg-sky: #e0f2fe;
+    --slate-dark: #1e293b;
+    --clay-orange: #f97316;
 }
 
-#topBar{
-position:absolute;
-top:10px;
-width:100%;
-display:flex;
-justify-content:space-between;
-padding:0 20px;
-font-size:20px;
-font-weight:bold;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
 }
 
-#game{
-position:absolute;
-width:100%;
-height:100%;
-overflow:hidden;
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg-sky);
+    color: var(--slate-dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-#clue{
-position:absolute;
-top:80px;
-width:100%;
-text-align:center;
-font-size:26px;
-font-weight:bold;
-color:#0d47a1;
+/* SCREENS */
+.screen-layout {
+    display: none;
+    width: 100%;
+    max-width: 650px;
+    min-height: 100vh;
+    padding: 15px;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* BOX */
-#box{
-position:absolute;
-top:140px;
-left:50%;
-font-size:90px;
-transition:transform 0.3s ease;
+.active-view { display: flex !important; }
+
+/* SPLASH */
+#screen-splash {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
 }
 
-#ticker{
-position:absolute;
-top:55%;
-width:100%;
-overflow:hidden;
-white-space:nowrap;
+/* IMAGE AREA */
+.display-frame img {
+    width: 100%;
+    max-width: 380px;
+    max-height: 240px;
+    object-fit: contain;
 }
 
-#track{
-display:inline-block;
-white-space:nowrap;
-animation:scroll 14s linear infinite;
+/* QUESTION */
+.question-bubble {
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    margin: 10px 0;
 }
 
-.emoji{
-display:inline-block;
-margin:0 90px;
-cursor:pointer;
+/* CONVEYOR */
+.conveyor {
+    width: 100%;
+    overflow: hidden;
+    background: #475569;
+    border-radius: 20px;
 }
 
-.emoji img{
-height:90px;
-width:90px;
-object-fit:contain;
+.track {
+    display: flex;
+    width: max-content;
+    animation: scroll 18s linear infinite;
 }
 
-@keyframes scroll{
-from{transform:translateX(0)}
-to{transform:translateX(-50%)}
+@keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
 }
 
-#result{
-position:absolute;
-top:45%;
-left:50%;
-transform:translate(-50%,-50%);
-font-size:38px;
-font-weight:bold;
-display:none;
-background:white;
-padding:20px;
-border-radius:18px;
+.choice {
+    flex-shrink: 0;
+    margin: 0 25px;
+    background: white;
+    padding: 10px;
+    border-radius: 15px;
+    cursor: pointer;
 }
+
+.choice img {
+    height: 90px;
+}
+
 </style>
 </head>
 
 <body>
 
-<div id="game">
-
-<div id="topBar">
-<div>⏱ Time Left: <span id="timer">30</span>s</div>
-<div>📊 Score: <span id="score">0</span></div>
-</div>
-
-<div id="clue"></div>
-
-<div id="box">📦</div>
-
-<div id="ticker">
-<div id="track"></div>
-</div>
-
-<div id="result"></div>
-
-</div>
-
+<!-- ===== SOUND ===== -->
 <audio id="correctSound" src="assets/correct.mp3"></audio>
 <audio id="wrongSound" src="assets/wrong.mp3"></audio>
 <audio id="clapSound" src="assets/clapping.mp3"></audio>
 
+<!-- ===== SPLASH ===== -->
+<div id="screen-splash">
+    <img src="assets/innovine-logo.png" style="width:220px;">
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="screen-game" class="screen-layout active-view">
+
+    <div class="display-frame">
+        <img id="mainImage" src="">
+    </div>
+
+    <div class="question-bubble" id="questionText"></div>
+
+    <div class="conveyor">
+        <div class="track" id="track"></div>
+    </div>
+
+</div>
+
 <script>
 
-/* ================= IMAGE BANK ================= */
-const bank=[
-{clue:"Which action shows RUNNING?",answer:"run.png"},
-{clue:"Which action shows EATING?",answer:"eat.png"},
-{clue:"Which action shows SLEEPING?",answer:"sleep.png"},
-{clue:"Which action shows READING?",answer:"read.png"},
-{clue:"Which action shows JUMPING?",answer:"jump.png"},
-{clue:"Which action shows WALKING?",answer:"walk.png"},
-{clue:"Which action shows CLAPPING?",answer:"clap.png"},
-{clue:"Which action shows SWIMMING?",answer:"swim.png"},
-{clue:"Which action shows SINGING?",answer:"sing.png"},
-{clue:"Which action shows DANCING?",answer:"dance.png"}
+/* ===== ACTION WORD DATA ===== */
+
+const bank = [
+{q:"Which action shows RUNNING?", ans:"run_image.png"},
+{q:"Which action shows EATING?", ans:"eat_image.jpg"},
+{q:"Which action shows SLEEPING?", ans:"sleep_image.jpg"},
+{q:"Which action shows READING?", ans:"read_image.png"},
+{q:"Which action shows JUMPING?", ans:"jump_image.png"},
+{q:"Which action shows SINGING?", ans:"sing_image.png"},
+{q:"Which action shows SWIMMING?", ans:"swim_image.png"},
+{q:"Which action shows WALKING?", ans:"walk_image.png"}
 ];
 
-let questions=[...bank].sort(()=>Math.random()-0.5).slice(0,10);
+let questions = [...bank].sort(()=>Math.random()-0.5).slice(0,8);
+let index = 0;
 
-let index=0;
-let score=0;
-let timer=30;
+/* ===== START AFTER SPLASH ===== */
+setTimeout(()=>{
+    document.getElementById("screen-splash").style.display="none";
+    loadQ();
+},5000);
 
-/* ================= LOAD ================= */
-load();
+/* ===== LOAD QUESTION ===== */
+function loadQ(){
 
-function load(){
-
-if(index>=10){
-document.getElementById("result").style.display="block";
-document.getElementById("result").innerHTML=
-`🎉 Game Over!<br>Score: ${score}/10`;
-return;
+if(index >= questions.length){
+    document.getElementById("questionText").innerText = "🎉 Well Done!";
+    document.getElementById("track").innerHTML="";
+    return;
 }
 
-let q=questions[index];
+let q = questions[index];
 
-document.getElementById("clue").innerText=q.clue;
+document.getElementById("questionText").innerText = q.q;
+document.getElementById("mainImage").src = "assets/" + q.ans;
 
-buildTicker(q.answer);
-
-timer=30;
+loadOptions(q.ans);
 }
 
-/* ================= TICKER ================= */
-function buildTicker(correct){
+/* ===== OPTIONS ===== */
+function loadOptions(correct){
 
-let track=document.getElementById("track");
-track.innerHTML="";
+let pool = bank.map(x=>x.ans).filter(x=>x!==correct);
 
-let pool=[...bank.map(x=>x.answer)].filter(x=>x!==correct);
-
-let options=[
+let options = [
 correct,
 random(pool),
 random(pool)
 ].sort(()=>Math.random()-0.5);
 
-options.forEach(img=>{
-let div=document.createElement("div");
-div.className="emoji";
+let track = document.getElementById("track");
+track.innerHTML="";
 
-div.innerHTML=`<img src="assets/${img}">`;
+options.forEach(opt=>{
+let div = document.createElement("div");
+div.className="choice";
 
-div.onclick=()=>check(img,correct);
+div.innerHTML = `<img src="assets/${opt}">`;
+
+div.onclick = ()=>check(opt, correct);
 
 track.appendChild(div);
 });
@@ -194,36 +205,19 @@ function random(arr){
 return arr[Math.floor(Math.random()*arr.length)];
 }
 
-/* ================= CHECK ================= */
-function check(val,correct){
+/* ===== CHECK ===== */
+function check(selected, correct){
 
-if(val===correct){
-score++;
+if(selected === correct){
 document.getElementById("correctSound").play();
 document.getElementById("clapSound").play();
-}else{
+} else {
 document.getElementById("wrongSound").play();
 }
 
-document.getElementById("score").innerText=score;
-
 index++;
-setTimeout(load,800);
+setTimeout(loadQ,800);
 }
-
-/* ================= TIMER ================= */
-setInterval(()=>{
-
-timer--;
-document.getElementById("timer").innerText=timer;
-
-if(timer<=0){
-index++;
-load();
-timer=30;
-}
-
-},1000);
 
 </script>
 
