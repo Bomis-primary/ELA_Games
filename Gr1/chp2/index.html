@@ -16,7 +16,7 @@ body {
     min-height:100vh;
 }
 
-/* SPLASH + TITLE SCREENS */
+/* SPLASH + TITLE */
 .screen {
     position:fixed;
     top:0;left:0;
@@ -36,9 +36,10 @@ body {
 }
 
 #titleScreen h1{
-    font-size:2rem;
+    font-size:clamp(1.6rem, 3vw, 2.4rem);
     text-align:center;
     color:#4a148c;
+    padding:0 10px;
 }
 
 button {
@@ -51,38 +52,42 @@ button {
     cursor:pointer;
 }
 
-/* GAME AREA */
+/* GAME CONTAINER */
 #gameContainer {
     display:none;
     flex-direction:column;
     width:95%;
-    max-width:650px;
+    max-width:900px; /* BIGGER ON LAPTOP */
     text-align:center;
 }
 
+/* TOP BAR */
 .top-bar{
     display:flex;
     justify-content:space-between;
     font-weight:bold;
-    font-size:1rem;
+    font-size:clamp(0.9rem, 1.2vw, 1.1rem);
     margin-bottom:10px;
     color:#4a148c;
 }
 
+/* QUESTION */
 h2{
-    font-size:1.2rem;
+    font-size:clamp(1rem, 1.6vw, 1.3rem);
     margin:10px 0;
 }
 
+/* DROP ZONES */
 #zones{
     display:flex;
     justify-content:space-around;
     margin-top:20px;
+    gap:10px;
 }
 
 .zone{
     width:45%;
-    min-height:90px;
+    min-height:clamp(80px, 12vh, 120px);
     border:2px dashed #6a1b9a;
     border-radius:10px;
     background:white;
@@ -90,15 +95,16 @@ h2{
     justify-content:center;
     align-items:center;
     font-weight:bold;
-    font-size:1.1rem;
+    font-size:clamp(0.9rem, 1.4vw, 1.2rem);
 }
 
+/* WORD */
 #word{
     margin-top:25px;
-    padding:15px;
+    padding:clamp(12px, 2vw, 18px);
     border-radius:10px;
     color:white;
-    font-size:1.3rem;
+    font-size:clamp(1rem, 2vw, 1.4rem);
     display:inline-block;
     cursor:grab;
     user-select:none;
@@ -121,6 +127,27 @@ h2{
 .trophy{
     font-size:3rem;
 }
+
+/* MOBILE FIX */
+@media (max-width: 600px){
+
+    #gameContainer{
+        width:98%;
+    }
+
+    #zones{
+        flex-direction:column;
+        align-items:center;
+    }
+
+    .zone{
+        width:90%;
+    }
+
+    #word{
+        width:80%;
+    }
+}
 </style>
 </head>
 
@@ -139,6 +166,7 @@ h2{
 
 <!-- GAME -->
 <div id="gameContainer">
+
     <div class="top-bar">
         <div>Question: <span id="qNo">1</span>/15</div>
         <div>⏱ <span id="timer">30</span>s</div>
@@ -152,6 +180,7 @@ h2{
     </div>
 
     <div id="word" draggable="true"></div>
+
 </div>
 
 <!-- END SCREEN -->
@@ -174,14 +203,20 @@ let words = [
 ["teacher","common"],["apple","common"],["Ananya","proper"],["Delhi","proper"],["friend","common"]
 ];
 
-let index=0;
-let score=0;
-let timer;
-let timeLeft=30;
-
 words = words.sort(()=>Math.random()-0.5);
 
-const wordBox = document.getElementById("word");
+let index=0;
+let score=0;
+let timeLeft=30;
+let timer;
+
+const wordBox=document.getElementById("word");
+
+/* SPLASH FLOW */
+setTimeout(()=>{
+    document.getElementById("logoScreen").style.display="none";
+    document.getElementById("titleScreen").style.display="flex";
+},5000);
 
 function startGame(){
     document.getElementById("titleScreen").style.display="none";
@@ -190,12 +225,6 @@ function startGame(){
     startTimer();
 }
 
-/* SPLASH SEQUENCE */
-setTimeout(()=>{
-    document.getElementById("logoScreen").style.display="none";
-    document.getElementById("titleScreen").style.display="flex";
-},5000);
-
 /* LOAD WORD */
 function loadWord(){
     if(index>=words.length){
@@ -203,7 +232,8 @@ function loadWord(){
         return;
     }
 
-    let [w,c] = words[index];
+    let [w,c]=words[index];
+
     wordBox.textContent=w;
     wordBox.dataset.correct=c;
     wordBox.style.background=randomColor();
@@ -218,7 +248,6 @@ function startTimer(){
     timer=setInterval(()=>{
         timeLeft--;
         document.getElementById("timer").textContent=timeLeft;
-
         if(timeLeft<=0){
             nextQuestion();
         }
@@ -236,7 +265,7 @@ function nextQuestion(){
 }
 
 /* DRAG */
-wordBox.addEventListener("dragstart",(e)=>{
+wordBox.addEventListener("dragstart",e=>{
     e.dataTransfer.setData("text",wordBox.textContent);
 });
 
@@ -244,11 +273,11 @@ wordBox.addEventListener("dragstart",(e)=>{
 document.querySelectorAll(".zone").forEach(z=>{
     z.addEventListener("dragover",e=>e.preventDefault());
 
-    z.addEventListener("drop",(e)=>{
+    z.addEventListener("drop",e=>{
         e.preventDefault();
 
-        let correct = wordBox.dataset.correct;
-        let chosen = e.target.id;
+        let correct=wordBox.dataset.correct;
+        let chosen=e.target.id;
 
         if(chosen===correct){
             score++;
@@ -265,7 +294,7 @@ document.querySelectorAll(".zone").forEach(z=>{
     });
 });
 
-/* SHOW CORRECT ANSWER ON WRONG */
+/* SHOW CORRECT */
 function showCorrect(correct){
     let zone=document.getElementById(correct);
     zone.style.background="#c8e6c9";
@@ -287,31 +316,32 @@ function confetti(){
     }
 }
 
-/* END GAME */
+/* END SCREEN */
 function endGame(){
+
     clearInterval(timer);
     document.getElementById("gameContainer").style.display="none";
     document.getElementById("endScreen").style.display="flex";
 
     let trophy="🥉 Bronze";
-    let text="Let's revise and come back!";
+    let msg="Let's revise and come back!";
 
     if(score===15){
         trophy="🏆 Gold";
-        text="Excellent!";
-    } else if(score>=10){
+        msg="Excellent!";
+    } else if(score<=10){
         trophy="🥈 Silver";
-        text="Well Done!";
-    } else if(score>=5){
+        msg="Well Done!";
+    } else if(score<=5){
         trophy="🥉 Bronze";
-        text="Good Try!";
+        msg="Good Try!";
     }
 
     document.getElementById("trophy").textContent=trophy;
-    document.getElementById("resultText").textContent=`Score: ${score}/15 - ${text}`;
+    document.getElementById("resultText").textContent=`Score: ${score}/15 - ${msg}`;
 }
 
-/* COLOR */
+/* COLORS */
 function randomColor(){
     const colors=["#e91e63","#9c27b0","#3f51b5","#009688","#ff9800"];
     return colors[Math.floor(Math.random()*colors.length)];
