@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CBQ Sentence Game Slow</title>
+<title>CBQ Sentence Adventure</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -30,7 +30,7 @@ body{
     text-align:center;
     padding:12px;
     font-weight:bold;
-    background:#fff5cc;
+    background:#fff4cc;
 }
 
 /* GAME */
@@ -58,7 +58,7 @@ body{
     position:fixed;
     bottom:0;
     width:100%;
-    height:85px;
+    height:90px;
     background:white;
     border-top:2px solid #ddd;
     overflow:hidden;
@@ -67,9 +67,9 @@ body{
 /* TRACK */
 #tickerTrack{
     display:flex;
-    gap:25px; /* more spacing = easier reading */
+    gap:26px;
     width:max-content;
-    animation: scroll 20s linear infinite; /* 🔥 SLOWER SPEED */
+    animation: scroll 24s linear infinite; /* 🔥 EVEN SLOWER */
 }
 
 /* SLOW SMOOTH FLOW */
@@ -176,6 +176,7 @@ let levels=[
 let level=0;
 let correct=0;
 let wrong=0;
+let round=1;
 
 /* START */
 function startGame(){
@@ -187,10 +188,28 @@ function startGame(){
 /* LOAD LEVEL */
 function loadLevel(){
  document.getElementById("mainImg").src=levels[level].image;
+ round = 1;
+ playRound();
+}
+
+/* PLAY ROUND (TWICE) */
+function playRound(){
 
  let arr=[...levels[level].sentences].sort(()=>Math.random()-0.5);
 
  buildTicker(arr);
+
+ setTimeout(()=>{
+
+ if(round === 1){
+ round = 2;
+ playRound(); // 🔥 repeat same image again
+ }
+ else{
+ nextLevel();
+ }
+
+ },20000); /* 🔥 SLOW + CHILD FRIENDLY */
 }
 
 /* TICKER */
@@ -227,21 +246,24 @@ function buildTicker(arr){
  track.appendChild(div);
  });
 
- /* level duration increased for reading comfort */
- setTimeout(()=>{
- level++;
- if(level>=levels.length){
- endGame();
- }else{
- loadLevel();
- }
- },18000); /* 🔥 SLOWER + MORE TIME */
 }
 
 /* SCORE */
 function updateScore(){
  document.getElementById("c").innerText=correct;
  document.getElementById("w").innerText=wrong;
+}
+
+/* NEXT LEVEL */
+function nextLevel(){
+ level++;
+
+ if(level>=levels.length){
+ endGame();
+ return;
+ }
+
+ loadLevel();
 }
 
 /* END */
@@ -253,9 +275,7 @@ function endGame(){
  <button onclick="location.reload()">Play Again</button>
  </div>`;
 
- if(correct>=10){
  document.getElementById("clapSound").play();
- }
 }
 
 </script>
