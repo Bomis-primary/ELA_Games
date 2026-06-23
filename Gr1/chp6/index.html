@@ -22,7 +22,43 @@ background:white;
 display:flex;
 justify-content:center;
 align-items:center;
-z-index:2000;
+z-index:3000;
+}
+
+/* TITLE SCREEN (RESTORED) */
+#titleScreen{
+position:fixed;
+width:100%;
+height:100%;
+background:#e3f2fd;
+display:none;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+z-index:2500;
+padding:20px;
+}
+
+#titleScreen h1{
+font-size:28px;
+color:#0d47a1;
+margin-bottom:10px;
+}
+
+#titleScreen p{
+font-size:18px;
+margin-bottom:20px;
+}
+
+#startBtn{
+padding:12px 20px;
+font-size:18px;
+border:none;
+background:#0d47a1;
+color:white;
+border-radius:10px;
+cursor:pointer;
 }
 
 /* FRAME */
@@ -100,7 +136,7 @@ background:rgba(0,0,0,0.05);
 z-index:999;
 }
 
-/* RESULT SCREEN */
+/* RESULT */
 #result{
 position:absolute;
 top:40%;
@@ -121,6 +157,13 @@ text-align:center;
 <!-- SPLASH -->
 <div id="splash">
 <img src="assets/innovine-logo.png" style="width:220px;">
+</div>
+
+<!-- TITLE SCREEN (ADDED BACK) -->
+<div id="titleScreen">
+<h1>🎯 Action Word Adventure</h1>
+<p>Watch the moving pictures and choose the correct action word!</p>
+<button id="startBtn">START GAME</button>
 </div>
 
 <!-- FRAME -->
@@ -154,12 +197,12 @@ text-align:center;
 const bank=[
 {q:"The child is jumping happily.",ans:"jump_image.png"},
 {q:"The boy is running fast.",ans:"run_image.png"},
-{q:"The girl is sleeping peacefully.",ans:"sleep_image.jpg"},
+{q:"The boy is sleeping peacefully.",ans:"sleep_image.jpg"},
 {q:"The child is eating food.",ans:"eat_image.jpg"},
 {q:"The student is reading a book.",ans:"read_image.png"},
-{q:"The children are singing.",ans:"sing_image.png"},
+{q:"The girl is singing.",ans:"sing_image.png"},
 {q:"The boy is swimming.",ans:"swim_image.png"},
-{q:"The girl is walking.",ans:"walk_image.png"}
+{q:"The boy is walking.",ans:"walk_image.png"}
 ];
 
 let questions=[...bank].sort(()=>Math.random()-0.5).slice(0,10);
@@ -167,39 +210,40 @@ let questions=[...bank].sort(()=>Math.random()-0.5).slice(0,10);
 let index=0;
 let timer=30;
 let locked=false;
-let gameEnded=false;
 
-/* ================= SPLASH ================= */
+/* SCORE TRACKING */
+let firstAttemptCorrect = 0;
+let retryCorrect = 0;
+let attemptFlag = false;
+
+/* ================= FLOW FIX (RESTORED) ================= */
 setTimeout(()=>{
 document.getElementById("splash").style.display="none";
-load();
+
+setTimeout(()=>{
+document.getElementById("titleScreen").style.display="flex";
+},1000);
+
 },5000);
+
+/* START BUTTON */
+document.getElementById("startBtn").onclick=()=>{
+document.getElementById("titleScreen").style.display="none";
+load();
+};
 
 /* ================= LOAD ================= */
 function load(){
 
-if(gameEnded) return;
-
 if(index>=10){
-gameEnded=true;
-
-/* STOP TICKER */
-document.getElementById("track").innerHTML="";
-document.getElementById("question").innerText="";
-
-setTimeout(()=>{
-document.getElementById("question").innerText="🎮 GAME OVER!";
-
-setTimeout(showScoreBoard,1000);
-
-},500);
-
+showScoreBoard();
 return;
 }
 
 document.getElementById("qCount").innerText=index+1;
 timer=30;
 locked=false;
+attemptFlag=false;
 
 let q=questions[index];
 document.getElementById("question").innerText=q.q;
@@ -221,7 +265,6 @@ pool[Math.floor(Math.random()*pool.length)],
 pool[Math.floor(Math.random()*pool.length)]
 ].sort(()=>Math.random()-0.5);
 
-/* loop effect */
 let loop=[...options,...options];
 
 loop.forEach(img=>{
@@ -242,14 +285,22 @@ function check(val,correct){
 if(locked) return;
 locked=true;
 
-/* FREEZE */
 document.getElementById("freeze").style.display="block";
 
 if(val===correct){
+
 document.getElementById("correctSound").play();
 document.getElementById("clappingSound").play();
+
+if(!attemptFlag){
+firstAttemptCorrect++;
+}else{
+retryCorrect++;
+}
+
 }else{
 document.getElementById("wrongSound").play();
+attemptFlag=true;
 }
 
 setTimeout(()=>{
@@ -262,7 +313,7 @@ load();
 /* ================= TIMER ================= */
 setInterval(()=>{
 
-if(locked || gameEnded) return;
+if(locked) return;
 
 timer--;
 document.getElementById("timer").innerText=timer;
@@ -277,23 +328,23 @@ load();
 /* ================= SCOREBOARD ================= */
 function showScoreBoard(){
 
-let score=index; // completed rounds
+document.getElementById("result").style.display="block";
 
 let msg="";
 
-if(score>=8){
+if(firstAttemptCorrect>=7){
 msg="🌟 Excellent Work!";
-}
-else if(score>=5){
+}else if(firstAttemptCorrect>=5){
 msg="👍 Good Job!";
-}
-else{
+}else{
 msg="📘 Keep Practicing!";
 }
 
-document.getElementById("result").style.display="block";
 document.getElementById("result").innerHTML=
-`🎯 Score: ${score}/10<br>${msg}`;
+`🎯 GAME OVER<br><br>
+✔ First Attempt Correct: ${firstAttemptCorrect}<br>
+🔁 Retry Correct: ${retryCorrect}<br><br>
+${msg}`;
 }
 
 </script>
