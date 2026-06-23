@@ -387,8 +387,8 @@ button:active{
 
 <body>
 
-<audio id="correctSound" src="correct.mp3"></audio>
-<audio id="wrongSound" src="wrong.mp3"></audio>
+<audio id="correctSound" src="./assets/correct.mp3"></audio>
+<audio id="wrongSound" src="./assets/wrong.mp3"></audio>
 
 <div id="logoScreen" class="screen active" style="background:white">
   <img src="./assets/innovine-logo_Final.png" class="logo" alt="Innovine Logo">
@@ -473,6 +473,17 @@ setTimeout(()=>{
 },5000);
 
 function startGame(){
+  // Prime sound layers safely inside user-gesture wrapper to satisfy strict browser security engines
+  const soundA = document.getElementById("correctSound");
+  const soundB = document.getElementById("wrongSound");
+  
+  if (soundA && typeof soundA.play === 'function') {
+    soundA.play().then(() => { soundA.pause(); soundA.currentTime = 0; }).catch(() => {});
+  }
+  if (soundB && typeof soundB.play === 'function') {
+    soundB.play().then(() => { soundB.pause(); soundB.currentTime = 0; }).catch(() => {});
+  }
+
   questions=[...allQuestions].sort(()=>Math.random()-0.5).slice(0,totalQ);
   startTime=Date.now();
   startScreen.classList.remove("active");
