@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CBQ Sentence Game - Grade 2</title>
+<title>CBQ Sentence Game Fixed Flow</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -28,10 +28,9 @@ body{
 #instruction{
     display:none;
     text-align:center;
-    padding:14px;
+    padding:12px;
     font-weight:bold;
-    background:#fff7cc;
-    font-size:18px;
+    background:#fff6cc;
 }
 
 /* GAME */
@@ -42,7 +41,7 @@ body{
 
 /* IMAGE */
 #mainImg{
-    width:65%;              /* smaller = less distraction */
+    width:65%;
     max-width:550px;
     margin-top:10px;
     border-radius:12px;
@@ -54,7 +53,7 @@ body{
     font-weight:bold;
 }
 
-/* TICKER AREA */
+/* TICKER */
 #tickerContainer{
     position:fixed;
     bottom:0;
@@ -65,21 +64,19 @@ body{
     overflow:hidden;
 }
 
-/* TRACK (VERY SLOW) */
 #tickerTrack{
     display:flex;
-    gap:35px; /* more spacing for readability */
+    gap:35px;
     width:max-content;
-    animation: scroll 40s linear infinite; /* 🔥 MUCH SLOWER */
+    animation: scroll 38s linear infinite;
 }
 
-/* SCROLL */
 @keyframes scroll{
     0%{transform:translateX(100%);}
     100%{transform:translateX(-100%);}
 }
 
-/* SENTENCE CARD */
+/* SENTENCE */
 .sentence{
     display:inline-block;
     background:#fff;
@@ -87,12 +84,12 @@ body{
     border-radius:10px;
     font-size:18px;
     font-weight:bold;
-    box-shadow:0 2px 6px rgba(0,0,0,0.15);
     cursor:pointer;
     white-space:nowrap;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
 }
 
-/* HIGHLIGHTS */
+/* HIGHLIGHT */
 .correctGlow{background:#c8f7c5 !important;}
 .wrongGlow{background:#ffcccc !important;}
 
@@ -108,7 +105,7 @@ body{
 
 <!-- INSTRUCTION -->
 <div id="instruction">
-    📌 Read slowly and click only the correct sentences
+    📌 Click correct sentences while they move slowly
 </div>
 
 <!-- GAME -->
@@ -138,7 +135,7 @@ body{
 setTimeout(()=>{
     document.getElementById("splash").style.display="none";
     document.getElementById("instruction").style.display="block";
-    setTimeout(startGame,2500);
+    setTimeout(startGame,2000);
 },5000);
 
 /* DATA */
@@ -170,6 +167,7 @@ let levels=[
 ];
 
 let level=0;
+let round=1;
 let correct=0;
 let wrong=0;
 
@@ -182,21 +180,44 @@ function startGame(){
 
 /* LOAD LEVEL */
 function loadLevel(){
- document.getElementById("mainImg").src=levels[level].image;
+ document.getElementById("mainImg").src = levels[level].image;
+ round = 1;
+ playRound();
+}
+
+/* ROUND SYSTEM (FIXED FLOW) */
+function playRound(){
 
  let arr=[...levels[level].sentences]
  .sort(()=>Math.random()-0.5);
 
  buildTicker(arr);
+
+ setTimeout(()=>{
+
+ if(round === 1){
+ round = 2;
+ playRound();   // second round SAME image
+ }
+ else{
+ level++;
+
+ if(level >= levels.length){
+ endGame();
+ }else{
+ loadLevel();
+ }
+ }
+
+ },20000); // slow enough for Grade 2
 }
 
-/* BUILD TICKER */
+/* TICKER */
 function buildTicker(arr){
 
  let track=document.getElementById("tickerTrack");
  track.innerHTML="";
 
-/* duplicate for smooth continuous flow */
  let loopArr=[...arr, ...arr];
 
  loopArr.forEach(item=>{
@@ -230,6 +251,16 @@ function buildTicker(arr){
 function updateScore(){
  document.getElementById("c").innerText=correct;
  document.getElementById("w").innerText=wrong;
+}
+
+/* END */
+function endGame(){
+ document.getElementById("tickerContainer").innerHTML=
+ `<div style="padding:20px;">
+ <h2>🎉 Game Completed 🎉</h2>
+ <h3>Score: ${correct} ✔ | ${wrong} ✖</h3>
+ <button onclick="location.reload()">Play Again</button>
+ </div>`;
 }
 
 </script>
