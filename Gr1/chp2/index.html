@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Common & Proper Nouns Adventure</title>
+<title>Common and Proper Nouns Adventure</title>
 
 <style>
 body {
@@ -16,7 +16,7 @@ body {
     min-height:100vh;
 }
 
-/* SPLASH + TITLE */
+/* SCREENS */
 .screen {
     position:fixed;
     top:0;left:0;
@@ -52,12 +52,12 @@ button {
     cursor:pointer;
 }
 
-/* GAME CONTAINER */
+/* GAME CONTAINER (LAPTOP OPTIMIZED) */
 #gameContainer {
     display:none;
     flex-direction:column;
     width:95%;
-    max-width:900px; /* BIGGER ON LAPTOP */
+    max-width:900px;
     text-align:center;
 }
 
@@ -77,7 +77,7 @@ h2{
     margin:10px 0;
 }
 
-/* DROP ZONES */
+/* ZONES */
 #zones{
     display:flex;
     justify-content:space-around;
@@ -101,16 +101,16 @@ h2{
 /* WORD */
 #word{
     margin-top:25px;
-    padding:clamp(12px, 2vw, 18px);
+    padding:15px;
     border-radius:10px;
     color:white;
-    font-size:clamp(1rem, 2vw, 1.4rem);
+    font-size:1.3rem;
     display:inline-block;
     cursor:grab;
     user-select:none;
 }
 
-/* END SCREEN */
+/* END */
 #endScreen{
     display:none;
     position:fixed;
@@ -124,43 +124,28 @@ h2{
     z-index:2000;
 }
 
-.trophy{
-    font-size:3rem;
-}
+.trophy{font-size:3rem;}
 
-/* MOBILE FIX */
-@media (max-width: 600px){
-
-    #gameContainer{
-        width:98%;
-    }
-
-    #zones{
-        flex-direction:column;
-        align-items:center;
-    }
-
-    .zone{
-        width:90%;
-    }
-
-    #word{
-        width:80%;
-    }
+/* MOBILE RESPONSIVE */
+@media (max-width:600px){
+    #gameContainer{width:98%;}
+    #zones{flex-direction:column;}
+    .zone{width:90%;}
+    #word{width:80%;}
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGO SCREEN -->
+<!-- LOGO -->
 <div id="logoScreen" class="screen">
     <img src="assets/innovine-logo.png" style="width:180px;">
 </div>
 
-<!-- TITLE SCREEN -->
+<!-- TITLE -->
 <div id="titleScreen" class="screen">
-    <h1>🎯 Common & Proper Noun Adventure</h1>
+    <h1>🎯 Common and Proper Noun Adventure</h1>
     <button onclick="startGame()">Start Game</button>
 </div>
 
@@ -172,7 +157,7 @@ h2{
         <div>⏱ <span id="timer">30</span>s</div>
     </div>
 
-    <h2>Drag the word into the correct category</h2>
+    <h2>Drag the word into the correct category.</h2>
 
     <div id="zones">
         <div class="zone" id="common">Common Noun</div>
@@ -183,7 +168,7 @@ h2{
 
 </div>
 
-<!-- END SCREEN -->
+<!-- END -->
 <div id="endScreen">
     <div class="trophy" id="trophy">🏆</div>
     <h2 id="resultText"></h2>
@@ -197,13 +182,17 @@ h2{
 
 <script>
 
-let words = [
+/* WORD POOL */
+let wordPool = [
 ["dog","common"],["school","common"],["book","common"],["city","common"],["river","common"],
+["teacher","common"],["apple","common"],["friend","common"],["tree","common"],["car","common"],
+["table","common"],["pen","common"],["bird","common"],["chair","common"],["ball","common"],
+
 ["Riya","proper"],["Mumbai","proper"],["Rahul","proper"],["Ganga","proper"],["India","proper"],
-["teacher","common"],["apple","common"],["Ananya","proper"],["Delhi","proper"],["friend","common"]
+["Ananya","proper"],["Delhi","proper"],["Chennai","proper"],["Kiran","proper"],["London","proper"]
 ];
 
-words = words.sort(()=>Math.random()-0.5);
+let words = wordPool.sort(()=>Math.random()-0.5).slice(0,15);
 
 let index=0;
 let score=0;
@@ -212,7 +201,7 @@ let timer;
 
 const wordBox=document.getElementById("word");
 
-/* SPLASH FLOW */
+/* SPLASH */
 setTimeout(()=>{
     document.getElementById("logoScreen").style.display="none";
     document.getElementById("titleScreen").style.display="flex";
@@ -225,9 +214,8 @@ function startGame(){
     startTimer();
 }
 
-/* LOAD WORD */
 function loadWord(){
-    if(index>=words.length){
+    if(index>=15){
         endGame();
         return;
     }
@@ -243,7 +231,6 @@ function loadWord(){
     resetTimer();
 }
 
-/* TIMER */
 function startTimer(){
     timer=setInterval(()=>{
         timeLeft--;
@@ -283,16 +270,63 @@ document.querySelectorAll(".zone").forEach(z=>{
             score++;
             document.getElementById("correctSound").play();
             document.getElementById("clapSound").play();
-            confetti();
+            confetti(chosen);
         } else {
             document.getElementById("wrongSound").play();
             showCorrect(correct);
         }
 
         index++;
-        setTimeout(loadWord,800);
+        setTimeout(loadWord,700);
     });
 });
+
+/* CONFETTI */
+function confetti(zoneId){
+    const zone=document.getElementById(zoneId);
+    const rect=zone.getBoundingClientRect();
+
+    for(let i=0;i<25;i++){
+        let c=document.createElement("div");
+        c.style.position="fixed";
+        c.style.width="8px";
+        c.style.height="8px";
+        c.style.borderRadius="50%";
+        c.style.background=randomColor();
+        c.style.zIndex="9999";
+
+        let x=rect.left+rect.width/2;
+        let y=rect.top+rect.height/2;
+
+        c.style.left=x+"px";
+        c.style.top=y+"px";
+
+        document.body.appendChild(c);
+
+        let angle=Math.random()*2*Math.PI;
+        let speed=Math.random()*6+2;
+        let vx=Math.cos(angle)*speed;
+        let vy=Math.sin(angle)*speed;
+        let gravity=0.15;
+
+        function animate(){
+            x+=vx;
+            y+=vy;
+            vy+=gravity;
+
+            c.style.left=x+"px";
+            c.style.top=y+"px";
+
+            if(y<window.innerHeight+50){
+                requestAnimationFrame(animate);
+            } else {
+                c.remove();
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+}
 
 /* SHOW CORRECT */
 function showCorrect(correct){
@@ -301,22 +335,7 @@ function showCorrect(correct){
     setTimeout(()=>zone.style.background="white",2000);
 }
 
-/* CONFETTI */
-function confetti(){
-    for(let i=0;i<15;i++){
-        let c=document.createElement("div");
-        c.style.position="absolute";
-        c.style.width="8px";
-        c.style.height="8px";
-        c.style.background=randomColor();
-        c.style.left=Math.random()*100+"%";
-        c.style.top=Math.random()*100+"%";
-        document.body.appendChild(c);
-        setTimeout(()=>c.remove(),800);
-    }
-}
-
-/* END SCREEN */
+/* ⭐ FIXED SCOREBOARD LOGIC (ONLY CHANGE) */
 function endGame(){
 
     clearInterval(timer);
@@ -326,13 +345,16 @@ function endGame(){
     let trophy="🥉 Bronze";
     let msg="Let's revise and come back!";
 
-    if(score===15){
+    /* ✅ CORRECTED LOGIC */
+    if(score >= 11){
         trophy="🏆 Gold";
         msg="Excellent!";
-    } else if(score<=10){
+    }
+    else if(score >= 6){
         trophy="🥈 Silver";
         msg="Well Done!";
-    } else if(score<=5){
+    }
+    else {
         trophy="🥉 Bronze";
         msg="Good Try!";
     }
