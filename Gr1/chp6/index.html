@@ -2,183 +2,164 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Action Words Adventure</title>
+<title>Action Word Adventure</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* ===== ORIGINAL STYLE KEPT (UNCHANGED STRUCTURE) ===== */
-
-:root {
-    --bg-sky: #e0f2fe;
-    --slate-dark: #1e293b;
-    --clay-orange: #f97316;
+body{
+margin:0;
+font-family:Comic Sans MS;
+background:#dff3ff;
+overflow:hidden;
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    user-select: none;
-}
-
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: var(--bg-sky);
-    color: var(--slate-dark);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* SCREENS */
-.screen-layout {
-    display: none;
-    width: 100%;
-    max-width: 650px;
-    min-height: 100vh;
-    padding: 15px;
-    flex-direction: column;
-    align-items: center;
-}
-
-.active-view { display: flex !important; }
-
-/* SPLASH */
-#screen-splash {
-    position: fixed;
-    width: 100vw;
-    height: 100vh;
-    background: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-/* IMAGE AREA */
-.display-frame img {
-    width: 100%;
-    max-width: 380px;
-    max-height: 240px;
-    object-fit: contain;
+/* TOP BAR */
+#topBar{
+position:absolute;
+top:10px;
+width:100%;
+display:flex;
+justify-content:space-between;
+padding:0 20px;
+font-size:20px;
+font-weight:bold;
 }
 
 /* QUESTION */
-.question-bubble {
-    font-size: 20px;
-    font-weight: 700;
-    text-align: center;
-    margin: 10px 0;
+#question{
+position:absolute;
+top:60px;
+width:100%;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+color:#0d47a1;
 }
 
-/* CONVEYOR */
-.conveyor {
-    width: 100%;
-    overflow: hidden;
-    background: #475569;
-    border-radius: 20px;
+/* TICKER */
+#ticker{
+position:absolute;
+bottom:60px;
+width:100%;
+overflow:hidden;
+white-space:nowrap;
+background:#2c3e50;
+padding:20px 0;
 }
 
-.track {
-    display: flex;
-    width: max-content;
-    animation: scroll 18s linear infinite;
+#track{
+display:inline-block;
+white-space:nowrap;
+animation:scroll 14s linear infinite;
 }
 
-@keyframes scroll {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
+@keyframes scroll{
+from{transform:translateX(0)}
+to{transform:translateX(-50%)}
 }
 
-.choice {
-    flex-shrink: 0;
-    margin: 0 25px;
-    background: white;
-    padding: 10px;
-    border-radius: 15px;
-    cursor: pointer;
+.option{
+display:inline-block;
+margin:0 80px;
+cursor:pointer;
 }
 
-.choice img {
-    height: 90px;
+.option img{
+height:100px;
+width:100px;
+object-fit:contain;
 }
 
+/* RESULT */
+#result{
+position:absolute;
+top:40%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+padding:20px;
+border-radius:15px;
+font-size:24px;
+display:none;
+}
 </style>
 </head>
 
 <body>
 
-<!-- ===== SOUND ===== -->
-<audio id="correctSound" src="assets/correct.mp3"></audio>
-<audio id="wrongSound" src="assets/wrong.mp3"></audio>
-<audio id="clapSound" src="assets/clapping.mp3"></audio>
-
-<!-- ===== SPLASH ===== -->
-<div id="screen-splash">
-    <img src="assets/innovine-logo.png" style="width:220px;">
+<!-- TOP BAR -->
+<div id="topBar">
+<div>Q: <span id="qCount">1</span>/10</div>
+<div>⏱ <span id="timer">30</span>s</div>
 </div>
 
-<!-- ===== GAME SCREEN ===== -->
-<div id="screen-game" class="screen-layout active-view">
+<!-- QUESTION -->
+<div id="question"></div>
 
-    <div class="display-frame">
-        <img id="mainImage" src="">
-    </div>
-
-    <div class="question-bubble" id="questionText"></div>
-
-    <div class="conveyor">
-        <div class="track" id="track"></div>
-    </div>
-
+<!-- TICKER -->
+<div id="ticker">
+<div id="track"></div>
 </div>
+
+<!-- RESULT -->
+<div id="result"></div>
 
 <script>
 
-/* ===== ACTION WORD DATA ===== */
-
+/* ================= DATA ================= */
 const bank = [
-{q:"Which action shows RUNNING?", ans:"run_image.png"},
-{q:"Which action shows EATING?", ans:"eat_image.jpg"},
-{q:"Which action shows SLEEPING?", ans:"sleep_image.jpg"},
-{q:"Which action shows READING?", ans:"read_image.png"},
-{q:"Which action shows JUMPING?", ans:"jump_image.png"},
-{q:"Which action shows SINGING?", ans:"sing_image.png"},
-{q:"Which action shows SWIMMING?", ans:"swim_image.png"},
-{q:"Which action shows WALKING?", ans:"walk_image.png"}
+{q:"The child is full of energy and jumping high. What action is this?", ans:"jump_image.png"},
+{q:"The boy moves very fast across the ground. What is he doing?", ans:"run_image.png"},
+{q:"The girl is resting with eyes closed. What action is this?", ans:"sleep_image.jpg"},
+{q:"The child is enjoying food at the table. What is happening?", ans:"eat_image.jpg"},
+{q:"The student is looking at a story book carefully. What action is this?", ans:"read_image.png"},
+{q:"The children are singing together happily. What are they doing?", ans:"sing_image.png"},
+{q:"The boy is moving in water like a fish. What action is this?", ans:"swim_image.png"},
+{q:"The girl is moving step by step on the road. What is she doing?", ans:"walk_image.png"}
 ];
 
-let questions = [...bank].sort(()=>Math.random()-0.5).slice(0,8);
+let questions = [...bank].sort(()=>Math.random()-0.5).slice(0,10);
+
 let index = 0;
+let score = 0;
+let timer = 30;
 
-/* ===== START AFTER SPLASH ===== */
-setTimeout(()=>{
-    document.getElementById("screen-splash").style.display="none";
-    loadQ();
-},5000);
+/* REMOVE IMAGE REPEAT MEMORY */
+let lastOptions = [];
 
-/* ===== LOAD QUESTION ===== */
-function loadQ(){
+/* START */
+loadQuestion();
 
-if(index >= questions.length){
-    document.getElementById("questionText").innerText = "🎉 Well Done!";
-    document.getElementById("track").innerHTML="";
-    return;
+/* ================= LOAD ================= */
+function loadQuestion(){
+
+if(index >= 10){
+endGame();
+return;
 }
+
+document.getElementById("qCount").innerText = index+1;
+
+timer = 30;
 
 let q = questions[index];
+document.getElementById("question").innerText = q.q;
 
-document.getElementById("questionText").innerText = q.q;
-document.getElementById("mainImage").src = "assets/" + q.ans;
-
-loadOptions(q.ans);
+buildOptions(q.ans);
 }
 
-/* ===== OPTIONS ===== */
-function loadOptions(correct){
+/* ================= OPTIONS ================= */
+function buildOptions(correct){
 
-let pool = bank.map(x=>x.ans).filter(x=>x!==correct);
+let track = document.getElementById("track");
+track.innerHTML = "";
+
+/* prevent repetition */
+let pool = bank.map(x=>x.ans).filter(x=>x!==correct && !lastOptions.includes(x));
+
+if(pool.length < 2){
+pool = bank.map(x=>x.ans).filter(x=>x!==correct);
+}
 
 let options = [
 correct,
@@ -186,16 +167,19 @@ random(pool),
 random(pool)
 ].sort(()=>Math.random()-0.5);
 
-let track = document.getElementById("track");
-track.innerHTML="";
+/* store last set */
+lastOptions = options;
 
-options.forEach(opt=>{
+options.forEach(img=>{
 let div = document.createElement("div");
-div.className="choice";
+div.className="option";
 
-div.innerHTML = `<img src="assets/${opt}">`;
+let image = document.createElement("img");
+image.src = "assets/" + img;
 
-div.onclick = ()=>check(opt, correct);
+div.appendChild(image);
+
+div.onclick = ()=>check(img, correct);
 
 track.appendChild(div);
 });
@@ -205,18 +189,47 @@ function random(arr){
 return arr[Math.floor(Math.random()*arr.length)];
 }
 
-/* ===== CHECK ===== */
-function check(selected, correct){
+/* ================= CHECK ================= */
+function check(val, correct){
 
-if(selected === correct){
-document.getElementById("correctSound").play();
-document.getElementById("clapSound").play();
-} else {
-document.getElementById("wrongSound").play();
+if(val === correct){
+score++;
 }
 
 index++;
-setTimeout(loadQ,800);
+setTimeout(loadQuestion,600);
+}
+
+/* ================= TIMER ================= */
+setInterval(()=>{
+
+timer--;
+document.getElementById("timer").innerText = timer;
+
+if(timer <= 0){
+index++;
+loadQuestion();
+timer = 30;
+}
+
+},1000);
+
+/* ================= END ================= */
+function endGame(){
+
+let remark = "";
+
+if(score >= 8){
+remark = "🌟 Excellent!";
+} else if(score >= 5){
+remark = "👍 Good Job!";
+} else {
+remark = "📘 Keep Practicing!";
+}
+
+document.getElementById("result").style.display="block";
+document.getElementById("result").innerHTML =
+`Score: ${score}/10 <br>${remark}`;
 }
 
 </script>
