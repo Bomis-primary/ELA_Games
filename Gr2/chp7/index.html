@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Gender Noun Adventure</title>
+<title>Gender Noun Spinner Game</title>
 
 <style>
 body{
@@ -29,12 +29,12 @@ body{
 #game{
     display:none;
     text-align:center;
-    padding:15px;
+    padding:10px;
 }
 
 /* INSTRUCTION */
 #instruction{
-    background:#fff7c2;
+    background:#fff6c7;
     padding:10px;
     font-size:18px;
     border-radius:10px;
@@ -43,40 +43,59 @@ body{
 
 /* SPINNER */
 #spinner{
-    width:180px;
-    margin:10px auto;
+    width:200px;
+    margin:5px auto;
 }
 
-/* WORD BOX */
+/* WORD */
 #wordBox{
-    font-size:32px;
+    font-size:34px;
     background:white;
     display:inline-block;
-    padding:12px 20px;
+    padding:10px 20px;
     border-radius:10px;
-    margin:10px;
+    margin:8px;
 }
 
 /* BUTTONS */
 button{
     font-size:18px;
-    padding:10px 15px;
-    margin:8px;
+    padding:8px 14px;
+    margin:6px;
     border-radius:10px;
     border:none;
-}
-
-/* OPTIONS */
-.option{
-    width:70%;
-    background:#2196f3;
-    color:white;
 }
 
 /* CLASSIFY */
 .classify{
     background:#4caf50;
     color:white;
+}
+
+/* MCQ OPTIONS */
+.option{
+    width:55%;
+    background:#2196f3;
+    color:white;
+    font-size:20px;
+}
+
+/* LEVEL 2 QUESTION BOX */
+#questionBox{
+    background:white;
+    padding:15px;
+    font-size:26px;
+    border-radius:12px;
+    margin:10px;
+    font-weight:bold;
+}
+
+/* LEVEL 2 OPTIONS */
+.l2option{
+    width:60%;
+    background:#ff9800;
+    color:white;
+    font-size:20px;
 }
 
 #level2{
@@ -96,45 +115,44 @@ button{
 <!-- GAME -->
 <div id="game">
 
-    <!-- LEVEL 1 -->
-    <div id="level1">
+<!-- LEVEL 1 -->
+<div id="level1">
 
-        <div id="instruction">
-            Level 1: Spin the wheel, classify noun and find opposite.
-        </div>
-
-        <img id="spinner" src="assets/spinner.png">
-
-        <div id="wordBox">Press SPIN</div>
-
-        <br>
-
-        <button onclick="spin()">SPIN 🎡</button>
-
-        <div>
-            <button class="classify" onclick="checkGender('male')">Masculine</button>
-            <button class="classify" onclick="checkGender('female')">Feminine</button>
-        </div>
-
-        <h3>Find Opposite</h3>
-        <div id="options"></div>
-
-        <button onclick="goLevel2()" id="nextBtn" style="display:none;background:orange;">NEXT LEVEL</button>
-
+    <div id="instruction">
+        Level 1: Spin the wheel, classify noun and choose its opposite.
     </div>
 
-    <!-- LEVEL 2 -->
-    <div id="level2">
+    <img id="spinner" src="assets/spinner.png">
 
-        <div id="instruction">
-            Level 2: WHO AM I?
-        </div>
+    <div id="wordBox">Press SPIN</div>
 
-        <div id="questionBox"></div>
+    <br>
 
-        <div id="mcq"></div>
+    <button onclick="spin()">SPIN 🎡</button>
 
+    <div>
+        <button class="classify" onclick="checkGender('male')">Masculine</button>
+        <button class="classify" onclick="checkGender('female')">Feminine</button>
     </div>
+
+    <h3>Find Opposite</h3>
+    <div id="options"></div>
+
+    <button onclick="goLevel2()" id="nextBtn" style="display:none;background:orange;">NEXT LEVEL</button>
+
+</div>
+
+<!-- LEVEL 2 -->
+<div id="level2">
+
+    <div id="instruction">
+        Level 2: WHO AM I?
+    </div>
+
+    <div id="questionBox"></div>
+    <div id="mcq"></div>
+
+</div>
 
 </div>
 
@@ -149,22 +167,27 @@ setTimeout(()=>{
     document.getElementById("game").style.display="block";
 },5000);
 
-// ---------------- LEVEL 1 ----------------
+// ---------------- LEVEL 1 DATA ----------------
 
 let words = [
     {word:"king", gender:"male", opposite:"queen"},
     {word:"queen", gender:"female", opposite:"king"},
     {word:"boy", gender:"male", opposite:"girl"},
     {word:"girl", gender:"female", opposite:"boy"},
-    {word:"actor", gender:"male", opposite:"actress"},
-    {word:"actress", gender:"female", opposite:"actor"},
-    {word:"lion", gender:"male", opposite:"lioness"},
-    {word:"lioness", gender:"female", opposite:"lion"}
+    {word:"horse", gender:"male", opposite:"mare"},
+    {word:"mare", gender:"female", opposite:"horse"},
+    {word:"goose", gender:"male", opposite:"gander"},
+    {word:"gander", gender:"female", opposite:"goose"},
+    {word:"bull", gender:"male", opposite:"cow"},
+    {word:"cow", gender:"female", opposite:"bull"},
+    {word:"prince", gender:"male", opposite:"princess"},
+    {word:"princess", gender:"female", opposite:"prince"}
 ];
 
 let current = {};
 let attempts = 3;
 
+// SPIN
 function spin(){
     current = words[Math.floor(Math.random()*words.length)];
     document.getElementById("wordBox").innerText = current.word;
@@ -172,6 +195,7 @@ function spin(){
     attempts = 3;
 }
 
+// CLASSIFY
 function checkGender(choice){
     if(choice === current.gender){
         document.getElementById("correctSound").play();
@@ -188,18 +212,17 @@ function checkGender(choice){
     }
 }
 
-// MCQ opposite
+// MCQ OPPOSITE
 function generateOptions(){
 
     let correct = current.opposite;
-
-    let pool = ["queen","king","girl","boy","actress","actor","lion","lioness"];
+    let pool = ["queen","king","girl","boy","mare","horse","cow","bull","goose","gander","princess","prince"];
 
     let options = [correct];
 
     while(options.length < 3){
         let r = pool[Math.floor(Math.random()*pool.length)];
-        if(!options.includes(r)){
+        if(!options.includes(r) && r !== current.word){
             options.push(r);
         }
     }
@@ -207,16 +230,14 @@ function generateOptions(){
     options.sort(()=>Math.random()-0.5);
 
     let box = document.getElementById("options");
-    box.innerHTML = "";
+    box.innerHTML="";
 
     options.forEach(o=>{
         let btn = document.createElement("button");
         btn.className="option";
         btn.innerText=o;
 
-        btn.onclick=()=>{
-            checkOpposite(o);
-        };
+        btn.onclick=()=>checkOpposite(o);
 
         box.appendChild(btn);
     });
@@ -228,7 +249,7 @@ function checkOpposite(ans){
         document.getElementById("nextBtn").style.display="inline-block";
     }else{
         document.getElementById("wrongSound").play();
-        alert("Wrong! Try Again");
+        alert("Try Again");
     }
 }
 
@@ -241,7 +262,7 @@ function goLevel2(){
     loadLevel2();
 }
 
-// ---------------- LEVEL 2 ----------------
+// ---------------- LEVEL 2 DATA ----------------
 
 let qIndex = 0;
 let attempts2 = 3;
@@ -253,8 +274,8 @@ let questions = [
         answer:"Uncle"
     },
     {
-        q:"I am a masculine animal with a giant furry mane. King of jungle. Who am I?",
-        options:["Tiger","Lion","Leopard"],
+        q:"I am a masculine animal with a giant furry mane. I am king of jungle. Who am I?",
+        options:["Lion","Tiger","Leopard"],
         answer:"Lion"
     },
     {
@@ -304,12 +325,10 @@ function loadLevel2(){
 
     q.options.forEach(o=>{
         let btn = document.createElement("button");
-        btn.className="option";
+        btn.className="l2option";
         btn.innerText=o;
 
-        btn.onclick=()=>{
-            checkLevel2(o);
-        };
+        btn.onclick=()=>checkLevel2(o);
 
         box.appendChild(btn);
     });
@@ -332,7 +351,7 @@ function checkLevel2(ans){
             qIndex++;
             loadLevel2();
         }else{
-            alert("Try Again! Attempts left: " + attempts2);
+            alert("Try Again. Attempts left: " + attempts2);
         }
     }
 }
