@@ -5,153 +5,227 @@
 <title>Gender Noun Spinner Game</title>
 
 <style>
-body{
-    margin:0;
-    font-family: Comic Sans MS;
+body {
+    margin: 0;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
     background: url("assets/image1.png") no-repeat center center fixed;
     background-size: cover;
-    overflow:hidden;
+    overflow: hidden;
+    color: #333;
 }
 
 /* SPLASH */
-#splash{
-    position:absolute;
-    width:100%;
-    height:100%;
-    background:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:10;
+#splash {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
 }
 
-/* GAME */
-#game{
-    display:none;
-    text-align:center;
-    padding:10px;
+/* GAME CONTAINER */
+#game {
+    display: none;
+    text-align: center;
+    padding: 10px;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 /* INSTRUCTION */
-#instruction{
-    background:#fff6c7;
-    padding:10px;
-    font-size:18px;
-    border-radius:10px;
-    margin:10px;
+#instruction {
+    background: rgba(255, 246, 199, 0.95);
+    padding: 12px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 15px;
+    margin: 10px auto;
+    border: 3px solid #ff9800;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* SPINNER */
-#spinner{
-    width:200px;
-    margin:5px auto;
+/* --- THE WHEEL OF FORTUNE (DYNAMICS) --- */
+#wheel-wrapper {
+    position: relative;
+    width: 340px;
+    height: 340px;
+    margin: 20px auto;
 }
 
-/* WORD */
-#wordBox{
-    font-size:34px;
-    background:white;
-    display:inline-block;
-    padding:10px 20px;
-    border-radius:10px;
-    margin:8px;
+#wheel-outer-ring {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, #0084c2 60%, #004b7c 100%);
+    border: 10px solid #005a96;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 0 20px rgba(255,255,255,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
 }
 
-/* BUTTONS */
-button{
-    font-size:18px;
-    padding:8px 14px;
-    margin:6px;
-    border-radius:10px;
-    border:none;
+/* The actual spinning part */
+#wheel-canvas {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
 }
 
-/* CLASSIFY */
-.classify{
-    background:#4caf50;
-    color:white;
+/* Wheel Center Pin */
+#wheel-center {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, #2196f3 30%, #0d47a1 100%);
+    border: 5px solid #ffffff;
+    border-radius: 50%;
+    z-index: 3;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
+
+/* Pointer Indicator */
+#wheel-pointer {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; 
+    height: 0; 
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 30px solid #ff1744;
+    z-index: 4;
+    filter: drop-shadow(0px 4px 2px rgba(0,0,0,0.3));
+}
+
+/* WORD BOX DISPLAY */
+#wordBox {
+    font-size: 36px;
+    font-weight: bold;
+    color: #2c3e50;
+    background: white;
+    display: inline-block;
+    padding: 12px 35px;
+    border-radius: 20px;
+    margin: 10px;
+    box-shadow: 0 6px 0px #bdc3c7, 0 10px 20px rgba(0,0,0,0.15);
+    border: 2px solid #ecf0f1;
+}
+
+/* PLAYFUL 3D BUTTONS */
+button {
+    font-family: 'Comic Sans MS', sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 12px 24px;
+    margin: 8px;
+    border-radius: 18px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    box-shadow: 0 6px 0px rgba(0,0,0,0.2);
+}
+button:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0px rgba(0,0,0,0.2);
+}
+
+/* Control Buttons */
+.btn-spin { background: #e040fb; color: white; box-shadow: 0 6px 0px #aa00ff; }
+.btn-stop { background: #ff5252; color: white; box-shadow: 0 6px 0px #d50000; }
+
+/* Gender Classification */
+.classify { width: 160px; color: white; }
+.classify.male { background: #2196f3; box-shadow: 0 6px 0px #0b7dda; }
+.classify.female { background: #ff4081; box-shadow: 0 6px 0px #f50057; }
 
 /* MCQ OPTIONS */
-.option{
-    width:55%;
-    background:#2196f3;
-    color:white;
-    font-size:20px;
+.option {
+    width: 45%;
+    background: #00bcd4;
+    color: white;
+    font-size: 22px;
+    box-shadow: 0 6px 0px #008ba3;
 }
 
 /* LEVEL 2 QUESTION BOX */
-#questionBox{
-    background:white;
-    padding:15px;
-    font-size:26px;
-    border-radius:12px;
-    margin:10px;
-    font-weight:bold;
+#questionBox {
+    background: white;
+    padding: 20px;
+    font-size: 28px;
+    border-radius: 15px;
+    margin: 15px auto;
+    font-weight: bold;
+    max-width: 650px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-bottom: 5px solid #e0e0e0;
 }
 
 /* LEVEL 2 OPTIONS */
-.l2option{
-    width:60%;
-    background:#ff9800;
-    color:white;
-    font-size:20px;
+.l2option {
+    width: 55%;
+    background: #ff9800;
+    color: white;
+    font-size: 22px;
+    box-shadow: 0 6px 0px #e65100;
 }
 
-#level2{
-    display:none;
-}
-
+#level2 { display: none; }
 </style>
 </head>
 
 <body>
 
-<!-- SPLASH -->
 <div id="splash">
     <img src="assets/innovinelogo.png" width="250">
 </div>
 
-<!-- GAME -->
 <div id="game">
 
-<!-- LEVEL 1 -->
 <div id="level1">
 
     <div id="instruction">
-        Level 1: Spin the wheel, classify noun and choose its opposite.
+        Level 1: Spin the wheel, classify the noun, and choose its opposite!
     </div>
 
-    <img id="spinner" src="assets/spinner.png">
+    <div id="wheel-wrapper">
+        <div id="wheel-pointer"></div>
+        <div id="wheel-outer-ring">
+            <div id="wheel-center"></div>
+            <div id="wheel-canvas"></div>
+        </div>
+    </div>
 
-    <div id="wordBox">Press SPIN</div>
+    <div id="wordBox">Press SPIN 🎡</div>
 
     <br>
 
-    <button onclick="spin()">SPIN 🎡</button>
+    <button class="btn-spin" onclick="spin()">SPIN</button>
+    <button class="btn-stop" onclick="stopWheel()">STOP</button>
 
-    <div>
-        <button class="classify" onclick="checkGender('male')">Masculine</button>
-        <button class="classify" onclick="checkGender('female')">Feminine</button>
+    <div style="margin-top: 10px;">
+        <button class="classify male" onclick="checkGender('male')">Masculine</button>
+        <button class="classify female" onclick="checkGender('female')">Feminine</button>
     </div>
 
-    <h3>Find Opposite</h3>
+    <h3 style="color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); font-size:24px; margin-bottom:5px;">Find Opposite</h3>
     <div id="options"></div>
 
-    <button onclick="goLevel2()" id="nextBtn" style="display:none;background:orange;">NEXT LEVEL</button>
+    <button onclick="goLevel2()" id="nextBtn" style="display:none; background:#4caf50; box-shadow: 0 6px 0px #388e3c; color:white; margin-top:20px;">NEXT LEVEL ➔</button>
 
 </div>
 
-<!-- LEVEL 2 -->
 <div id="level2">
-
-    <div id="instruction">
-        Level 2: WHO AM I?
-    </div>
-
+    <div id="instruction">Level 2: WHO AM I?</div>
     <div id="questionBox"></div>
     <div id="mcq"></div>
-
 </div>
 
 </div>
@@ -162,83 +236,143 @@ button{
 
 <script>
 
-setTimeout(()=>{
-    document.getElementById("splash").style.display="none";
-    document.getElementById("game").style.display="block";
-},5000);
+setTimeout(() => {
+    document.getElementById("splash").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    renderWheel(); // Build the wheel immediately upon entry
+}, 3000);
 
 // ---------------- LEVEL 1 DATA ----------------
 
 let words = [
-    {word:"king", gender:"male", opposite:"queen"},
-    {word:"queen", gender:"female", opposite:"king"},
-    {word:"boy", gender:"male", opposite:"girl"},
-    {word:"girl", gender:"female", opposite:"boy"},
-    {word:"horse", gender:"male", opposite:"mare"},
-    {word:"mare", gender:"female", opposite:"horse"},
-    {word:"goose", gender:"male", opposite:"gander"},
-    {word:"gander", gender:"female", opposite:"goose"},
-    {word:"bull", gender:"male", opposite:"cow"},
-    {word:"cow", gender:"female", opposite:"bull"},
-    {word:"prince", gender:"male", opposite:"princess"},
-    {word:"princess", gender:"female", opposite:"prince"}
+    {word:"king", gender:"male", opposite:"queen", color: "#ff5722", visited: false},
+    {word:"queen", gender:"female", opposite:"king", color: "#e91e63", visited: false},
+    {word:"boy", gender:"male", opposite:"girl", color: "#9c27b0", visited: false},
+    {word:"girl", gender:"female", opposite:"boy", color: "#673ab7", visited: false},
+    {word:"horse", gender:"male", opposite:"mare", color: "#3f51b5", visited: false},
+    {word:"mare", gender:"female", opposite:"horse", color: "#2196f3", visited: false},
+    {word:"goose", gender:"male", opposite:"gander", color: "#00bcd4", visited: false},
+    {word:"gander", gender:"female", opposite:"goose", color: "#009688", visited: false},
+    {word:"bull", gender:"male", opposite:"cow", color: "#4caf50", visited: false},
+    {word:"cow", gender:"female", opposite:"bull", color: "#8bc34a", visited: false},
+    {word:"prince", gender:"male", opposite:"princess", color: "#ffeb3b", visited: false},
+    {word:"princess", gender:"female", opposite:"prince", color: "#ff9800", visited: false}
 ];
 
 let current = {};
 let attempts = 3;
+let currentRotation = 0;
+let isSpinning = false;
 
-// SPIN
+// Dynamic CSS Wheel Builder 
+function renderWheel() {
+    let segmentAngle = 360 / words.length;
+    let gradientParts = [];
+    
+    words.forEach((w, index) => {
+        let startAngle = index * segmentAngle;
+        let endAngle = startAngle + segmentAngle;
+        // If the word has been visited/spun already, paint it grey!
+        let sliceColor = w.visited ? "#9e9e9e" : w.color;
+        gradientParts.push(`${sliceColor} ${startAngle}deg ${endAngle}deg`);
+    });
+    
+    document.getElementById("wheel-canvas").style.background = `conic-gradient(${gradientParts.join(', ')})`;
+}
+
+// SPIN ANIMATION
 function spin(){
-    current = words[Math.floor(Math.random()*words.length)];
-    document.getElementById("wordBox").innerText = current.word;
+    if(isSpinning) return;
+    
+    // Filter out unvisited items if available, else pick any
+    let availableWords = words.filter(w => !w.visited);
+    if(availableWords.length === 0) {
+        // Reset if all words used up
+        words.forEach(w => w.visited = false);
+        availableWords = words;
+    }
+    
+    // Pick target word
+    current = availableWords[Math.floor(Math.random() * availableWords.length)];
+    let targetIndex = words.indexOf(current);
+    
+    let segmentAngle = 360 / words.length;
+    // Target the center of the selected slice
+    let targetSliceAngle = (targetIndex * segmentAngle) + (segmentAngle / 2);
+    
+    // Calculate final rotation degrees so pointer at top (0 deg) hits correctly
+    // Conic gradient maps 0deg to top, but moves clockwise. To match pointer:
+    let finalAngle = 360 - targetSliceAngle;
+    
+    // Add 4-5 full rotations for dramatic speed effect
+    currentRotation += 1440 + finalAngle - (currentRotation % 360);
+    
+    isSpinning = true;
+    let wheel = document.getElementById("wheel-canvas");
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    
+    document.getElementById("wordBox").innerText = "Spinning...";
+    
+    // Wait for transition animation to complete (4 seconds)
+    setTimeout(() => {
+        if(isSpinning) stopWheel();
+    }, 4000);
+}
+
+// STOP / LAND ON THE WORD
+function stopWheel() {
+    if(!isSpinning) return;
+    isSpinning = false;
+    
+    // Mark item as visited and re-render greyed wheel segment
+    current.visited = true;
+    renderWheel();
+    
+    document.getElementById("wordBox").innerText = current.word.toUpperCase();
     generateOptions();
     attempts = 3;
 }
 
-// CLASSIFY
+// CLASSIFY GENDER
 function checkGender(choice){
+    if(!current.word) return alert("Spin the wheel first!");
     if(choice === current.gender){
         document.getElementById("correctSound").play();
-        alert("Correct!");
+        alert("Great job! That's correct.");
     }else{
         attempts--;
         document.getElementById("wrongSound").play();
-
-        if(attempts<=0){
+        if(attempts <= 0){
             alert("Correct Answer: " + current.gender);
         }else{
-            alert("Try Again. Attempts left: " + attempts);
+            alert("Try Again! Attempts left: " + attempts);
         }
     }
 }
 
-// MCQ OPPOSITE
+// MCQ OPPOSITE GENERATION
 function generateOptions(){
-
     let correct = current.opposite;
     let pool = ["queen","king","girl","boy","mare","horse","cow","bull","goose","gander","princess","prince"];
-
     let options = [correct];
 
     while(options.length < 3){
-        let r = pool[Math.floor(Math.random()*pool.length)];
+        let r = pool[Math.floor(Math.random() * pool.length)];
         if(!options.includes(r) && r !== current.word){
             options.push(r);
         }
     }
 
-    options.sort(()=>Math.random()-0.5);
+    options.sort(() => Math.random() - 0.5);
 
     let box = document.getElementById("options");
-    box.innerHTML="";
+    box.innerHTML = "";
 
-    options.forEach(o=>{
+    options.forEach(o => {
         let btn = document.createElement("button");
-        btn.className="option";
-        btn.innerText=o;
-
-        btn.onclick=()=>checkOpposite(o);
-
+        btn.className = "option";
+        btn.innerText = o.charAt(0).toUpperCase() + o.slice(1);
+        btn.onclick = () => checkOpposite(o);
         box.appendChild(btn);
     });
 }
@@ -246,98 +380,59 @@ function generateOptions(){
 function checkOpposite(ans){
     if(ans === current.opposite){
         document.getElementById("correctSound").play();
-        document.getElementById("nextBtn").style.display="inline-block";
+        document.getElementById("nextBtn").style.display = "inline-block";
     }else{
         document.getElementById("wrongSound").play();
-        alert("Try Again");
+        alert("Try Again!");
     }
 }
 
 // ---------------- LEVEL SWITCH ----------------
-
 function goLevel2(){
-    document.getElementById("level1").style.display="none";
-    document.getElementById("spinner").style.display="none";
-    document.getElementById("level2").style.display="block";
+    document.getElementById("level1").style.display = "none";
+    document.getElementById("level2").style.display = "block";
     loadLevel2();
 }
 
 // ---------------- LEVEL 2 DATA ----------------
-
 let qIndex = 0;
 let attempts2 = 3;
-
 let questions = [
-    {
-        q:"I am masculine. I am your parent's brother. Who am I?",
-        options:["Uncle","Father","Brother"],
-        answer:"Uncle"
-    },
-    {
-        q:"I am a masculine animal with a giant furry mane. I am king of jungle. Who am I?",
-        options:["Lion","Tiger","Leopard"],
-        answer:"Lion"
-    },
-    {
-        q:"I am feminine. I give milk and say moo. Who am I?",
-        options:["Cow","Goat","Buffalo"],
-        answer:"Cow"
-    },
-    {
-        q:"I am feminine. I am your father's daughter. Who am I?",
-        options:["Sister","Aunt","Mother"],
-        answer:"Sister"
-    },
-    {
-        q:"I am feminine. I wear a crown and rule a kingdom. Who am I?",
-        options:["Queen","Princess","Lady"],
-        answer:"Queen"
-    },
-    {
-        q:"I am a boy. My aunt and uncle love me. Who am I?",
-        options:["Boy","Son","Cousin"],
-        answer:"Boy"
-    },
-    {
-        q:"I am a male chicken. I say cock-a-doodle-doo. Who am I?",
-        options:["Hen","Rooster","Duck"],
-        answer:"Rooster"
-    }
+    { q:"I am masculine. I am your parent's brother. Who am I?", options:["Uncle","Father","Brother"], answer:"Uncle" },
+    { q:"I am a masculine animal with a giant furry mane. I am king of the jungle. Who am I?", options:["Lion","Tiger","Leopard"], answer:"Lion" },
+    { q:"I am feminine. I give milk and say moo. Who am I?", options:["Cow","Goat","Buffalo"], answer:"Cow" },
+    { q:"I am feminine. I am your father's daughter. Who am I?", options:["Sister","Aunt","Mother"], answer:"Sister" },
+    { q:"I am feminine. I wear a crown and rule a kingdom. Who am I?", options:["Queen","Princess","Lady"], answer:"Queen" },
+    { q:"I am a boy. My aunt and uncle love me. Who am I?", options:["Boy","Son","Cousin"], answer:"Boy" },
+    { q:"I am a male chicken. I say cock-a-doodle-doo. Who am I?", options:["Hen","Rooster","Duck"], answer:"Rooster" }
 ];
 
 function loadLevel2(){
-
     if(qIndex >= questions.length){
-        document.getElementById("questionBox").innerHTML="🎉 Level Complete!";
-        document.getElementById("mcq").innerHTML="";
+        document.getElementById("questionBox").innerHTML = "🎉 Level Complete!";
+        document.getElementById("mcq").innerHTML = "";
         document.getElementById("clapSound").play();
         return;
     }
 
     attempts2 = 3;
-
     let q = questions[qIndex];
-
     document.getElementById("questionBox").innerText = q.q;
 
     let box = document.getElementById("mcq");
-    box.innerHTML="";
+    box.innerHTML = "";
 
-    q.options.forEach(o=>{
+    q.options.forEach(o => {
         let btn = document.createElement("button");
-        btn.className="l2option";
-        btn.innerText=o;
-
-        btn.onclick=()=>checkLevel2(o);
-
+        btn.className = "l2option";
+        btn.innerText = o;
+        btn.onclick = () => checkLevel2(o);
         box.appendChild(btn);
     });
 }
 
 function checkLevel2(ans){
-
     let correct = questions[qIndex].answer;
-
     if(ans === correct){
         document.getElementById("correctSound").play();
         qIndex++;
@@ -345,8 +440,7 @@ function checkLevel2(ans){
     }else{
         attempts2--;
         document.getElementById("wrongSound").play();
-
-        if(attempts2<=0){
+        if(attempts2 <= 0){
             alert("Correct Answer: " + correct);
             qIndex++;
             loadLevel2();
@@ -355,7 +449,6 @@ function checkLevel2(ans){
         }
     }
 }
-
 </script>
 
 </body>
