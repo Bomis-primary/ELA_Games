@@ -3,245 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dino Word Trail - Grade 1</title>
+<title>Name Place Animal Thing - Board Game</title>
 
 <style>
 *{box-sizing:border-box}
-
 body{
   margin:0;
-  font-family:Arial, sans-serif;
-  background:linear-gradient(#9ee8ff,#ffe7a8);
-  color:#17312b;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(#b9efe8,#fff1a8);
   text-align:center;
+  color:#102b24;
 }
-
 .screen{display:none;min-height:100vh;padding:16px}
 .active{display:block}
-
-.splash-logo{
-  max-width:320px;
-  width:80%;
-  height:auto;
-  margin-top:32vh;
-}
+.splash-logo{max-width:320px;width:80%;margin-top:32vh}
 
 .card{
-  max-width:850px;
-  margin:18px auto;
-  background:#fff;
-  border-radius:24px;
-  padding:20px;
-  box-shadow:0 6px 18px #0003;
+  max-width:850px;margin:20px auto;background:white;border-radius:24px;
+  padding:22px;box-shadow:0 8px 20px #0003;
 }
-
-h1{font-size:32px;margin:8px 0}
-h2{margin:8px 0}
-
 button{
-  border:0;
-  border-radius:16px;
-  padding:12px 18px;
-  font-size:18px;
-  font-weight:bold;
-  background:#ffd447;
-  box-shadow:0 5px 0 #b88900;
-  cursor:pointer;
-  margin:5px;
+  border:0;border-radius:16px;padding:12px 20px;margin:5px;
+  font-size:18px;font-weight:bold;background:#ffd447;
+  box-shadow:0 5px 0 #b88900;cursor:pointer;
 }
-
-button:active{
-  transform:translateY(3px);
-  box-shadow:0 2px 0 #b88900;
-}
-
-button:disabled{opacity:.5;cursor:not-allowed}
-
-.avatar-btn{
-  font-size:40px;
-  background:#e8f7ff;
-  box-shadow:0 4px 0 #75a7c9;
-}
-
-.instructions{
-  text-align:left;
-  font-size:18px;
-  line-height:1.5;
-}
-
-.game-wrap{
-  max-width:1000px;
-  margin:auto;
-}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 #b88900}
+.avatar-btn{font-size:40px;background:#e8f7ff;box-shadow:0 4px 0 #75a7c9}
 
 .topbar{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:8px;
-  margin-bottom:10px;
+  display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;
 }
-
 .stat{
-  background:#fff;
-  border-radius:14px;
-  padding:8px;
-  font-weight:bold;
+  background:white;border-radius:14px;padding:8px 12px;font-weight:bold;
   box-shadow:0 3px 8px #0002;
 }
 
-.progress-box{
-  background:#fff;
-  border-radius:20px;
-  padding:8px;
-  margin:8px 0 12px;
-}
-
-.progress-bg{
-  height:18px;
-  background:#ddeee0;
-  border-radius:20px;
-  overflow:hidden;
-}
-
-.progress-fill{
-  height:100%;
-  width:0%;
-  background:#36a852;
-  transition:.3s;
-}
-
-.board-shell{
-  width:100%;
-  overflow:auto;
-  margin-top:12px;
-}
-
+.board-wrap{width:100%;overflow:auto}
 .board{
   position:relative;
-  width:900px;
-  height:1080px;
-  margin:auto;
-  border:8px solid #1e3328;
-  border-radius:18px;
+  width:1000px;
+  height:720px;
+  margin:10px auto;
   background:
-    radial-gradient(circle at 16% 18%, #bce9ff 0 8%, transparent 9%),
-    radial-gradient(circle at 72% 32%, #d7b177 0 12%, transparent 13%),
-    radial-gradient(circle at 32% 70%, #f26f4b 0 13%, transparent 14%),
-    radial-gradient(circle at 72% 78%, #78c875 0 20%, transparent 21%),
-    linear-gradient(160deg,#8ed1b2 0 24%,#f3c27e 25% 44%,#ffb3a5 45% 63%,#9bcf87 64% 100%);
-  box-shadow:0 8px 22px #0004;
-  overflow:hidden;
+    radial-gradient(circle at center,#fff8dc 0 27%,transparent 28%),
+    radial-gradient(circle at 20% 30%,#75c990 0 12%,transparent 13%),
+    radial-gradient(circle at 75% 75%,#76c88b 0 16%,transparent 17%),
+    linear-gradient(145deg,#58ad70,#91d59a);
+  border:8px solid #225c38;
+  border-radius:30px;
+  box-shadow:0 8px 25px #0004;
 }
-
-.scene{
-  position:absolute;
-  font-size:50px;
-  opacity:.9;
-  pointer-events:none;
-}
-
-.waterfall{left:28px;top:80px}
-.tree1{left:210px;top:80px}
-.tree2{right:115px;bottom:250px}
-.volcano{left:80px;top:570px;font-size:70px}
-.skull{right:220px;top:305px;font-size:86px}
-.longdino{left:400px;bottom:95px;font-size:105px}
-.meteor{right:65px;top:80px;font-size:70px}
-.clouds{left:355px;top:470px;font-size:70px}
-.river{left:365px;bottom:8px;font-size:70px}
-.birds{left:120px;top:520px;font-size:44px}
 
 .tile{
   position:absolute;
-  width:118px;
-  min-height:72px;
+  width:112px;
+  height:78px;
   border-radius:18px;
-  background:#d9f5c5;
-  border:4px solid #163826;
+  border:4px solid #214b32;
+  background:#d8f8ce;
+  box-shadow:5px 5px 0 #0007;
   display:flex;
   align-items:center;
   justify-content:center;
   flex-direction:column;
+  font-size:14px;
   font-weight:bold;
-  font-size:15px;
-  padding:6px;
-  box-shadow:6px 6px 0 #0008;
+  padding:5px;
 }
-
-.tile.question{background:#d8f6c8}
-.tile.special{background:#ffe1a0}
-.tile.start,.tile.finish{background:#ddd;font-size:20px}
+.special{background:#ffe1a0}
+.start,.finish{background:#ddd;font-size:18px}
 
 .player{
   position:absolute;
-  right:-7px;
+  right:-8px;
   bottom:-12px;
-  font-size:34px;
-  animation:bounce .8s infinite alternate;
+  font-size:32px;
+  animation:bounce .7s infinite alternate;
 }
+@keyframes bounce{to{transform:translateY(-7px)}}
 
-@keyframes bounce{
-  from{transform:translateY(0)}
-  to{transform:translateY(-7px)}
-}
-
-.panel{
+.center-panel{
+  position:absolute;
+  left:250px;
+  top:210px;
+  width:500px;
+  min-height:270px;
   background:white;
-  border-radius:20px;
-  margin:14px auto;
-  padding:15px;
-  max-width:780px;
-  box-shadow:0 4px 14px #0002;
+  border:6px solid #225c38;
+  border-radius:28px;
+  padding:18px;
+  box-shadow:0 8px 20px #0004;
 }
-
 .options{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
-
 .option{
   background:#e7f5ff;
   border:3px solid #7ab7df;
   box-shadow:none;
-  font-size:18px;
 }
+.correct{background:#b8f7bf!important}
+.wrong{background:#ffc8c8!important}
+#message{font-size:20px;font-weight:bold;min-height:28px}
 
-.correct{
-  background:#b8f7bf!important;
-  border-color:#26a641!important;
+.progress-box{
+  max-width:900px;margin:8px auto;background:white;border-radius:20px;padding:8px;
 }
-
-.wrong{
-  background:#ffc8c8!important;
-  border-color:#d44040!important;
-}
-
-#message{
-  min-height:30px;
-  font-weight:bold;
-  font-size:20px;
-}
-
-.confetti{
-  font-size:42px;
-  animation:pop 1s infinite alternate;
-}
-
-@keyframes pop{
-  from{transform:scale(1)}
-  to{transform:scale(1.15)}
-}
+.progress-bg{height:18px;background:#ddeee0;border-radius:20px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:#36a852;transition:.3s}
 
 @media(max-width:700px){
-  .topbar{grid-template-columns:repeat(2,1fr)}
-  .board{
-    width:900px;
-    height:1080px;
-    transform-origin:top left;
-  }
-  .options{grid-template-columns:1fr}
-  h1{font-size:25px}
+  .board{width:1000px;height:720px}
+  .center-panel{left:250px;top:210px}
 }
 </style>
 </head>
@@ -249,23 +124,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <body>
 
 <div id="splash" class="screen active">
-  <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo">
+  <img src="assets/innovine-logo.png" class="splash-logo" alt="Innovine Logo">
 </div>
 
 <div id="instructions" class="screen">
   <div class="card">
-    <h1>🦕 Dino Word Trail</h1>
+    <h1>🦕 Word Trail</h1>
     <h2>Name, Place, Animal, Thing</h2>
-
-    <div class="instructions">
-      <p>🎲 Roll the dice and move along the stone path.</p>
-      <p>🧠 Answer when you land on a word tile.</p>
-      <p>✅ Correct answer gives 1 point.</p>
-      <p>🔁 You get 2 tries for each question.</p>
-      <p>💡 After 2 wrong tries, the answer is shown.</p>
-      <p>🏁 Reach FINISH to complete the game.</p>
-    </div>
-
+    <p>🎲 Roll the dice and move around the board.</p>
+    <p>🧠 Answer the question in the middle.</p>
+    <p>✅ Correct answer gives 1 point.</p>
+    <p>🔁 You get 2 tries.</p>
     <h2>Choose your player</h2>
     <button class="avatar-btn" onclick="chooseAvatar('🦖')">🦖</button>
     <button class="avatar-btn" onclick="chooseAvatar('🚶')">🚶</button>
@@ -274,45 +143,37 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 
 <div id="game" class="screen">
-  <div class="game-wrap">
-    <h1>🦕 Dino Word Trail</h1>
+  <h1>🦕 Word Trail</h1>
 
-    <div class="topbar">
-      <div class="stat">🎲 Dice: <span id="dice">-</span></div>
-      <div class="stat">⭐ Score: <span id="score">0</span></div>
-      <div class="stat">📍 Tile: <span id="pos">Start</span></div>
-      <div class="stat">🧠 Q: <span id="qcount">0</span></div>
-      <div class="stat"><button onclick="toggleMute()" id="muteBtn">🔊 Sound</button></div>
-    </div>
-
-    <div class="progress-box">
-      <div class="progress-bg">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-    </div>
-
+  <div class="topbar">
+    <div class="stat">🎲 Dice: <span id="dice">-</span></div>
+    <div class="stat">⭐ Score: <span id="score">0</span></div>
+    <div class="stat">📍 Tile: <span id="pos">Start</span></div>
+    <div class="stat">🧠 Q: <span id="qcount">0</span></div>
     <button onclick="rollDice()" id="rollBtn">Roll Dice</button>
     <button onclick="startGame()">Restart</button>
+    <button onclick="toggleMute()" id="muteBtn">🔊 Sound</button>
+  </div>
 
-    <div class="board-shell">
-      <div id="board" class="board"></div>
-    </div>
+  <div class="progress-box"><div class="progress-bg"><div class="progress-fill" id="progressFill"></div></div></div>
 
-    <div class="panel" id="questionPanel" style="display:none">
-      <h2 id="questionText"></h2>
-      <p id="hintText"></p>
-      <div class="options" id="options"></div>
-      <p id="message"></p>
+  <div class="board-wrap">
+    <div class="board" id="board">
+      <div class="center-panel" id="questionPanel">
+        <h2 id="questionText">Roll the dice to begin!</h2>
+        <p id="hintText"></p>
+        <div class="options" id="options"></div>
+        <p id="message"></p>
+      </div>
     </div>
   </div>
 </div>
 
 <div id="end" class="screen">
   <div class="card">
-    <div class="confetti">🎉 ⭐ 🏆 ⭐ 🎉</div>
-    <h1>Well Done!</h1>
+    <h1>🎉 Well Done!</h1>
     <h2>You reached FINISH!</h2>
-    <p>Your Score: <b><span id="finalScore"></span></b></p>
+    <p>Score: <b><span id="finalScore"></span></b></p>
     <p>Questions Answered: <b><span id="finalQuestions"></span></b></p>
     <button onclick="showScreen('instructions')">Play Again</button>
   </div>
@@ -323,312 +184,215 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <audio id="clapSound" src="assets/clapping.mp3"></audio>
 
 <script>
-const questionBank = [
-  {q:"Dog belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It is a living creature."},
-  {q:"Riya belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person's name."},
-  {q:"School belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"We go there to learn."},
-  {q:"Pencil belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We write with it."},
-  {q:"Cat belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It says meow."},
-  {q:"Aman belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a boy's name."},
-  {q:"Park belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"Children play there."},
-  {q:"Book belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We read it."},
-  {q:"Lion belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It is a wild animal."},
-  {q:"Sita belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person's name."},
-  {q:"Zoo belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"Many animals live there."},
-  {q:"Chair belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We sit on it."},
-  {q:"Elephant belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It has a trunk."},
-  {q:"Tina belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person's name."},
-  {q:"Home belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"We live there."},
-  {q:"Ball belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We play with it."},
-  {q:"Fish belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It lives in water."},
-  {q:"Ravi belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person's name."},
-  {q:"Mumbai belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"It is a city."},
-  {q:"Table belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We keep things on it."},
-  {q:"Goat belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It is an animal."},
-  {q:"Neha belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person's name."},
-  {q:"Garden belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"It is somewhere we can go."},
-  {q:"Cup belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We drink from it."}
+const questionBank=[
+{q:"Dog belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It is a living creature."},
+{q:"Riya belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person’s name."},
+{q:"School belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"We go there to learn."},
+{q:"Pencil belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We write with it."},
+{q:"Cat belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It says meow."},
+{q:"Aman belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a boy’s name."},
+{q:"Park belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"Children play there."},
+{q:"Book belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We read it."},
+{q:"Lion belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It is a wild animal."},
+{q:"Sita belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person’s name."},
+{q:"Zoo belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"Many animals live there."},
+{q:"Chair belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We sit on it."},
+{q:"Elephant belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It has a trunk."},
+{q:"Tina belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person’s name."},
+{q:"Home belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"We live there."},
+{q:"Ball belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We play with it."},
+{q:"Fish belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It lives in water."},
+{q:"Ravi belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person’s name."},
+{q:"Mumbai belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"It is a city."},
+{q:"Table belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We keep things on it."},
+{q:"Goat belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It is an animal."},
+{q:"Neha belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person’s name."},
+{q:"Garden belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"It is somewhere we can go."},
+{q:"Cup belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We drink from it."},
+{q:"Tiger belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It is a wild animal."},
+{q:"Meena belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person’s name."},
+{q:"Delhi belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"It is a city."},
+{q:"Bag belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We carry books in it."}
 ];
 
-const specials = [
-  {text:"Move Ahead 2",emoji:"🚀",type:"ahead",value:2},
-  {text:"Go Back 2",emoji:"⏪",type:"back",value:2},
-  {text:"Jump Ahead 3",emoji:"🦘",type:"ahead",value:3},
-  {text:"Miss Turn",emoji:"😴",type:"miss",value:1},
-  {text:"Bonus Point",emoji:"🎁",type:"bonus",value:1}
+const specials=[
+{text:"Move Ahead 2",emoji:"🚀",type:"ahead",value:2},
+{text:"Go Back 2",emoji:"⏪",type:"back",value:2},
+{text:"Jump Ahead 3",emoji:"🦘",type:"ahead",value:3},
+{text:"Miss Turn",emoji:"😴",type:"miss",value:1},
+{text:"Bonus Point",emoji:"🎁",type:"bonus",value:1}
 ];
 
-const path = [
-  {x:22,y:26},   {x:170,y:38},  {x:318,y:38},  {x:466,y:38},  {x:614,y:38},
-  {x:748,y:92},  {x:758,y:210}, {x:758,y:328}, {x:758,y:446}, {x:620,y:432},
-  {x:482,y:432}, {x:344,y:432}, {x:206,y:432}, {x:70,y:340},  {x:70,y:460},
-  {x:70,y:580},  {x:70,y:700},  {x:70,y:820},  {x:210,y:940}, {x:350,y:940}
+const path=[
+{x:30,y:25},{x:150,y:25},{x:270,y:25},{x:390,y:25},{x:510,y:25},{x:630,y:25},{x:750,y:25},{x:865,y:25},
+{x:865,y:125},{x:865,y:225},{x:865,y:325},{x:865,y:425},{x:865,y:525},{x:865,y:620},
+{x:750,y:620},{x:630,y:620},{x:510,y:620},{x:390,y:620},{x:270,y:620},{x:150,y:620},{x:30,y:620},
+{x:30,y:525},{x:30,y:425},{x:30,y:325},{x:30,y:225},{x:30,y:125},
+{x:150,y:125},{x:270,y:125},{x:390,y:125},{x:510,y:125}
 ];
 
-let tiles = [];
-let playerPos = 0;
-let score = 0;
-let qAnswered = 0;
-let currentQuestion = null;
-let attempts = 0;
-let missTurn = false;
-let locked = false;
-let muted = false;
-let avatar = "🦖";
+let tiles=[],playerPos=0,score=0,qAnswered=0,currentQuestion=null,attempts=0;
+let missTurn=false,locked=false,muted=false,avatar="🦖";
 
-setTimeout(() => showScreen("instructions"), 5000);
+setTimeout(()=>showScreen("instructions"),5000);
 
 function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-function chooseAvatar(a){
-  avatar = a;
-  startGame();
-}
-
-function shuffle(arr){
-  return [...arr].sort(() => Math.random() - 0.5);
-}
+function chooseAvatar(a){avatar=a;startGame();}
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5);}
 
 function startGame(){
-  playerPos = 0;
-  score = 0;
-  qAnswered = 0;
-  attempts = 0;
-  missTurn = false;
-  locked = false;
-
-  const selectedQuestions = shuffle(questionBank).slice(0,13).map(q => ({...q,tileType:"question"}));
-  const selectedSpecials = shuffle(specials).slice(0,5).map(s => ({...s,tileType:"special"}));
-
-  tiles = [
+  playerPos=0;score=0;qAnswered=0;attempts=0;missTurn=false;locked=false;
+  const selectedQuestions=shuffle(questionBank).slice(0,23).map(q=>({...q,tileType:"question"}));
+  const selectedSpecials=shuffle(specials).slice(0,5).map(s=>({...s,tileType:"special"}));
+  tiles=[
     {text:"START",emoji:"🏁",tileType:"start"},
     ...shuffle([...selectedQuestions,...selectedSpecials]),
     {text:"FINISH",emoji:"🏆",tileType:"finish"}
   ];
-
-  document.getElementById("questionPanel").style.display = "none";
-  document.getElementById("dice").textContent = "-";
-
-  renderBoard();
-  updateStats();
-  showScreen("game");
+  document.getElementById("dice").textContent="-";
+  document.getElementById("questionText").textContent="Roll the dice to begin!";
+  document.getElementById("hintText").textContent="";
+  document.getElementById("options").innerHTML="";
+  document.getElementById("message").textContent="";
+  renderBoard();updateStats();showScreen("game");
 }
 
 function renderBoard(){
-  const board = document.getElementById("board");
-  board.innerHTML = "";
+  const board=document.getElementById("board");
+  [...board.querySelectorAll(".tile")].forEach(t=>t.remove());
 
-  const sceneItems = [
-    ["🌊","scene waterfall"],
-    ["🌴","scene tree1"],
-    ["🌳","scene tree2"],
-    ["🌋","scene volcano"],
-    ["💀","scene skull"],
-    ["🦕","scene longdino"],
-    ["☄️","scene meteor"],
-    ["☁️","scene clouds"],
-    ["🌊","scene river"],
-    ["🦅","scene birds"]
-  ];
+  tiles.forEach((tile,i)=>{
+    const div=document.createElement("div");
+    div.className="tile "+tile.tileType;
+    div.style.left=path[i].x+"px";
+    div.style.top=path[i].y+"px";
 
-  sceneItems.forEach(item => {
-    const div = document.createElement("div");
-    div.className = item[1];
-    div.textContent = item[0];
-    board.appendChild(div);
-  });
+    if(tile.tileType==="question") div.innerHTML=`<div>🧠</div><div>Word Tile</div>`;
+    else div.innerHTML=`<div>${tile.emoji}</div><div>${tile.text}</div>`;
 
-  tiles.forEach((tile,i) => {
-    const div = document.createElement("div");
-    div.className = "tile " + tile.tileType;
-    div.style.left = path[i].x + "px";
-    div.style.top = path[i].y + "px";
-
-    if(tile.tileType === "question"){
-      div.innerHTML = `<div>🧠</div><div>Word Tile</div>`;
-    } else {
-      div.innerHTML = `<div>${tile.emoji}</div><div>${tile.text}</div>`;
-    }
-
-    if(i === playerPos){
-      const p = document.createElement("div");
-      p.className = "player";
-      p.textContent = avatar;
+    if(i===playerPos){
+      const p=document.createElement("div");
+      p.className="player";
+      p.textContent=avatar;
       div.appendChild(p);
     }
-
     board.appendChild(div);
   });
 }
 
 function updateStats(){
-  document.getElementById("score").textContent = score;
-  document.getElementById("qcount").textContent = qAnswered;
-  document.getElementById("pos").textContent =
-    playerPos === 0 ? "Start" : playerPos === tiles.length - 1 ? "Finish" : playerPos;
-
-  document.getElementById("progressFill").style.width =
-    ((playerPos / (tiles.length - 1)) * 100) + "%";
+  document.getElementById("score").textContent=score;
+  document.getElementById("qcount").textContent=qAnswered;
+  document.getElementById("pos").textContent=playerPos===0?"Start":playerPos===tiles.length-1?"Finish":playerPos;
+  document.getElementById("progressFill").style.width=((playerPos/(tiles.length-1))*100)+"%";
 }
 
 function rollDice(){
-  if(locked) return;
-
+  if(locked)return;
   if(missTurn){
-    missTurn = false;
+    missTurn=false;
     showMessage("😴 You missed this turn. Roll again!");
     return;
   }
-
-  const dice = Math.floor(Math.random() * 6) + 1;
-  document.getElementById("dice").textContent = dice;
-
-  playerPos += dice;
-
-  if(playerPos >= tiles.length - 1){
-    finishGame();
-    return;
-  }
-
-  renderBoard();
-  updateStats();
-  handleTile();
+  const dice=Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").textContent=dice;
+  playerPos+=dice;
+  if(playerPos>=tiles.length-1){finishGame();return;}
+  renderBoard();updateStats();handleTile();
 }
 
 function handleTile(){
-  const tile = tiles[playerPos];
-
-  if(tile.tileType === "question"){
-    showQuestion(tile);
-  }
-
-  if(tile.tileType === "special"){
-    locked = true;
-    document.getElementById("questionPanel").style.display = "block";
-    document.getElementById("questionText").textContent = tile.emoji + " " + tile.text;
-    document.getElementById("hintText").textContent = "";
-    document.getElementById("options").innerHTML = "";
-    document.getElementById("message").textContent = "Special tile activated!";
-
-    setTimeout(() => {
-      if(tile.type === "ahead") playerPos += tile.value;
-      if(tile.type === "back") playerPos -= tile.value;
-      if(tile.type === "miss") missTurn = true;
-      if(tile.type === "bonus") score += tile.value;
-
-      if(playerPos < 0) playerPos = 0;
-
-      if(playerPos >= tiles.length - 1){
-        finishGame();
-        return;
-      }
-
-      locked = false;
-      document.getElementById("questionPanel").style.display = "none";
-      renderBoard();
-      updateStats();
-    }, 1200);
+  const tile=tiles[playerPos];
+  if(tile.tileType==="question")showQuestion(tile);
+  if(tile.tileType==="special"){
+    locked=true;
+    showMessage(tile.emoji+" "+tile.text);
+    document.getElementById("message").textContent="Special tile activated!";
+    setTimeout(()=>{
+      if(tile.type==="ahead")playerPos+=tile.value;
+      if(tile.type==="back")playerPos-=tile.value;
+      if(tile.type==="miss")missTurn=true;
+      if(tile.type==="bonus")score+=tile.value;
+      if(playerPos<0)playerPos=0;
+      if(playerPos>=tiles.length-1){finishGame();return;}
+      locked=false;renderBoard();updateStats();
+      showMessage("Roll again!");
+    },1200);
   }
 }
 
 function showQuestion(q){
-  locked = true;
-  currentQuestion = q;
-  attempts = 0;
-
-  document.getElementById("questionPanel").style.display = "block";
-  document.getElementById("questionText").textContent = q.q;
-  document.getElementById("hintText").textContent = "";
-  document.getElementById("message").textContent = "";
-
-  const box = document.getElementById("options");
-  box.innerHTML = "";
-
-  shuffle(q.o).forEach(opt => {
-    const btn = document.createElement("button");
-    btn.className = "option";
-    btn.textContent = opt;
-    btn.onclick = () => checkAnswer(btn,opt);
+  locked=true;currentQuestion=q;attempts=0;
+  document.getElementById("questionText").textContent=q.q;
+  document.getElementById("hintText").textContent="";
+  document.getElementById("message").textContent="";
+  const box=document.getElementById("options");
+  box.innerHTML="";
+  shuffle(q.o).forEach(opt=>{
+    const btn=document.createElement("button");
+    btn.className="option";
+    btn.textContent=opt;
+    btn.onclick=()=>checkAnswer(btn,opt);
     box.appendChild(btn);
   });
 }
 
 function checkAnswer(btn,answer){
-  if(answer === currentQuestion.a){
+  if(answer===currentQuestion.a){
     btn.classList.add("correct");
-    score++;
-    qAnswered++;
+    score++;qAnswered++;
     playSound("rightSound");
-    document.getElementById("message").textContent = "✅ Correct!";
+    document.getElementById("message").textContent="✅ Correct!";
     disableOptions();
-
-    setTimeout(() => {
-      locked = false;
-      document.getElementById("questionPanel").style.display = "none";
-      updateStats();
-    }, 1000);
-  } else {
+    setTimeout(()=>{locked=false;updateStats();showMessage("Roll again!");},1000);
+  }else{
     attempts++;
     btn.classList.add("wrong");
     playSound("wrongSound");
-
-    if(attempts === 1){
-      document.getElementById("message").textContent = "❌ Try once more.";
-      document.getElementById("hintText").textContent = "💡 Hint: " + currentQuestion.hint;
-      btn.disabled = true;
-    } else {
+    if(attempts===1){
+      document.getElementById("message").textContent="❌ Try once more.";
+      document.getElementById("hintText").textContent="💡 Hint: "+currentQuestion.hint;
+      btn.disabled=true;
+    }else{
       qAnswered++;
-      document.getElementById("message").textContent = "Answer: " + currentQuestion.a;
+      document.getElementById("message").textContent="Answer: "+currentQuestion.a;
       disableOptions();
-
-      setTimeout(() => {
-        locked = false;
-        document.getElementById("questionPanel").style.display = "none";
-        updateStats();
-      }, 1800);
+      setTimeout(()=>{locked=false;updateStats();showMessage("Roll again!");},1800);
     }
   }
 }
 
-function disableOptions(){
-  document.querySelectorAll(".option").forEach(b => b.disabled = true);
-}
+function disableOptions(){document.querySelectorAll(".option").forEach(b=>b.disabled=true);}
 
 function showMessage(text){
-  document.getElementById("questionPanel").style.display = "block";
-  document.getElementById("questionText").textContent = text;
-  document.getElementById("hintText").textContent = "";
-  document.getElementById("options").innerHTML = "";
-  document.getElementById("message").textContent = "";
+  document.getElementById("questionText").textContent=text;
+  document.getElementById("hintText").textContent="";
+  document.getElementById("options").innerHTML="";
+  document.getElementById("message").textContent="";
 }
 
 function finishGame(){
-  playerPos = tiles.length - 1;
-  renderBoard();
-  updateStats();
-  playSound("clapSound");
-
-  document.getElementById("finalScore").textContent = score;
-  document.getElementById("finalQuestions").textContent = qAnswered;
-
-  setTimeout(() => showScreen("end"), 900);
+  playerPos=tiles.length-1;
+  renderBoard();updateStats();playSound("clapSound");
+  document.getElementById("finalScore").textContent=score;
+  document.getElementById("finalQuestions").textContent=qAnswered;
+  setTimeout(()=>showScreen("end"),900);
 }
 
 function toggleMute(){
-  muted = !muted;
-  document.getElementById("muteBtn").textContent = muted ? "🔇 Muted" : "🔊 Sound";
+  muted=!muted;
+  document.getElementById("muteBtn").textContent=muted?"🔇 Muted":"🔊 Sound";
 }
-
 function playSound(id){
-  if(muted) return;
-  const audio = document.getElementById(id);
-  audio.currentTime = 0;
-  audio.play().catch(() => {});
+  if(muted)return;
+  const audio=document.getElementById(id);
+  audio.currentTime=0;
+  audio.play().catch(()=>{});
 }
 </script>
-
 </body>
 </html>
