@@ -198,6 +198,12 @@ button:active {
     font-size: 22px;
     box-shadow: 0 6px 0px #008ba3;
 }
+.option:disabled {
+    background: #9e9e9e !important;
+    box-shadow: 0 6px 0px #757575 !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
 
 /* LEVEL 2 */
 #questionBox {
@@ -227,12 +233,15 @@ button:active {
 
 <div class="main-wrapper">
 
+    <!-- SPLASH -->
     <div id="splash">
         <img src="assets/innovinelogo.png" width="250">
     </div>
 
+    <!-- GAME -->
     <div id="game">
 
+    <!-- LEVEL 1 -->
     <div id="level1">
 
         <div id="instruction">
@@ -241,6 +250,7 @@ button:active {
 
         <div class="game-container">
             
+            <!-- WHEEL BLOCK -->
             <div class="wheel-section">
                 <div id="wheel-pointer"></div>
                 <div id="wheel-outer-ring">
@@ -249,6 +259,7 @@ button:active {
                 </div>
             </div>
 
+            <!-- CONTROLS BLOCK -->
             <div class="controls-section">
                 <div id="wordBox">READY?</div>
                 <div id="feedbackBox">Press SPIN to start!</div>
@@ -272,6 +283,7 @@ button:active {
 
     </div>
 
+    <!-- LEVEL 2 -->
     <div id="level2">
         <div id="instruction">Level 2: WHO AM I?</div>
         <div id="questionBox"></div>
@@ -294,7 +306,7 @@ setTimeout(() => {
 }, 3000);
 
 // ---------------- LEVEL 1 DATA ----------------
-// Fixed unique list containing no paired duplicate gender terms on the wheel
+// Expanded to 12 words with completely distinct noun lineages (no mutual pairs on the wheel)
 let words = [
     {word:"king", gender:"male", opposite:"queen", color: "#ff5722", visited: false},
     {word:"fox", gender:"male", opposite:"vixen", color: "#e91e63", visited: false},
@@ -302,13 +314,19 @@ let words = [
     {word:"mare", gender:"female", opposite:"horse", color: "#2196f3", visited: false},
     {word:"gander", gender:"male", opposite:"goose", color: "#009688", visited: false},
     {word:"cow", gender:"female", opposite:"bull", color: "#8bc34a", visited: false},
-    {word:"prince", gender:"male", opposite:"princess", color: "#ffc107", visited: false}
+    {word:"prince", gender:"male", opposite:"princess", color: "#ffc107", visited: false},
+    {word:"rooster", gender:"male", opposite:"hen", color: "#ff9800", visited: false},
+    {word:"uncle", gender:"male", opposite:"aunt", color: "#00bcd4", visited: false},
+    {word:"lioness", gender:"female", opposite:"lion", color: "#e11d48", visited: false},
+    {word:"tiger", gender:"male", opposite:"tigress", color: "#4f46e5", visited: false},
+    {word:"daughter", gender:"female", opposite:"son", color: "#059669", visited: false}
 ];
 
 let current = {};
 let attempts = 3;
 let currentRotation = 0;
 let isSpinning = false;
+let genderIdentified = false; // Guard state tracker variable
 
 function showFeedback(text, isCorrect = null) {
     const box = document.getElementById("feedbackBox");
@@ -316,6 +334,13 @@ function showFeedback(text, isCorrect = null) {
     if(isCorrect === true) box.style.color = "#4caf50";
     else if(isCorrect === false) box.style.color = "#ff5252";
     else box.style.color = "#ffffff";
+}
+
+function toggleOppositeButtons(enable) {
+    const optionButtons = document.querySelectorAll("#options .option");
+    optionButtons.forEach(btn => {
+        btn.disabled = !enable;
+    });
 }
 
 function renderCanvasWheel() {
@@ -347,7 +372,7 @@ function renderCanvasWheel() {
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 24px 'Comic Sans MS'";
+        ctx.font = "bold 20px 'Comic Sans MS'"; // Sized slightly down to cleanly fit 12 variables
         ctx.fillText(w.word.toUpperCase(), radius - 35, 0);
         ctx.restore();
     });
@@ -372,6 +397,8 @@ function spin(){
     currentRotation += 1440 + finalAngle - (currentRotation % 360);
     
     isSpinning = true;
+    genderIdentified = false; // Reset lock tracking parameters
+    
     let wheel = document.getElementById("wheel-canvas");
     wheel.style.transform = `rotate(${currentRotation}deg)`;
     
@@ -393,7 +420,7 @@ function stopWheel() {
     renderCanvasWheel();
     
     document.getElementById("wordBox").innerText = current.word.toUpperCase();
-    showFeedback("Classify the noun's gender!");
+    showFeedback("Classify the noun's gender first!");
     generateOptions();
     attempts = 3;
 }
@@ -405,12 +432,16 @@ function checkGender(choice){
     }
     if(choice === current.gender){
         document.getElementById("correctSound").play();
-        showFeedback(`Correct! "${current.word}" is ${current.gender}!`, true);
+        showFeedback(`Correct! Now find its opposite below!`, true);
+        genderIdentified = true; 
+        toggleOppositeButtons(true); // Unlock bottom option panel elements
     }else{
         attempts--;
         document.getElementById("wrongSound").play();
         if(attempts <= 0){
-            showFeedback(`Answer: It is ${current.gender}.`, false);
+            showFeedback(`It is ${current.gender}. Now try the opposites!`, false);
+            genderIdentified = true;
+            toggleOppositeButtons(true); // Unlock panel even if they run out of attempts
         }else{
             showFeedback(`Try Again! Attempts left: ${attempts}`, false);
         }
@@ -419,8 +450,7 @@ function checkGender(choice){
 
 function generateOptions(){
     let correct = current.opposite;
-    // Updated global structural pools matching changes
-    let pool = ["queen","king","girl","boy","mare","horse","cow","bull","goose","gander","princess","prince","vixen","fox"];
+    let pool = ["queen","king","girl","boy","mare","horse","cow","bull","goose","gander","princess","prince","vixen","fox","hen","rooster","uncle","aunt","lioness","lion","tiger","tigress","daughter","son"];
     let options = [correct];
 
     while(options.length < 3){
@@ -442,9 +472,17 @@ function generateOptions(){
         btn.onclick = () => checkOpposite(o);
         box.appendChild(btn);
     });
+
+    // Make sure options start disabled initially until classification checks pass
+    toggleOppositeButtons(false);
 }
 
 function checkOpposite(ans){
+    if(!genderIdentified){
+        showFeedback("Identify the core gender selection parameters above first!");
+        return;
+    }
+    
     if(ans === current.opposite){
         document.getElementById("correctSound").play();
         document.getElementById("clapSound").play();
