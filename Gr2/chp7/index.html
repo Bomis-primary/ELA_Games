@@ -1,1 +1,188 @@
-aaaa
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Gender Noun Spinner Game</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Comic Sans MS;
+    background: url("assets/image1.png") no-repeat center center fixed;
+    background-size: cover;
+    overflow:hidden;
+}
+
+/* SPLASH */
+#splash{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:10;
+}
+
+/* GAME AREA */
+#game{
+    display:none;
+    text-align:center;
+    padding:20px;
+}
+
+/* INSTRUCTIONS */
+#instruction{
+    background:#fff8c6;
+    padding:10px;
+    font-size:20px;
+    border-radius:10px;
+    margin:10px;
+}
+
+/* SPINNER */
+#wordBox{
+    font-size:40px;
+    margin:20px;
+    padding:20px;
+    background:white;
+    display:inline-block;
+    border-radius:15px;
+}
+
+/* BUTTONS */
+button{
+    font-size:20px;
+    padding:10px 20px;
+    margin:10px;
+    border-radius:10px;
+    border:none;
+}
+
+.classify{
+    background:#4caf50;
+    color:white;
+}
+
+.opposite{
+    background:#2196f3;
+    color:white;
+}
+
+#nextBtn{
+    display:none;
+    background:orange;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+    <img src="assets/innovinelogo.png" width="250">
+</div>
+
+<!-- GAME -->
+<div id="game">
+
+    <div id="instruction">
+        Level 1: Spin the wheel, classify the noun and find its opposite gender.
+    </div>
+
+    <div id="wordBox">Press SPIN</div>
+
+    <br>
+
+    <button onclick="spin()">SPIN 🎡</button>
+
+    <div>
+        <button class="classify" onclick="checkGender('male')">Masculine</button>
+        <button class="classify" onclick="checkGender('female')">Feminine</button>
+    </div>
+
+    <div>
+        <button class="opposite" onclick="checkOpposite()">Find Opposite</button>
+    </div>
+
+    <button id="nextBtn" onclick="nextLevel()">NEXT LEVEL</button>
+
+</div>
+
+<audio id="correctSound" src="assets/correct.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
+<audio id="clapSound" src="assets/clapping.mp3"></audio>
+
+<script>
+
+setTimeout(()=>{
+    document.getElementById("splash").style.display="none";
+    document.getElementById("game").style.display="block";
+},5000);
+
+// LEVEL 1 WORDS (10 nouns)
+let words = [
+    {word:"king", gender:"male", opposite:"queen"},
+    {word:"queen", gender:"female", opposite:"king"},
+    {word:"boy", gender:"male", opposite:"girl"},
+    {word:"girl", gender:"female", opposite:"boy"},
+    {word:"actor", gender:"male", opposite:"actress"},
+    {word:"actress", gender:"female", opposite:"actor"},
+    {word:"prince", gender:"male", opposite:"princess"},
+    {word:"princess", gender:"female", opposite:"prince"},
+    {word:"lion", gender:"male", opposite:"lioness"},
+    {word:"lioness", gender:"female", opposite:"lion"}
+];
+
+let current = {};
+let attempts = 3;
+
+// SPIN FUNCTION
+function spin(){
+    current = words[Math.floor(Math.random()*words.length)];
+    document.getElementById("wordBox").innerText = current.word;
+    attempts = 3;
+}
+
+// CHECK GENDER
+function checkGender(choice){
+    if(choice === current.gender){
+        document.getElementById("correctSound").play();
+        alert("Correct!");
+    }else{
+        attempts--;
+        document.getElementById("wrongSound").play();
+
+        if(attempts<=0){
+            alert("Correct Answer: " + current.gender);
+        }else{
+            alert("Try Again! Attempts left: " + attempts);
+        }
+    }
+}
+
+// CHECK OPPOSITE
+function checkOpposite(){
+    let ans = prompt("Type opposite of " + current.word);
+
+    if(ans && ans.toLowerCase() === current.opposite){
+        document.getElementById("correctSound").play();
+        document.getElementById("nextBtn").style.display="inline-block";
+    }else{
+        document.getElementById("wrongSound").play();
+        alert("Correct Answer: " + current.opposite);
+    }
+}
+
+// LEVEL 2
+function nextLevel(){
+    window.location.href = "#level2";
+    document.getElementById("instruction").innerText =
+    "Level 2: WHO AM I? Choose the correct answer.";
+}
+
+</script>
+
+</body>
+</html>
