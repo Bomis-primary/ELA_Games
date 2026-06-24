@@ -31,7 +31,7 @@ body {
     display: none;
     text-align: center;
     padding: 10px;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
 }
 
@@ -48,49 +48,66 @@ body {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* --- THE WHEEL OF FORTUNE (DYNAMICS) --- */
-#wheel-wrapper {
-    position: relative;
-    width: 340px;
-    height: 340px;
-    margin: 20px auto;
+/* --- GAME LAYOUT CONFIGURATION --- */
+.game-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin-top: 15px;
+    flex-wrap: wrap;
 }
 
+.wheel-section {
+    position: relative;
+    width: 360px;
+    height: 360px;
+}
+
+.controls-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 300px;
+}
+
+/* --- THE WHEEL MECHANICS --- */
 #wheel-outer-ring {
     width: 100%;
     height: 100%;
     border-radius: 50%;
     background: radial-gradient(circle, #0084c2 60%, #004b7c 100%);
-    border: 10px solid #005a96;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 0 20px rgba(255,255,255,0.4);
+    border: 12px solid #005a96;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.4);
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
 }
 
-/* The actual spinning part */
+/* Canvas element rotating smoothly */
 #wheel-canvas {
-    width: 300px;
-    height: 300px;
+    width: 330px;
+    height: 330px;
     border-radius: 50%;
     transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
 }
 
-/* Wheel Center Pin */
+/* Center Pin */
 #wheel-center {
     position: absolute;
-    width: 80px;
-    height: 80px;
+    width: 75px;
+    height: 75px;
     background: radial-gradient(circle, #2196f3 30%, #0d47a1 100%);
-    border: 5px solid #ffffff;
+    border: 4px solid #ffffff;
     border-radius: 50%;
     z-index: 3;
     box-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
 
-/* Pointer Indicator */
+/* Pointer Ticker at the absolute top (0 degrees) */
 #wheel-pointer {
     position: absolute;
     top: -15px;
@@ -100,23 +117,24 @@ body {
     height: 0; 
     border-left: 18px solid transparent;
     border-right: 18px solid transparent;
-    border-top: 30px solid #ff1744;
+    border-top: 32px solid #ff1744;
     z-index: 4;
     filter: drop-shadow(0px 4px 2px rgba(0,0,0,0.3));
 }
 
-/* WORD BOX DISPLAY */
+/* RESULT WORD DISPLAY BOX */
 #wordBox {
-    font-size: 36px;
+    font-size: 38px;
     font-weight: bold;
     color: #2c3e50;
     background: white;
     display: inline-block;
-    padding: 12px 35px;
+    padding: 10px 40px;
     border-radius: 20px;
-    margin: 10px;
+    margin-bottom: 15px;
     box-shadow: 0 6px 0px #bdc3c7, 0 10px 20px rgba(0,0,0,0.15);
     border: 2px solid #ecf0f1;
+    min-width: 200px;
 }
 
 /* PLAYFUL 3D BUTTONS */
@@ -125,7 +143,7 @@ button {
     font-size: 20px;
     font-weight: bold;
     padding: 12px 24px;
-    margin: 8px;
+    margin: 6px;
     border-radius: 18px;
     border: none;
     cursor: pointer;
@@ -138,24 +156,29 @@ button:active {
 }
 
 /* Control Buttons */
-.btn-spin { background: #e040fb; color: white; box-shadow: 0 6px 0px #aa00ff; }
-.btn-stop { background: #ff5252; color: white; box-shadow: 0 6px 0px #d50000; }
+.btn-spin { background: #e040fb; color: white; box-shadow: 0 6px 0px #aa00ff; width: 130px; }
+.btn-stop { background: #ff5252; color: white; box-shadow: 0 6px 0px #d50000; width: 130px; }
 
-/* Gender Classification */
-.classify { width: 160px; color: white; }
+/* Gender Selection Sidebars */
+.gender-row {
+    margin: 10px 0;
+    display: flex;
+    gap: 10px;
+}
+.classify { width: 140px; color: white; font-size: 18px; }
 .classify.male { background: #2196f3; box-shadow: 0 6px 0px #0b7dda; }
 .classify.female { background: #ff4081; box-shadow: 0 6px 0px #f50057; }
 
-/* MCQ OPTIONS */
+/* MCQ OPTIONS BELOW */
 .option {
-    width: 45%;
+    width: 28%;
     background: #00bcd4;
     color: white;
-    font-size: 22px;
+    font-size: 20px;
     box-shadow: 0 6px 0px #008ba3;
 }
 
-/* LEVEL 2 QUESTION BOX */
+/* LEVEL 2 DECORATION */
 #questionBox {
     background: white;
     padding: 20px;
@@ -167,8 +190,6 @@ button:active {
     box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     border-bottom: 5px solid #e0e0e0;
 }
-
-/* LEVEL 2 OPTIONS */
 .l2option {
     width: 55%;
     background: #ff9800;
@@ -195,30 +216,35 @@ button:active {
         Level 1: Spin the wheel, classify the noun, and choose its opposite!
     </div>
 
-    <div id="wheel-wrapper">
-        <div id="wheel-pointer"></div>
-        <div id="wheel-outer-ring">
-            <div id="wheel-center"></div>
-            <div id="wheel-canvas"></div>
+    <div class="game-container">
+        
+        <div class="wheel-section">
+            <div id="wheel-pointer"></div>
+            <div id="wheel-outer-ring">
+                <div id="wheel-center"></div>
+                <canvas id="wheel-canvas" width="500" height="500"></canvas>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div id="wordBox">SPIN THE WHEEL!</div>
+            
+            <div>
+                <button class="btn-spin" onclick="spin()">SPIN 🎡</button>
+                <button class="btn-stop" onclick="stopWheel()">STOP 🛑</button>
+            </div>
+
+            <div class="gender-row">
+                <button class="classify male" onclick="checkGender('male')">Masculine</button>
+                <button class="classify female" onclick="checkGender('female')">Feminine</button>
+            </div>
         </div>
     </div>
 
-    <div id="wordBox">Press SPIN 🎡</div>
-
-    <br>
-
-    <button class="btn-spin" onclick="spin()">SPIN</button>
-    <button class="btn-stop" onclick="stopWheel()">STOP</button>
-
-    <div style="margin-top: 10px;">
-        <button class="classify male" onclick="checkGender('male')">Masculine</button>
-        <button class="classify female" onclick="checkGender('female')">Feminine</button>
-    </div>
-
-    <h3 style="color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); font-size:24px; margin-bottom:5px;">Find Opposite</h3>
+    <h3 style="color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); font-size:24px; margin-top:25px; margin-bottom:10px;">Find Opposite</h3>
     <div id="options"></div>
 
-    <button onclick="goLevel2()" id="nextBtn" style="display:none; background:#4caf50; box-shadow: 0 6px 0px #388e3c; color:white; margin-top:20px;">NEXT LEVEL ➔</button>
+    <button onclick="goLevel2()" id="nextBtn" style="display:none; background:#4caf50; box-shadow: 0 6px 0px #388e3c; color:white; margin-top:25px;">NEXT LEVEL ➔</button>
 
 </div>
 
@@ -235,15 +261,13 @@ button:active {
 <audio id="clapSound" src="assets/clapping.mp3"></audio>
 
 <script>
-
 setTimeout(() => {
     document.getElementById("splash").style.display = "none";
     document.getElementById("game").style.display = "block";
-    renderWheel(); // Build the wheel immediately upon entry
+    renderCanvasWheel(); 
 }, 3000);
 
 // ---------------- LEVEL 1 DATA ----------------
-
 let words = [
     {word:"king", gender:"male", opposite:"queen", color: "#ff5722", visited: false},
     {word:"queen", gender:"female", opposite:"king", color: "#e91e63", visited: false},
@@ -255,7 +279,7 @@ let words = [
     {word:"gander", gender:"female", opposite:"goose", color: "#009688", visited: false},
     {word:"bull", gender:"male", opposite:"cow", color: "#4caf50", visited: false},
     {word:"cow", gender:"female", opposite:"bull", color: "#8bc34a", visited: false},
-    {word:"prince", gender:"male", opposite:"princess", color: "#ffeb3b", visited: false},
+    {word:"prince", gender:"male", opposite:"princess", color: "#ffc107", visited: false},
     {word:"princess", gender:"female", opposite:"prince", color: "#ff9800", visited: false}
 ];
 
@@ -264,47 +288,66 @@ let attempts = 3;
 let currentRotation = 0;
 let isSpinning = false;
 
-// Dynamic CSS Wheel Builder 
-function renderWheel() {
-    let segmentAngle = 360 / words.length;
-    let gradientParts = [];
-    
-    words.forEach((w, index) => {
-        let startAngle = index * segmentAngle;
-        let endAngle = startAngle + segmentAngle;
-        // If the word has been visited/spun already, paint it grey!
-        let sliceColor = w.visited ? "#9e9e9e" : w.color;
-        gradientParts.push(`${sliceColor} ${startAngle}deg ${endAngle}deg`);
+// DRAW THE WHEEL AND TEXT ONTO HTML5 CANVAS
+function renderCanvasWheel() {
+    const canvas = document.getElementById("wheel-canvas");
+    const ctx = canvas.getContext("2d");
+    const numSegments = words.length;
+    const segmentAngle = (2 * Math.PI) / numSegments;
+    const radius = canvas.width / 2;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    words.forEach((w, i) => {
+        const startAngle = i * segmentAngle;
+        const endAngle = startAngle + segmentAngle;
+
+        // Draw Wedge background
+        ctx.beginPath();
+        ctx.moveTo(radius, radius);
+        ctx.arc(radius, radius, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = w.visited ? "#9e9e9e" : w.color;
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.4)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Add Text Labels inside wedges
+        ctx.save();
+        ctx.translate(radius, radius);
+        // Rotate text path to center of wedge line orientation
+        ctx.rotate(startAngle + segmentAngle / 2);
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 24px 'Comic Sans MS'";
+        // Offset the text string outward towards edge ring
+        ctx.fillText(w.word.toUpperCase(), radius - 35, 0);
+        ctx.restore();
     });
-    
-    document.getElementById("wheel-canvas").style.background = `conic-gradient(${gradientParts.join(', ')})`;
 }
 
-// SPIN ANIMATION
+// RUN THE ROTATION CALCULATION
 function spin(){
     if(isSpinning) return;
     
-    // Filter out unvisited items if available, else pick any
     let availableWords = words.filter(w => !w.visited);
     if(availableWords.length === 0) {
-        // Reset if all words used up
         words.forEach(w => w.visited = false);
         availableWords = words;
     }
     
-    // Pick target word
     current = availableWords[Math.floor(Math.random() * availableWords.length)];
     let targetIndex = words.indexOf(current);
     
-    let segmentAngle = 360 / words.length;
-    // Target the center of the selected slice
-    let targetSliceAngle = (targetIndex * segmentAngle) + (segmentAngle / 2);
+    let segmentDegrees = 360 / words.length;
+    let targetSliceCenter = (targetIndex * segmentDegrees) + (segmentDegrees / 2);
     
-    // Calculate final rotation degrees so pointer at top (0 deg) hits correctly
-    // Conic gradient maps 0deg to top, but moves clockwise. To match pointer:
-    let finalAngle = 360 - targetSliceAngle;
+    // Canvas tracks 0 degrees out horizontally right side (3 o'clock). 
+    // To land perfectly on top pointer (12 o'clock), adjust offsets by 270 degrees:
+    let finalAngle = (270 - targetSliceCenter + 360) % 360;
     
-    // Add 4-5 full rotations for dramatic speed effect
     currentRotation += 1440 + finalAngle - (currentRotation % 360);
     
     isSpinning = true;
@@ -313,44 +356,41 @@ function spin(){
     
     document.getElementById("wordBox").innerText = "Spinning...";
     
-    // Wait for transition animation to complete (4 seconds)
     setTimeout(() => {
         if(isSpinning) stopWheel();
     }, 4000);
 }
 
-// STOP / LAND ON THE WORD
 function stopWheel() {
     if(!isSpinning) return;
     isSpinning = false;
     
-    // Mark item as visited and re-render greyed wheel segment
     current.visited = true;
-    renderWheel();
+    renderCanvasWheel(); // Refresh colors instantly (turns current segment grey)
     
     document.getElementById("wordBox").innerText = current.word.toUpperCase();
     generateOptions();
     attempts = 3;
 }
 
-// CLASSIFY GENDER
+// CHECK INLINE CLASSIFICATION ACTION
 function checkGender(choice){
-    if(!current.word) return alert("Spin the wheel first!");
+    if(!current.word) return alert("Please spin the wheel first!");
     if(choice === current.gender){
         document.getElementById("correctSound").play();
-        alert("Great job! That's correct.");
+        alert(`Correct! "${current.word}" is a ${current.gender} noun.`);
     }else{
         attempts--;
         document.getElementById("wrongSound").play();
         if(attempts <= 0){
-            alert("Correct Answer: " + current.gender);
+            alert("Answer: This noun is " + current.gender);
         }else{
             alert("Try Again! Attempts left: " + attempts);
         }
     }
 }
 
-// MCQ OPPOSITE GENERATION
+// OPTIONS GENERATION
 function generateOptions(){
     let correct = current.opposite;
     let pool = ["queen","king","girl","boy","mare","horse","cow","bull","goose","gander","princess","prince"];
