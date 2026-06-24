@@ -8,152 +8,61 @@
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   background:linear-gradient(#9ee8ff,#ffe9a8);
   color:#17312b;
   text-align:center;
 }
 .screen{display:none;min-height:100vh;padding:18px}
 .active{display:block}
-.logo{
-  font-size:44px;
-  font-weight:900;
-  margin-top:35vh;
-  color:#0b5c7a;
+.splash-logo{max-width:300px;width:80%;height:auto;margin-top:35vh}
+.card{
+  max-width:800px;margin:18px auto;background:#fff;border-radius:22px;
+  padding:18px;box-shadow:0 6px 18px #0002
 }
 h1{font-size:32px;margin:10px 0}
-h2{margin:8px 0}
-p{font-size:18px}
 button{
-  border:0;
-  border-radius:16px;
-  padding:12px 18px;
-  font-size:18px;
-  font-weight:bold;
-  background:#ffd447;
-  box-shadow:0 5px 0 #b88900;
-  cursor:pointer;
+  border:0;border-radius:16px;padding:12px 18px;font-size:18px;font-weight:bold;
+  background:#ffd447;box-shadow:0 5px 0 #b88900;cursor:pointer;margin:5px
 }
 button:active{transform:translateY(3px);box-shadow:0 2px 0 #b88900}
-button:disabled{opacity:.5;cursor:not-allowed}
-.small-btn{font-size:14px;padding:8px 12px;border-radius:12px}
-.card{
-  max-width:780px;
-  margin:18px auto;
-  background:#fff;
-  border-radius:22px;
-  padding:18px;
-  box-shadow:0 6px 18px #0002;
-}
-.instructions{
-  text-align:left;
-  font-size:18px;
-  line-height:1.5;
-}
+button:disabled{opacity:.5}
+.avatar-btn{font-size:38px;background:#e7f5ff;box-shadow:0 4px 0 #79a8c8}
+.instructions{text-align:left;font-size:18px;line-height:1.5}
 .game-wrap{max-width:950px;margin:auto}
-.topbar{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:8px;
-  margin-bottom:10px;
-}
-.stat{
-  background:#fff;
-  border-radius:14px;
-  padding:8px;
-  font-weight:bold;
-  box-shadow:0 3px 8px #0002;
-}
+.topbar{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+.stat{background:#fff;border-radius:14px;padding:8px;font-weight:bold;box-shadow:0 3px 8px #0002}
 .board{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:9px;
-  background:#4b9b62;
-  border:6px solid #255638;
-  padding:12px;
-  border-radius:22px;
-  position:relative;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:9px;
+  background:#4b9b62;border:6px solid #255638;padding:12px;border-radius:22px
 }
 .tile{
-  min-height:78px;
-  border-radius:16px;
-  background:#d9f5c5;
-  border:3px solid #24543a;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  font-weight:bold;
-  font-size:17px;
-  position:relative;
-  padding:6px;
+  min-height:78px;border-radius:16px;background:#d9f5c5;border:3px solid #24543a;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  font-weight:bold;font-size:16px;position:relative;padding:6px
 }
-.tile.question{background:#d7f8d0}
-.tile.special{background:#ffe2a6}
-.tile.start,.tile.finish{background:#e5e5e5}
+.question{background:#d7f8d0}
+.special{background:#ffe2a6}
+.start,.finish{background:#e5e5e5}
 .player{
-  position:absolute;
-  right:3px;
-  bottom:0;
-  font-size:30px;
-  animation:bounce .8s infinite alternate;
+  position:absolute;right:3px;bottom:0;font-size:30px;
+  animation:bounce .8s infinite alternate
 }
-@keyframes bounce{
-  from{transform:translateY(0)}
-  to{transform:translateY(-5px)}
-}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-5px)}}
 .panel{
-  background:white;
-  border-radius:20px;
-  margin:14px auto;
-  padding:15px;
-  max-width:760px;
-  box-shadow:0 4px 14px #0002;
+  background:white;border-radius:20px;margin:14px auto;padding:15px;
+  max-width:760px;box-shadow:0 4px 14px #0002
 }
-.options{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-.option{
-  background:#e7f5ff;
-  border:3px solid #7ab7df;
-  box-shadow:none;
-  font-size:18px;
-}
+.options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.option{background:#e7f5ff;border:3px solid #7ab7df;box-shadow:none;font-size:18px}
 .correct{background:#b8f7bf!important;border-color:#26a641!important}
 .wrong{background:#ffc8c8!important;border-color:#d44040!important}
-#message{
-  min-height:30px;
-  font-weight:bold;
-  font-size:20px;
-}
-.progress-box{
-  background:#fff;
-  border-radius:20px;
-  padding:8px;
-  margin-bottom:10px;
-}
-.progress-bg{
-  height:18px;
-  background:#ddeee0;
-  border-radius:20px;
-  overflow:hidden;
-}
-.progress-fill{
-  height:100%;
-  width:0%;
-  background:#36a852;
-  transition:.3s;
-}
-.confetti{
-  font-size:42px;
-  animation:pop 1s infinite alternate;
-}
-@keyframes pop{
-  from{transform:scale(1)}
-  to{transform:scale(1.15)}
-}
+#message{min-height:30px;font-weight:bold;font-size:20px}
+.progress-box{background:#fff;border-radius:20px;padding:8px;margin-bottom:10px}
+.progress-bg{height:18px;background:#ddeee0;border-radius:20px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:#36a852;transition:.3s}
+.confetti{font-size:42px;animation:pop 1s infinite alternate}
+@keyframes pop{from{transform:scale(1)}to{transform:scale(1.15)}}
 @media(max-width:700px){
   .topbar{grid-template-columns:repeat(2,1fr)}
   .board{grid-template-columns:repeat(4,1fr);gap:7px;padding:8px}
@@ -163,10 +72,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
 }
 </style>
 </head>
+
 <body>
 
 <div id="splash" class="screen active">
-  <div class="logo">INNOVINE</div>
+  <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo">
 </div>
 
 <div id="instructions" class="screen">
@@ -174,15 +84,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <h1>🦕 Dino Word Trail</h1>
     <h2>Name, Place, Animal, Thing</h2>
     <div class="instructions">
-      <p><b>How to play:</b></p>
       <p>🎲 Roll the dice and move on the board.</p>
-      <p>🧠 Answer the question when you land on a word tile.</p>
-      <p>✅ Correct answer gives you 1 point.</p>
-      <p>🔁 You get 2 tries for each question.</p>
-      <p>💡 After 2 wrong tries, the correct answer is shown.</p>
+      <p>🧠 Answer when you land on a word tile.</p>
+      <p>✅ Correct answer gives 1 point.</p>
+      <p>🔁 You get 2 tries.</p>
+      <p>💡 After 2 wrong tries, the answer is shown.</p>
       <p>🏁 Reach FINISH to complete the game.</p>
     </div>
-    <button onclick="startGame()">Start Game</button>
+    <h2>Choose your player</h2>
+    <button class="avatar-btn" onclick="chooseAvatar('🦖')">🦖</button>
+    <button class="avatar-btn" onclick="chooseAvatar('🚶')">🚶</button>
+    <button class="avatar-btn" onclick="chooseAvatar('🧒')">🧒</button>
   </div>
 </div>
 
@@ -195,20 +107,15 @@ button:disabled{opacity:.5;cursor:not-allowed}
       <div class="stat">⭐ Score: <span id="score">0</span></div>
       <div class="stat">📍 Tile: <span id="pos">Start</span></div>
       <div class="stat">🧠 Q: <span id="qcount">0</span></div>
-      <div class="stat"><button class="small-btn" onclick="toggleMute()" id="muteBtn">🔊 Sound</button></div>
+      <div class="stat"><button onclick="toggleMute()" id="muteBtn">🔊 Sound</button></div>
     </div>
 
-    <div class="progress-box">
-      <div class="progress-bg">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-    </div>
+    <div class="progress-box"><div class="progress-bg"><div class="progress-fill" id="progressFill"></div></div></div>
 
     <button onclick="rollDice()" id="rollBtn">Roll Dice</button>
-    <button onclick="startGame()" class="small-btn">Restart</button>
+    <button onclick="startGame()">Restart</button>
 
     <br><br>
-
     <div id="board" class="board"></div>
 
     <div class="panel" id="questionPanel" style="display:none">
@@ -222,295 +129,225 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div id="end" class="screen">
   <div class="card">
-    <div class="confetti">🎉 ⭐ 🦕 ⭐ 🎉</div>
+    <div class="confetti">🎉 ⭐ 🏆 ⭐ 🎉</div>
     <h1>Well Done!</h1>
     <h2>You reached FINISH!</h2>
     <p>Your Score: <b><span id="finalScore"></span></b></p>
     <p>Questions Answered: <b><span id="finalQuestions"></span></b></p>
-    <button onclick="startGame()">Play Again</button>
+    <button onclick="showScreen('instructions')">Play Again</button>
   </div>
 </div>
 
-<audio id="rightSound" src="right.mp3"></audio>
-<audio id="wrongSound" src="wrong.mp3"></audio>
-<audio id="clapSound" src="clapping.mp3"></audio>
+<audio id="rightSound" src="assets/correct.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
+<audio id="clapSound" src="assets/clapping.mp3"></audio>
 
 <script>
-const questionBank = [
-  {cat:"Name", emoji:"👧", q:"Which one is a name?", o:["Riya","Ball","Cat","Park"], a:"Riya", hint:"A name is what we call a person."},
-  {cat:"Name", emoji:"👦", q:"Which one is a name?", o:["Aman","Dog","Book","Zoo"], a:"Aman", hint:"A name belongs to a person."},
-  {cat:"Name", emoji:"👧", q:"Which word is a person’s name?", o:["Sita","School","Lion","Chair"], a:"Sita", hint:"Think of a child’s name."},
-  {cat:"Name", emoji:"👦", q:"Which one is a name?", o:["Ravi","Tiger","Pencil","Garden"], a:"Ravi", hint:"This is the name of a boy."},
-
-  {cat:"Place", emoji:"🏫", q:"Which one is a place?", o:["School","Aman","Fish","Bag"], a:"School", hint:"A place is somewhere we can go."},
-  {cat:"Place", emoji:"🌳", q:"Which one is a place?", o:["Park","Cat","Pen","Riya"], a:"Park", hint:"Children play here."},
-  {cat:"Place", emoji:"🦁", q:"Which one is a place?", o:["Zoo","Dog","Table","Tina"], a:"Zoo", hint:"Animals live here for people to see."},
-  {cat:"Place", emoji:"🏠", q:"Which one is a place?", o:["Home","Horse","Book","Aman"], a:"Home", hint:"We live here."},
-
-  {cat:"Animal", emoji:"🐶", q:"Which one is an animal?", o:["Dog","Delhi","Riya","Ball"], a:"Dog", hint:"It barks."},
-  {cat:"Animal", emoji:"🐱", q:"Which one is an animal?", o:["Cat","School","Chair","Ravi"], a:"Cat", hint:"It says meow."},
-  {cat:"Animal", emoji:"🦁", q:"Which one is an animal?", o:["Lion","Pencil","Park","Sita"], a:"Lion", hint:"It is called the king of the jungle."},
-  {cat:"Animal", emoji:"🐘", q:"Which one is an animal?", o:["Elephant","Book","Mumbai","Aman"], a:"Elephant", hint:"It has a long trunk."},
-
-  {cat:"Thing", emoji:"⚽", q:"Which one is a thing?", o:["Ball","Riya","Zoo","Dog"], a:"Ball", hint:"You can play with it."},
-  {cat:"Thing", emoji:"✏️", q:"Which one is a thing?", o:["Pencil","Cat","School","Aman"], a:"Pencil", hint:"You write with it."},
-  {cat:"Thing", emoji:"📘", q:"Which one is a thing?", o:["Book","Lion","Park","Sita"], a:"Book", hint:"You read it."},
-  {cat:"Thing", emoji:"🪑", q:"Which one is a thing?", o:["Chair","Home","Dog","Ravi"], a:"Chair", hint:"You sit on it."},
-
-  {cat:"Mixed", emoji:"🧠", q:"Which one is a place?", o:["Mumbai","Meena","Monkey","Mug"], a:"Mumbai", hint:"It is a city."},
-  {cat:"Mixed", emoji:"🧠", q:"Which one is an animal?", o:["Fish","Fan","Farah","Farm"], a:"Fish", hint:"It lives in water."},
-  {cat:"Mixed", emoji:"🧠", q:"Which one is a thing?", o:["Kite","Kiran","Koala","Kerala"], a:"Kite", hint:"It flies in the sky with a string."},
-  {cat:"Mixed", emoji:"🧠", q:"Which one is a name?", o:["Neha","Nest","Nagpur","Nose"], a:"Neha", hint:"It is a girl’s name."},
-  {cat:"Mixed", emoji:"🧠", q:"Which one is a place?", o:["Goa","Goat","Glass","Gita"], a:"Goa", hint:"It is a place people visit."},
-  {cat:"Mixed", emoji:"🧠", q:"Which one is an animal?", o:["Bear","Bag","Bina","Bus"], a:"Bear", hint:"It is a wild animal."},
-  {cat:"Mixed", emoji:"🧠", q:"Which one is a thing?", o:["Cup","Cow","Chennai","Charu"], a:"Cup", hint:"We drink from it."},
-  {cat:"Mixed", emoji:"🧠", q:"Which one is a name?", o:["Tina","Tiger","Table","Town"], a:"Tina", hint:"It is a person’s name."}
+const questionBank=[
+{q:"Dog belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It is a living creature."},
+{q:"Riya belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person's name."},
+{q:"School belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"We go there to learn."},
+{q:"Pencil belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We write with it."},
+{q:"Cat belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It says meow."},
+{q:"Aman belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a boy's name."},
+{q:"Park belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"Children play there."},
+{q:"Book belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We read it."},
+{q:"Lion belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It is a wild animal."},
+{q:"Sita belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person's name."},
+{q:"Zoo belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"Many animals live there."},
+{q:"Chair belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We sit on it."},
+{q:"Elephant belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It has a trunk."},
+{q:"Tina belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person's name."},
+{q:"Home belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"We live there."},
+{q:"Ball belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We play with it."},
+{q:"Fish belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Animal",hint:"It lives in water."},
+{q:"Ravi belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Name",hint:"It is a person's name."},
+{q:"Mumbai belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Place",hint:"It is a city."},
+{q:"Table belongs to which group?",o:["Name","Place","Animal","Thing"],a:"Thing",hint:"We keep things on it."}
 ];
 
-const specialTiles = [
-  {text:"Move Ahead 2", emoji:"🚀", type:"ahead", value:2},
-  {text:"Go Back 2", emoji:"↩️", type:"back", value:2},
-  {text:"Miss a Turn", emoji:"🛑", type:"miss", value:1},
-  {text:"Jump Ahead 3", emoji:"🦘", type:"ahead", value:3}
+const specials=[
+{text:"Move Ahead 2",emoji:"🚀",type:"ahead",value:2},
+{text:"Go Back 2",emoji:"⏪",type:"back",value:2},
+{text:"Jump Ahead 3",emoji:"🦘",type:"ahead",value:3},
+{text:"Miss Turn",emoji:"😴",type:"miss",value:1},
+{text:"Bonus Point",emoji:"🎁",type:"bonus",value:1}
 ];
 
-let tiles = [];
-let playerPos = 0;
-let score = 0;
-let qAnswered = 0;
-let currentQuestion = null;
-let attempts = 0;
-let missTurn = false;
-let locked = false;
-let muted = false;
+let tiles=[],playerPos=0,score=0,qAnswered=0,currentQuestion=null,attempts=0,missTurn=false,locked=false,muted=false,avatar="🦖";
 
-setTimeout(() => showScreen("instructions"), 5000);
+setTimeout(()=>showScreen("instructions"),5000);
 
 function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-function shuffle(arr){
-  return [...arr].sort(() => Math.random() - 0.5);
+function chooseAvatar(a){
+  avatar=a;
+  startGame();
 }
 
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5)}
+
 function startGame(){
-  playerPos = 0;
-  score = 0;
-  qAnswered = 0;
-  attempts = 0;
-  missTurn = false;
-  locked = false;
-
-  const selectedQuestions = shuffle(questionBank).slice(0,14).map(q => ({...q, tileType:"question"}));
-  const selectedSpecials = shuffle(specialTiles).slice(0,4).map(s => ({...s, tileType:"special"}));
-
-  tiles = [
-    {text:"START", emoji:"🏁", tileType:"start"},
-    ...shuffle([...selectedQuestions, ...selectedSpecials]),
-    {text:"FINISH", emoji:"🏆", tileType:"finish"}
+  playerPos=0;score=0;qAnswered=0;attempts=0;missTurn=false;locked=false;
+  const selectedQuestions=shuffle(questionBank).slice(0,13).map(q=>({...q,tileType:"question"}));
+  const selectedSpecials=shuffle(specials).slice(0,5).map(s=>({...s,tileType:"special"}));
+  tiles=[
+    {text:"START",emoji:"🏁",tileType:"start"},
+    ...shuffle([...selectedQuestions,...selectedSpecials]),
+    {text:"FINISH",emoji:"🏆",tileType:"finish"}
   ];
-
-  document.getElementById("questionPanel").style.display = "none";
-  document.getElementById("rollBtn").disabled = false;
-  document.getElementById("dice").textContent = "-";
-
-  renderBoard();
-  updateStats();
-  showScreen("game");
+  document.getElementById("questionPanel").style.display="none";
+  document.getElementById("dice").textContent="-";
+  renderBoard();updateStats();showScreen("game");
 }
 
 function renderBoard(){
-  const board = document.getElementById("board");
-  board.innerHTML = "";
-
-  tiles.forEach((tile, i) => {
-    const div = document.createElement("div");
-    div.className = "tile " + tile.tileType;
-
-    if(tile.tileType === "question"){
-      div.innerHTML = `<div>${tile.emoji}</div><div>${tile.cat}</div>`;
-    } else {
-      div.innerHTML = `<div>${tile.emoji}</div><div>${tile.text}</div>`;
-    }
-
-    if(i === playerPos){
-      const p = document.createElement("div");
-      p.className = "player";
-      p.textContent = "🦖";
+  const board=document.getElementById("board");
+  board.innerHTML="";
+  tiles.forEach((tile,i)=>{
+    const div=document.createElement("div");
+    div.className="tile "+tile.tileType;
+    if(tile.tileType==="question") div.innerHTML=`<div>🧠</div><div>Word Tile</div>`;
+    else div.innerHTML=`<div>${tile.emoji}</div><div>${tile.text}</div>`;
+    if(i===playerPos){
+      const p=document.createElement("div");
+      p.className="player";
+      p.textContent=avatar;
       div.appendChild(p);
     }
-
     board.appendChild(div);
   });
 }
 
 function updateStats(){
-  document.getElementById("score").textContent = score;
-  document.getElementById("qcount").textContent = qAnswered;
-  document.getElementById("pos").textContent =
-    playerPos === 0 ? "Start" : playerPos === tiles.length-1 ? "Finish" : playerPos;
-  document.getElementById("progressFill").style.width =
-    ((playerPos / (tiles.length - 1)) * 100) + "%";
+  document.getElementById("score").textContent=score;
+  document.getElementById("qcount").textContent=qAnswered;
+  document.getElementById("pos").textContent=playerPos===0?"Start":playerPos===tiles.length-1?"Finish":playerPos;
+  document.getElementById("progressFill").style.width=((playerPos/(tiles.length-1))*100)+"%";
 }
 
 function rollDice(){
-  if(locked) return;
-
+  if(locked)return;
   if(missTurn){
-    missTurn = false;
-    showMessage("🛑 Missed turn! Now roll again.");
+    missTurn=false;
+    showMessage("😴 You missed this turn. Roll again!");
     return;
   }
-
-  const dice = Math.floor(Math.random()*6)+1;
-  document.getElementById("dice").textContent = dice;
-
-  playerPos += dice;
-
-  if(playerPos >= tiles.length-1){
-    finishGame();
-    return;
-  }
-
-  renderBoard();
-  updateStats();
-  handleTile();
+  const dice=Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").textContent=dice;
+  playerPos+=dice;
+  if(playerPos>=tiles.length-1){finishGame();return;}
+  renderBoard();updateStats();handleTile();
 }
 
 function handleTile(){
-  const tile = tiles[playerPos];
-
-  if(tile.tileType === "question"){
-    showQuestion(tile);
-  }
-
-  if(tile.tileType === "special"){
-    locked = true;
-    document.getElementById("questionPanel").style.display = "block";
-    document.getElementById("questionText").textContent = tile.emoji + " " + tile.text;
-    document.getElementById("hintText").textContent = "";
-    document.getElementById("options").innerHTML = "";
-    document.getElementById("message").textContent = "Special tile activated!";
-
-    setTimeout(() => {
-      if(tile.type === "ahead") playerPos += tile.value;
-      if(tile.type === "back") playerPos -= tile.value;
-      if(tile.type === "miss") missTurn = true;
-
-      if(playerPos < 0) playerPos = 0;
-
-      if(playerPos >= tiles.length-1){
-        finishGame();
-        return;
-      }
-
-      locked = false;
-      document.getElementById("questionPanel").style.display = "none";
-      renderBoard();
-      updateStats();
-    }, 1200);
+  const tile=tiles[playerPos];
+  if(tile.tileType==="question")showQuestion(tile);
+  if(tile.tileType==="special"){
+    locked=true;
+    document.getElementById("questionPanel").style.display="block";
+    document.getElementById("questionText").textContent=tile.emoji+" "+tile.text;
+    document.getElementById("hintText").textContent="";
+    document.getElementById("options").innerHTML="";
+    document.getElementById("message").textContent="Special tile activated!";
+    setTimeout(()=>{
+      if(tile.type==="ahead")playerPos+=tile.value;
+      if(tile.type==="back")playerPos-=tile.value;
+      if(tile.type==="miss")missTurn=true;
+      if(tile.type==="bonus")score+=tile.value;
+      if(playerPos<0)playerPos=0;
+      if(playerPos>=tiles.length-1){finishGame();return;}
+      locked=false;
+      document.getElementById("questionPanel").style.display="none";
+      renderBoard();updateStats();
+    },1200);
   }
 }
 
 function showQuestion(q){
-  locked = true;
-  currentQuestion = q;
-  attempts = 0;
-
-  document.getElementById("questionPanel").style.display = "block";
-  document.getElementById("questionText").textContent = q.emoji + " " + q.q;
-  document.getElementById("hintText").textContent = "";
-  document.getElementById("message").textContent = "";
-
-  const box = document.getElementById("options");
-  box.innerHTML = "";
-
-  shuffle(q.o).forEach(opt => {
-    const btn = document.createElement("button");
-    btn.className = "option";
-    btn.textContent = opt;
-    btn.onclick = () => checkAnswer(btn,opt);
+  locked=true;currentQuestion=q;attempts=0;
+  document.getElementById("questionPanel").style.display="block";
+  document.getElementById("questionText").textContent=q.q;
+  document.getElementById("hintText").textContent="";
+  document.getElementById("message").textContent="";
+  const box=document.getElementById("options");
+  box.innerHTML="";
+  shuffle(q.o).forEach(opt=>{
+    const btn=document.createElement("button");
+    btn.className="option";
+    btn.textContent=opt;
+    btn.onclick=()=>checkAnswer(btn,opt);
     box.appendChild(btn);
   });
 }
 
-function checkAnswer(btn, answer){
-  if(answer === currentQuestion.a){
+function checkAnswer(btn,answer){
+  if(answer===currentQuestion.a){
     btn.classList.add("correct");
-    score++;
-    qAnswered++;
+    score++;qAnswered++;
     playSound("rightSound");
-    document.getElementById("message").textContent = "✅ Correct! Great job.";
-
+    document.getElementById("message").textContent="✅ Correct!";
     disableOptions();
-
-    setTimeout(() => {
-      locked = false;
-      document.getElementById("questionPanel").style.display = "none";
+    setTimeout(()=>{
+      locked=false;
+      document.getElementById("questionPanel").style.display="none";
       updateStats();
-    }, 1000);
-  } else {
+    },1000);
+  }else{
     attempts++;
     btn.classList.add("wrong");
     playSound("wrongSound");
-
-    if(attempts === 1){
-      document.getElementById("message").textContent = "❌ Try once more.";
-      document.getElementById("hintText").textContent = "💡 Hint: " + currentQuestion.hint;
-      btn.disabled = true;
-    } else {
+    if(attempts===1){
+      document.getElementById("message").textContent="❌ Try once more.";
+      document.getElementById("hintText").textContent="💡 Hint: "+currentQuestion.hint;
+      btn.disabled=true;
+    }else{
       qAnswered++;
-      document.getElementById("message").textContent =
-        "The correct answer is: " + currentQuestion.a;
+      document.getElementById("message").textContent="Answer: "+currentQuestion.a;
       disableOptions();
-
-      setTimeout(() => {
-        locked = false;
-        document.getElementById("questionPanel").style.display = "none";
+      setTimeout(()=>{
+        locked=false;
+        document.getElementById("questionPanel").style.display="none";
         updateStats();
-      }, 1800);
+      },1800);
     }
   }
 }
 
 function disableOptions(){
-  document.querySelectorAll(".option").forEach(b => b.disabled = true);
+  document.querySelectorAll(".option").forEach(b=>b.disabled=true);
 }
 
 function showMessage(text){
-  document.getElementById("questionPanel").style.display = "block";
-  document.getElementById("questionText").textContent = text;
-  document.getElementById("hintText").textContent = "";
-  document.getElementById("options").innerHTML = "";
-  document.getElementById("message").textContent = "";
+  document.getElementById("questionPanel").style.display="block";
+  document.getElementById("questionText").textContent=text;
+  document.getElementById("hintText").textContent="";
+  document.getElementById("options").innerHTML="";
+  document.getElementById("message").textContent="";
 }
 
 function finishGame(){
-  playerPos = tiles.length-1;
-  renderBoard();
-  updateStats();
-  playSound("clapSound");
-
-  document.getElementById("finalScore").textContent = score;
-  document.getElementById("finalQuestions").textContent = qAnswered;
-
-  setTimeout(() => showScreen("end"), 900);
+  playerPos=tiles.length-1;
+  renderBoard();updateStats();playSound("clapSound");
+  document.getElementById("finalScore").textContent=score;
+  document.getElementById("finalQuestions").textContent=qAnswered;
+  setTimeout(()=>showScreen("end"),900);
 }
 
 function toggleMute(){
-  muted = !muted;
-  document.getElementById("muteBtn").textContent = muted ? "🔇 Muted" : "🔊 Sound";
+  muted=!muted;
+  document.getElementById("muteBtn").textContent=muted?"🔇 Muted":"🔊 Sound";
 }
 
 function playSound(id){
-  if(muted) return;
-  const audio = document.getElementById(id);
-  audio.currentTime = 0;
+  if(muted)return;
+  const audio=document.getElementById(id);
+  audio.currentTime=0;
   audio.play().catch(()=>{});
 }
 </script>
-
 </body>
 </html>
