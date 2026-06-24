@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Gender Noun Spinner Game</title>
+<title>Gender Noun Adventure</title>
 
 <style>
 body{
@@ -25,55 +25,64 @@ body{
     z-index:10;
 }
 
-/* GAME AREA */
+/* GAME */
 #game{
     display:none;
     text-align:center;
-    padding:20px;
+    padding:15px;
 }
 
-/* INSTRUCTIONS */
+/* INSTRUCTION */
 #instruction{
-    background:#fff8c6;
+    background:#fff7c2;
     padding:10px;
-    font-size:20px;
+    font-size:18px;
     border-radius:10px;
     margin:10px;
 }
 
 /* SPINNER */
+#spinner{
+    width:180px;
+    margin:10px auto;
+}
+
+/* WORD BOX */
 #wordBox{
-    font-size:40px;
-    margin:20px;
-    padding:20px;
+    font-size:32px;
     background:white;
     display:inline-block;
-    border-radius:15px;
+    padding:12px 20px;
+    border-radius:10px;
+    margin:10px;
 }
 
 /* BUTTONS */
 button{
-    font-size:20px;
-    padding:10px 20px;
-    margin:10px;
+    font-size:18px;
+    padding:10px 15px;
+    margin:8px;
     border-radius:10px;
     border:none;
 }
 
+/* OPTIONS */
+.option{
+    width:70%;
+    background:#2196f3;
+    color:white;
+}
+
+/* CLASSIFY */
 .classify{
     background:#4caf50;
     color:white;
 }
 
-.opposite{
-    background:#2196f3;
-    color:white;
+#level2{
+    display:none;
 }
 
-#nextBtn{
-    display:none;
-    background:orange;
-}
 </style>
 </head>
 
@@ -87,26 +96,45 @@ button{
 <!-- GAME -->
 <div id="game">
 
-    <div id="instruction">
-        Level 1: Spin the wheel, classify the noun and find its opposite gender.
+    <!-- LEVEL 1 -->
+    <div id="level1">
+
+        <div id="instruction">
+            Level 1: Spin the wheel, classify noun and find opposite.
+        </div>
+
+        <img id="spinner" src="assets/spinner.png">
+
+        <div id="wordBox">Press SPIN</div>
+
+        <br>
+
+        <button onclick="spin()">SPIN 🎡</button>
+
+        <div>
+            <button class="classify" onclick="checkGender('male')">Masculine</button>
+            <button class="classify" onclick="checkGender('female')">Feminine</button>
+        </div>
+
+        <h3>Find Opposite</h3>
+        <div id="options"></div>
+
+        <button onclick="goLevel2()" id="nextBtn" style="display:none;background:orange;">NEXT LEVEL</button>
+
     </div>
 
-    <div id="wordBox">Press SPIN</div>
+    <!-- LEVEL 2 -->
+    <div id="level2">
 
-    <br>
+        <div id="instruction">
+            Level 2: WHO AM I?
+        </div>
 
-    <button onclick="spin()">SPIN 🎡</button>
+        <div id="questionBox"></div>
 
-    <div>
-        <button class="classify" onclick="checkGender('male')">Masculine</button>
-        <button class="classify" onclick="checkGender('female')">Feminine</button>
+        <div id="mcq"></div>
+
     </div>
-
-    <div>
-        <button class="opposite" onclick="checkOpposite()">Find Opposite</button>
-    </div>
-
-    <button id="nextBtn" onclick="nextLevel()">NEXT LEVEL</button>
 
 </div>
 
@@ -121,7 +149,8 @@ setTimeout(()=>{
     document.getElementById("game").style.display="block";
 },5000);
 
-// LEVEL 1 WORDS (10 nouns)
+// ---------------- LEVEL 1 ----------------
+
 let words = [
     {word:"king", gender:"male", opposite:"queen"},
     {word:"queen", gender:"female", opposite:"king"},
@@ -129,8 +158,6 @@ let words = [
     {word:"girl", gender:"female", opposite:"boy"},
     {word:"actor", gender:"male", opposite:"actress"},
     {word:"actress", gender:"female", opposite:"actor"},
-    {word:"prince", gender:"male", opposite:"princess"},
-    {word:"princess", gender:"female", opposite:"prince"},
     {word:"lion", gender:"male", opposite:"lioness"},
     {word:"lioness", gender:"female", opposite:"lion"}
 ];
@@ -138,14 +165,13 @@ let words = [
 let current = {};
 let attempts = 3;
 
-// SPIN FUNCTION
 function spin(){
     current = words[Math.floor(Math.random()*words.length)];
     document.getElementById("wordBox").innerText = current.word;
+    generateOptions();
     attempts = 3;
 }
 
-// CHECK GENDER
 function checkGender(choice){
     if(choice === current.gender){
         document.getElementById("correctSound").play();
@@ -157,29 +183,158 @@ function checkGender(choice){
         if(attempts<=0){
             alert("Correct Answer: " + current.gender);
         }else{
-            alert("Try Again! Attempts left: " + attempts);
+            alert("Try Again. Attempts left: " + attempts);
         }
     }
 }
 
-// CHECK OPPOSITE
-function checkOpposite(){
-    let ans = prompt("Type opposite of " + current.word);
+// MCQ opposite
+function generateOptions(){
 
-    if(ans && ans.toLowerCase() === current.opposite){
+    let correct = current.opposite;
+
+    let pool = ["queen","king","girl","boy","actress","actor","lion","lioness"];
+
+    let options = [correct];
+
+    while(options.length < 3){
+        let r = pool[Math.floor(Math.random()*pool.length)];
+        if(!options.includes(r)){
+            options.push(r);
+        }
+    }
+
+    options.sort(()=>Math.random()-0.5);
+
+    let box = document.getElementById("options");
+    box.innerHTML = "";
+
+    options.forEach(o=>{
+        let btn = document.createElement("button");
+        btn.className="option";
+        btn.innerText=o;
+
+        btn.onclick=()=>{
+            checkOpposite(o);
+        };
+
+        box.appendChild(btn);
+    });
+}
+
+function checkOpposite(ans){
+    if(ans === current.opposite){
         document.getElementById("correctSound").play();
         document.getElementById("nextBtn").style.display="inline-block";
     }else{
         document.getElementById("wrongSound").play();
-        alert("Correct Answer: " + current.opposite);
+        alert("Wrong! Try Again");
     }
 }
 
-// LEVEL 2
-function nextLevel(){
-    window.location.href = "#level2";
-    document.getElementById("instruction").innerText =
-    "Level 2: WHO AM I? Choose the correct answer.";
+// ---------------- LEVEL SWITCH ----------------
+
+function goLevel2(){
+    document.getElementById("level1").style.display="none";
+    document.getElementById("spinner").style.display="none";
+    document.getElementById("level2").style.display="block";
+    loadLevel2();
+}
+
+// ---------------- LEVEL 2 ----------------
+
+let qIndex = 0;
+let attempts2 = 3;
+
+let questions = [
+    {
+        q:"I am masculine. I am your parent's brother. Who am I?",
+        options:["Uncle","Father","Brother"],
+        answer:"Uncle"
+    },
+    {
+        q:"I am a masculine animal with a giant furry mane. King of jungle. Who am I?",
+        options:["Tiger","Lion","Leopard"],
+        answer:"Lion"
+    },
+    {
+        q:"I am feminine. I give milk and say moo. Who am I?",
+        options:["Cow","Goat","Buffalo"],
+        answer:"Cow"
+    },
+    {
+        q:"I am feminine. I am your father's daughter. Who am I?",
+        options:["Sister","Aunt","Mother"],
+        answer:"Sister"
+    },
+    {
+        q:"I am feminine. I wear a crown and rule a kingdom. Who am I?",
+        options:["Queen","Princess","Lady"],
+        answer:"Queen"
+    },
+    {
+        q:"I am a boy. My aunt and uncle love me. Who am I?",
+        options:["Boy","Son","Cousin"],
+        answer:"Boy"
+    },
+    {
+        q:"I am a male chicken. I say cock-a-doodle-doo. Who am I?",
+        options:["Hen","Rooster","Duck"],
+        answer:"Rooster"
+    }
+];
+
+function loadLevel2(){
+
+    if(qIndex >= questions.length){
+        document.getElementById("questionBox").innerHTML="🎉 Level Complete!";
+        document.getElementById("mcq").innerHTML="";
+        document.getElementById("clapSound").play();
+        return;
+    }
+
+    attempts2 = 3;
+
+    let q = questions[qIndex];
+
+    document.getElementById("questionBox").innerText = q.q;
+
+    let box = document.getElementById("mcq");
+    box.innerHTML="";
+
+    q.options.forEach(o=>{
+        let btn = document.createElement("button");
+        btn.className="option";
+        btn.innerText=o;
+
+        btn.onclick=()=>{
+            checkLevel2(o);
+        };
+
+        box.appendChild(btn);
+    });
+}
+
+function checkLevel2(ans){
+
+    let correct = questions[qIndex].answer;
+
+    if(ans === correct){
+        document.getElementById("correctSound").play();
+        qIndex++;
+        loadLevel2();
+    }else{
+        attempts2--;
+        document.getElementById("wrongSound").play();
+
+        if(attempts2<=0){
+            alert("Correct Answer: " + correct);
+            qIndex++;
+            loadLevel2();
+        }else{
+            alert("Try Again! Attempts left: " + attempts2);
+        }
+    }
 }
 
 </script>
