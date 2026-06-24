@@ -7,11 +7,19 @@
 <style>
 body {
     margin: 0;
+    padding: 0;
     font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
     background: url("assets/image1.png") no-repeat center center fixed;
     background-size: cover;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-y: auto; /* Allows scrolling if buttons overflow smaller screens */
     color: #333;
+}
+
+/* MAIN GAME WRAPPER */
+.main-wrapper {
+    box-sizing: border-box;
+    padding-bottom: 50px; /* Extra padding at the bottom ensures nothing gets cut off */
 }
 
 /* SPLASH */
@@ -170,11 +178,19 @@ button:active {
 .classify.female { background: #ff4081; box-shadow: 0 6px 0px #f50057; }
 
 /* MCQ OPTIONS BELOW */
+#options {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding: 0 20px;
+}
 .option {
-    width: 28%;
+    min-width: 160px;
     background: #00bcd4;
     color: white;
-    font-size: 20px;
+    font-size: 22px;
     box-shadow: 0 6px 0px #008ba3;
 }
 
@@ -204,55 +220,59 @@ button:active {
 
 <body>
 
-<div id="splash">
-    <img src="assets/innovinelogo.png" width="250">
-</div>
+<div class="main-wrapper">
 
-<div id="game">
-
-<div id="level1">
-
-    <div id="instruction">
-        Level 1: Spin the wheel, classify the noun, and choose its opposite!
+    <div id="splash">
+        <img src="assets/innovinelogo.png" width="250">
     </div>
 
-    <div class="game-container">
-        
-        <div class="wheel-section">
-            <div id="wheel-pointer"></div>
-            <div id="wheel-outer-ring">
-                <div id="wheel-center"></div>
-                <canvas id="wheel-canvas" width="500" height="500"></canvas>
-            </div>
+    <div id="game">
+
+    <div id="level1">
+
+        <div id="instruction">
+            Level 1: Spin the wheel, classify the noun, and choose its opposite!
         </div>
 
-        <div class="controls-section">
-            <div id="wordBox">SPIN THE WHEEL!</div>
+        <div class="game-container">
             
-            <div>
-                <button class="btn-spin" onclick="spin()">SPIN 🎡</button>
-                <button class="btn-stop" onclick="stopWheel()">STOP 🛑</button>
+            <div class="wheel-section">
+                <div id="wheel-pointer"></div>
+                <div id="wheel-outer-ring">
+                    <div id="wheel-center"></div>
+                    <canvas id="wheel-canvas" width="500" height="500"></canvas>
+                </div>
             </div>
 
-            <div class="gender-row">
-                <button class="classify male" onclick="checkGender('male')">Masculine</button>
-                <button class="classify female" onclick="checkGender('female')">Feminine</button>
+            <div class="controls-section">
+                <div id="wordBox">SPIN THE WHEEL!</div>
+                
+                <div>
+                    <button class="btn-spin" onclick="spin()">SPIN 🎡</button>
+                    <button class="btn-stop" onclick="stopWheel()">STOP 🛑</button>
+                </div>
+
+                <div class="gender-row">
+                    <button class="classify male" onclick="checkGender('male')">Masculine</button>
+                    <button class="classify female" onclick="checkGender('female')">Feminine</button>
+                </div>
             </div>
         </div>
+
+        <h3 style="color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); font-size:24px; margin-top:25px; margin-bottom:10px;">Find Opposite</h3>
+        <div id="options"></div>
+
+        <button onclick="goLevel2()" id="nextBtn" style="display:none; background:#4caf50; box-shadow: 0 6px 0px #388e3c; color:white; margin-top:25px;">NEXT LEVEL ➔</button>
+
     </div>
 
-    <h3 style="color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); font-size:24px; margin-top:25px; margin-bottom:10px;">Find Opposite</h3>
-    <div id="options"></div>
+    <div id="level2">
+        <div id="instruction">Level 2: WHO AM I?</div>
+        <div id="questionBox"></div>
+        <div id="mcq"></div>
+    </div>
 
-    <button onclick="goLevel2()" id="nextBtn" style="display:none; background:#4caf50; box-shadow: 0 6px 0px #388e3c; color:white; margin-top:25px;">NEXT LEVEL ➔</button>
-
-</div>
-
-<div id="level2">
-    <div id="instruction">Level 2: WHO AM I?</div>
-    <div id="questionBox"></div>
-    <div id="mcq"></div>
-</div>
+    </div>
 
 </div>
 
@@ -288,7 +308,6 @@ let attempts = 3;
 let currentRotation = 0;
 let isSpinning = false;
 
-// DRAW THE WHEEL AND TEXT ONTO HTML5 CANVAS
 function renderCanvasWheel() {
     const canvas = document.getElementById("wheel-canvas");
     const ctx = canvas.getContext("2d");
@@ -302,7 +321,6 @@ function renderCanvasWheel() {
         const startAngle = i * segmentAngle;
         const endAngle = startAngle + segmentAngle;
 
-        // Draw Wedge background
         ctx.beginPath();
         ctx.moveTo(radius, radius);
         ctx.arc(radius, radius, radius, startAngle, endAngle);
@@ -313,22 +331,18 @@ function renderCanvasWheel() {
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Add Text Labels inside wedges
         ctx.save();
         ctx.translate(radius, radius);
-        // Rotate text path to center of wedge line orientation
         ctx.rotate(startAngle + segmentAngle / 2);
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 24px 'Comic Sans MS'";
-        // Offset the text string outward towards edge ring
         ctx.fillText(w.word.toUpperCase(), radius - 35, 0);
         ctx.restore();
     });
 }
 
-// RUN THE ROTATION CALCULATION
 function spin(){
     if(isSpinning) return;
     
@@ -343,9 +357,6 @@ function spin(){
     
     let segmentDegrees = 360 / words.length;
     let targetSliceCenter = (targetIndex * segmentDegrees) + (segmentDegrees / 2);
-    
-    // Canvas tracks 0 degrees out horizontally right side (3 o'clock). 
-    // To land perfectly on top pointer (12 o'clock), adjust offsets by 270 degrees:
     let finalAngle = (270 - targetSliceCenter + 360) % 360;
     
     currentRotation += 1440 + finalAngle - (currentRotation % 360);
@@ -366,19 +377,18 @@ function stopWheel() {
     isSpinning = false;
     
     current.visited = true;
-    renderCanvasWheel(); // Refresh colors instantly (turns current segment grey)
+    renderCanvasWheel();
     
     document.getElementById("wordBox").innerText = current.word.toUpperCase();
     generateOptions();
     attempts = 3;
 }
 
-// CHECK INLINE CLASSIFICATION ACTION
 function checkGender(choice){
     if(!current.word) return alert("Please spin the wheel first!");
     if(choice === current.gender){
         document.getElementById("correctSound").play();
-        alert(`Correct! "${current.word}" is a ${current.gender} noun.`);
+        alert(`Correct! "${current.word}" is ${current.gender}.`);
     }else{
         attempts--;
         document.getElementById("wrongSound").play();
@@ -390,7 +400,6 @@ function checkGender(choice){
     }
 }
 
-// OPTIONS GENERATION
 function generateOptions(){
     let correct = current.opposite;
     let pool = ["queen","king","girl","boy","mare","horse","cow","bull","goose","gander","princess","prince"];
@@ -419,11 +428,16 @@ function generateOptions(){
 
 function checkOpposite(ans){
     if(ans === current.opposite){
+        // PLAY BOTH CORRECT AND CLAPPING AUDIO SIMULTANEOUSLY
         document.getElementById("correctSound").play();
+        document.getElementById("clapSound").play();
+        
         document.getElementById("nextBtn").style.display = "inline-block";
+        alert("Wonderful! You found the correct opposite!");
     }else{
+        // PLAY WRONG AUDIO
         document.getElementById("wrongSound").play();
-        alert("Try Again!");
+        alert("Oops! Try Again!");
     }
 }
 
@@ -475,6 +489,7 @@ function checkLevel2(ans){
     let correct = questions[qIndex].answer;
     if(ans === correct){
         document.getElementById("correctSound").play();
+        document.getElementById("clapSound").play();
         qIndex++;
         loadLevel2();
     }else{
