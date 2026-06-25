@@ -2,142 +2,144 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pronoun Space Station Challenge</title>
+<title>Astronaut Pronoun Rescue Mission</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
 margin:0;
-font-family:Arial;
 overflow:hidden;
+font-family:Arial;
+background: radial-gradient(circle at bottom,#000814,#001d3d,#000);
 color:white;
-background: radial-gradient(circle at bottom,#020111,#0a1b3d,#000);
 }
 
-/* ⭐ STAR FIELD */
+/* ⭐ SPACE BACKGROUND */
 .star{
 position:absolute;
-width:3px;
-height:3px;
+width:2px;
+height:2px;
 background:white;
 border-radius:50%;
-animation: floatStars linear infinite;
+animation: moveStars linear infinite;
 opacity:0.8;
 }
 
-@keyframes floatStars{
-0%{transform:translateY(0px);}
+@keyframes moveStars{
+0%{transform:translateY(0);}
 100%{transform:translateY(100vh);}
 }
 
-/* 🪐 PLANETS */
-.planet{
+/* 🚀 ASTRONAUT SHIP */
+#ship{
 position:absolute;
-border-radius:50%;
-opacity:0.6;
-animation: drift 20s linear infinite;
-}
-
-@keyframes drift{
-0%{transform:translateX(-100px);}
-100%{transform:translateX(120vw);}
-}
-
-/* UI */
-#gameBox{
-position:relative;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+width:70px;
+transition:0.1s;
 z-index:10;
-text-align:center;
-padding:20px;
 }
 
-h1{
-font-size:28px;
-margin:10px;
-}
-
-#sentence{
-font-size:28px;
-margin:40px 20px;
-min-height:60px;
-}
-
-.options{
-display:flex;
-justify-content:center;
-flex-wrap:wrap;
-gap:15px;
-}
-
-.option{
+/* 🪐 SENTENCE BLOCK */
+#block{
+position:absolute;
+top:20%;
+left:50%;
+transform:translateX(-50%);
 background:white;
 color:black;
-padding:14px 22px;
-border-radius:12px;
-font-size:20px;
-cursor:pointer;
-transition:0.2s;
-min-width:80px;
+padding:18px 25px;
+border-radius:15px;
+font-size:22px;
+min-width:280px;
+text-align:center;
+box-shadow:0 0 10px rgba(255,255,255,0.4);
 }
 
-.option:hover{
+/* OPTIONS */
+#options{
+position:absolute;
+bottom:120px;
+width:100%;
+display:flex;
+justify-content:center;
+gap:20px;
+z-index:10;
+}
+
+.opt{
+background:white;
+color:black;
+padding:12px 18px;
+border-radius:12px;
+cursor:pointer;
+font-size:20px;
+min-width:70px;
+transition:0.2s;
+}
+
+.opt:hover{
 transform:scale(1.1);
 }
 
-#scoreBoard{
+/* SCORE */
+#hud{
+position:absolute;
+top:10px;
+left:10px;
 font-size:18px;
-margin-top:10px;
+z-index:20;
 }
 
+/* FEEDBACK */
 #feedback{
-margin-top:15px;
+position:absolute;
+top:70px;
+width:100%;
+text-align:center;
 font-size:22px;
 height:30px;
 }
 
-button{
-margin-top:20px;
-padding:10px 18px;
+/* RESTART */
+#restart{
+position:absolute;
+top:45%;
+left:50%;
+transform:translate(-50%,-50%);
+display:none;
+padding:12px 20px;
 font-size:18px;
+background:#ffcc00;
 border:none;
 border-radius:10px;
 cursor:pointer;
-}
-
-#restartBtn{
-display:none;
-background:#ffcc00;
+z-index:20;
 }
 </style>
 </head>
 
 <body>
 
-<div id="gameBox">
-
-<h1>🚀 Pronoun Space Station Challenge</h1>
-
-<div id="scoreBoard">
-Score: <span id="score">0</span> | Mission: <span id="qno">1</span>/15
-</div>
-
-<div id="sentence"></div>
-
-<div class="options" id="options"></div>
-
+<div id="hud">Score: <span id="score">0</span> | Mission: <span id="qno">1</span>/15</div>
 <div id="feedback"></div>
 
-<button id="restartBtn" onclick="restartGame()">Play Again 🔄</button>
+<div id="block"></div>
 
-</div>
+<div id="options"></div>
+
+<img id="ship" src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png">
+
+<button id="restart" onclick="restartGame()">🚀 Mission Again</button>
 
 <audio id="correctSound" src="correct.mp3"></audio>
 <audio id="wrongSound" src="wrong.mp3"></audio>
 
 <script>
 
-/* 🌌 CREATE STARS */
-for(let i=0;i<80;i++){
+/* ⭐ STARS */
+for(let i=0;i<100;i++){
 let s=document.createElement("div");
 s.className="star";
 s.style.left=Math.random()*100+"vw";
@@ -146,111 +148,122 @@ s.style.animationDuration=(5+Math.random()*10)+"s";
 document.body.appendChild(s);
 }
 
-/* 🪐 PLANETS */
-const colors=["#ffcc00","#66ccff","#ff6699","#99ff99","#c299ff"];
-for(let i=0;i<5;i++){
-let p=document.createElement("div");
-p.className="planet";
-p.style.width=(40+Math.random()*60)+"px";
-p.style.height=p.style.width;
-p.style.background=colors[i];
-p.style.top=Math.random()*80+"vh";
-p.style.left="-100px";
-p.style.animationDuration=(15+Math.random()*10)+"s";
-document.body.appendChild(p);
-}
-
-/* ❓ QUESTIONS (15) */
-const questions=[
-{t:"Ravi is reading. ___ is happy.",a:"He"},
+/* 🚀 GAME DATA */
+const q=[
+{t:"Ravi is playing. ___ is happy.",a:"He"},
 {t:"Sita is singing. ___ is joyful.",a:"She"},
 {t:"The dog is barking. ___ is loud.",a:"It"},
-{t:"Rahul and Amit are playing. ___ are friends.",a:"They"},
-{t:"The cat is sleeping. ___ is on the bed.",a:"It"},
+{t:"Rahul and Amit are friends. ___ are playing.",a:"They"},
+{t:"The cat is sleeping. ___ is on bed.",a:"It"},
 {t:"Meena is dancing. ___ is on stage.",a:"She"},
-{t:"The bird is flying. ___ is in the sky.",a:"It"},
+{t:"The bird is flying. ___ is in sky.",a:"It"},
 {t:"Aarav is running. ___ is fast.",a:"He"},
-{t:"The teacher is teaching. ___ is kind.",a:"She"},
-{t:"The cars are moving. ___ are fast.",a:"They"},
+{t:"The teacher is kind. ___ helps students.",a:"She"},
+{t:"Cars are moving. ___ are fast.",a:"They"},
 {t:"Riya is drawing. ___ is creative.",a:"She"},
-{t:"The elephant is big. ___ is strong.",a:"It"},
+{t:"Elephant is big. ___ is strong.",a:"It"},
 {t:"John and Tom are here. ___ are late.",a:"They"},
 {t:"The boy is hungry. ___ wants food.",a:"He"},
-{t:"The sun is bright. ___ is hot.",a:"It"}
+{t:"Sun is bright. ___ is hot.",a:"It"}
 ];
 
-let current=0;
+let i=0;
 let score=0;
 
-const sentence=document.getElementById("sentence");
+/* ELEMENTS */
+const block=document.getElementById("block");
 const options=document.getElementById("options");
 const scoreBox=document.getElementById("score");
-const qnoBox=document.getElementById("qno");
+const qno=document.getElementById("qno");
 const feedback=document.getElementById("feedback");
 
-const correctSound=document.getElementById("correctSound");
-const wrongSound=document.getElementById("wrongSound");
+const ship=document.getElementById("ship");
 
-function loadQ(){
-
-if(current>=questions.length){
-endGame();
+/* LOAD QUESTION */
+function load(){
+if(i>=q.length){
+end();
 return;
 }
 
-let q=questions[current];
-
-sentence.innerText=q.t;
+block.innerText=q[i].t;
 options.innerHTML="";
 feedback.innerText="";
 
-["He","She","It","They"].forEach(opt=>{
-let btn=document.createElement("div");
-btn.className="option";
-btn.innerText=opt;
-btn.onclick=()=>check(opt);
-options.appendChild(btn);
+["He","She","It","They"].forEach(v=>{
+let d=document.createElement("div");
+d.className="opt";
+d.innerText=v;
+d.onclick=()=>check(v);
+options.appendChild(d);
 });
 
-qnoBox.innerText=current+1;
+qno.innerText=i+1;
 }
 
-function check(ans){
-let q=questions[current];
+/* CHECK */
+function check(val){
+let ans=q[i].a;
 
-if(ans===q.a){
+if(val===ans){
 score++;
 scoreBox.innerText=score;
-feedback.innerText="✨ Correct!";
-correctSound.play();
+feedback.innerText="✨ Correct Rescue!";
+document.getElementById("correctSound").play();
 }
 else{
-feedback.innerText="❌ Try again!";
-wrongSound.play();
+feedback.innerText="💥 Wrong Signal!";
+document.getElementById("wrongSound").play();
+shakeShip();
 return;
 }
 
-current++;
-setTimeout(loadQ,700);
+i++;
+setTimeout(load,800);
 }
 
-function endGame(){
-sentence.innerText="🚀 Mission Completed!";
+/* SHIP SHAKE */
+function shakeShip(){
+ship.style.transform="translateX(-50%) rotate(10deg)";
+setTimeout(()=>{
+ship.style.transform="translateX(-50%) rotate(-10deg)";
+},100);
+setTimeout(()=>{
+ship.style.transform="translateX(-50%)";
+},200);
+}
+
+/* END */
+function end(){
+block.innerText="🚀 Mission Completed!";
 options.innerHTML="";
 feedback.innerText="Final Score: "+score+"/15";
-document.getElementById("restartBtn").style.display="inline-block";
+document.getElementById("restart").style.display="block";
 }
 
+/* RESTART */
 function restartGame(){
-current=0;
+i=0;
 score=0;
-document.getElementById("restartBtn").style.display="none";
+document.getElementById("restart").style.display="none";
 scoreBox.innerText=0;
-loadQ();
+load();
 }
 
-loadQ();
+/* START */
+load();
 
+/* 🚀 MOVE SHIP */
+document.addEventListener("keydown",(e)=>{
+let left=ship.offsetLeft;
+
+if(e.key==="ArrowLeft"){
+ship.style.left=(left-20)+"px";
+}
+if(e.key==="ArrowRight"){
+ship.style.left=(left+20)+"px";
+}
+});
 </script>
 
 </body>
