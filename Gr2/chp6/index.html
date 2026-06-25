@@ -28,6 +28,7 @@
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             box-sizing: border-box;
+            height: 70px;
         }
 
         .logo {
@@ -50,10 +51,10 @@
         .instruction-box {
             background-color: #eef2f7;
             border-left: 5px solid #3498db;
-            padding: 12px 20px;
-            margin: 15px auto 5px auto;
+            padding: 10px 20px;
+            margin: 10px auto 5px auto;
             border-radius: 4px;
-            max-width: 80%;
+            max-width: 90%;
             text-align: center;
             font-size: 18px;
             font-weight: bold;
@@ -61,7 +62,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* Main Game Area */
+        /* Main Game Area (Optimized for Large Image) */
         .game-container {
             flex: 1;
             display: flex;
@@ -70,27 +71,27 @@
             justify-content: center;
             width: 100%;
             position: relative;
-            padding: 10px 20px;
+            padding: 5px 20px;
             box-sizing: border-box;
+            height: calc(100vh - 200px);
         }
 
         .display-image {
-            max-height: 45vh;
-            max-width: 85%;
+            height: 55vh; /* Increased picture height significantly */
+            max-width: 95%;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             object-fit: contain;
-            margin-bottom: 20px;
         }
 
         /* Horizontal Moving Sentence Area at the bottom */
         .sentence-zone {
             width: 100%;
-            height: 100px;
+            height: 110px;
             position: relative;
             overflow: hidden;
             background-color: #e8f4fd;
-            border-top: 3px dashed #3498db;
+            border-top: 4px solid #3498db;
             display: flex;
             align-items: center;
         }
@@ -98,18 +99,18 @@
         .horizontal-sentence {
             position: absolute;
             white-space: nowrap;
-            left: 100%; /* Start outside the right edge */
+            left: 100%;
             background-color: #ffffff;
             border: 3px solid #3498db;
             border-radius: 30px;
-            padding: 12px 35px;
-            font-size: 22px;
+            padding: 14px 40px;
+            font-size: 24px; /* Larger font for easier tracking */
             font-weight: bold;
             color: #2c3e50;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.12);
             transition: transform 0.2s, background-color 0.2s;
-            animation: scrollLeft 9s linear forwards;
+            animation: scrollLeft 10s linear forwards; /* Smooth horizontal scroll speed */
         }
 
         .horizontal-sentence:hover {
@@ -119,30 +120,27 @@
         }
 
         @keyframes scrollLeft {
-            0% {
-                left: 100%;
-            }
-            100% {
-                left: -100%;
-            }
+            0% { left: 100%; }
+            100% { left: -120%; }
         }
 
-        /* Feedback Overlay */
+        /* Feedback Overlay containers */
         .feedback-box {
             position: absolute;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
-            padding: 15px 30px;
-            border-radius: 10px;
+            padding: 15px 40px;
+            border-radius: 30px;
             z-index: 5;
             text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         .feedback-correct { background-color: #2ecc71; color: white; }
-        .feedback-wrong { background-color: #e74c3c; color: white; margin-bottom: 10px; }
+        .feedback-wrong { background-color: #e74c3c; color: white; margin-bottom: 8px; }
 
         /* Control Buttons */
         .btn {
-            padding: 12px 30px;
+            padding: 12px 35px;
             font-size: 18px;
             background-color: #2ecc71;
             color: white;
@@ -177,7 +175,7 @@
         p { font-size: 18px; color: #7f8c8d; margin-bottom: 20px; }
         
         .big-logo {
-            height: 140px;
+            height: 150px;
         }
     </style>
 </head>
@@ -189,7 +187,7 @@
 
     <div id="splash-screen" class="screen">
         <img src="assets/innovinelogo.png" alt="Innovine Logo" class="big-logo">
-        <h1 style="margin-top:20px; font-size: 28px; color: #34495e;">Welcome to the English Game</h1>
+        <h1 style="margin-top:20px; font-size: 32px; color: #34495e;">Demonstrative Pronouns Game</h1>
     </div>
 
     <header>
@@ -199,7 +197,7 @@
     </header>
 
     <div class="instruction-box">
-        Instructions: Click on the sentences that are grammatically CORRECT and match the picture!
+        Instructions: Look at the picture carefully. Click on the sentences that are grammatically CORRECT!
     </div>
 
     <div class="game-container">
@@ -217,32 +215,32 @@
     </div>
 
     <script>
-        // Game Dataset Configuration
+        // Full Dataset Configuration including all sentences provided
         const gameRounds = [
             {
                 round: 1,
                 image: "assets/image1.jpg",
                 sentences: [
-                    { text: "This girl is reading a book.", isCorrect: true },
-                    { text: "Those birds are flying above the school building.", isCorrect: true },
-                    { text: "This children are playing football in the field.", isCorrect: false }, 
-                    { text: "These flowers are bright and beautiful.", isCorrect: true },
-                    { text: "Those bag are colourful.", isCorrect: false },
-                    { text: "That school building has a red roof.", isCorrect: true },
-                    { text: "That boy is watering the flowers.", isCorrect: false }
+                    { text: "1. This girl is reading a book.", isCorrect: true },
+                    { text: "2. Those birds are flying above the school building.", isCorrect: true },
+                    { text: "3. This children are playing football in the field.", isCorrect: false }, 
+                    { text: "4. These flowers are bright and beautiful.", isCorrect: true },
+                    { text: "5. Those bag are colourful.", isCorrect: false },
+                    { text: "6. That school building has a red roof.", isCorrect: true },
+                    { text: "7. That boy is watering the flowers.", isCorrect: false }
                 ]
             },
             {
                 round: 2,
                 image: "assets/image2.jpg",
                 sentences: [
-                    { text: "This market is full of colourful shops and people.", isCorrect: true },
-                    { text: "These fruits and vegetables are fresh.", isCorrect: true },
-                    { text: "These girl is looking at the flowers.", isCorrect: false }, 
-                    { text: "That woman is buying vegetables from the shopkeeper.", isCorrect: true },
-                    { text: "Those children are going towards the book store.", isCorrect: true },
-                    { text: "This clothing shop is selling bright dresses.", isCorrect: false },
-                    { text: "These boy has a balloon in his hand.", isCorrect: false }
+                    { text: "1. This market is full of colourful shops and people.", isCorrect: true },
+                    { text: "2. These fruits and vegetables are fresh.", isCorrect: true },
+                    { text: "3. These girl is looking at the flowers.", isCorrect: false }, 
+                    { text: "4. That woman is buying vegetables from the shopkeeper.", isCorrect: true },
+                    { text: "5. Those children are going towards the book store.", isCorrect: true },
+                    { text: "6. This clothing shop is selling bright dresses.", isCorrect: false },
+                    { text: "7. These boy has a balloon in his hand.", isCorrect: false }
                 ]
             }
         ];
@@ -256,7 +254,7 @@
         const sndWrong = document.getElementById('snd-wrong');
         const sndClapping = document.getElementById('snd-clapping');
 
-        // Handles the 5-second Splash screen restriction
+        // Handles the 5-second splash screen restriction
         window.onload = function() {
             setTimeout(() => {
                 document.getElementById('splash-screen').classList.add('hidden');
@@ -291,7 +289,7 @@
             element.innerText = sentenceData.text;
             
             element.onclick = () => {
-                element.onclick = null; // Prevent multi-clicks
+                element.onclick = null; // Prevent dual registration clicks
                 clearTimeout(activeTimeout); 
                 
                 if (sentenceData.isCorrect) {
@@ -313,7 +311,7 @@
                     
                     zone.innerHTML = `
                         <div style="display:flex; flex-direction:column; align-items:center; width: 100%;">
-                            <div class="feedback-box feedback-wrong" style="position:static;">Incorrect!</div>
+                            <div class="feedback-box feedback-wrong" style="position:static;">Incorrect sentence!</div>
                             <button class="btn btn-try-again" onclick="retrySentence()">Try Again</button>
                         </div>
                     `;
@@ -322,13 +320,13 @@
 
             zone.appendChild(element);
 
-            // Automatically load next sentence if current one scrolls off screen without being clicked (9 seconds)
+            // Automatically loop/load next entry if ignored (10 seconds total time limit)
             currentSentenceIndex++;
-            activeTimeout = setTimeout(presentNextSentence, 9200);
+            activeTimeout = setTimeout(presentNextSentence, 10200);
         }
 
         function retrySentence() {
-            currentSentenceIndex--; // Step back to replay the same sentence
+            currentSentenceIndex--; // Rewind track index pointer by 1
             presentNextSentence();
         }
 
