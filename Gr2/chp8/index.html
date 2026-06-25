@@ -2,19 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pronoun Astronaut Mission FIXED</title>
+<title>Pronoun Astronaut Mission</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
+html, body {
 margin:0;
+padding:0;
+height:100%;
 overflow:hidden;
-font-family:Arial;
-background: radial-gradient(circle at bottom,#000814,#001d3d,#000);
+background: radial-gradient(circle at bottom, #000814 0%, #000 70%) !important;
+font-family: Arial;
 }
 
-/* 🌌 BACKGROUND LAYER */
-#bg{
+/* 🌌 SPACE LAYER */
+#space{
 position:fixed;
 top:0;
 left:0;
@@ -27,30 +29,17 @@ overflow:hidden;
 /* ⭐ STARS */
 .star{
 position:absolute;
-width:3px;
-height:3px;
+width:2px;
+height:2px;
 background:white;
 border-radius:50%;
 opacity:0.8;
-animation:fall linear infinite;
+animation: twinkle 3s infinite alternate;
 }
 
-@keyframes fall{
-from{transform:translateY(-10vh);}
-to{transform:translateY(110vh);}
-}
-
-/* 🪐 PLANET */
-.planet{
-position:absolute;
-border-radius:50%;
-opacity:0.5;
-animation: drift 25s linear infinite;
-}
-
-@keyframes drift{
-from{transform:translateX(-200px);}
-to{transform:translateX(120vw);}
+@keyframes twinkle{
+0%{opacity:0.2;}
+100%{opacity:1;}
 }
 
 /* HUD */
@@ -59,13 +48,14 @@ position:absolute;
 top:10px;
 left:10px;
 z-index:10;
+background:rgba(0,0,0,0.5);
 color:white;
-background:rgba(0,0,0,0.4);
 padding:8px 12px;
 border-radius:10px;
+font-size:16px;
 }
 
-/* SENTENCE */
+/* QUESTION */
 #block{
 position:absolute;
 top:18%;
@@ -73,10 +63,10 @@ left:50%;
 transform:translateX(-50%);
 background:white;
 color:black;
-padding:18px;
+padding:20px;
 border-radius:12px;
 font-size:22px;
-min-width:300px;
+min-width:320px;
 text-align:center;
 z-index:10;
 }
@@ -100,6 +90,13 @@ padding:12px 18px;
 border-radius:10px;
 cursor:pointer;
 font-size:20px;
+min-width:70px;
+text-align:center;
+transition:0.2s;
+}
+
+.opt:hover{
+transform:scale(1.1);
 }
 
 /* FEEDBACK */
@@ -110,20 +107,22 @@ width:100%;
 text-align:center;
 font-size:22px;
 z-index:10;
+color:white;
 }
 
 /* ASTRONAUT */
 #ship{
 position:absolute;
-bottom:40px;
+bottom:50px;
 left:50%;
 transform:translateX(-50%);
-width:85px;
-z-index:10;
-filter:drop-shadow(0 0 10px white);
+width:110px;
+z-index:20;
+filter: drop-shadow(0 0 15px #00e5ff);
+transition:0.1s;
 }
 
-/* BUTTON */
+/* RESTART */
 #restart{
 position:absolute;
 top:45%;
@@ -134,17 +133,20 @@ padding:14px 22px;
 background:#ffcc00;
 border:none;
 border-radius:10px;
-z-index:20;
 font-size:18px;
+z-index:20;
+cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div id="bg"></div>
+<div id="space"></div>
 
-<div id="hud">Score: <span id="score">0</span> | Mission: <span id="qno">1</span>/15</div>
+<div id="hud">
+Score: <span id="score">0</span> | Mission: <span id="qno">1</span>/15
+</div>
 
 <div id="feedback"></div>
 <div id="block"></div>
@@ -160,30 +162,18 @@ src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png">
 
 <script>
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded",()=>{
 
-/* 🌌 BUILD BACKGROUND */
-const bg=document.getElementById("bg");
+/* 🌌 STARFIELD */
+const space=document.getElementById("space");
 
-for(let i=0;i<120;i++){
+for(let i=0;i<150;i++){
 let s=document.createElement("div");
 s.className="star";
 s.style.left=Math.random()*100+"vw";
 s.style.top=Math.random()*100+"vh";
-s.style.animationDuration=(3+Math.random()*6)+"s";
-bg.appendChild(s);
-}
-
-for(let i=0;i<5;i++){
-let p=document.createElement("div");
-p.className="planet";
-p.style.width=(40+Math.random()*60)+"px";
-p.style.height=p.style.width;
-p.style.background=["#ffcc00","#66ccff","#ff6699","#99ff99","#c299ff"][i];
-p.style.top=Math.random()*80+"vh";
-p.style.left="-100px";
-p.style.animationDuration=(15+Math.random()*10)+"s";
-bg.appendChild(p);
+s.style.animationDuration=(2+Math.random()*3)+"s";
+space.appendChild(s);
 }
 
 /* QUESTIONS */
@@ -205,9 +195,10 @@ const q=[
 {t:"Sun is bright. ___ is hot.",a:"It"}
 ];
 
-let i=0,score=0;
+let i=0;
+let score=0;
 
-/* UI */
+/* ELEMENTS */
 const block=document.getElementById("block");
 const options=document.getElementById("options");
 const scoreBox=document.getElementById("score");
@@ -215,8 +206,12 @@ const qno=document.getElementById("qno");
 const feedback=document.getElementById("feedback");
 const ship=document.getElementById("ship");
 
+/* LOAD */
 function load(){
-if(i>=q.length){ end(); return; }
+if(i>=q.length){
+end();
+return;
+}
 
 block.innerText=q[i].t;
 options.innerHTML="";
@@ -233,21 +228,23 @@ options.appendChild(d);
 qno.innerText=i+1;
 }
 
+/* CHECK */
 function check(v){
 if(v===q[i].a){
 score++;
 scoreBox.innerText=score;
 feedback.innerText="✨ Correct!";
-safePlay("correctSound");
+playSound("correctSound");
 i++;
 setTimeout(load,600);
 }else{
 feedback.innerText="❌ Try Again!";
-safePlay("wrongSound");
+playSound("wrongSound");
 }
 }
 
-function safePlay(id){
+/* SOUND SAFE */
+function playSound(id){
 let a=document.getElementById(id);
 if(a){
 a.currentTime=0;
@@ -255,6 +252,7 @@ a.play().catch(()=>{});
 }
 }
 
+/* END */
 function end(){
 block.innerText="🚀 Mission Completed!";
 options.innerHTML="";
@@ -262,23 +260,31 @@ feedback.innerText="Final Score: "+score+"/15";
 document.getElementById("restart").style.display="block";
 }
 
+/* RESTART */
 window.restartGame=function(){
-i=0;score=0;
+i=0;
+score=0;
 scoreBox.innerText=0;
 document.getElementById("restart").style.display="none";
 load();
 };
 
+/* ASTRONAUT MOVE */
 document.addEventListener("keydown",(e)=>{
 let left=ship.offsetLeft;
-if(e.key==="ArrowLeft") ship.style.left=(left-20)+"px";
-if(e.key==="ArrowRight") ship.style.left=(left+20)+"px";
+
+if(e.key==="ArrowLeft"){
+ship.style.left=(left-20)+"px";
+}
+if(e.key==="ArrowRight"){
+ship.style.left=(left+20)+"px";
+}
 });
 
+/* START */
 load();
 
 });
-
 </script>
 
 </body>
