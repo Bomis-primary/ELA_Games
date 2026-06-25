@@ -1,584 +1,378 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Gender Noun Spinner Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demonstrative Pronouns Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-<style>
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
-    background: url("assets/image1.png") no-repeat center center fixed;
-    background-size: cover;
-    min-height: 100vh;
-    overflow-y: auto;
-    color: #333;
-}
+        /* Header Styles */
+        header {
+            width: 100%;
+            background-color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
 
-.main-wrapper {
-    box-sizing: border-box;
-    padding-bottom: 50px;
-}
+        .logo {
+            height: 50px;
+        }
 
-/* SPLASH */
-#splash {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-}
+        .game-title {
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
 
-/* GAME CONTAINER */
-#game {
-    display: none;
-    text-align: center;
-    padding: 10px;
-    max-width: 900px;
-    margin: 0 auto;
-}
+        .stats {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
 
-/* INSTRUCTION */
-#instruction {
-    background: rgba(255, 246, 199, 0.95);
-    padding: 12px;
-    font-size: 20px;
-    font-weight: bold;
-    border-radius: 15px;
-    margin: 10px auto;
-    border: 3px solid #ff9800;
-    max-width: 600px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
+        /* Instruction Area */
+        .instruction-box {
+            background-color: #eef2f7;
+            border-left: 5px solid #3498db;
+            padding: 10px 20px;
+            margin: 10px auto 0 auto;
+            border-radius: 4px;
+            max-width: 80%;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #34495e;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
 
-/* GAME LAYOUT */
-.game-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    margin-top: 15px;
-    flex-wrap: wrap;
-}
+        /* Main Game Area */
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+            padding: 10px 20px;
+            box-sizing: border-box;
+        }
 
-.wheel-section {
-    position: relative;
-    width: 360px;
-    height: 360px;
-}
+        .display-image {
+            max-height: 40vh;
+            max-width: 80%;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
 
-.controls-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 300px;
-}
+        /* Floating Sentence Area */
+        .sentence-zone {
+            width: 100%;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-/* WHEEL ELEMENTS */
-#wheel-outer-ring {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: radial-gradient(circle, #0084c2 60%, #004b7c 100%);
-    border: 12px solid #005a96;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
+        .floating-sentence {
+            position: absolute;
+            bottom: -80px;
+            background-color: #ffffff;
+            border: 3px solid #3498db;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            transition: transform 0.2s, background-color 0.2s;
+            animation: floatUp 6.5s linear forwards;
+            white-space: nowrap;
+        }
 
-/* CSS handles layout size perfectly */
-#wheel-canvas {
-    width: 330px;
-    height: 330px;
-    border-radius: 50%;
-    transition: transform 6s cubic-bezier(0.25, 1, 0.5, 1);
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-}
+        .floating-sentence:hover {
+            background-color: #ecf0f1;
+            transform: scale(1.05);
+        }
 
-#wheel-center {
-    position: absolute;
-    width: 75px;
-    height: 75px;
-    background: radial-gradient(circle, #2196f3 30%, #0d47a1 100%);
-    border: 4px solid #ffffff;
-    border-radius: 50%;
-    z-index: 3;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-}
+        /* Interactive Feedback Overlay inside the sentence zone */
+        .feedback-overlay {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 10px;
+            animation: fadeInOut 2s ease forwards;
+            z-index: 5;
+        }
+        .feedback-correct { background-color: #2ecc71; color: white; }
+        .feedback-wrong { background-color: #e74c3c; color: white; }
 
-#wheel-pointer {
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0; 
-    height: 0; 
-    border-left: 18px solid transparent;
-    border-right: 18px solid transparent;
-    border-top: 32px solid #ff1744;
-    z-index: 4;
-    filter: drop-shadow(0px 4px 2px rgba(0,0,0,0.3));
-}
+        @keyframes floatUp {
+            0% { bottom: -80px; opacity: 0; }
+            15% { bottom: 20px; opacity: 1; }
+            85% { bottom: 20px; opacity: 1; }
+            100% { bottom: 140px; opacity: 0; }
+        }
 
-/* WORD DISPLAY */
-#wordBox {
-    font-size: 38px;
-    font-weight: bold;
-    color: #2c3e50;
-    background: white;
-    display: inline-block;
-    padding: 10px 40px;
-    border-radius: 20px;
-    margin-bottom: 10px;
-    box-shadow: 0 6px 0px #bdc3c7, 0 10px 20px rgba(0,0,0,0.15);
-    border: 2px solid #ecf0f1;
-    min-width: 200px;
-}
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: scale(0.8); }
+            15% { opacity: 1; transform: scale(1); }
+            85% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.8); }
+        }
 
-/* CRISP FEEDBACK TEXT CONTAINER */
-#feedbackBox {
-    min-height: 35px;
-    font-size: 24px;
-    font-weight: bold;
-    color: #ffffff;
-    text-shadow: 2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000;
-    margin-bottom: 10px;
-}
+        /* Control / Feedback Buttons */
+        .btn {
+            padding: 12px 30px;
+            font-size: 18px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-weight: bold;
+            margin-top: 15px;
+        }
 
-/* BUTTONS */
-button {
-    font-family: 'Comic Sans MS', sans-serif;
-    font-size: 20px;
-    font-weight: bold;
-    padding: 12px 24px;
-    margin: 6px;
-    border-radius: 18px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.1s ease;
-    box-shadow: 0 6px 0px rgba(0,0,0,0.2);
-}
-button:active {
-    transform: translateY(4px);
-    box-shadow: 0 2px 0px rgba(0,0,0,0.2);
-}
+        .btn:hover { background-color: #27ae60; }
+        .btn-try-again { background-color: #e67e22; }
+        .btn-try-again:hover { background-color: #d35400; }
 
-.btn-spin { background: #e040fb; color: white; box-shadow: 0 6px 0px #aa00ff; width: 130px; }
-.btn-stop { background: #ff5252; color: white; box-shadow: 0 6px 0px #d50000; width: 130px; }
+        /* Overlay Screens */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
 
-.gender-row {
-    margin: 10px 0;
-    display: flex;
-    gap: 10px;
-}
-.classify { width: 140px; color: white; font-size: 18px; }
-.classify.male { background: #2196f3; box-shadow: 0 6px 0px #0b7dda; }
-.classify.female { background: #ff4081; box-shadow: 0 6px 0px #f50057; }
-
-/* OPPOSITES LIST */
-#options {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-    padding: 0 20px;
-    min-height: 60px;
-}
-.option {
-    min-width: 160px;
-    background: #00bcd4;
-    color: white;
-    font-size: 22px;
-    box-shadow: 0 6px 0px #008ba3;
-}
-.option:disabled {
-    background: #9e9e9e !important;
-    box-shadow: 0 6px 0px #757575 !important;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-/* LEVEL 2 */
-#questionBox {
-    background: white;
-    padding: 20px;
-    font-size: 26px;
-    border-radius: 15px;
-    margin: 15px auto;
-    font-weight: bold;
-    max-width: 650px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    border-bottom: 5px solid #e0e0e0;
-}
-.l2option {
-    width: 55%;
-    background: #ff9800;
-    color: white;
-    font-size: 22px;
-    box-shadow: 0 6px 0px #e65100;
-}
-
-#level2 { display: none; }
-</style>
+        .hidden { display: none !important; }
+        h1 { color: #2c3e50; margin-bottom: 10px; }
+        p { font-size: 18px; color: #7f8c8d; margin-bottom: 20px; }
+        
+        .big-logo {
+            height: 120px;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="main-wrapper">
+    <audio id="snd-correct" src="correct.mp3"></audio>
+    <audio id="snd-wrong" src="wrong.mp3"></audio>
+    <audio id="snd-clapping" src="clapping.mp3"></audio>
 
-    <div id="splash">
-        <img src="assets/innovinelogo.png" width="250">
+    <div id="splash-screen" class="screen">
+        <img src="innovinelogo.png" alt="Innovine Logo" class="big-logo">
+        <h1 style="margin-top:20px;">Loading Game...</h1>
     </div>
 
-    <div id="game">
+    <header>
+        <img src="innovinelogo.png" alt="Innovine Logo" class="logo">
+        <div class="game-title" id="round-title">Round 1</div>
+        <div class="stats">Score: <span id="score-display">0</span></div>
+    </header>
 
-    <div id="level1">
+    <div class="instruction-box">
+        Instructions: Click on the sentences that are grammatically CORRECT and match the picture!
+    </div>
 
-        <div id="instruction">
-            Level 1: Spin the wheel, classify the noun, and choose its opposite!
-        </div>
+    <div class="game-container">
+        <img id="game-image" src="image1.jpg" alt="Game Scenario" class="display-image">
 
-        <div class="game-container">
+        <div class="sentence-zone" id="sentence-zone">
+            </div>
+    </div>
+
+    <div id="end-screen" class="screen hidden">
+        <img src="innovinelogo.png" alt="Innovine Logo" class="logo" style="margin-bottom: 20px;">
+        <h1>Wonderful Job!</h1>
+        <p id="final-score-text">You scored 0 points.</p>
+        <button class="btn" onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+        // Game Dataset Configuration matching your parameters
+        const gameRounds = [
+            {
+                round: 1,
+                image: "image1.jpg",
+                sentences: [
+                    { text: "This girl is reading a book.", isCorrect: true },
+                    { text: "Those birds are flying above the school building.", isCorrect: true },
+                    { text: "This children are playing football in the field.", isCorrect: false }, 
+                    { text: "These flowers are bright and beautiful.", isCorrect: true },
+                    { text: "Those bag are colourful.", isCorrect: false },
+                    { text: "That school building has a red roof.", isCorrect: true },
+                    { text: "That boy is watering the flowers.", isCorrect: true }
+                ]
+            },
+            {
+                round: 2,
+                image: "image2.jpg",
+                sentences: [
+                    { text: "This market is full of colourful shops and people.", isCorrect: true },
+                    { text: "These fruits and vegetables are fresh.", isCorrect: true },
+                    { text: "These girl is looking at the flowers.", isCorrect: false }, 
+                    { text: "That woman is buying vegetables from the shopkeeper.", isCorrect: true },
+                    { text: "Those children are going towards the book store.", isCorrect: true },
+                    { text: "This clothing shop is selling bright dresses and traditional clothes.", isCorrect: true },
+                    { text: "Those kid have balloons in their hand.", isCorrect: false }
+                ]
+            }
+        ];
+
+        let currentRoundIndex = 0;
+        let currentSentenceIndex = 0;
+        let score = 0;
+        let activeTimeout = null;
+
+        const sndCorrect = document.getElementById('snd-correct');
+        const sndWrong = document.getElementById('snd-wrong');
+        const sndClapping = document.getElementById('snd-clapping');
+
+        // Initial Splash Screen Setup: display Innovine Logo for 5 seconds
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+                setupRound();
+            }, 5000); 
+        };
+
+        function setupRound() {
+            const currentRound = gameRounds[currentRoundIndex];
+            document.getElementById('round-title').innerText = `Round ${currentRound.round}`;
+            document.getElementById('game-image').src = currentRound.image;
+            currentSentenceIndex = 0;
             
-            <div class="wheel-section">
-                <div id="wheel-pointer"></div>
-                <div id="wheel-outer-ring">
-                    <div id="wheel-center"></div>
-                    <canvas id="wheel-canvas"></canvas>
-                </div>
-            </div>
+            setTimeout(presentNextSentence, 1000);
+        }
 
-            <div class="controls-section">
-                <div id="wordBox">READY?</div>
-                <div id="feedbackBox">Press SPIN to start!</div>
+        function presentNextSentence() {
+            const currentRound = gameRounds[currentRoundIndex];
+            const zone = document.getElementById('sentence-zone');
+            zone.innerHTML = ''; // Clean floating arena
+
+            // Check if current image context round tracks are finished
+            if (currentSentenceIndex >= currentRound.sentences.length) {
+                nextRound();
+                return;
+            }
+
+            const sentenceData = currentRound.sentences[currentSentenceIndex];
+            
+            const element = document.createElement('div');
+            element.className = 'floating-sentence';
+            element.innerText = sentenceData.text;
+            
+            element.onclick = () => {
+                element.onclick = null; // Kill listener instantly
+                clearTimeout(activeTimeout); // Pause progression auto-timer 
                 
-                <div>
-                    <button class="btn-spin" onclick="spin()">SPIN 🎡</button>
-                    <button class="btn-stop" onclick="stopWheel()">STOP 🛑</button>
-                </div>
+                if (sentenceData.isCorrect) {
+                    // Play Correct sound AND Clapping sound concurrently
+                    sndCorrect.currentTime = 0;
+                    sndCorrect.play();
+                    sndClapping.currentTime = 0;
+                    sndClapping.play();
 
-                <div class="gender-row">
-                    <button class="classify male" onclick="checkGender('male')">Masculine</button>
-                    <button class="classify female" onclick="checkGender('female')">Feminine</button>
-                </div>
-            </div>
-        </div>
+                    score += 10;
+                    document.getElementById('score-display').innerText = score;
+                    
+                    zone.innerHTML = `<div class="feedback-overlay feedback-correct">Correct! Excellent!</div>`;
+                    setTimeout(advanceTrack, 2000);
+                } else {
+                    // Wrong selection pathway
+                    sndWrong.currentTime = 0;
+                    sndWrong.play();
+                    
+                    zone.innerHTML = `
+                        <div style="display:flex; flex-direction:column; align-items:center;">
+                            <div class="feedback-overlay feedback-wrong" style="position:static; animation:none;">Incorrect sentence!</div>
+                            <button class="btn btn-try-again" onclick="retrySentence()">Try Again</button>
+                        </div>
+                    `;
+                }
+            };
 
-        <h3 style="color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); font-size:24px; margin-top:25px; margin-bottom:10px;">Find Opposite</h3>
-        <div id="options"></div>
+            zone.appendChild(element);
 
-        <button onclick="goLevel2()" id="nextBtn" style="display:none; background:#4caf50; box-shadow: 0 6px 0px #388e3c; color:white; margin-top:25px;">NEXT LEVEL ➔</button>
-
-    </div>
-
-    <div id="level2">
-        <div id="instruction">Level 2: WHO AM I?</div>
-        <div id="questionBox"></div>
-        <div id="mcq"></div>
-    </div>
-
-    </div>
-
-</div>
-
-<audio id="correctSound" src="assets/correct.mp3"></audio>
-<audio id="wrongSound" src="assets/wrong.mp3"></audio>
-<audio id="clapSound" src="assets/clapping.mp3"></audio>
-
-<script>
-setTimeout(() => {
-    document.getElementById("splash").style.display = "none";
-    document.getElementById("game").style.display = "block";
-    setupHighDPIWheel(); 
-}, 3000);
-
-// ---------------- LEVEL 1 DATA ----------------
-let words = [
-    {word:"king", gender:"male", opposite:"queen", color: "#ff5722", visited: false},
-    {word:"fox", gender:"male", opposite:"vixen", color: "#e91e63", visited: false},
-    {word:"boy", gender:"male", opposite:"girl", color: "#9c27b0", visited: false},
-    {word:"mare", gender:"female", opposite:"horse", color: "#2196f3", visited: false},
-    {word:"gander", gender:"male", opposite:"goose", color: "#009688", visited: false},
-    {word:"cow", gender:"female", opposite:"bull", color: "#8bc34a", visited: false},
-    {word:"prince", gender:"male", opposite:"princess", color: "#ffc107", visited: false},
-    {word:"rooster", gender:"male", opposite:"hen", color: "#ff9800", visited: false},
-    {word:"uncle", gender:"male", opposite:"aunt", color: "#00bcd4", visited: false},
-    {word:"lioness", gender:"female", opposite:"lion", color: "#e11d48", visited: false},
-    {word:"tiger", gender:"male", opposite:"tigress", color: "#4f46e5", visited: false},
-    {word:"daughter", gender:"female", opposite:"son", color: "#059669", visited: false}
-];
-
-let current = {};
-let attempts = 3;
-let currentRotation = 0;
-let isSpinning = false;
-let genderIdentified = false;
-
-// HIGH-DPI/RETINA CRITICAL RENDER SCALE MANAGEMENT
-function setupHighDPIWheel() {
-    const canvas = document.getElementById("wheel-canvas");
-    const dpr = window.devicePixelRatio || 1;
-    
-    // Set internal render resolution base grid multi-scaled
-    canvas.width = 500 * dpr;
-    canvas.height = 500 * dpr;
-    
-    // Scale tracking context matrix systems
-    const ctx = canvas.getContext("2d");
-    ctx.scale(dpr, dpr);
-    
-    renderCanvasWheel();
-}
-
-function showFeedback(text, isCorrect = null) {
-    const box = document.getElementById("feedbackBox");
-    box.innerText = text;
-    if(isCorrect === true) box.style.color = "#4caf50";
-    else if(isCorrect === false) box.style.color = "#ff5252";
-    else box.style.color = "#ffffff";
-}
-
-function toggleOppositeButtons(enable) {
-    const optionButtons = document.querySelectorAll("#options .option");
-    optionButtons.forEach(btn => {
-        btn.disabled = !enable;
-    });
-}
-
-function renderCanvasWheel() {
-    const canvas = document.getElementById("wheel-canvas");
-    const ctx = canvas.getContext("2d");
-    const numSegments = words.length;
-    const segmentAngle = (2 * Math.PI) / numSegments;
-    
-    // Match logic layout base
-    const baseSize = canvas.width / (window.devicePixelRatio || 1);
-    const radius = baseSize / 2;
-
-    ctx.clearRect(0, 0, baseSize, baseSize);
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "right";
-
-    words.forEach((w, i) => {
-        const startAngle = i * segmentAngle;
-        const endAngle = startAngle + segmentAngle;
-
-        ctx.beginPath();
-        ctx.moveTo(radius, radius);
-        ctx.arc(radius, radius, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = w.visited ? "#9e9e9e" : w.color;
-        ctx.fill();
-        ctx.strokeStyle = "rgba(255,255,255,0.6)";
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-
-        ctx.save();
-        ctx.translate(radius, radius);
-        ctx.rotate(startAngle + segmentAngle / 2);
-        
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 20px 'Comic Sans MS'";
-        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-        ctx.shadowBlur = 3;
-        ctx.shadowOffsetX = 1;
-        ctx.shadowOffsetY = 1;
-        
-        ctx.fillText(w.word.toUpperCase(), radius - 35, 0);
-        ctx.restore();
-    });
-}
-
-function spin(){
-    if(isSpinning) return;
-    
-    let availableWords = words.filter(w => !w.visited);
-    if(availableWords.length === 0) {
-        words.forEach(w => w.visited = false);
-        availableWords = words;
-    }
-    
-    current = availableWords[Math.floor(Math.random() * availableWords.length)];
-    let targetIndex = words.indexOf(current);
-    
-    let segmentDegrees = 360 / words.length;
-    let targetSliceCenter = (targetIndex * segmentDegrees) + (segmentDegrees / 2);
-    let finalAngle = (270 - targetSliceCenter + 360) % 360;
-    
-    currentRotation += 1440 + finalAngle - (currentRotation % 360);
-    
-    isSpinning = true;
-    genderIdentified = false;
-    
-    let wheel = document.getElementById("wheel-canvas");
-    wheel.style.transform = `rotate(${currentRotation}deg)`;
-    
-    document.getElementById("wordBox").innerText = "???";
-    showFeedback("Spinning...");
-    document.getElementById("options").innerHTML = "";
-    document.getElementById("nextBtn").style.display = "none";
-    
-    setTimeout(() => {
-        if(isSpinning) stopWheel();
-    }, 6000);
-}
-
-function stopWheel() {
-    if(!isSpinning) return;
-    isSpinning = false;
-    
-    current.visited = true;
-    renderCanvasWheel();
-    
-    document.getElementById("wordBox").innerText = current.word.toUpperCase();
-    showFeedback("Classify the noun's gender first!");
-    generateOptions();
-    attempts = 3;
-}
-
-function checkGender(choice){
-    if(!current.word) {
-        showFeedback("Please spin the wheel first!");
-        return;
-    }
-    if(choice === current.gender){
-        document.getElementById("correctSound").play();
-        showFeedback(`Correct! Now find its opposite below!`, true);
-        genderIdentified = true; 
-        toggleOppositeButtons(true);
-    }else{
-        attempts--;
-        document.getElementById("wrongSound").play();
-        if(attempts <= 0){
-            showFeedback(`It is ${current.gender}. Now try the opposites!`, false);
-            genderIdentified = true;
-            toggleOppositeButtons(true);
-        }else{
-            showFeedback(`Try Again! Attempts left: ${attempts}`, false);
+            // Advance automatically if child misses clicking entirely
+            currentSentenceIndex++;
+            activeTimeout = setTimeout(presentNextSentence, 6700);
         }
-    }
-}
 
-function generateOptions(){
-    let correct = current.opposite;
-    let pool = ["queen","king","girl","boy","mare","horse","cow","bull","goose","gander","princess","prince","vixen","fox","hen","rooster","uncle","aunt","lioness","lion","tiger","tigress","daughter","son"];
-    let options = [correct];
-
-    while(options.length < 3){
-        let r = pool[Math.floor(Math.random() * pool.length)];
-        if(!options.includes(r) && r !== current.word){
-            options.push(r);
+        function retrySentence() {
+            // Roll index step counter back by one to loop the sentence sequence back onto screen
+            currentSentenceIndex--;
+            presentNextSentence();
         }
-    }
 
-    options.sort(() => Math.random() - 0.5);
-
-    let box = document.getElementById("options");
-    box.innerHTML = "";
-
-    options.forEach(o => {
-        let btn = document.createElement("button");
-        btn.className = "option";
-        btn.innerText = o.charAt(0).toUpperCase() + o.slice(1);
-        btn.onclick = () => checkOpposite(o);
-        box.appendChild(btn);
-    });
-
-    toggleOppositeButtons(false);
-}
-
-function checkOpposite(ans){
-    if(!genderIdentified){
-        showFeedback("Identify the core gender selection parameters above first!");
-        return;
-    }
-    
-    if(ans === current.opposite){
-        document.getElementById("correctSound").play();
-        document.getElementById("clapSound").play();
-        document.getElementById("nextBtn").style.display = "inline-block";
-        showFeedback("Wonderful! Perfect match!", true);
-    }else{
-        document.getElementById("wrongSound").play();
-        showFeedback("Oops! Wrong choice, try another!", false);
-    }
-}
-
-// ---------------- LEVEL SWITCH ----------------
-function goLevel2(){
-    document.getElementById("level1").style.display = "none";
-    document.getElementById("level2").style.display = "block";
-    loadLevel2();
-}
-
-// ---------------- LEVEL 2 DATA ----------------
-let qIndex = 0;
-let attempts2 = 3;
-
-// Corrected sentences precisely according to grammar specs
-let questions = [
-    { q:"I am masculine. This boy is watering the plants. Who am I?", options:["Uncle","Father","Brother"], answer:"Uncle" },
-    { q:"I am a masculine animal with a giant furry mane. I am king of the jungle. Who am I?", options:["Lion","Tiger","Leopard"], answer:"Lion" },
-    { q:"I am feminine. That clothing shop is selling clothes. Who am I?", options:["Cow","Goat","Buffalo"], answer:"Cow" },
-    { q:"I am feminine. I am your father's daughter. Who am I?", options:["Sister","Aunt","Mother"], answer:"Sister" },
-    { q:"I am feminine. I wear a crown and rule a kingdom. Who am I?", options:["Queen","Princess","Lady"], answer:"Queen" },
-    { q:"I am a boy. My aunt and uncle love me. Who am I?", options:["Boy","Son","Cousin"], answer:"Boy" },
-    { q:"I am a male chicken. I say cock-a-doodle-doo. Who am I?", options:["Hen","Rooster","Duck"], answer:"Rooster" }
-];
-
-function loadLevel2(){
-    if(qIndex >= questions.length){
-        document.getElementById("questionBox").innerHTML = "🎉 Level Complete!";
-        document.getElementById("mcq").innerHTML = "";
-        document.getElementById("clapSound").play();
-        return;
-    }
-
-    attempts2 = 3;
-    let q = questions[qIndex];
-    document.getElementById("questionBox").innerText = q.q;
-
-    let box = document.getElementById("mcq");
-    box.innerHTML = "";
-
-    q.options.forEach(o => {
-        let btn = document.createElement("button");
-        btn.className = "l2option";
-        btn.innerText = o;
-        btn.onclick = () => checkLevel2(o);
-        box.appendChild(btn);
-    });
-}
-
-function checkLevel2(ans){
-    let correct = questions[qIndex].answer;
-    if(ans === correct){
-        document.getElementById("correctSound").play();
-        document.getElementById("clapSound").play();
-        qIndex++;
-        loadLevel2();
-    }else{
-        attempts2--;
-        document.getElementById("wrongSound").play();
-        if(attempts2 <= 0){
-            qIndex++;
-            loadLevel2();
+        function advanceTrack() {
+            currentSentenceIndex++;
+            presentNextSentence();
         }
-    }
-}
-</script>
 
+        function nextRound() {
+            clearTimeout(activeTimeout);
+            currentRoundIndex++;
+            
+            if (currentRoundIndex < gameRounds.length) {
+                setupRound();
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('final-score-text').innerText = `You earned a total of ${score} points!`;
+            sndClapping.currentTime = 0;
+            sndClapping.play();
+        }
+
+        function restartGame() {
+            score = 0;
+            currentRoundIndex = 0;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('end-screen').classList.add('hidden');
+            setupRound();
+        }
+    </script>
 </body>
 </html>
