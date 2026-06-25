@@ -2,50 +2,80 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pronoun Space Rescue Mission</title>
+<title>Pronoun Space Station Challenge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(to bottom,#0b1a3a,#1e3c72);
-color:white;
-text-align:center;
 overflow:hidden;
+color:white;
+background: radial-gradient(circle at bottom,#020111,#0a1b3d,#000);
 }
 
-h1{
-margin:10px;
-font-size:28px;
+/* ⭐ STAR FIELD */
+.star{
+position:absolute;
+width:3px;
+height:3px;
+background:white;
+border-radius:50%;
+animation: floatStars linear infinite;
+opacity:0.8;
 }
 
+@keyframes floatStars{
+0%{transform:translateY(0px);}
+100%{transform:translateY(100vh);}
+}
+
+/* 🪐 PLANETS */
+.planet{
+position:absolute;
+border-radius:50%;
+opacity:0.6;
+animation: drift 20s linear infinite;
+}
+
+@keyframes drift{
+0%{transform:translateX(-100px);}
+100%{transform:translateX(120vw);}
+}
+
+/* UI */
 #gameBox{
-max-width:800px;
-margin:auto;
+position:relative;
+z-index:10;
+text-align:center;
 padding:20px;
 }
 
+h1{
+font-size:28px;
+margin:10px;
+}
+
 #sentence{
-font-size:26px;
-margin:30px 0;
+font-size:28px;
+margin:40px 20px;
 min-height:60px;
 }
 
 .options{
 display:flex;
 justify-content:center;
-gap:20px;
 flex-wrap:wrap;
+gap:15px;
 }
 
 .option{
-background:#ffffff;
-color:#000;
-padding:15px 25px;
+background:white;
+color:black;
+padding:14px 22px;
 border-radius:12px;
-cursor:pointer;
 font-size:20px;
+cursor:pointer;
 transition:0.2s;
 min-width:80px;
 }
@@ -60,14 +90,14 @@ margin-top:10px;
 }
 
 #feedback{
-font-size:22px;
 margin-top:15px;
+font-size:22px;
 height:30px;
 }
 
 button{
 margin-top:20px;
-padding:10px 20px;
+padding:10px 18px;
 font-size:18px;
 border:none;
 border-radius:10px;
@@ -83,12 +113,12 @@ background:#ffcc00;
 
 <body>
 
-<h1>🚀 Pronoun Space Rescue Mission</h1>
-
 <div id="gameBox">
 
+<h1>🚀 Pronoun Space Station Challenge</h1>
+
 <div id="scoreBoard">
-Score: <span id="score">0</span> | Question: <span id="qno">1</span>/5
+Score: <span id="score">0</span> | Mission: <span id="qno">1</span>/15
 </div>
 
 <div id="sentence"></div>
@@ -101,112 +131,125 @@ Score: <span id="score">0</span> | Question: <span id="qno">1</span>/5
 
 </div>
 
-<!-- Sounds -->
 <audio id="correctSound" src="correct.mp3"></audio>
 <audio id="wrongSound" src="wrong.mp3"></audio>
 
 <script>
 
-const questions = [
-{
-text:"Ravi is playing. ___ is happy.",
-answer:"He",
-options:["He","She","It","They"]
-},
-{
-text:"Sita is reading. ___ is in the library.",
-answer:"She",
-options:["He","She","It","They"]
-},
-{
-text:"The dog is barking. ___ is loud.",
-answer:"It",
-options:["He","She","It","They"]
-},
-{
-text:"Ravi and Mohan are friends. ___ are playing.",
-answer:"They",
-options:["He","She","It","They"]
-},
-{
-text:"The cat is sleeping. ___ is on the sofa.",
-answer:"It",
-options:["He","She","It","They"]
+/* 🌌 CREATE STARS */
+for(let i=0;i<80;i++){
+let s=document.createElement("div");
+s.className="star";
+s.style.left=Math.random()*100+"vw";
+s.style.top=Math.random()*100+"vh";
+s.style.animationDuration=(5+Math.random()*10)+"s";
+document.body.appendChild(s);
 }
+
+/* 🪐 PLANETS */
+const colors=["#ffcc00","#66ccff","#ff6699","#99ff99","#c299ff"];
+for(let i=0;i<5;i++){
+let p=document.createElement("div");
+p.className="planet";
+p.style.width=(40+Math.random()*60)+"px";
+p.style.height=p.style.width;
+p.style.background=colors[i];
+p.style.top=Math.random()*80+"vh";
+p.style.left="-100px";
+p.style.animationDuration=(15+Math.random()*10)+"s";
+document.body.appendChild(p);
+}
+
+/* ❓ QUESTIONS (15) */
+const questions=[
+{t:"Ravi is reading. ___ is happy.",a:"He"},
+{t:"Sita is singing. ___ is joyful.",a:"She"},
+{t:"The dog is barking. ___ is loud.",a:"It"},
+{t:"Rahul and Amit are playing. ___ are friends.",a:"They"},
+{t:"The cat is sleeping. ___ is on the bed.",a:"It"},
+{t:"Meena is dancing. ___ is on stage.",a:"She"},
+{t:"The bird is flying. ___ is in the sky.",a:"It"},
+{t:"Aarav is running. ___ is fast.",a:"He"},
+{t:"The teacher is teaching. ___ is kind.",a:"She"},
+{t:"The cars are moving. ___ are fast.",a:"They"},
+{t:"Riya is drawing. ___ is creative.",a:"She"},
+{t:"The elephant is big. ___ is strong.",a:"It"},
+{t:"John and Tom are here. ___ are late.",a:"They"},
+{t:"The boy is hungry. ___ wants food.",a:"He"},
+{t:"The sun is bright. ___ is hot.",a:"It"}
 ];
 
-let current = 0;
-let score = 0;
+let current=0;
+let score=0;
 
-const sentenceBox = document.getElementById("sentence");
-const optionsBox = document.getElementById("options");
-const scoreBox = document.getElementById("score");
-const qnoBox = document.getElementById("qno");
-const feedback = document.getElementById("feedback");
+const sentence=document.getElementById("sentence");
+const options=document.getElementById("options");
+const scoreBox=document.getElementById("score");
+const qnoBox=document.getElementById("qno");
+const feedback=document.getElementById("feedback");
 
-const correctSound = document.getElementById("correctSound");
-const wrongSound = document.getElementById("wrongSound");
+const correctSound=document.getElementById("correctSound");
+const wrongSound=document.getElementById("wrongSound");
 
-function loadQuestion(){
+function loadQ(){
 
-if(current >= questions.length){
+if(current>=questions.length){
 endGame();
 return;
 }
 
-let q = questions[current];
+let q=questions[current];
 
-sentenceBox.innerText = q.text;
-optionsBox.innerHTML = "";
-feedback.innerText = "";
+sentence.innerText=q.t;
+options.innerHTML="";
+feedback.innerText="";
 
-q.options.forEach(opt=>{
-let btn = document.createElement("div");
-btn.classList.add("option");
-btn.innerText = opt;
-btn.onclick = ()=>checkAnswer(opt);
-optionsBox.appendChild(btn);
+["He","She","It","They"].forEach(opt=>{
+let btn=document.createElement("div");
+btn.className="option";
+btn.innerText=opt;
+btn.onclick=()=>check(opt);
+options.appendChild(btn);
 });
 
-qnoBox.innerText = current+1;
+qnoBox.innerText=current+1;
 }
 
-function checkAnswer(selected){
+function check(ans){
+let q=questions[current];
 
-let q = questions[current];
-
-if(selected === q.answer){
+if(ans===q.a){
 score++;
-scoreBox.innerText = score;
-feedback.innerText = "✅ Correct!";
+scoreBox.innerText=score;
+feedback.innerText="✨ Correct!";
 correctSound.play();
 }
 else{
-feedback.innerText = "❌ Try Again!";
+feedback.innerText="❌ Try again!";
 wrongSound.play();
 return;
 }
 
 current++;
-setTimeout(loadQuestion,800);
+setTimeout(loadQ,700);
 }
 
 function endGame(){
-sentenceBox.innerText = "🎉 Mission Completed!";
-optionsBox.innerHTML = "";
-feedback.innerText = "Final Score: " + score + "/" + questions.length;
+sentence.innerText="🚀 Mission Completed!";
+options.innerHTML="";
+feedback.innerText="Final Score: "+score+"/15";
 document.getElementById("restartBtn").style.display="inline-block";
 }
 
 function restartGame(){
-current = 0;
-score = 0;
+current=0;
+score=0;
 document.getElementById("restartBtn").style.display="none";
-scoreBox.innerText = score;
-loadQuestion();
+scoreBox.innerText=0;
+loadQ();
 }
 
-loadQuestion();
+loadQ();
 
 </script>
 
