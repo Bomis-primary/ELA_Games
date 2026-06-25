@@ -2,44 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pronoun Astronaut Mission</title>
+<title>Pronoun Meteor Shooter</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 html, body {
 margin:0;
 padding:0;
-height:100%;
 overflow:hidden;
-background: radial-gradient(circle at bottom, #000814 0%, #000 70%) !important;
+background: radial-gradient(circle at bottom, #000814, #000000);
 font-family: Arial;
 }
 
-/* 🌌 SPACE LAYER */
-#space{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-z-index:0;
-overflow:hidden;
-}
-
-/* ⭐ STARS */
+/* 🌌 STARFIELD */
 .star{
 position:absolute;
 width:2px;
 height:2px;
 background:white;
 border-radius:50%;
-opacity:0.8;
-animation: twinkle 3s infinite alternate;
+opacity:0.7;
+animation: fall 4s linear infinite;
 }
 
-@keyframes twinkle{
-0%{opacity:0.2;}
-100%{opacity:1;}
+@keyframes fall{
+from{transform:translateY(-10vh);}
+to{transform:translateY(110vh);}
 }
 
 /* HUD */
@@ -47,244 +35,225 @@ animation: twinkle 3s infinite alternate;
 position:absolute;
 top:10px;
 left:10px;
-z-index:10;
+z-index:50;
 background:rgba(0,0,0,0.5);
 color:white;
 padding:8px 12px;
 border-radius:10px;
-font-size:16px;
 }
 
 /* QUESTION */
-#block{
+#sentence{
 position:absolute;
-top:18%;
-left:50%;
-transform:translateX(-50%);
-background:white;
-color:black;
-padding:20px;
-border-radius:12px;
-font-size:22px;
-min-width:320px;
-text-align:center;
-z-index:10;
-}
-
-/* OPTIONS */
-#options{
-position:absolute;
-bottom:120px;
-width:100%;
-display:flex;
-justify-content:center;
-gap:15px;
-flex-wrap:wrap;
-z-index:10;
-}
-
-.opt{
-background:white;
-color:black;
-padding:12px 18px;
-border-radius:10px;
-cursor:pointer;
-font-size:20px;
-min-width:70px;
-text-align:center;
-transition:0.2s;
-}
-
-.opt:hover{
-transform:scale(1.1);
-}
-
-/* FEEDBACK */
-#feedback{
-position:absolute;
-top:80px;
+top:10%;
 width:100%;
 text-align:center;
-font-size:22px;
-z-index:10;
+font-size:24px;
 color:white;
+z-index:50;
 }
 
 /* ASTRONAUT */
 #ship{
 position:absolute;
-bottom:50px;
+bottom:40px;
 left:50%;
-transform:translateX(-50%);
 width:110px;
-z-index:20;
-filter: drop-shadow(0 0 15px #00e5ff);
-transition:0.1s;
+transform:translateX(-50%);
+z-index:100;
+filter:drop-shadow(0 0 12px #00e5ff);
 }
 
-/* RESTART */
-#restart{
+/* LASER */
+.laser{
 position:absolute;
-top:45%;
+width:4px;
+height:20px;
+background:yellow;
+bottom:80px;
+left:50%;
+transform:translateX(-50%);
+}
+
+/* METEOR */
+.meteor{
+position:absolute;
+top:-50px;
+padding:10px 15px;
+background:white;
+color:black;
+border-radius:12px;
+font-size:20px;
+font-weight:bold;
+z-index:20;
+animation: drop linear;
+}
+
+@keyframes drop{
+from{transform:translateY(-50px);}
+to{transform:translateY(110vh);}
+}
+
+/* SCORE */
+#scoreBoard{
+position:absolute;
+top:10px;
+right:10px;
+z-index:50;
+background:rgba(0,0,0,0.5);
+color:white;
+padding:8px 12px;
+border-radius:10px;
+}
+
+/* END */
+#end{
+position:absolute;
+top:50%;
 left:50%;
 transform:translate(-50%,-50%);
+color:white;
+font-size:28px;
 display:none;
-padding:14px 22px;
-background:#ffcc00;
-border:none;
-border-radius:10px;
-font-size:18px;
-z-index:20;
-cursor:pointer;
+text-align:center;
 }
 </style>
 </head>
 
 <body>
 
-<div id="space"></div>
-
-<div id="hud">
-Score: <span id="score">0</span> | Mission: <span id="qno">1</span>/15
-</div>
-
-<div id="feedback"></div>
-<div id="block"></div>
-<div id="options"></div>
+<div id="hud"></div>
+<div id="scoreBoard">Score: 0</div>
+<div id="sentence"></div>
 
 <img id="ship"
 src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png">
 
-<button id="restart" onclick="restartGame()">🚀 Restart Mission</button>
+<div id="end"></div>
 
 <audio id="correctSound" src="correct.mp3"></audio>
 <audio id="wrongSound" src="wrong.mp3"></audio>
 
 <script>
 
-document.addEventListener("DOMContentLoaded",()=>{
+let score=0;
+let current=0;
 
-/* 🌌 STARFIELD */
-const space=document.getElementById("space");
+const sentences=[
+{q:"Ravi is playing. ___ is happy.",a:"He"},
+{q:"Sita is singing. ___ is joyful.",a:"She"},
+{q:"The dog is barking. ___ is loud.",a:"It"},
+{q:"Rahul and Amit are friends. ___ are playing.",a:"They"},
+{q:"The cat is sleeping. ___ is on bed.",a:"It"},
+{q:"Meena is dancing. ___ is on stage.",a:"She"},
+{q:"Bird is flying. ___ is in sky.",a:"It"},
+{q:"Aarav is running. ___ is fast.",a:"He"},
+{q:"Teacher is teaching students. ___ helps them.",a:"He/She"},
+{q:"Cars are moving. ___ are fast.",a:"They"},
+{q:"Riya is drawing. ___ is creative.",a:"She"},
+{q:"Elephant is big. ___ is strong.",a:"It"},
+{q:"John and Tom are here. ___ are late.",a:"They"},
+{q:"Boy is hungry. ___ wants food.",a:"He"},
+{q:"Sun is bright. ___ is hot.",a:"It"}
+];
 
-for(let i=0;i<150;i++){
+const options=["He","She","It","They"];
+
+let activeMeteors=[];
+
+/* STAR BACKGROUND */
+for(let i=0;i<80;i++){
 let s=document.createElement("div");
 s.className="star";
 s.style.left=Math.random()*100+"vw";
-s.style.top=Math.random()*100+"vh";
 s.style.animationDuration=(2+Math.random()*3)+"s";
-space.appendChild(s);
+document.body.appendChild(s);
 }
 
-/* QUESTIONS */
-const q=[
-{t:"Ravi is playing. ___ is happy.",a:"He"},
-{t:"Sita is singing. ___ is joyful.",a:"She"},
-{t:"Dog is barking. ___ is loud.",a:"It"},
-{t:"Rahul and Amit are friends. ___ are playing.",a:"They"},
-{t:"Cat is sleeping. ___ is on bed.",a:"It"},
-{t:"Meena is dancing. ___ is on stage.",a:"She"},
-{t:"Bird is flying. ___ is in sky.",a:"It"},
-{t:"Aarav is running. ___ is fast.",a:"He"},
-{t:"Teacher is kind. ___ helps students.",a:"She"},
-{t:"Cars are moving. ___ are fast.",a:"They"},
-{t:"Riya is drawing. ___ is creative.",a:"She"},
-{t:"Elephant is big. ___ is strong.",a:"It"},
-{t:"John and Tom are here. ___ are late.",a:"They"},
-{t:"Boy is hungry. ___ wants food.",a:"He"},
-{t:"Sun is bright. ___ is hot.",a:"It"}
-];
-
-let i=0;
-let score=0;
-
-/* ELEMENTS */
-const block=document.getElementById("block");
-const options=document.getElementById("options");
-const scoreBox=document.getElementById("score");
-const qno=document.getElementById("qno");
-const feedback=document.getElementById("feedback");
-const ship=document.getElementById("ship");
-
-/* LOAD */
 function load(){
-if(i>=q.length){
-end();
+if(current>=sentences.length){
+document.getElementById("end").style.display="block";
+document.getElementById("end").innerHTML="🚀 Mission Complete!<br>Score: "+score;
 return;
 }
 
-block.innerText=q[i].t;
-options.innerHTML="";
-feedback.innerText="";
+document.getElementById("sentence").innerText=sentences[current].q;
 
-["He","She","It","They"].forEach(v=>{
-let d=document.createElement("div");
-d.className="opt";
-d.innerText=v;
-d.onclick=()=>check(v);
-options.appendChild(d);
+spawnMeteors();
+}
+
+function spawnMeteors(){
+activeMeteors.forEach(m=>m.remove());
+activeMeteors=[];
+
+options.forEach(opt=>{
+let m=document.createElement("div");
+m.className="meteor";
+m.innerText=opt;
+
+m.style.left=Math.random()*90+"vw";
+m.style.animationDuration=(5+Math.random()*3)+"s";
+
+m.onclick=()=>check(opt);
+
+document.body.appendChild(m);
+activeMeteors.push(m);
+
+setTimeout(()=>m.remove(),8000);
 });
-
-qno.innerText=i+1;
 }
 
-/* CHECK */
-function check(v){
-if(v===q[i].a){
-score++;
-scoreBox.innerText=score;
-feedback.innerText="✨ Correct!";
-playSound("correctSound");
-i++;
-setTimeout(load,600);
-}else{
-feedback.innerText="❌ Try Again!";
-playSound("wrongSound");
-}
-}
+function check(opt){
 
-/* SOUND SAFE */
-function playSound(id){
-let a=document.getElementById(id);
-if(a){
-a.currentTime=0;
-a.play().catch(()=>{});
-}
-}
+let ans=sentences[current].a;
 
-/* END */
-function end(){
-block.innerText="🚀 Mission Completed!";
-options.innerHTML="";
-feedback.innerText="Final Score: "+score+"/15";
-document.getElementById("restart").style.display="block";
+if(ans==="He/She"){
+if(opt==="He"||opt==="She") correct();
+else wrong();
 }
+else if(opt===ans){
+correct();
+}
+else wrong();
 
-/* RESTART */
-window.restartGame=function(){
-i=0;
-score=0;
-scoreBox.innerText=0;
-document.getElementById("restart").style.display="none";
+current++;
 load();
-};
+}
 
-/* ASTRONAUT MOVE */
+function correct(){
+score++;
+document.getElementById("scoreBoard").innerText="Score: "+score;
+document.getElementById("correctSound").play().catch(()=>{});
+}
+
+function wrong(){
+document.getElementById("wrongSound").play().catch(()=>{});
+}
+
+/* MOVEMENT */
+let ship=document.getElementById("ship");
+
 document.addEventListener("keydown",(e)=>{
 let left=ship.offsetLeft;
 
-if(e.key==="ArrowLeft"){
-ship.style.left=(left-20)+"px";
-}
-if(e.key==="ArrowRight"){
-ship.style.left=(left+20)+"px";
+if(e.key==="ArrowLeft") ship.style.left=(left-20)+"px";
+if(e.key==="ArrowRight") ship.style.left=(left+20)+"px";
+
+if(e.key===" "){
+shoot();
 }
 });
 
-/* START */
+function shoot(){
+let laser=document.createElement("div");
+laser.className="laser";
+document.body.appendChild(laser);
+
+setTimeout(()=>laser.remove(),300);
+}
+
 load();
 
-});
 </script>
 
 </body>
