@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Astronaut Pronoun Rescue Mission</title>
+<title>Astronaut Pronoun Mission</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -14,46 +14,49 @@ background: radial-gradient(circle at bottom,#000814,#001d3d,#000);
 color:white;
 }
 
-/* ⭐ SPACE BACKGROUND */
+/* ⭐ STAR BACKGROUND */
 .star{
 position:absolute;
 width:2px;
 height:2px;
 background:white;
 border-radius:50%;
-animation: moveStars linear infinite;
+animation: floatStars linear infinite;
 opacity:0.8;
+z-index:0;
 }
 
-@keyframes moveStars{
+@keyframes floatStars{
 0%{transform:translateY(0);}
 100%{transform:translateY(100vh);}
 }
 
-/* 🚀 ASTRONAUT SHIP */
-#ship{
+/* HUD */
+#hud{
 position:absolute;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-width:70px;
-transition:0.1s;
+top:10px;
+left:10px;
+font-size:18px;
 z-index:10;
+background:rgba(0,0,0,0.3);
+padding:8px 12px;
+border-radius:10px;
 }
 
-/* 🪐 SENTENCE BLOCK */
+/* SENTENCE */
 #block{
 position:absolute;
-top:20%;
+top:18%;
 left:50%;
 transform:translateX(-50%);
 background:white;
 color:black;
-padding:18px 25px;
+padding:20px;
 border-radius:15px;
 font-size:22px;
-min-width:280px;
+min-width:300px;
 text-align:center;
+z-index:10;
 box-shadow:0 0 10px rgba(255,255,255,0.4);
 }
 
@@ -64,8 +67,9 @@ bottom:120px;
 width:100%;
 display:flex;
 justify-content:center;
-gap:20px;
+gap:15px;
 z-index:10;
+flex-wrap:wrap;
 }
 
 .opt{
@@ -76,6 +80,7 @@ border-radius:12px;
 cursor:pointer;
 font-size:20px;
 min-width:70px;
+text-align:center;
 transition:0.2s;
 }
 
@@ -83,23 +88,27 @@ transition:0.2s;
 transform:scale(1.1);
 }
 
-/* SCORE */
-#hud{
-position:absolute;
-top:10px;
-left:10px;
-font-size:18px;
-z-index:20;
-}
-
 /* FEEDBACK */
 #feedback{
 position:absolute;
-top:70px;
+top:80px;
 width:100%;
 text-align:center;
 font-size:22px;
+z-index:10;
 height:30px;
+}
+
+/* ASTRONAUT */
+#ship{
+position:absolute;
+bottom:40px;
+left:50%;
+transform:translateX(-50%);
+width:90px;
+z-index:20;
+transition:0.1s;
+filter:drop-shadow(0 0 10px white);
 }
 
 /* RESTART */
@@ -109,7 +118,7 @@ top:45%;
 left:50%;
 transform:translate(-50%,-50%);
 display:none;
-padding:12px 20px;
+padding:14px 22px;
 font-size:18px;
 background:#ffcc00;
 border:none;
@@ -122,16 +131,18 @@ z-index:20;
 
 <body>
 
-<div id="hud">Score: <span id="score">0</span> | Mission: <span id="qno">1</span>/15</div>
+<div id="hud">
+Score: <span id="score">0</span> | Mission: <span id="qno">1</span>/15
+</div>
+
 <div id="feedback"></div>
-
 <div id="block"></div>
-
 <div id="options"></div>
 
-<img id="ship" src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png">
+<img id="ship"
+src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png">
 
-<button id="restart" onclick="restartGame()">🚀 Mission Again</button>
+<button id="restart" onclick="restartGame()">🚀 Restart Mission</button>
 
 <audio id="correctSound" src="correct.mp3"></audio>
 <audio id="wrongSound" src="wrong.mp3"></audio>
@@ -139,7 +150,7 @@ z-index:20;
 <script>
 
 /* ⭐ STARS */
-for(let i=0;i<100;i++){
+for(let i=0;i<80;i++){
 let s=document.createElement("div");
 s.className="star";
 s.style.left=Math.random()*100+"vw";
@@ -148,7 +159,7 @@ s.style.animationDuration=(5+Math.random()*10)+"s";
 document.body.appendChild(s);
 }
 
-/* 🚀 GAME DATA */
+/* QUESTIONS */
 const q=[
 {t:"Ravi is playing. ___ is happy.",a:"He"},
 {t:"Sita is singing. ___ is joyful.",a:"She"},
@@ -156,14 +167,14 @@ const q=[
 {t:"Rahul and Amit are friends. ___ are playing.",a:"They"},
 {t:"The cat is sleeping. ___ is on bed.",a:"It"},
 {t:"Meena is dancing. ___ is on stage.",a:"She"},
-{t:"The bird is flying. ___ is in sky.",a:"It"},
+{t:"Bird is flying. ___ is in sky.",a:"It"},
 {t:"Aarav is running. ___ is fast.",a:"He"},
-{t:"The teacher is kind. ___ helps students.",a:"She"},
+{t:"Teacher is kind. ___ helps students.",a:"She"},
 {t:"Cars are moving. ___ are fast.",a:"They"},
 {t:"Riya is drawing. ___ is creative.",a:"She"},
 {t:"Elephant is big. ___ is strong.",a:"It"},
 {t:"John and Tom are here. ___ are late.",a:"They"},
-{t:"The boy is hungry. ___ wants food.",a:"He"},
+{t:"Boy is hungry. ___ wants food.",a:"He"},
 {t:"Sun is bright. ___ is hot.",a:"It"}
 ];
 
@@ -176,10 +187,9 @@ const options=document.getElementById("options");
 const scoreBox=document.getElementById("score");
 const qno=document.getElementById("qno");
 const feedback=document.getElementById("feedback");
-
 const ship=document.getElementById("ship");
 
-/* LOAD QUESTION */
+/* LOAD */
 function load(){
 if(i>=q.length){
 end();
@@ -208,29 +218,17 @@ let ans=q[i].a;
 if(val===ans){
 score++;
 scoreBox.innerText=score;
-feedback.innerText="✨ Correct Rescue!";
+feedback.innerText="✨ Correct!";
 document.getElementById("correctSound").play();
 }
 else{
-feedback.innerText="💥 Wrong Signal!";
+feedback.innerText="❌ Try Again!";
 document.getElementById("wrongSound").play();
-shakeShip();
 return;
 }
 
 i++;
-setTimeout(load,800);
-}
-
-/* SHIP SHAKE */
-function shakeShip(){
-ship.style.transform="translateX(-50%) rotate(10deg)";
-setTimeout(()=>{
-ship.style.transform="translateX(-50%) rotate(-10deg)";
-},100);
-setTimeout(()=>{
-ship.style.transform="translateX(-50%)";
-},200);
+setTimeout(load,700);
 }
 
 /* END */
@@ -250,20 +248,19 @@ scoreBox.innerText=0;
 load();
 }
 
-/* START */
-load();
-
-/* 🚀 MOVE SHIP */
+/* MOVE SHIP */
 document.addEventListener("keydown",(e)=>{
 let left=ship.offsetLeft;
 
 if(e.key==="ArrowLeft"){
-ship.style.left=(left-20)+"px";
+ship.style.left=(left-25)+"px";
 }
 if(e.key==="ArrowRight"){
-ship.style.left=(left+20)+"px";
+ship.style.left=(left+25)+"px";
 }
 });
+
+load();
 </script>
 
 </body>
