@@ -314,4 +314,106 @@
 
                 if (item.isCorrect) {
                     onSuccess();
-                    zone.innerHTML = `<div class="
+                    zone.innerHTML = `<div class="feedback-box feedback-correct">Correct! Well done!</div>`;
+                    setTimeout(() => { currentSentIdx++; loadSentence(); }, 2000);
+                } else {
+                    handleWrongPhase1(item);
+                }
+            };
+
+            zone.appendChild(div);
+            currentSentIdx++;
+            timer = setTimeout(loadSentence, 10200);
+        }
+
+        function handleWrongPhase1(item) {
+            sndWrong.play();
+            wrongAttempts++;
+            const zone = document.getElementById('sentence-zone');
+
+            if (wrongAttempts >= 2) {
+                zone.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="feedback-box feedback-wrong">Incorrect!</div>
+                        <div class="reveal-box">The Correct sentence is: ${item.correction}</div>
+                        <button class="btn btn-try-again" style="background-color:#34495e;" onclick="currentSentIdx++; loadSentence();">Continue</button>
+                    </div>`;
+            } else {
+                zone.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="feedback-box feedback-wrong">Incorrect sentence!</div>
+                        <button class="btn btn-try-again" onclick="currentSentIdx--; loadSentence();">Try Again</button>
+                    </div>`;
+            }
+        }
+
+        function startPhase2() {
+            p2Idx = 0;
+            document.getElementById('round-title').innerText = "Phase 2 - Pick the Correct Word";
+            document.getElementById('instruction-text').innerText = "Pick the correct word (This, That, These, Those) to fill the blank!";
+            loadPhase2();
+        }
+
+        function loadPhase2() {
+            const zone = document.getElementById('sentence-zone');
+            if (p2Idx >= phase2Questions.length) {
+                gameOver();
+                return;
+            }
+
+            const q = phase2Questions[p2Idx];
+            document.getElementById('game-image').src = q.image;
+
+            zone.innerHTML = `
+                <div class="phase2-container">
+                    <div class="quiz-sentence">${q.sentence}</div>
+                    <div class="options-grid">
+                        <button class="opt-btn btn-this" onclick="checkP2('This')">This</button>
+                        <button class="opt-btn btn-that" onclick="checkP2('That')">That</button>
+                        <button class="opt-btn btn-these" onclick="checkP2('These')">These</button>
+                        <button class="opt-btn btn-those" onclick="checkP2('Those')">Those</button>
+                    </div>
+                </div>`;
+        }
+
+        function checkP2(choice) {
+            const q = phase2Questions[p2Idx];
+            const zone = document.getElementById('sentence-zone');
+
+            if (choice === q.answer) {
+                onSuccess();
+                zone.innerHTML = `<div class="feedback-box feedback-correct">Excellent! "${choice}" is correct!</div>`;
+                setTimeout(() => { p2Idx++; loadPhase2(); }, 2000);
+            } else {
+                sndWrong.play();
+                zone.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="feedback-box feedback-wrong">Not quite! Try again.</div>
+                        <button class="btn btn-try-again" onclick="loadPhase2()">Try Again</button>
+                    </div>`;
+            }
+        }
+
+        function onSuccess() {
+            sndCorrect.play();
+            sndClapping.play();
+            score += 10;
+            document.getElementById('score-display').innerText = score;
+        }
+
+        function gameOver() {
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('final-score-text').innerText = "Total Score: " + score;
+            sndClapping.play();
+        }
+
+        function restartGame() {
+            score = 0;
+            document.getElementById('score-display').innerText = "0";
+            document.getElementById('end-screen').classList.add('hidden');
+            document.getElementById('instruction-text').innerText = "Instructions: Look at the picture carefully. Click on the sentences that are grammatically CORRECT!";
+            startPhase1();
+        }
+    </script>
+</body>
+</html>
