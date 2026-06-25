@@ -74,7 +74,7 @@
         /* Phase 1: Horizontal Moving Sentence Area */
         .sentence-zone {
             width: 100%;
-            height: 125px;
+            height: 130px;
             position: relative;
             overflow: hidden;
             background-color: #e8f4fd;
@@ -217,7 +217,7 @@
     </div>
 
     <script>
-        // Phase 1 Dataset: Total 17 dynamic running sentences
+        // Phase 1 Dataset: Exactly 6 unique items per image
         const phase1Rounds = [
             {
                 image: "assets/image1.jpg",
@@ -228,10 +228,7 @@
                     { text: "This children are playing football in the field.", isCorrect: false, correction: "These children are playing football in the field." },
                     { text: "These flowers are bright and beautiful.", isCorrect: true },
                     { text: "Those bag are colourful.", isCorrect: false, correction: "Those bags are colourful." },
-                    { text: "That school building has a red roof.", isCorrect: true },
-                    { text: "Those slide is yellow in colour.", isCorrect: false, correction: "That slide is yellow in colour." },
-                    { text: "These playground is very clean and green.", isCorrect: false, correction: "This playground is very clean and green." },
-                    { text: "That clouds are white and fluffy.", isCorrect: false, correction: "Those clouds are white and fluffy." }
+                    { text: "Those slide is yellow in colour.", isCorrect: false, correction: "That slide is yellow in colour." }
                 ]
             },
             {
@@ -243,21 +240,26 @@
                     { text: "These girl is looking at the flowers.", isCorrect: false, correction: "This girl is looking at the flowers." },
                     { text: "That woman is buying vegetables from the shopkeeper.", isCorrect: true },
                     { text: "Those children are going towards the book store.", isCorrect: true },
-                    { text: "This clothing shop is selling bright dresses.", isCorrect: false, correction: "That clothing shop is selling bright dresses." },
-                    { text: "This fruits and vegetables are fresh.", isCorrect: false, correction: "These fruits and vegetables are fresh." },
-                    { text: "Those shopkeeper is selling delicious mangoes.", isCorrect: false, correction: "That shopkeeper is selling delicious mangoes." }
+                    { text: "This fruits and vegetables are fresh.", isCorrect: false, correction: "These fruits and vegetables are fresh." }
                 ]
             }
         ];
 
-        // Phase 2 Dataset: Practice fill-in-the-blanks questions
+        // Phase 2 Dataset: Exactly 5 completely unique questions per image
         const phase2Questions = [
-            { image: "assets/image1.jpg", sentence: "Look up there! _______ birds are soaring high above the roof.", answer: "Those" },
-            { image: "assets/image1.jpg", sentence: "Right here next to me, _______ flowers smell wonderful.", answer: "These" },
-            { image: "assets/image1.jpg", sentence: "_______ large building in the distance is our school.", answer: "That" },
-            { image: "assets/image2.jpg", sentence: "_______ busy market we are standing in is full of colors.", answer: "This" },
-            { image: "assets/image2.jpg", sentence: "Over at that far counter, _______ woman is paying the shopkeeper.", answer: "That" },
-            { image: "assets/image2.jpg", sentence: "Look across the street, _______ children are heading to the bookstore.", answer: "Those" }
+            // Image 1 Questions
+            { image: "assets/image1.jpg", sentence: "_______ large school building over there has a bright red roof.", answer: "That" },
+            { image: "assets/image1.jpg", sentence: "Look right here! _______ grass is very green and clean.", answer: "This" },
+            { image: "assets/image1.jpg", sentence: "Way up high, _______ white clouds are moving slowly across the sky.", answer: "Those" },
+            { image: "assets/image1.jpg", sentence: "The children love to ride down _______ shiny yellow slide.", answer: "That" },
+            { image: "assets/image1.jpg", sentence: "Growing near our feet, _______ small plants have tiny green leaves.", answer: "These" },
+            
+            // Image 2 Questions
+            { image: "assets/image2.jpg", sentence: "_______ clothing shop behind us is selling beautiful dresses.", answer: "That" },
+            { image: "assets/image2.jpg", sentence: "Right in front of me, _______ basket is packed with ripe mangoes.", answer: "This" },
+            { image: "assets/image2.jpg", sentence: "Look at the signs across the street! _______ banners are very bright.", answer: "Those" },
+            { image: "assets/image2.jpg", sentence: "The shopkeeper inside _______ little bookstore is very friendly.", answer: "That" },
+            { image: "assets/image2.jpg", sentence: "Collected on this table, _______ juicy apples look delicious.", answer: "These" }
         ];
 
         let currentRoundIdx = 0;
