@@ -74,7 +74,7 @@
         /* Phase 1: Horizontal Moving Sentence Area */
         .sentence-zone {
             width: 100%;
-            height: 120px;
+            height: 125px;
             position: relative;
             overflow: hidden;
             background-color: #e8f4fd;
@@ -151,7 +151,7 @@
         }
         .feedback-correct { background-color: #2ecc71; color: white; }
         .feedback-wrong { background-color: #e74c3c; color: white; }
-        .reveal-box { background-color: #2ecc71; color: white; font-size: 20px; padding: 10px 25px; border-radius: 8px; margin-top: 5px; font-weight: bold;}
+        .reveal-box { background-color: #2ecc71; color: white; font-size: 22px; padding: 12px 30px; border-radius: 8px; margin-top: 6px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
 
         .btn {
             padding: 12px 35px;
@@ -163,6 +163,7 @@
             cursor: pointer;
             font-weight: bold;
         }
+        .btn-continue { background-color: #34495e; margin-top: 10px; }
         .btn-try-again { background-color: #e67e22; margin-top: 10px; }
 
         /* Screens */
@@ -216,7 +217,7 @@
     </div>
 
     <script>
-        // Phase 1 Dataset: Contains all 14 sentences provided
+        // Phase 1 Dataset: Total 17 dynamic running sentences
         const phase1Rounds = [
             {
                 image: "assets/image1.jpg",
@@ -228,7 +229,9 @@
                     { text: "These flowers are bright and beautiful.", isCorrect: true },
                     { text: "Those bag are colourful.", isCorrect: false, correction: "Those bags are colourful." },
                     { text: "That school building has a red roof.", isCorrect: true },
-                    { text: "Those slide is yellow in colour.", isCorrect: false, correction: "That slide is yellow in colour." }
+                    { text: "Those slide is yellow in colour.", isCorrect: false, correction: "That slide is yellow in colour." },
+                    { text: "These playground is very clean and green.", isCorrect: false, correction: "This playground is very clean and green." },
+                    { text: "That clouds are white and fluffy.", isCorrect: false, correction: "Those clouds are white and fluffy." }
                 ]
             },
             {
@@ -241,12 +244,13 @@
                     { text: "That woman is buying vegetables from the shopkeeper.", isCorrect: true },
                     { text: "Those children are going towards the book store.", isCorrect: true },
                     { text: "This clothing shop is selling bright dresses.", isCorrect: false, correction: "That clothing shop is selling bright dresses." },
-                    { text: "This fruits and vegetables are fresh.", isCorrect: false, correction: "These fruits and vegetables are fresh." }
+                    { text: "This fruits and vegetables are fresh.", isCorrect: false, correction: "These fruits and vegetables are fresh." },
+                    { text: "Those shopkeeper is selling delicious mangoes.", isCorrect: false, correction: "That shopkeeper is selling delicious mangoes." }
                 ]
             }
         ];
 
-        // Phase 2 Dataset: Brand-new custom fill-in-the-blank practice sentences
+        // Phase 2 Dataset: Practice fill-in-the-blanks questions
         const phase2Questions = [
             { image: "assets/image1.jpg", sentence: "Look up there! _______ birds are soaring high above the roof.", answer: "Those" },
             { image: "assets/image1.jpg", sentence: "Right here next to me, _______ flowers smell wonderful.", answer: "These" },
@@ -260,7 +264,6 @@
         let currentSentIdx = 0;
         let p2Idx = 0;
         let score = 0;
-        let wrongAttempts = 0;
         let timer;
 
         const sndCorrect = document.getElementById('snd-correct');
@@ -291,7 +294,6 @@
             const data = phase1Rounds[currentRoundIdx];
             const zone = document.getElementById('sentence-zone');
             zone.innerHTML = '';
-            wrongAttempts = 0;
 
             if (currentSentIdx >= data.sentences.length) {
                 currentRoundIdx++;
@@ -327,24 +329,17 @@
         }
 
         function handleWrongPhase1(item) {
+            sndWrong.currentTime = 0;
             sndWrong.play();
-            wrongAttempts++;
             const zone = document.getElementById('sentence-zone');
 
-            if (wrongAttempts >= 2) {
-                zone.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center;">
-                        <div class="feedback-box feedback-wrong">Incorrect!</div>
-                        <div class="reveal-box">The Correct sentence is: ${item.correction}</div>
-                        <button class="btn btn-try-again" style="background-color:#34495e;" onclick="currentSentIdx++; loadSentence();">Continue</button>
-                    </div>`;
-            } else {
-                zone.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center;">
-                        <div class="feedback-box feedback-wrong">Incorrect sentence!</div>
-                        <button class="btn btn-try-again" onclick="currentSentIdx--; loadSentence();">Try Again</button>
-                    </div>`;
-            }
+            // Instantly plays wrong sound and displays the corrected text layout on screen
+            zone.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <div class="feedback-box feedback-wrong">Incorrect!</div>
+                    <div class="reveal-box">Correct Sentence: ${item.correction}</div>
+                    <button class="btn btn-continue" onclick="loadSentence();">Continue</button>
+                </div>`;
         }
 
         function startPhase2() {
@@ -385,6 +380,7 @@
                 zone.innerHTML = `<div class="feedback-box feedback-correct">Excellent! "${choice}" is correct!</div>`;
                 setTimeout(() => { p2Idx++; loadPhase2(); }, 2000);
             } else {
+                sndWrong.currentTime = 0;
                 sndWrong.play();
                 zone.innerHTML = `
                     <div style="display:flex; flex-direction:column; align-items:center;">
@@ -395,8 +391,8 @@
         }
 
         function onSuccess() {
-            sndCorrect.play();
-            sndClapping.play();
+            sndCorrect.currentTime = 0; sndCorrect.play();
+            sndClapping.currentTime = 0; sndClapping.play();
             score += 10;
             document.getElementById('score-display').innerText = score;
         }
@@ -404,7 +400,7 @@
         function gameOver() {
             document.getElementById('end-screen').classList.remove('hidden');
             document.getElementById('final-score-text').innerText = "Total Score: " + score;
-            sndClapping.play();
+            sndClapping.currentTime = 0; sndClapping.play();
         }
 
         function restartGame() {
