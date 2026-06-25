@@ -1,1 +1,367 @@
-aaaaaa
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demonstrative Pronouns Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header Styles */
+        header {
+            width: 100%;
+            background-color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+
+        .logo {
+            height: 50px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .stats {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* Instruction Area Above Picture */
+        .instruction-box {
+            background-color: #eef2f7;
+            border-left: 5px solid #3498db;
+            padding: 12px 20px;
+            margin: 15px auto 5px auto;
+            border-radius: 4px;
+            max-width: 80%;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #34495e;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Main Game Area */
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+            padding: 10px 20px;
+            box-sizing: border-box;
+        }
+
+        .display-image {
+            max-height: 45vh;
+            max-width: 85%;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+
+        /* Horizontal Moving Sentence Area at the bottom */
+        .sentence-zone {
+            width: 100%;
+            height: 100px;
+            position: relative;
+            overflow: hidden;
+            background-color: #e8f4fd;
+            border-top: 3px dashed #3498db;
+            display: flex;
+            align-items: center;
+        }
+
+        .horizontal-sentence {
+            position: absolute;
+            white-space: nowrap;
+            left: 100%; /* Start outside the right edge */
+            background-color: #ffffff;
+            border: 3px solid #3498db;
+            border-radius: 30px;
+            padding: 12px 35px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background-color 0.2s;
+            animation: scrollLeft 9s linear forwards;
+        }
+
+        .horizontal-sentence:hover {
+            background-color: #f7f9fa;
+            transform: scale(1.03);
+            border-color: #2980b9;
+        }
+
+        @keyframes scrollLeft {
+            0% {
+                left: 100%;
+            }
+            100% {
+                left: -100%;
+            }
+        }
+
+        /* Feedback Overlay */
+        .feedback-box {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px 30px;
+            border-radius: 10px;
+            z-index: 5;
+            text-align: center;
+        }
+        .feedback-correct { background-color: #2ecc71; color: white; }
+        .feedback-wrong { background-color: #e74c3c; color: white; margin-bottom: 10px; }
+
+        /* Control Buttons */
+        .btn {
+            padding: 12px 30px;
+            font-size: 18px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-weight: bold;
+        }
+
+        .btn:hover { background-color: #27ae60; }
+        .btn-try-again { background-color: #e67e22; margin-top: 5px; }
+        .btn-try-again:hover { background-color: #d35400; }
+
+        /* Overlay Screens */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .hidden { display: none !important; }
+        h1 { color: #2c3e50; margin-bottom: 10px; }
+        p { font-size: 18px; color: #7f8c8d; margin-bottom: 20px; }
+        
+        .big-logo {
+            height: 140px;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="snd-correct" src="assets/correct.mp3"></audio>
+    <audio id="snd-wrong" src="assets/wrong.mp3"></audio>
+    <audio id="snd-clapping" src="assets/clapping.mp3"></audio>
+
+    <div id="splash-screen" class="screen">
+        <img src="assets/innovinelogo.png" alt="Innovine Logo" class="big-logo">
+        <h1 style="margin-top:20px; font-size: 28px; color: #34495e;">Welcome to the English Game</h1>
+    </div>
+
+    <header>
+        <img src="assets/innovinelogo.png" alt="Innovine Logo" class="logo">
+        <div class="game-title" id="round-title">Round 1</div>
+        <div class="stats">Score: <span id="score-display">0</span></div>
+    </header>
+
+    <div class="instruction-box">
+        Instructions: Click on the sentences that are grammatically CORRECT and match the picture!
+    </div>
+
+    <div class="game-container">
+        <img id="game-image" src="assets/image1.jpg" alt="Game Scenario" class="display-image">
+
+        <div class="sentence-zone" id="sentence-zone">
+            </div>
+    </div>
+
+    <div id="end-screen" class="screen hidden">
+        <img src="assets/innovinelogo.png" alt="Innovine Logo" class="logo" style="margin-bottom: 20px;">
+        <h1>Wonderful Job!</h1>
+        <p id="final-score-text">You scored 0 points.</p>
+        <button class="btn" onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+        // Game Dataset Configuration
+        const gameRounds = [
+            {
+                round: 1,
+                image: "assets/image1.jpg",
+                sentences: [
+                    { text: "This girl is reading a book.", isCorrect: true },
+                    { text: "Those birds are flying above the school building.", isCorrect: true },
+                    { text: "This children are playing football in the field.", isCorrect: false }, 
+                    { text: "These flowers are bright and beautiful.", isCorrect: true },
+                    { text: "Those bag are colourful.", isCorrect: false },
+                    { text: "That school building has a red roof.", isCorrect: true },
+                    { text: "That boy is watering the flowers.", isCorrect: false }
+                ]
+            },
+            {
+                round: 2,
+                image: "assets/image2.jpg",
+                sentences: [
+                    { text: "This market is full of colourful shops and people.", isCorrect: true },
+                    { text: "These fruits and vegetables are fresh.", isCorrect: true },
+                    { text: "These girl is looking at the flowers.", isCorrect: false }, 
+                    { text: "That woman is buying vegetables from the shopkeeper.", isCorrect: true },
+                    { text: "Those children are going towards the book store.", isCorrect: true },
+                    { text: "This clothing shop is selling bright dresses.", isCorrect: false },
+                    { text: "These boy has a balloon in his hand.", isCorrect: false }
+                ]
+            }
+        ];
+
+        let currentRoundIndex = 0;
+        let currentSentenceIndex = 0;
+        let score = 0;
+        let activeTimeout = null;
+
+        const sndCorrect = document.getElementById('snd-correct');
+        const sndWrong = document.getElementById('snd-wrong');
+        const sndClapping = document.getElementById('snd-clapping');
+
+        // Handles the 5-second Splash screen restriction
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+                setupRound();
+            }, 5000); 
+        };
+
+        function setupRound() {
+            const currentRound = gameRounds[currentRoundIndex];
+            document.getElementById('round-title').innerText = `Round ${currentRound.round}`;
+            document.getElementById('game-image').src = currentRound.image;
+            currentSentenceIndex = 0;
+            
+            setTimeout(presentNextSentence, 500);
+        }
+
+        function presentNextSentence() {
+            const currentRound = gameRounds[currentRoundIndex];
+            const zone = document.getElementById('sentence-zone');
+            zone.innerHTML = ''; 
+
+            // End round if sentences complete
+            if (currentSentenceIndex >= currentRound.sentences.length) {
+                nextRound();
+                return;
+            }
+
+            const sentenceData = currentRound.sentences[currentSentenceIndex];
+            
+            const element = document.createElement('div');
+            element.className = 'horizontal-sentence';
+            element.innerText = sentenceData.text;
+            
+            element.onclick = () => {
+                element.onclick = null; // Prevent multi-clicks
+                clearTimeout(activeTimeout); 
+                
+                if (sentenceData.isCorrect) {
+                    // Play correct sound and clapping sound concurrently
+                    sndCorrect.currentTime = 0;
+                    sndCorrect.play();
+                    sndClapping.currentTime = 0;
+                    sndClapping.play();
+
+                    score += 10;
+                    document.getElementById('score-display').innerText = score;
+                    
+                    zone.innerHTML = `<div class="feedback-box feedback-correct" style="position: relative; margin: auto;">Correct! Excellent!</div>`;
+                    setTimeout(advanceTrack, 2000);
+                } else {
+                    // Play wrong sound and offer Try Again
+                    sndWrong.currentTime = 0;
+                    sndWrong.play();
+                    
+                    zone.innerHTML = `
+                        <div style="display:flex; flex-direction:column; align-items:center; width: 100%;">
+                            <div class="feedback-box feedback-wrong" style="position:static;">Incorrect!</div>
+                            <button class="btn btn-try-again" onclick="retrySentence()">Try Again</button>
+                        </div>
+                    `;
+                }
+            };
+
+            zone.appendChild(element);
+
+            // Automatically load next sentence if current one scrolls off screen without being clicked (9 seconds)
+            currentSentenceIndex++;
+            activeTimeout = setTimeout(presentNextSentence, 9200);
+        }
+
+        function retrySentence() {
+            currentSentenceIndex--; // Step back to replay the same sentence
+            presentNextSentence();
+        }
+
+        function advanceTrack() {
+            currentSentenceIndex++;
+            presentNextSentence();
+        }
+
+        function nextRound() {
+            clearTimeout(activeTimeout);
+            currentRoundIndex++;
+            
+            if (currentRoundIndex < gameRounds.length) {
+                setupRound();
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('final-score-text').innerText = `You earned a total of ${score} points!`;
+            sndClapping.currentTime = 0;
+            sndClapping.play();
+        }
+
+        function restartGame() {
+            score = 0;
+            currentRoundIndex = 0;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('end-screen').classList.add('hidden');
+            setupRound();
+        }
+    </script>
+</body>
+</html>
