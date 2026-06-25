@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demonstrative Pronouns Game</title>
+    <title>English Grammar Game</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -61,7 +61,6 @@
             position: relative;
             padding: 5px 20px;
             box-sizing: border-box;
-            height: calc(100vh - 200px);
         }
 
         .display-image {
@@ -72,7 +71,7 @@
             object-fit: contain;
         }
 
-        /* Horizontal Moving Sentence Area (Phase 1) */
+        /* Phase 1: Horizontal Moving Sentence Area */
         .sentence-zone {
             width: 100%;
             height: 120px;
@@ -103,10 +102,10 @@
 
         @keyframes scrollLeft {
             0% { left: 100%; }
-            100% { left: -120%; }
+            100% { left: -150%; }
         }
 
-        /* Interactive Choice Buttons (Phase 2) */
+        /* Phase 2: Selection Grid */
         .phase2-container {
             display: flex;
             flex-direction: column;
@@ -136,9 +135,7 @@
             border-radius: 12px;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.1s;
         }
-        .opt-btn:active { transform: scale(0.95); }
         .btn-this { background-color: #e74c3c; }
         .btn-that { background-color: #3498db; }
         .btn-these { background-color: #f1c40f; color: #2c3e50; }
@@ -151,13 +148,11 @@
             padding: 12px 35px;
             border-radius: 30px;
             text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         .feedback-correct { background-color: #2ecc71; color: white; }
         .feedback-wrong { background-color: #e74c3c; color: white; }
-        .reveal-box { background-color: #2ecc71; color: white; font-size: 20px; padding: 10px 25px; border-radius: 8px; text-align: center; margin-top: 5px; font-weight: bold;}
+        .reveal-box { background-color: #2ecc71; color: white; font-size: 20px; padding: 10px 25px; border-radius: 8px; margin-top: 5px; font-weight: bold;}
 
-        /* Global Utility Buttons */
         .btn {
             padding: 12px 35px;
             font-size: 18px;
@@ -166,10 +161,9 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             font-weight: bold;
         }
-        .btn-try-again { background-color: #e67e22; margin-top: 8px; }
+        .btn-try-again { background-color: #e67e22; margin-top: 10px; }
 
         /* Screens */
         .screen {
@@ -178,16 +172,15 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 1);
+            background-color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 10;
+            z-index: 100;
         }
         .hidden { display: none !important; }
-        h1 { color: #2c3e50; margin-bottom: 10px; }
-        .big-logo { height: 150px; }
+        .big-logo { height: 180px; width: auto; object-fit: contain; }
     </style>
 </head>
 <body>
@@ -198,12 +191,11 @@
 
     <div id="splash-screen" class="screen">
         <img src="assets/innovinelogo.png" alt="Innovine Logo" class="big-logo">
-        <h1 style="margin-top:20px; font-size: 32px; color: #34495e;">Demonstrative Pronouns Game</h1>
     </div>
 
     <header>
         <img src="assets/innovinelogo.png" alt="Innovine Logo" class="logo">
-        <div class="game-title" id="round-title">Phase 1 - Round 1</div>
+        <div class="game-title" id="round-title">Phase 1</div>
         <div class="stats">Score: <span id="score-display">0</span></div>
     </header>
 
@@ -212,24 +204,23 @@
     </div>
 
     <div class="game-container">
-        <img id="game-image" src="assets/image1.jpg" alt="Game Scenario" class="display-image">
-
+        <img id="game-image" src="assets/image1.jpg" alt="Game Picture" class="display-image">
         <div class="sentence-zone" id="sentence-zone"></div>
     </div>
 
     <div id="end-screen" class="screen hidden">
         <img src="assets/innovinelogo.png" alt="Innovine Logo" class="logo" style="margin-bottom: 20px;">
         <h1>Wonderful Job!</h1>
-        <p id="final-score-text" style="font-size: 22px; font-weight: bold; color: #2c3e50;"></p>
+        <p id="final-score-text" style="font-size: 24px; font-weight: bold; color: #2c3e50;"></p>
         <button class="btn" onclick="restartGame()">Play Again</button>
     </div>
 
     <script>
-        // Phase 1: Moving Sentences Dataset
+        // Phase 1: Moving Sentences
         const phase1Rounds = [
             {
                 image: "assets/image1.jpg",
-                title: "Phase 1 - Round 1",
+                title: "Round 1",
                 sentences: [
                     { text: "Those birds are flying above the school building.", isCorrect: true },
                     { text: "Those slide is yellow in colour.", isCorrect: false, correction: "That slide is yellow in colour." },
@@ -238,7 +229,7 @@
             },
             {
                 image: "assets/image2.jpg",
-                title: "Phase 1 - Round 2",
+                title: "Round 2",
                 sentences: [
                     { text: "This fruits and vegetables are fresh.", isCorrect: false, correction: "These fruits and vegetables are fresh." },
                     { text: "This market is full of colourful shops and people.", isCorrect: true },
@@ -248,7 +239,7 @@
             }
         ];
 
-        // Phase 2: Interactive Adjective Selector Quiz Dataset
+        // Phase 2: Pick the Adjective
         const phase2Questions = [
             { image: "assets/image1.jpg", sentence: "_______ girl is reading a book.", answer: "This" },
             { image: "assets/image1.jpg", sentence: "_______ flowers are bright and beautiful.", answer: "These" },
@@ -256,13 +247,13 @@
             { image: "assets/image2.jpg", sentence: "_______ clothing shop is selling bright dresses.", answer: "This" }
         ];
 
-        let gamePhase = 1; // 1 = Moving sentences, 2 = Fill in the blanks
-        let currentRoundIndex = 0;
-        let currentSentenceIndex = 0;
-        let phase2Index = 0;
+        let currentRoundIdx = 0;
+        let currentSentIdx = 0;
+        let p2Idx = 0;
         let score = 0;
         let wrongAttempts = 0;
-        let activeTimeout = null;
+        let gameActive = false;
+        let timer;
 
         const sndCorrect = document.getElementById('snd-correct');
         const sndWrong = document.getElementById('snd-wrong');
@@ -275,38 +266,146 @@
             }, 5000); 
         };
 
-        /* --- PHASE 1 LOGIC --- */
         function startPhase1() {
-            gamePhase = 1;
-            currentRoundIndex = 0;
-            setupPhase1Round();
+            currentRoundIdx = 0;
+            gameActive = true;
+            setupPhase1();
         }
 
-        function setupPhase1Round() {
-            const data = phase1Rounds[currentRoundIndex];
-            document.getElementById('round-title').innerText = data.title;
+        function setupPhase1() {
+            const data = phase1Rounds[currentRoundIdx];
+            document.getElementById('round-title').innerText = "Phase 1 - " + data.title;
             document.getElementById('game-image').src = data.image;
-            currentSentenceIndex = 0;
-            presentNextSentence();
+            currentSentIdx = 0;
+            loadSentence();
         }
 
-        function presentNextSentence() {
-            const data = phase1Rounds[currentRoundIndex];
+        function loadSentence() {
+            const data = phase1Rounds[currentRoundIdx];
             const zone = document.getElementById('sentence-zone');
             zone.innerHTML = '';
-            wrongAttempts = 0; 
+            wrongAttempts = 0;
 
-            if (currentSentenceIndex >= data.sentences.length) {
-                currentRoundIndex++;
-                if (currentRoundIndex < phase1Rounds.length) {
-                    setupPhase1Round();
+            if (currentSentIdx >= data.sentences.length) {
+                currentRoundIdx++;
+                if (currentRoundIdx < phase1Rounds.length) {
+                    setupPhase1();
                 } else {
                     startPhase2();
                 }
                 return;
             }
 
-            const currentSentence = data.sentences[currentSentenceIndex];
-            const element = document.createElement('div');
-            element.className = 'horizontal-sentence';
-            element.innerText = currentSentence.
+            const item = data.sentences[currentSentIdx];
+            const div = document.createElement('div');
+            div.className = 'horizontal-sentence';
+            div.innerText = item.text;
+
+            div.onclick = () => {
+                div.onclick = null; 
+                clearTimeout(timer);
+
+                if (item.isCorrect) {
+                    onSuccess();
+                    zone.innerHTML = `<div class="feedback-box feedback-correct">Correct! Well done!</div>`;
+                    setTimeout(() => { currentSentIdx++; loadSentence(); }, 2000);
+                } else {
+                    handleWrongPhase1(item);
+                }
+            };
+
+            zone.appendChild(div);
+            currentSentIdx++;
+            timer = setTimeout(loadSentence, 10200);
+        }
+
+        function handleWrongPhase1(item) {
+            sndWrong.play();
+            wrongAttempts++;
+            const zone = document.getElementById('sentence-zone');
+
+            if (wrongAttempts >= 2) {
+                zone.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="feedback-box feedback-wrong">Incorrect!</div>
+                        <div class="reveal-box">The Correct sentence is: ${item.correction}</div>
+                        <button class="btn btn-try-again" style="background-color:#34495e;" onclick="currentSentIdx++; loadSentence();">Continue</button>
+                    </div>`;
+            } else {
+                zone.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="feedback-box feedback-wrong">Incorrect sentence!</div>
+                        <button class="btn btn-try-again" onclick="currentSentIdx--; loadSentence();">Try Again</button>
+                    </div>`;
+            }
+        }
+
+        function startPhase2() {
+            p2Idx = 0;
+            document.getElementById('round-title').innerText = "Phase 2 - Pick the Correct Word";
+            document.getElementById('instruction-text').innerText = "Pick the correct word (This, That, These, Those) to fill the blank!";
+            loadPhase2();
+        }
+
+        function loadPhase2() {
+            const zone = document.getElementById('sentence-zone');
+            if (p2Idx >= phase2Questions.length) {
+                gameOver();
+                return;
+            }
+
+            const q = phase2Questions[p2Idx];
+            document.getElementById('game-image').src = q.image;
+
+            zone.innerHTML = `
+                <div class="phase2-container">
+                    <div class="quiz-sentence">${q.sentence}</div>
+                    <div class="options-grid">
+                        <button class="opt-btn btn-this" onclick="checkP2('This')">This</button>
+                        <button class="opt-btn btn-that" onclick="checkP2('That')">That</button>
+                        <button class="opt-btn btn-these" onclick="checkP2('These')">These</button>
+                        <button class="opt-btn btn-those" onclick="checkP2('Those')">Those</button>
+                    </div>
+                </div>`;
+        }
+
+        function checkP2(choice) {
+            const q = phase2Questions[p2Idx];
+            const zone = document.getElementById('sentence-zone');
+
+            if (choice === q.answer) {
+                onSuccess();
+                zone.innerHTML = `<div class="feedback-box feedback-correct">Excellent! "${choice}" is correct!</div>`;
+                setTimeout(() => { p2Idx++; loadPhase2(); }, 2000);
+            } else {
+                sndWrong.play();
+                zone.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="feedback-box feedback-wrong">Not quite! Try again.</div>
+                        <button class="btn btn-try-again" onclick="loadPhase2()">Try Again</button>
+                    </div>`;
+            }
+        }
+
+        function onSuccess() {
+            sndCorrect.play();
+            sndClapping.play();
+            score += 10;
+            document.getElementById('score-display').innerText = score;
+        }
+
+        function gameOver() {
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('final-score-text').innerText = "Total Score: " + score;
+            sndClapping.play();
+        }
+
+        function restartGame() {
+            score = 0;
+            document.getElementById('score-display').innerText = "0";
+            document.getElementById('end-screen').classList.add('hidden');
+            startPhase1();
+        }
+    </script>
+</body>
+</html>
