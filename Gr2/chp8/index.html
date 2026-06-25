@@ -1,1 +1,214 @@
-2,3,45
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pronoun Space Rescue Mission</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(to bottom,#0b1a3a,#1e3c72);
+color:white;
+text-align:center;
+overflow:hidden;
+}
+
+h1{
+margin:10px;
+font-size:28px;
+}
+
+#gameBox{
+max-width:800px;
+margin:auto;
+padding:20px;
+}
+
+#sentence{
+font-size:26px;
+margin:30px 0;
+min-height:60px;
+}
+
+.options{
+display:flex;
+justify-content:center;
+gap:20px;
+flex-wrap:wrap;
+}
+
+.option{
+background:#ffffff;
+color:#000;
+padding:15px 25px;
+border-radius:12px;
+cursor:pointer;
+font-size:20px;
+transition:0.2s;
+min-width:80px;
+}
+
+.option:hover{
+transform:scale(1.1);
+}
+
+#scoreBoard{
+font-size:18px;
+margin-top:10px;
+}
+
+#feedback{
+font-size:22px;
+margin-top:15px;
+height:30px;
+}
+
+button{
+margin-top:20px;
+padding:10px 20px;
+font-size:18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+#restartBtn{
+display:none;
+background:#ffcc00;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🚀 Pronoun Space Rescue Mission</h1>
+
+<div id="gameBox">
+
+<div id="scoreBoard">
+Score: <span id="score">0</span> | Question: <span id="qno">1</span>/5
+</div>
+
+<div id="sentence"></div>
+
+<div class="options" id="options"></div>
+
+<div id="feedback"></div>
+
+<button id="restartBtn" onclick="restartGame()">Play Again 🔄</button>
+
+</div>
+
+<!-- Sounds -->
+<audio id="correctSound" src="correct.mp3"></audio>
+<audio id="wrongSound" src="wrong.mp3"></audio>
+
+<script>
+
+const questions = [
+{
+text:"Ravi is playing. ___ is happy.",
+answer:"He",
+options:["He","She","It","They"]
+},
+{
+text:"Sita is reading. ___ is in the library.",
+answer:"She",
+options:["He","She","It","They"]
+},
+{
+text:"The dog is barking. ___ is loud.",
+answer:"It",
+options:["He","She","It","They"]
+},
+{
+text:"Ravi and Mohan are friends. ___ are playing.",
+answer:"They",
+options:["He","She","It","They"]
+},
+{
+text:"The cat is sleeping. ___ is on the sofa.",
+answer:"It",
+options:["He","She","It","They"]
+}
+];
+
+let current = 0;
+let score = 0;
+
+const sentenceBox = document.getElementById("sentence");
+const optionsBox = document.getElementById("options");
+const scoreBox = document.getElementById("score");
+const qnoBox = document.getElementById("qno");
+const feedback = document.getElementById("feedback");
+
+const correctSound = document.getElementById("correctSound");
+const wrongSound = document.getElementById("wrongSound");
+
+function loadQuestion(){
+
+if(current >= questions.length){
+endGame();
+return;
+}
+
+let q = questions[current];
+
+sentenceBox.innerText = q.text;
+optionsBox.innerHTML = "";
+feedback.innerText = "";
+
+q.options.forEach(opt=>{
+let btn = document.createElement("div");
+btn.classList.add("option");
+btn.innerText = opt;
+btn.onclick = ()=>checkAnswer(opt);
+optionsBox.appendChild(btn);
+});
+
+qnoBox.innerText = current+1;
+}
+
+function checkAnswer(selected){
+
+let q = questions[current];
+
+if(selected === q.answer){
+score++;
+scoreBox.innerText = score;
+feedback.innerText = "✅ Correct!";
+correctSound.play();
+}
+else{
+feedback.innerText = "❌ Try Again!";
+wrongSound.play();
+return;
+}
+
+current++;
+setTimeout(loadQuestion,800);
+}
+
+function endGame(){
+sentenceBox.innerText = "🎉 Mission Completed!";
+optionsBox.innerHTML = "";
+feedback.innerText = "Final Score: " + score + "/" + questions.length;
+document.getElementById("restartBtn").style.display="inline-block";
+}
+
+function restartGame(){
+current = 0;
+score = 0;
+document.getElementById("restartBtn").style.display="none";
+scoreBox.innerText = score;
+loadQuestion();
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
