@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Helping Verbs Arcade Game</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f2f7ff;
+    text-align: center;
+}
+
+.screen { display: none; padding: 20px; }
+.active { display: block; }
+
+.logo {
+    width: 180px;
+    margin-top: 60px;
+}
+
+button {
+    padding: 12px 20px;
+    margin: 10px;
+    font-size: 18px;
+    border: none;
+    border-radius: 10px;
+    background: #2d7ef7;
+    color: white;
+}
+
+button:active { transform: scale(0.97); }
+
+#questionBox {
+    font-size: 22px;
+    margin: 10px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-around;
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+#arcadeArea {
+    position: relative;
+    height: 320px;
+    background: #eaf3ff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#player {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    width: 70px;
+    height: 22px;
+    background: #2d7ef7;
+    border-radius: 10px;
+    transform: translateX(-50%);
+}
+
+.pin {
+    position: absolute;
+    padding: 8px 10px;
+    background: white;
+    border: 2px solid #333;
+    border-radius: 8px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splash" class="screen active">
+    <img src="assets/innovine-logo.png" class="logo"/>
+</div>
+
+<!-- START -->
+<div id="startScreen" class="screen">
+    <h1>Helping Verbs Arcade</h1>
+    <p>Catch the correct helping verb: <b>is / am / are</b></p>
+    <p>Use ⬅️ ➡️ arrow keys to move</p>
+    <button onclick="startGame()">Start Game</button>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen" class="screen">
+
+    <div class="topbar">
+        <div>Score: <span id="score">0</span></div>
+        <div>Q: <span id="qnum">1</span>/16</div>
+        <div>Time: <span id="time">10</span></div>
+    </div>
+
+    <div id="questionBox"></div>
+
+    <div id="arcadeArea">
+        <div id="player"></div>
+    </div>
+</div>
+
+<!-- END -->
+<div id="endScreen" class="screen">
+    <h1>Game Over 🎉</h1>
+    <h2 id="finalScore"></h2>
+    <button onclick="restart()">Play Again</button>
+</div>
+
+<!-- SOUNDS -->
+<audio id="correctSound" src="assets/correct.mp3"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3"></audio>
+<audio id="clapSound" src="assets/clapping.mp3"></audio>
+
+<script>
+// ================= QUESTIONS =================
+const allQuestions = [
+    {q:"I ___ a student.", a:"am"},
+    {q:"She ___ happy.", a:"is"},
+    {q:"They ___ playing.", a:"are"},
+    {q:"He ___ tall.", a:"is"},
+    {q:"I ___ reading.", a:"am"},
+    {q:"We ___ friends.", a:"are"},
+    {q:"It ___ a dog.", a:"is"},
+    {q:"You ___ kind.", a:"are"},
+    {q:"She ___ my sister.", a:"is"},
+    {q:"I ___ hungry.", a:"am"},
+    {q:"They ___ here.", a:"are"},
+    {q:"He ___ running.", a:"is"},
+    {q:"We ___ ready.", a:"are"},
+    {q:"It ___ raining.", a:"is"},
+    {q:"You ___ late.", a:"are"},
+    {q:"She ___ dancing.", a:"is"},
+    {q:"I ___ going home.", a:"am"},
+    {q:"They ___ teachers.", a:"are"},
+    {q:"He ___ my friend.", a:"is"},
+    {q:"We ___ students.", a:"are"}
+];
+
+// ================= STATE =================
+let questions = [];
+let index = 0;
+let score = 0;
+let time = 10;
+let timer;
+let playerX = 50;
+let pins = [];
+
+// ================= SPLASH =================
+setTimeout(()=>{
+    document.getElementById("splash").classList.remove("active");
+    document.getElementById("startScreen").classList.add("active");
+}, 5000);
+
+// ================= START =================
+function startGame(){
+    document.getElementById("startScreen").classList.remove("active");
+    document.getElementById("gameScreen").classList.add("active");
+
+    questions = allQuestions.sort(()=>Math.random()-0.5).slice(0,16);
+    index = 0;
+    score = 0;
+
+    loadQuestion();
+}
+
+// ================= KEYBOARD =================
+document.addEventListener("keydown", (e)=>{
+    if(e.key === "ArrowLeft") playerX -= 7;
+    if(e.key === "ArrowRight") playerX += 7;
+
+    playerX = Math.max(5, Math.min(95, playerX));
+
+    document.getElementById("player").style.left = playerX + "%";
+
+    checkCatch();
+});
+
+// ================= LOAD QUESTION =================
+function loadQuestion(){
+    if(index >= questions.length){
+        endGame();
+        return;
+    }
+
+    document.getElementById("questionBox").innerText =
+        questions[index].q;
+
+    document.getElementById("score").innerText = score;
+    document.getElementById("qnum").innerText = index+1;
+
+    spawnPins();
+    resetTimer();
+}
+
+// ================= SPAWN PINS =================
+function spawnPins(){
+    const area = document.getElementById("arcadeArea");
+
+    area.innerHTML = "";
+    area.appendChild(document.getElementById("player"));
+
+    let options = ["is","am","are"];
+
+    pins = [];
+
+    for(let i=0;i<9;i++){
+        let val = options[Math.floor(Math.random()*3)];
+
+        let pin = document.createElement("div");
+        pin.className = "pin";
+        pin.innerText = val;
+
+        pin.style.left = (5 + Math.random()*85) + "%";
+        pin.style.top = "-40px";
+
+        area.appendChild(pin);
+
+        pins.push({
+            el: pin,
+            val: val,
+            y: -40,
+            x: parseFloat(pin.style.left)
+        });
+    }
+
+    animatePins();
+}
+
+// ================= ANIMATE =================
+function animatePins(){
+    let interval = setInterval(()=>{
+        pins.forEach(p=>{
+            p.y += 2.5;
+            p.el.style.top = p.y + "px";
+        });
+
+        checkCatch();
+    }, 40);
+
+    setTimeout(()=>clearInterval(interval), 6500);
+}
+
+// ================= CATCH LOGIC =================
+function checkCatch(){
+    let correct = questions[index].a;
+
+    pins.forEach(p=>{
+        if(p.y > 250 && Math.abs(p.x - playerX) < 8){
+            
+            if(p.val === correct){
+                score++;
+                document.getElementById("correctSound").play();
+            } else {
+                document.getElementById("wrongSound").play();
+            }
+
+            index++;
+            loadQuestion();
+        }
+    });
+}
+
+// ================= TIMER =================
+function resetTimer(){
+    clearInterval(timer);
+    time = 10;
+
+    document.getElementById("time").innerText = time;
+
+    timer = setInterval(()=>{
+        time--;
+        document.getElementById("time").innerText = time;
+
+        if(time <= 0){
+            clearInterval(timer);
+            document.getElementById("wrongSound").play();
+            index++;
+            loadQuestion();
+        }
+    },1000);
+}
+
+// ================= END =================
+function endGame(){
+    document.getElementById("gameScreen").classList.remove("active");
+    document.getElementById("endScreen").classList.add("active");
+
+    document.getElementById("finalScore").innerText =
+        `Score: ${score} / ${questions.length}`;
+
+    document.getElementById("clapSound").play();
+}
+
+// ================= RESTART =================
+function restart(){
+    location.reload();
+}
+</script>
+
+</body>
+</html>
