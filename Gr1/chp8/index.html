@@ -1,338 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Olympic Grammar Archery - Is Am Are</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helping Verbs Adventure - Grade 1</title>
 
 <style>
-body{
-margin:0;
-font-family:Arial, sans-serif;
-background:linear-gradient(to bottom,#e8f6ff,#ffffff);
-overflow:hidden;
-}
+    :root {
+        --sky-blue: #bae6fd;
+        --grass-green: #22c55e;
+        --pop-pink: #f43f5e;
+        --gold: #eab308;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-.screen{
-position:absolute;
-inset:0;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-text-align:center;
-}
+    body, html {
+        width: 100%; height: 100%;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: #1e293b; overflow: hidden;
+        background-color: #38bdf8;
+    }
 
-/* SPLASH */
-#splash{
-background:white;
-z-index:10;
-}
-#splash img{
-width:180px;
-}
+    .game-container {
+        position: relative; width: 100%; height: 100%;
+        background: #38bdf8 url('assets/sky-bg.png') no-repeat center center;
+        background-size: cover;
+        display: flex; justify-content: center; align-items: center;
+        flex-direction: column; padding: 20px;
+    }
 
-/* INSTRUCTIONS */
-#intro{
-display:none;
-background:#fff;
-z-index:9;
-}
-#intro h1{
-font-size:28px;
-color:#1b4d89;
-}
-#intro p{
-font-size:18px;
-margin:10px;
-}
+    #screen-splash {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: #ffffff; z-index: 9999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
 
-/* GAME */
-#game{
-display:none;
-flex-direction:row;
-justify-content:space-between;
-padding:10px;
-box-sizing:border-box;
-}
+    .logo-img {
+        max-width: 420px;
+    }
 
-#hud{
-position:absolute;
-top:10px;
-width:100%;
-display:flex;
-justify-content:space-between;
-padding:0 15px;
-font-weight:bold;
-font-size:18px;
-}
+    .screen { display: none; }
+    .screen.active { display: flex; flex-direction: column; align-items: center; }
 
-#playerArea{
-width:40%;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-}
+    .card {
+        background: white;
+        padding: 30px;
+        border-radius: 25px;
+        border: 4px solid #38bdf8;
+        text-align: center;
+    }
 
-#archer{
-width:120px;
-transition:transform 0.2s;
-}
+    h1 { color: #0284c7; }
 
-#bowHint{
-font-size:14px;
-color:#555;
-margin-top:10px;
-}
+    .btn {
+        padding: 14px 30px;
+        font-size: 20px;
+        border-radius: 20px;
+        border: none;
+        cursor: pointer;
+        background: #22c55e;
+        color: white;
+        font-weight: bold;
+        margin-top: 15px;
+    }
 
-#targetArea{
-width:55%;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-gap:20px;
-}
+    .hud {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        background: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        margin-bottom: 10px;
+    }
 
-.option{
-padding:15px 25px;
-border:3px solid #1b4d89;
-border-radius:12px;
-font-size:22px;
-width:120px;
-text-align:center;
-background:white;
-cursor:pointer;
-transition:0.2s;
-}
+    .math-banner {
+        background: #fef08a;
+        padding: 12px;
+        font-size: 26px;
+        font-weight: bold;
+        border-radius: 20px;
+        margin-bottom: 10px;
+    }
 
-.option.selected{
-background:#1b4d89;
-color:white;
-transform:scale(1.1);
-}
+    .interaction-canvas {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        align-items: center;
+        height: 300px;
+    }
 
-/* RESULT */
-#result{
-display:none;
-background:white;
-z-index:20;
-}
+    .balloon-node {
+        cursor: pointer;
+    }
 
-#result h1{
-font-size:32px;
-color:#1b4d89;
-}
-button{
-padding:10px 20px;
-font-size:18px;
-border:none;
-border-radius:10px;
-background:#1b4d89;
-color:white;
-cursor:pointer;
-}
+    .balloon-body {
+        width: 110px;
+        height: 130px;
+        border-radius: 50%;
+        background: #0ea5e9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 32px;
+        color: white;
+        font-weight: bold;
+    }
+
+    .basket-node {
+        cursor: pointer;
+        font-size: 60px;
+    }
+
 </style>
 </head>
 
 <body>
 
 <!-- SPLASH -->
-<div id="splash" class="screen">
-    <img src="assets/innovine-logo.png" />
+<div id="screen-splash">
+    <img class="logo-img" src="assets/innovine-logo.png">
 </div>
 
-<!-- INTRO -->
-<div id="intro" class="screen">
-    <h1>🏹 Olympic Grammar Archery</h1>
-    <p><b>Helping Verbs: is / am / are</b></p>
-    <p>Use UP / DOWN arrows to aim and SPACE to shoot the correct answer.</p>
-    <button onclick="startGame()">Start Game</button>
-</div>
+<div class="game-container">
 
-<!-- HUD -->
-<div id="hud">
-    <div>Question: <span id="qNo">1</span>/15</div>
-    <div>⏳ Time: <span id="timer">30</span>s</div>
-</div>
+    <div id="screen-game" class="screen active">
 
-<!-- GAME -->
-<div id="game" class="screen">
+        <div class="hud">
+            <div id="round-counter">Round: 1/10</div>
+            <div id="pops-counter">Score: 0</div>
+        </div>
 
-    <div id="playerArea">
-        <img id="archer" src="https://cdn-icons-png.flaticon.com/512/4774/4774069.png"/>
-        <div id="bowHint">Aim & Shoot 🎯</div>
-    </div>
+        <div class="math-banner" id="challenge-formula">Loading...</div>
 
-    <div id="targetArea">
-        <div class="option selected">is</div>
-        <div class="option">am</div>
-        <div class="option">are</div>
+        <div class="interaction-canvas" id="interaction-field"></div>
+
     </div>
 
 </div>
 
-<!-- RESULT -->
-<div id="result" class="screen">
-    <h1 id="finalText">Great Job!</h1>
-    <button onclick="location.reload()">Play Again</button>
-</div>
-
-<audio id="correctSound" src="assets/correct.mp3"></audio>
-<audio id="wrongSound" src="assets/wrong.mp3"></audio>
-<audio id="clapSound" src="assets/clapping.mp3"></audio>
+<!-- SOUNDS -->
+<audio id="snd-correct" src="assets/correct.mp3"></audio>
+<audio id="snd-wrong" src="assets/wrong.mp3"></audio>
+<audio id="snd-clap" src="assets/clapping.mp3"></audio>
 
 <script>
 
-// QUESTIONS BANK (20)
-const questions = [
-["I ___ a boy","am"],
-["She ___ happy","is"],
-["They ___ playing","are"],
-["I ___ 6 years old","am"],
-["He ___ tall","is"],
-["We ___ friends","are"],
-["I ___ hungry","am"],
-["It ___ a cat","is"],
-["You ___ late","are"],
-["She ___ a doctor","is"],
-["They ___ at school","are"],
-["I ___ ready","am"],
-["He ___ my brother","is"],
-["We ___ in the park","are"],
-["She ___ dancing","is"],
-["I ___ excited","am"],
-["They ___ students","are"],
-["It ___ raining","is"],
-["You ___ kind","are"],
-["I ___ sleepy","am"]
+let currentRound = 1;
+let score = 0;
+let correctAnswer = "";
+let attempts = 0;
+
+const sentences = [
+    {q: "I ___ a boy.", a: "am"},
+    {q: "She ___ happy.", a: "is"},
+    {q: "They ___ playing.", a: "are"},
+    {q: "We ___ friends.", a: "are"},
+    {q: "He ___ tall.", a: "is"},
+    {q: "I ___ six years old.", a: "am"},
+    {q: "It ___ a dog.", a: "is"},
+    {q: "You ___ my friend.", a: "are"},
+    {q: "She ___ a teacher.", a: "is"},
+    {q: "We ___ in school.", a: "are"},
+    {q: "I ___ happy today.", a: "am"},
+    {q: "They ___ at home.", a: "are"}
 ];
 
-let selectedIndex = 0;
-let qIndex = 0;
-let score = 0;
-let timer;
-let timeLeft = 30;
-let currentSet = [];
-
-const options = document.querySelectorAll(".option");
-
-// SPLASH FLOW
-setTimeout(()=>{
-document.getElementById("splash").style.display="none";
-document.getElementById("intro").style.display="flex";
-},5000);
-
-// START GAME
 function startGame(){
-document.getElementById("intro").style.display="none";
-document.getElementById("game").style.display="flex";
-initGame();
+    loadRound();
 }
 
-// INIT
-function initGame(){
-currentSet = shuffle(questions).slice(0,15);
-loadQuestion();
-startTimer();
+function loadRound(){
+
+    attempts = 0;
+
+    document.getElementById("round-counter").innerText = `Round: ${currentRound}/10`;
+    document.getElementById("pops-counter").innerText = `Score: ${score}`;
+
+    let data = sentences[Math.floor(Math.random() * sentences.length)];
+    correctAnswer = data.a;
+
+    document.getElementById("challenge-formula").innerText = data.q;
+
+    let options = ["is","am","are"];
+    options.sort(() => Math.random() - 0.5);
+
+    let field = document.getElementById("interaction-field");
+    field.innerHTML = "";
+
+    options.forEach(opt => {
+        let div = document.createElement("div");
+        div.className = "balloon-node";
+        div.innerHTML = `<div class="balloon-body">${opt}</div>`;
+
+        div.onclick = () => checkAnswer(opt, div);
+
+        field.appendChild(div);
+    });
 }
 
-// LOAD QUESTION
-function loadQuestion(){
-if(qIndex >= currentSet.length){
-endGame();
-return;
+function checkAnswer(opt, el){
+
+    attempts++;
+
+    if(opt === correctAnswer){
+        score++;
+
+        document.getElementById("snd-correct").play();
+        document.getElementById("snd-clap").play();
+
+        el.style.background = "green";
+
+        setTimeout(nextRound, 1200);
+    }
+    else{
+        document.getElementById("snd-wrong").play();
+
+        el.style.opacity = 0.3;
+
+        if(attempts >= 2){
+            setTimeout(nextRound, 1000);
+        }
+    }
 }
 
-document.getElementById("qNo").innerText = qIndex+1;
+function nextRound(){
 
-options.forEach((o,i)=>{
-o.classList.remove("selected");
-if(i===0) o.classList.add("selected");
-});
+    currentRound++;
 
-selectedIndex = 0;
-document.getElementById("archer").style.transform="translateX(0)";
+    if(currentRound > 10){
+        document.getElementById("challenge-formula").innerText =
+        `Game Over! Score: ${score}/10`;
+        document.getElementById("interaction-field").innerHTML = "";
+        return;
+    }
+
+    loadRound();
 }
 
-// TIMER
-function startTimer(){
-timeLeft = 30;
-document.getElementById("timer").innerText = timeLeft;
-
-timer = setInterval(()=>{
-timeLeft--;
-document.getElementById("timer").innerText = timeLeft;
-
-if(timeLeft<=0){
-nextQuestion(false);
-}
-},1000);
-}
-
-// SHOOT
-document.addEventListener("keydown",(e)=>{
-if(document.getElementById("game").style.display!=="flex") return;
-
-if(e.key==="ArrowDown"){
-selectedIndex = (selectedIndex+1)%3;
-updateSelection();
-}
-if(e.key==="ArrowUp"){
-selectedIndex = (selectedIndex+2)%3;
-updateSelection();
-}
-if(e.key===" "){
-checkAnswer();
-}
-});
-
-function updateSelection(){
-options.forEach(o=>o.classList.remove("selected"));
-options[selectedIndex].classList.add("selected");
-
-let move = selectedIndex * 40;
-document.getElementById("archer").style.transform = `translateY(${move}px)`;
-}
-
-// CHECK ANSWER
-function checkAnswer(){
-let correct = currentSet[qIndex][1];
-let chosen = options[selectedIndex].innerText;
-
-if(chosen === correct){
-document.getElementById("correctSound").play();
-score++;
-nextQuestion(true);
-}else{
-document.getElementById("wrongSound").play();
-nextQuestion(false);
-}
-}
-
-// NEXT
-function nextQuestion(){
-clearInterval(timer);
-qIndex++;
-startTimer();
-loadQuestion();
-}
-
-// END
-function endGame(){
-document.getElementById("game").style.display="none";
-document.getElementById("result").style.display="flex";
-document.getElementById("finalText").innerText =
-`You scored ${score} / 15 🏹`;
-
-document.getElementById("clapSound").play();
-}
-
-// SHUFFLE
-function shuffle(arr){
-return arr.sort(()=>Math.random()-0.5);
-}
+window.onload = () => {
+    setTimeout(() => {
+        document.getElementById("screen-splash").style.display = "none";
+        startGame();
+    }, 2000);
+};
 
 </script>
 
