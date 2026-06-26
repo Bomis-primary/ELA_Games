@@ -15,6 +15,7 @@
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none; /* Prevents double-tap zoom on mobile devices */
         }
         /* Pulse animation for active target text */
         @keyframes pulse-glow {
@@ -29,12 +30,12 @@
 <body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-6 text-white">
 
     <!-- Game Container -->
-    <div class="relative w-full max-w-5xl bg-slate-900 rounded-3xl border-4 border-amber-500 shadow-2xl shadow-amber-500/10 overflow-hidden flex flex-col h-[92vh] md:h-auto">
+    <div class="relative w-full max-w-5xl bg-slate-900 rounded-3xl border-4 border-amber-500 shadow-2xl shadow-amber-500/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
         
         <!-- Premium Header Area -->
-        <header class="bg-gradient-to-r from-slate-800 via-blue-900 to-slate-800 px-4 py-3 border-b-2 border-amber-500 flex flex-wrap justify-between items-center gap-2">
+        <header class="bg-gradient-to-r from-slate-800 via-blue-900 to-slate-800 px-4 py-3 border-b-2 border-amber-500 flex flex-wrap justify-between items-center gap-2 z-10">
             <div class="flex items-center gap-3">
-                <!-- Decorative Olympic Rings Colored Circle Icon -->
+                <!-- Decorative Olympic Rings -->
                 <div class="flex space-x-0.5">
                     <span class="w-3 h-3 rounded-full border border-blue-400"></span>
                     <span class="w-3 h-3 rounded-full border border-yellow-400"></span>
@@ -61,7 +62,7 @@
         </header>
 
         <!-- Current Question Display Banner -->
-        <section class="bg-slate-950 p-4 border-b border-slate-800 flex flex-col items-center justify-center text-center">
+        <section class="bg-slate-950 p-4 border-b border-slate-800 flex flex-col items-center justify-center text-center z-10">
             <p class="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">Aim and shoot the correct target!</p>
             <h2 id="question-text" class="text-xl md:text-3xl font-bold text-white tracking-wide leading-relaxed px-4 py-1.5 bg-slate-900/50 rounded-xl border border-blue-500/30">
                 Loading Grammar Question...
@@ -69,20 +70,37 @@
         </section>
 
         <!-- Main Gameplay Arena -->
-        <main class="relative flex-grow bg-slate-950 overflow-hidden min-h-[300px]">
+        <main class="relative flex-grow bg-slate-950 overflow-hidden min-h-[350px] h-[50vh] md:h-[550px]">
             <!-- Canvas covering full play space -->
             <canvas id="gameCanvas" class="w-full h-full block"></canvas>
             
+            <!-- Logo Intro Screen (Shows for 5 seconds before start) -->
+            <div id="logo-screen" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-6 text-center z-30 transition-opacity duration-1000">
+                <div class="flex flex-col items-center justify-center space-y-4 max-w-sm">
+                    <!-- Logo image with reliable offline backup -->
+                    <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[200px] h-auto object-contain transition-all duration-300" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+                    <!-- Fallback typography badge for slow/offline states -->
+                    <div id="logo-fallback" class="hidden text-center">
+                        <div class="text-4xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">INNOVINE</div>
+                        <div class="text-xs text-slate-500 uppercase tracking-widest font-semibold mt-1">Learning Games</div>
+                    </div>
+                    <!-- Small premium status indicator -->
+                    <div class="pt-6">
+                        <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- In-game UI Floating Overlays -->
             <!-- Welcome / Start Screen -->
-            <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-10">
-                <div class="max-w-md bg-slate-900/80 p-8 rounded-2xl border border-amber-500/40 backdrop-blur-md">
+            <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden">
+                <div class="max-w-md bg-slate-900/90 p-8 rounded-2xl border border-amber-500/40 backdrop-blur-md shadow-2xl">
                     <!-- Virtual Olympic Flame/Trophy Symbol -->
                     <div class="text-6xl mb-4">🏹</div>
                     <h2 class="text-3xl font-extrabold text-amber-400 mb-2">OLYMPIC ARCHERY</h2>
                     <h3 class="text-lg text-slate-300 font-semibold mb-4">Grammar Challenge (is / am / are)</h3>
                     <p class="text-sm text-slate-400 mb-6 leading-relaxed">
-                        Navigate the Olympian Archer with the <strong class="text-amber-400">UP / DOWN keys</strong> (or tap side controls) to adjust your bow's angle. Hit <strong class="text-amber-400">SPACEBAR</strong> to release your arrow and strike the correct grammatically matching target ring!
+                        Navigate the Olympian Archer with the <strong class="text-amber-400">UP / DOWN keys</strong> (or mobile tap controls) to adjust your bow's angle. Hit <strong class="text-amber-400">SPACEBAR</strong> or the <strong class="text-amber-400">Fire</strong> button to release your arrow and strike the correct target!
                     </p>
                     <button id="start-btn" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold py-3 px-6 rounded-xl shadow-lg shadow-amber-500/20 transform transition active:scale-95 text-lg">
                         Enter the Arena
@@ -91,8 +109,8 @@
             </div>
 
             <!-- Game Over Screen -->
-            <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-10 hidden">
-                <div class="max-w-md bg-slate-900/80 p-8 rounded-2xl border border-red-500/40 backdrop-blur-md">
+            <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden">
+                <div class="max-w-md bg-slate-900/90 p-8 rounded-2xl border border-red-500/40 backdrop-blur-md">
                     <div class="text-6xl mb-4">🏆</div>
                     <h2 class="text-3xl font-extrabold text-amber-400 mb-1">Session Complete!</h2>
                     <p class="text-slate-400 text-sm mb-6">You've shot all your arrows in the Olympic arena.</p>
@@ -126,9 +144,9 @@
         </main>
 
         <!-- Responsive Mobile / Touch Controls Area -->
-        <footer class="bg-slate-900/95 border-t border-slate-800 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <!-- Instruction panel -->
-            <div class="hidden md:flex items-center gap-3 text-slate-400 text-xs">
+        <footer class="bg-slate-900/95 border-t border-slate-800 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
+            <!-- Instruction panel (Hidden on small mobile screens, visible on tablets/desktops) -->
+            <div class="hidden sm:flex items-center gap-3 text-slate-400 text-xs">
                 <span class="bg-slate-800 px-2.5 py-1.5 rounded-md border border-slate-700 font-mono">▲</span>
                 <span class="bg-slate-800 px-2.5 py-1.5 rounded-md border border-slate-700 font-mono">▼</span>
                 <span>Aim Bow</span>
@@ -136,8 +154,8 @@
                 <span>Shoot Arrow</span>
             </div>
 
-            <!-- Virtual D-pad / Interactive Mobile Interface -->
-            <div class="flex items-center justify-between w-full md:w-auto gap-4 md:hidden">
+            <!-- Mobile & Tablet Responsive Controls (Always render nicely on smaller widths) -->
+            <div class="flex items-center justify-between w-full sm:w-auto gap-4 sm:hidden">
                 <div class="flex gap-2">
                     <button id="btn-up" class="w-14 h-14 bg-slate-800 border border-slate-700 rounded-xl active:bg-blue-600 active:border-blue-400 flex items-center justify-center text-white text-2xl transition shadow-lg select-none">
                         ▲
@@ -146,13 +164,13 @@
                         ▼
                     </button>
                 </div>
-                <button id="btn-shoot" class="flex-grow md:flex-grow-0 px-8 py-4 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400 text-slate-950 font-black rounded-xl active:scale-95 transition shadow-lg text-lg tracking-wider uppercase select-none">
+                <button id="btn-shoot" class="flex-grow sm:flex-grow-0 px-8 py-4 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400 text-slate-950 font-black rounded-xl active:scale-95 transition shadow-lg text-lg tracking-wider uppercase select-none">
                     🎯 Fire Arrow
                 </button>
             </div>
             
             <div class="text-xs text-center text-slate-500">
-                Created for Young Champions &bull; Perfect your English verbs!
+                Created for Young Champions &bull; Grade 1 Grammar Verbs
             </div>
         </footer>
     </div>
@@ -171,6 +189,9 @@
 
         function playSound(type) {
             if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -178,9 +199,722 @@
                 gain.connect(audioCtx.destination);
 
                 if (type === 'shoot') {
-                    // Quick swoosh frequency ramp
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.15);
+                    osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(700, audioCtx.currentTime + 0.15);
                     gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValue
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } else if (type === 'hit-correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(900, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'hit-wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'victory') {
+                    const freqs = [523.25, 659.25, 783.99, 1046.50];
+                    freqs.forEach((freq, idx) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
+                        noteGain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.1);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.1 + 0.4);
+                        noteOsc.start(audioCtx.currentTime + idx * 0.1);
+                        noteOsc.stop(audioCtx.currentTime + idx * 0.1 + 0.4);
+                    });
+                }
+            } catch (e) {
+                console.warn("Audio Context Error: ", e);
+            }
+        }
+
+        // Grade 1-suitable Grammar Questions Database (Simple vocabulary, sight words)
+        const questionsList = [
+            { question: "I ___ happy.", answer: "am" },
+            { question: "He ___ my friend.", answer: "is" },
+            { question: "They ___ playing soccer.", answer: "are" },
+            { question: "It ___ a fast dog.", answer: "is" },
+            { question: "We ___ running together.", answer: "are" },
+            { question: "I ___ six years old.", answer: "am" },
+            { question: "The cat ___ sleeping.", answer: "is" },
+            { question: "The birds ___ flying high.", answer: "are" },
+            { question: "She ___ a good girl.", answer: "is" },
+            { question: "We ___ in the school yard.", answer: "are" },
+            { question: "I ___ eating my lunch.", answer: "am" },
+            { question: "The apples ___ red and sweet.", answer: "are" },
+            { question: "The sun ___ very bright.", answer: "is" },
+            { question: "You ___ a superstar!", answer: "are" },
+            { question: "I ___ holding a golden bow.", answer: "am" }
+        ];
+
+        // Canvas Game Engine Setup
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // UI Elements
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+        const hitNotification = document.getElementById("hit-notification");
+        const hudText = document.getElementById("hud-text");
+
+        // Stats elements
+        const scoreEl = document.getElementById("score");
+        const arrowsEl = document.getElementById("arrows");
+        const streakEl = document.getElementById("streak");
+        const finalScoreEl = document.getElementById("final-score");
+        const finalAccuracyEl = document.getElementById("final-accuracy");
+        const performanceMessageEl = document.getElementById("performance-message");
+        const questionTextEl = document.getElementById("question-text");
+
+        // State Machine
+        let gameState = 'INTRO'; // INTRO, START, PLAYING, GAMEOVER
+        let score = 0;
+        let arrowsCount = 10;
+        let streak = 0;
+        let correctHits = 0;
+        let totalShots = 0;
+        let currentQuestion = null;
+
+        // Player / Archer state
+        const archer = {
+            x: 80,
+            y: 0, 
+            width: 70,
+            height: 90,
+            angle: 0, // In Radians
+            targetAngle: 0,
+            aimSpeed: 0.08,
+            minAngle: -Math.PI / 4.2, // ~ -42 deg to align perfectly with targets
+            maxAngle: Math.PI / 4.2,  // ~ +42 deg
+            isAimingUp: false,
+            isAimingDown: false
+        };
+
+        // Arrow state
+        let activeArrow = null;
+        const arrowConfig = {
+            speed: 16,
+            length: 45
+        };
+
+        // Targets configuration (is, am, are)
+        let targets = [];
+
+        // Particles for celebratory hit bursts
+        let particles = [];
+
+        // Scale factor for responsive rendering on smaller viewports
+        let scaleFactor = 1;
+
+        // Track and sky background coordinates
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
+            // Adjust archer vertical center
+            archer.y = canvas.height / 2;
+
+            // Handle scale factor for smaller phones / tablets
+            scaleFactor = Math.min(1, canvas.width / 800);
+            archer.x = 80 * scaleFactor;
+
+            // Target positions on the right hand side
+            const targetX = canvas.width - (100 * scaleFactor);
+            const targetSpacings = canvas.height / 4;
+            const targetRadius = 38 * scaleFactor;
+            
+            targets = [
+                { id: "is", x: targetX, y: targetSpacings, r: targetRadius, color: '#f59e0b', label: 'is' }, // Top
+                { id: "am", x: targetX, y: targetSpacings * 2, r: targetRadius, color: '#3b82f6', label: 'am' }, // Middle
+                { id: "are", x: targetX, y: targetSpacings * 3, r: targetRadius, color: '#ef4444', label: 'are' } // Bottom
+            ];
+        }
+
+        // Initialize state variables
+        function initGame() {
+            score = 0;
+            arrowsCount = 10;
+            streak = 0;
+            correctHits = 0;
+            totalShots = 0;
+            activeArrow = null;
+            particles = [];
+            
+            scoreEl.textContent = score;
+            arrowsEl.textContent = arrowsCount;
+            streakEl.textContent = "🔥 " + streak;
+
+            loadNewQuestion();
+            resizeCanvas();
+        }
+
+        function loadNewQuestion() {
+            const randomIndex = Math.floor(Math.random() * questionsList.length);
+            currentQuestion = questionsList[randomIndex];
+            questionTextEl.innerHTML = currentQuestion.question.replace("___", "<span class='text-amber-400 underline font-black decoration-2 decoration-wavy'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+        }
+
+        // Fire logic
+        function shootArrow() {
+            if (gameState !== 'PLAYING' || activeArrow || arrowsCount <= 0) return;
+            
+            initAudio();
+            playSound('shoot');
+
+            totalShots++;
+            arrowsCount--;
+            arrowsEl.textContent = arrowsCount;
+
+            const bowLength = 40 * scaleFactor;
+            const startX = archer.x + Math.cos(archer.angle) * bowLength;
+            const startY = archer.y + Math.sin(archer.angle) * bowLength;
+
+            activeArrow = {
+                x: startX,
+                y: startY,
+                vx: Math.cos(archer.angle) * arrowConfig.speed,
+                vy: Math.sin(archer.angle) * arrowConfig.speed,
+                angle: archer.angle
+            };
+        }
+
+        // Create particles upon impact
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8 - 2, 
+                    vy: (Math.random() - 0.5) * 8,
+                    r: Math.random() * 4 + 2,
+                    color: color,
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        // Check arrow-target impact
+        function checkCollision(px, py, target) {
+            const dx = px - target.x;
+            const dy = py - target.y;
+            return Math.sqrt(dx * dx + dy * dy) < target.r;
+        }
+
+        // In-game dynamic banner alerts
+        function triggerHUDNotification(statusText, isCorrect) {
+            hudText.textContent = statusText;
+            if (isCorrect) {
+                hudText.className = "text-4xl md:text-6xl font-black tracking-wider text-emerald-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center";
+            } else {
+                hudText.className = "text-4xl md:text-6xl font-black tracking-wider text-red-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center";
+            }
+            
+            hitNotification.style.opacity = "1";
+            hitNotification.style.transform = "translate(-50%, -50%) scale(1.15)";
+            
+            setTimeout(() => {
+                hitNotification.style.opacity = "0";
+                hitNotification.style.transform = "translate(-50%, -50%) scale(0.75)";
+            }, 1200);
+        }
+
+        function endSession() {
+            gameState = 'GAMEOVER';
+            gameoverScreen.classList.remove("hidden");
+            playSound('victory');
+
+            finalScoreEl.textContent = score;
+            const accuracy = totalShots > 0 ? Math.round((correctHits / totalShots) * 100) : 0;
+            finalAccuracyEl.textContent = accuracy + "%";
+
+            let message = "";
+            if (score >= 80) {
+                message = "🏆 Super Job! You are a Gold Medal winner!";
+            } else if (score >= 50) {
+                message = "🥈 Great Effort! You earned a Silver Medal!";
+            } else {
+                message = "🎯 Good try! Practice makes perfect. Try again!";
+            }
+            performanceMessageEl.textContent = message;
+        }
+
+        // Event Listeners for Controls
+        window.addEventListener('keydown', (e) => {
+            if (gameState !== 'PLAYING') return;
+            if (e.key === 'ArrowUp' || e.key === 'Up') {
+                archer.isAimingUp = true;
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown' || e.key === 'Down') {
+                archer.isAimingDown = true;
+                e.preventDefault();
+            } else if (e.key === ' ' || e.key === 'Spacebar') {
+                shootArrow();
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'Up') {
+                archer.isAimingUp = false;
+            } else if (e.key === 'ArrowDown' || e.key === 'Down') {
+                archer.isAimingDown = false;
+            }
+        });
+
+        // Touch Control Triggers for Phones and Tablets
+        const btnUp = document.getElementById("btn-up");
+        const btnDown = document.getElementById("btn-down");
+        const btnShoot = document.getElementById("btn-shoot");
+
+        function handleTouchAimUp(state) {
+            if (gameState === 'PLAYING') archer.isAimingUp = state;
+        }
+
+        function handleTouchAimDown(state) {
+            if (gameState === 'PLAYING') archer.isAimingDown = state;
+        }
+
+        // Up Button listeners
+        btnUp.addEventListener('touchstart', (e) => { handleTouchAimUp(true); e.preventDefault(); }, {passive: false});
+        btnUp.addEventListener('touchend', () => { handleTouchAimUp(false); });
+        btnUp.addEventListener('mousedown', () => { handleTouchAimUp(true); });
+        btnUp.addEventListener('mouseup', () => { handleTouchAimUp(false); });
+        btnUp.addEventListener('mouseleave', () => { handleTouchAimUp(false); });
+
+        // Down Button listeners
+        btnDown.addEventListener('touchstart', (e) => { handleTouchAimDown(true); e.preventDefault(); }, {passive: false});
+        btnDown.addEventListener('touchend', () => { handleTouchAimDown(false); });
+        btnDown.addEventListener('mousedown', () => { handleTouchAimDown(true); });
+        btnDown.addEventListener('mouseup', () => { handleTouchAimDown(false); });
+        btnDown.addEventListener('mouseleave', () => { handleTouchAimDown(false); });
+
+        btnShoot.addEventListener('click', () => {
+            shootArrow();
+        });
+
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+
+        // Canvas Visual Rendering Helpers
+        function drawBackground() {
+            // Gradient Sky
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGrad.addColorStop(0, '#020617'); 
+            skyGrad.addColorStop(0.7, '#1e1b4b'); 
+            skyGrad.addColorStop(1, '#0f172a'); 
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Watermark Olympic Rings (Scaled proportionately)
+            const ringY = 110 * scaleFactor;
+            const ringX = canvas.width / 2;
+            const ringR = 25 * scaleFactor;
+            const thickness = 4 * scaleFactor;
+            const spacing = 28 * scaleFactor;
+
+            const drawRing = (x, y, color) => {
+                ctx.beginPath();
+                ctx.arc(x, y, ringR, 0, Math.PI * 2);
+                ctx.lineWidth = thickness;
+                ctx.strokeStyle = color;
+                ctx.globalAlpha = 0.15; 
+                ctx.stroke();
+                ctx.globalAlpha = 1.0;
+            };
+
+            drawRing(ringX - spacing, ringY, '#3b82f6'); 
+            drawRing(ringX, ringY, '#000000');          
+            drawRing(ringX + spacing, ringY, '#ef4444'); 
+            drawRing(ringX - spacing/2, ringY + ringR, '#eab308'); 
+            drawRing(ringX + spacing/2, ringY + ringR, '#22c55e'); 
+
+            // Green grass field on bottom
+            ctx.fillStyle = '#14532d'; 
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - 40);
+            ctx.lineTo(canvas.width, canvas.height - 120);
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.fill();
+
+            // Track lines
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - 20);
+            ctx.lineTo(canvas.width, canvas.height - 80);
+            ctx.stroke();
+        }
+
+        function drawArcher() {
+            ctx.save();
+            ctx.translate(archer.x, archer.y);
+            ctx.scale(scaleFactor, scaleFactor);
+            ctx.rotate(archer.angle);
+
+            // Torso (Olympic Vest)
+            ctx.fillStyle = '#ef4444'; 
+            ctx.beginPath();
+            ctx.arc(-25, 0, 15, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Head
+            ctx.fillStyle = '#ffedd5'; 
+            ctx.beginPath();
+            ctx.arc(-25, -25, 11, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Athletic Cap
+            ctx.fillStyle = '#1e3a8a'; 
+            ctx.beginPath();
+            ctx.arc(-27, -29, 12, Math.PI, 0);
+            ctx.fill();
+
+            // Bow
+            ctx.strokeStyle = '#eab308'; 
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(10, 0, 35, -Math.PI / 2.3, Math.PI / 2.3);
+            ctx.stroke();
+
+            // Bowstring
+            ctx.strokeStyle = '#cbd5e1'; 
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(10 - 25, -31);
+            ctx.lineTo(10 - 25, 31);
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Draw pre-shot arrow if no active flight is happening
+            if (!activeArrow && gameState === 'PLAYING') {
+                ctx.save();
+                ctx.translate(archer.x, archer.y);
+                ctx.scale(scaleFactor, scaleFactor);
+                ctx.rotate(archer.angle);
+
+                // Shaft
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(-15, 0);
+                ctx.lineTo(25, 0);
+                ctx.stroke();
+
+                // Arrowhead
+                ctx.fillStyle = '#94a3b8';
+                ctx.beginPath();
+                ctx.moveTo(25, -4);
+                ctx.lineTo(33, 0);
+                ctx.lineTo(25, 4);
+                ctx.fill();
+
+                // Feathers
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.moveTo(-15, 0);
+                ctx.lineTo(-22, -5);
+                ctx.lineTo(-18, 0);
+                ctx.lineTo(-22, 5);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        function drawTargets() {
+            targets.forEach(target => {
+                ctx.save();
+                
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetX = 3;
+                ctx.shadowOffsetY = 3;
+
+                // Circular Target rings
+                // Ring 1 (White outer)
+                ctx.fillStyle = '#f8fafc';
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#94a3b8';
+                ctx.stroke();
+
+                // Ring 2 (Black)
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r * 0.75, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ring 3 (Red)
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ring 4 (Gold Bullseye)
+                ctx.fillStyle = '#f59e0b';
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r * 0.25, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowColor = 'transparent';
+
+                // Target Wooden Legs
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 3 * scaleFactor;
+                ctx.beginPath();
+                ctx.moveTo(target.x, target.y + target.r);
+                ctx.lineTo(target.x - (12 * scaleFactor), target.y + target.r + (28 * scaleFactor));
+                ctx.moveTo(target.x, target.y + target.r);
+                ctx.lineTo(target.x + (12 * scaleFactor), target.y + target.r + (28 * scaleFactor));
+                ctx.stroke();
+
+                // Text Badge Box
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.roundRect(target.x - (28 * scaleFactor), target.y - (11 * scaleFactor), 56 * scaleFactor, 22 * scaleFactor, 5 * scaleFactor);
+                ctx.fill();
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = target.color;
+                ctx.stroke();
+
+                // Inner label text (is, am, are)
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `bold ${Math.floor(15 * scaleFactor)}px "Outfit", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(target.label.toUpperCase(), target.x, target.y);
+
+                ctx.restore();
+            });
+        }
+
+        function drawArrow() {
+            if (!activeArrow) return;
+            
+            ctx.save();
+            ctx.translate(activeArrow.x, activeArrow.y);
+            ctx.rotate(activeArrow.angle);
+            ctx.scale(scaleFactor, scaleFactor);
+
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(-arrowConfig.length / 2, 0);
+            ctx.lineTo(arrowConfig.length / 2, 0);
+            ctx.stroke();
+
+            // Arrow head
+            ctx.fillStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.moveTo(arrowConfig.length / 2, -5);
+            ctx.lineTo(arrowConfig.length / 2 + 10, 0);
+            ctx.lineTo(arrowConfig.length / 2, 5);
+            ctx.fill();
+
+            // Feathers
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.moveTo(-arrowConfig.length / 2, 0);
+            ctx.lineTo(-arrowConfig.length / 2 - 8, -6);
+            ctx.lineTo(-arrowConfig.length / 2 - 4, 0);
+            ctx.lineTo(-arrowConfig.length / 2 - 8, 6);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawParticles() {
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(idx, 1);
+                    return;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        // Draw helper path line to guide Grade 1 students
+        function drawTrajectoryLine() {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.22)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 6]);
+            
+            const bowLength = 40 * scaleFactor;
+            const startX = archer.x + Math.cos(archer.angle) * bowLength;
+            const startY = archer.y + Math.sin(archer.angle) * bowLength;
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX + Math.cos(archer.angle) * (canvas.width - 150), startY + Math.sin(archer.angle) * (canvas.width - 150));
+            ctx.stroke();
+            ctx.restore();
+        }
+
+
+        // Primary Game Update loops
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            // Handle aiming bounds and speed
+            if (archer.isAimingUp) {
+                archer.angle -= archer.aimSpeed;
+                if (archer.angle < archer.minAngle) archer.angle = archer.minAngle;
+            }
+            if (archer.isAimingDown) {
+                archer.angle += archer.aimSpeed;
+                if (archer.angle > archer.maxAngle) archer.angle = archer.maxAngle;
+            }
+
+            // Arrow movement and flight logic
+            if (activeArrow) {
+                activeArrow.x += activeArrow.vx;
+                activeArrow.y += activeArrow.vy;
+                
+                activeArrow.angle = Math.atan2(activeArrow.vy, activeArrow.vx);
+
+                // Destroy out-of-bounds arrows
+                if (activeArrow.x > canvas.width + 100 || 
+                    activeArrow.y < -100 || 
+                    activeArrow.y > canvas.height + 100) {
+                    activeArrow = null; 
+                    
+                    streak = 0;
+                    streakEl.textContent = "🔥 " + streak;
+                    playSound('hit-wrong');
+                    triggerHUDNotification("MISSED TARGET!", false);
+
+                    if (arrowsCount <= 0) {
+                        setTimeout(endSession, 1000);
+                    } else {
+                        loadNewQuestion();
+                    }
+                } else {
+                    // Check arrow impact with each target ring
+                    for (let i = 0; i < targets.length; i++) {
+                        const target = targets[i];
+                        if (checkCollision(activeArrow.x, activeArrow.y, target)) {
+                            createExplosion(activeArrow.x, activeArrow.y, target.color);
+                            
+                            // Check grammatical answer
+                            if (target.id === currentQuestion.answer) {
+                                correctHits++;
+                                streak++;
+                                score += 10 + Math.floor(streak / 3) * 5; 
+                                scoreEl.textContent = score;
+                                streakEl.textContent = "🔥 " + streak;
+                                
+                                playSound('hit-correct');
+                                triggerHUDNotification("CORRECT HIT!", true);
+                            } else {
+                                streak = 0;
+                                streakEl.textContent = "🔥 " + streak;
+                                
+                                playSound('hit-wrong');
+                                triggerHUDNotification("INCORRECT!", false);
+                            }
+
+                            activeArrow = null;
+
+                            if (arrowsCount <= 0) {
+                                setTimeout(endSession, 1200);
+                            } else {
+                                setTimeout(loadNewQuestion, 1000);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            drawTargets();
+            
+            if (gameState === 'PLAYING') {
+                drawTrajectoryLine();
+            }
+            
+            drawArcher();
+            drawArrow();
+            drawParticles();
+        }
+
+        // Main game frame loop
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize 5-second intro logo timer, then reveal the Start Menu
+        window.onload = function() {
+            resizeCanvas();
+            requestAnimationFrame(gameLoop);
+
+            // Intro sequence runs exactly for 5 seconds (5000ms)
+            setTimeout(() => {
+                logoScreen.classList.add("opacity-0");
+                // Allow CSS opacity fade transition to complete before removing element
+                setTimeout(() => {
+                    logoScreen.classList.add("hidden");
+                    startScreen.classList.remove("hidden");
+                    gameState = 'START';
+                }, 1000);
+            }, 5000);
+        };
+    </script>
+</body>
+</html>
