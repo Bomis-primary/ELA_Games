@@ -1,308 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Helping Verbs Arcade Game</title>
-
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f2f7ff;
-    text-align: center;
-}
-
-.screen { display: none; padding: 20px; }
-.active { display: block; }
-
-.logo {
-    width: 180px;
-    margin-top: 60px;
-}
-
-button {
-    padding: 12px 20px;
-    margin: 10px;
-    font-size: 18px;
-    border: none;
-    border-radius: 10px;
-    background: #2d7ef7;
-    color: white;
-}
-
-button:active { transform: scale(0.97); }
-
-#questionBox {
-    font-size: 22px;
-    margin: 10px;
-}
-
-.topbar {
-    display: flex;
-    justify-content: space-around;
-    font-size: 18px;
-    margin: 10px 0;
-}
-
-#arcadeArea {
-    position: relative;
-    height: 320px;
-    background: #eaf3ff;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-#player {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    width: 70px;
-    height: 22px;
-    background: #2d7ef7;
-    border-radius: 10px;
-    transform: translateX(-50%);
-}
-
-.pin {
-    position: absolute;
-    padding: 8px 10px;
-    background: white;
-    border: 2px solid #333;
-    border-radius: 8px;
-    font-weight: bold;
-}
-</style>
-</head>
-
-<body>
-
-<!-- SPLASH -->
-<div id="splash" class="screen active">
-    <img src="assets/innovine-logo.png" class="logo"/>
-</div>
-
-<!-- START -->
-<div id="startScreen" class="screen">
-    <h1>Helping Verbs Arcade</h1>
-    <p>Catch the correct helping verb: <b>is / am / are</b></p>
-    <p>Use ⬅️ ➡️ arrow keys to move</p>
-    <button onclick="startGame()">Start Game</button>
-</div>
-
-<!-- GAME -->
-<div id="gameScreen" class="screen">
-
-    <div class="topbar">
-        <div>Score: <span id="score">0</span></div>
-        <div>Q: <span id="qnum">1</span>/16</div>
-        <div>Time: <span id="time">10</span></div>
-    </div>
-
-    <div id="questionBox"></div>
-
-    <div id="arcadeArea">
-        <div id="player"></div>
-    </div>
-</div>
-
-<!-- END -->
-<div id="endScreen" class="screen">
-    <h1>Game Over 🎉</h1>
-    <h2 id="finalScore"></h2>
-    <button onclick="restart()">Play Again</button>
-</div>
-
-<!-- SOUNDS -->
-<audio id="correctSound" src="assets/correct.mp3"></audio>
-<audio id="wrongSound" src="assets/wrong.mp3"></audio>
-<audio id="clapSound" src="assets/clapping.mp3"></audio>
-
-<script>
-// ================= QUESTIONS =================
-const allQuestions = [
-    {q:"I ___ a student.", a:"am"},
-    {q:"She ___ happy.", a:"is"},
-    {q:"They ___ playing.", a:"are"},
-    {q:"He ___ tall.", a:"is"},
-    {q:"I ___ reading.", a:"am"},
-    {q:"We ___ friends.", a:"are"},
-    {q:"It ___ a dog.", a:"is"},
-    {q:"You ___ kind.", a:"are"},
-    {q:"She ___ my sister.", a:"is"},
-    {q:"I ___ hungry.", a:"am"},
-    {q:"They ___ here.", a:"are"},
-    {q:"He ___ running.", a:"is"},
-    {q:"We ___ ready.", a:"are"},
-    {q:"It ___ raining.", a:"is"},
-    {q:"You ___ late.", a:"are"},
-    {q:"She ___ dancing.", a:"is"},
-    {q:"I ___ going home.", a:"am"},
-    {q:"They ___ teachers.", a:"are"},
-    {q:"He ___ my friend.", a:"is"},
-    {q:"We ___ students.", a:"are"}
-];
-
-// ================= STATE =================
-let questions = [];
-let index = 0;
-let score = 0;
-let time = 10;
-let timer;
-let playerX = 50;
-let pins = [];
-
-// ================= SPLASH =================
-setTimeout(()=>{
-    document.getElementById("splash").classList.remove("active");
-    document.getElementById("startScreen").classList.add("active");
-}, 5000);
-
-// ================= START =================
-function startGame(){
-    document.getElementById("startScreen").classList.remove("active");
-    document.getElementById("gameScreen").classList.add("active");
-
-    questions = allQuestions.sort(()=>Math.random()-0.5).slice(0,16);
-    index = 0;
-    score = 0;
-
-    loadQuestion();
-}
-
-// ================= KEYBOARD =================
-document.addEventListener("keydown", (e)=>{
-    if(e.key === "ArrowLeft") playerX -= 7;
-    if(e.key === "ArrowRight") playerX += 7;
-
-    playerX = Math.max(5, Math.min(95, playerX));
-
-    document.getElementById("player").style.left = playerX + "%";
-
-    checkCatch();
-});
-
-// ================= LOAD QUESTION =================
-function loadQuestion(){
-    if(index >= questions.length){
-        endGame();
-        return;
-    }
-
-    document.getElementById("questionBox").innerText =
-        questions[index].q;
-
-    document.getElementById("score").innerText = score;
-    document.getElementById("qnum").innerText = index+1;
-
-    spawnPins();
-    resetTimer();
-}
-
-// ================= SPAWN PINS =================
-function spawnPins(){
-    const area = document.getElementById("arcadeArea");
-
-    area.innerHTML = "";
-    area.appendChild(document.getElementById("player"));
-
-    let options = ["is","am","are"];
-
-    pins = [];
-
-    for(let i=0;i<9;i++){
-        let val = options[Math.floor(Math.random()*3)];
-
-        let pin = document.createElement("div");
-        pin.className = "pin";
-        pin.innerText = val;
-
-        pin.style.left = (5 + Math.random()*85) + "%";
-        pin.style.top = "-40px";
-
-        area.appendChild(pin);
-
-        pins.push({
-            el: pin,
-            val: val,
-            y: -40,
-            x: parseFloat(pin.style.left)
-        });
-    }
-
-    animatePins();
-}
-
-// ================= ANIMATE =================
-function animatePins(){
-    let interval = setInterval(()=>{
-        pins.forEach(p=>{
-            p.y += 2.5;
-            p.el.style.top = p.y + "px";
-        });
-
-        checkCatch();
-    }, 40);
-
-    setTimeout(()=>clearInterval(interval), 6500);
-}
-
-// ================= CATCH LOGIC =================
-function checkCatch(){
-    let correct = questions[index].a;
-
-    pins.forEach(p=>{
-        if(p.y > 250 && Math.abs(p.x - playerX) < 8){
-            
-            if(p.val === correct){
-                score++;
-                document.getElementById("correctSound").play();
-            } else {
-                document.getElementById("wrongSound").play();
-            }
-
-            index++;
-            loadQuestion();
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grammar Olympics: Helping Verbs</title>
+    <style>
+        /* Global Styles & Olympic Theme */
+        :root {
+            --olympic-blue: #0081C8;
+            --olympic-yellow: #FCB131;
+            --olympic-black: #000000;
+            --olympic-green: #00A651;
+            --olympic-red: #EE334E;
+            --bg-color: #e0f7fa;
         }
-    });
-}
 
-// ================= TIMER =================
-function resetTimer(){
-    clearInterval(timer);
-    time = 10;
-
-    document.getElementById("time").innerText = time;
-
-    timer = setInterval(()=>{
-        time--;
-        document.getElementById("time").innerText = time;
-
-        if(time <= 0){
-            clearInterval(timer);
-            document.getElementById("wrongSound").play();
-            index++;
-            loadQuestion();
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            touch-action: manipulation; /* Prevents double-tap zoom on mobile */
         }
-    },1000);
-}
 
-// ================= END =================
-function endGame(){
-    document.getElementById("gameScreen").classList.remove("active");
-    document.getElementById("endScreen").classList.add("active");
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
 
-    document.getElementById("finalScore").innerText =
-        `Score: ${score} / ${questions.length}`;
+        .active {
+            display: flex;
+        }
 
-    document.getElementById("clapSound").play();
-}
+        /* Splash Screen */
+        #splash-screen {
+            background-color: white;
+        }
+        #splash-screen img {
+            max-width: 80%;
+            max-height: 50%;
+        }
 
-// ================= RESTART =================
-function restart(){
-    location.reload();
-}
-</script>
+        /* Intro Screen */
+        #intro-screen {
+            background-color: var(--olympic-yellow);
+            color: #333;
+            padding: 20px;
+        }
+        #intro-screen h1 {
+            color: var(--olympic-red);
+            font-size: 2.5rem;
+            text-shadow: 2px 2px white;
+            margin-bottom: 10px;
+        }
+        .instructions {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            border: 4px solid var(--olympic-blue);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+        .btn-start {
+            background-color: var(--olympic-green);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            font-weight: bold;
+            font-family: inherit;
+        }
+        .btn-start:active { transform: scale(0.95); }
 
-</body>
-</html>
+        /* Game Screen */
+        #game-screen {
+            justify-content: flex-start;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background-color: var(--olympic-blue);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+
+        .question-box {
+            width: 90%;
+            background: white;
+            margin: 15px auto;
+            padding: 15px;
+            border-radius: 10px;
+            border: 3px solid var(--olympic-red);
+            font-size: 1.5rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .play-area {
+            position: relative;
+            flex-grow: 1;
+            width: 100%;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
+            border-top: 4px solid var(--olympic-green);
+            border-bottom: 4px solid var(--olympic-green);
+        }
+
+        /* Archer & Arrows */
+        .archer-lane {
+            position: absolute;
+            left: 5%;
+            font-size: 3rem;
+            transition: top 0.3s ease;
+            z-index: 10;
+        }
+
+        .arrow {
+            position: absolute;
+            font-size: 2rem;
+            display: none;
+            z-index: 5;
+            transition: left 0.5s linear;
+        }
+
+        /* Targets */
+        .target-container {
+            position: absolute;
+            right: 5%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            height: 100%;
+            width: 80px;
+        }
+
+        .target {
+            background-color: white;
+            border: 4px solid var(--olympic-black);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 4px 6px rgba(0,0,0,0.3);
+            transition: background-color 0.3s;
+        }
+
+        /* Mobile Controls */
+        .controls {
+            width: 100%;
+            height: 80px;
+            background-color: #fff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .control-btn {
+            background-color: var(--olympic-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+        .control-btn:active { transform: scale(0.9); }
+        .btn-shoot {
+            width: 120px;
+            border-radius: 30px;
+            background-color: var(--olympic-red);
+            font-family: inherit;
+            font-weight: bold;
+        }
+
+        /* End Screen */
+        #end-screen {
+            background-color: var(--olympic-blue);
+            color: white;
+        }
+        .medal { font-size: 5rem; margin-bottom: 20px; }
+
+        @media (min-width: 768px) {
+            .controls { display: none; } /* Hide on-screen controls for laptops */
+            .question-box { font-size: 2rem; }
+            .target { width: 100px; height: 100px; font-size: 2rem; }
