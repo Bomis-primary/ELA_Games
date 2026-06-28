@@ -6,138 +6,98 @@
 <title>Bowling Grammar Game</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#1a0533 0%,#2d1060 50%,#0d2a6e 100%);min-height:100vh;color:#fff;overflow:hidden}
-.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:12px}
-.screen.active{display:flex}
-#splash h1{font-size:clamp(22px,4vw,42px);font-weight:900;text-align:center;background:linear-gradient(90deg,#ffcf4d,#ff7ac8,#6be7ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
-#splash p{color:#c9b8f0;text-align:center;margin-bottom:24px;font-size:16px}
-.logo-ball{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#ff9de2,#ff3498);box-shadow:0 8px 20px rgba(0,0,0,0.4);margin:0 auto 20px;position:relative}
-.logo-ball::after{content:"";position:absolute;width:10px;height:10px;background:rgba(0,0,0,0.3);border-radius:50%;top:28px;left:18px;box-shadow:14px 0 0 rgba(0,0,0,0.3),7px 14px 0 rgba(0,0,0,0.3)}
-#game{width:100%;max-width:700px;height:100vh;display:none;flex-direction:column;gap:8px;padding:8px}
-#game.active{display:flex}
-.topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-shrink:0}
-.pill{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
-.pill.score-pill{background:rgba(255,207,77,0.2);border-color:#ffcf4d;color:#ffcf4d}
-.pill.timer-pill{background:rgba(107,231,255,0.15);border-color:#6be7ff;color:#6be7ff}
-.pill.timer-pill.urgent{background:rgba(255,80,80,0.2);border-color:#ff5050;color:#ff5050}
-#timer-bar-wrap{height:6px;background:rgba(255,255,255,0.1);border-radius:999px;overflow:hidden;flex:1}
-#timer-bar{height:100%;background:linear-gradient(90deg,#6be7ff,#7b5cff);border-radius:999px;transition:width 1s linear}
-.qbox{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:14px 16px;text-align:center;flex-shrink:0}
-.qbox h2{font-size:clamp(14px,2.5vw,20px);line-height:1.4;color:#fff}
-.stage{position:relative;flex:1;min-height:0;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#0d1b4b 0%,#1a2c6e 30%,#2d1b6e 100%)}
-.stars-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 2s infinite alternate}
-@keyframes twinkle{from{opacity:0.2}to{opacity:0.9}}
-.lane-wrap{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:72%;height:55%}
-.lane-surface{position:absolute;inset:0;background:linear-gradient(180deg,#7b3dc8,#4a1b8c);border-radius:24px 24px 0 0}
-.lane-line{position:absolute;left:50%;transform:translateX(-50%);top:0;width:6px;height:100%;background:rgba(255,255,255,0.25);border-radius:999px}
-.gutter-l,.gutter-r{position:absolute;bottom:0;width:14%;height:100%;background:rgba(0,0,0,0.25);border-top:2px solid rgba(255,255,255,0.1)}
-.gutter-l{right:100%;border-radius:8px 0 0 0}
-.gutter-r{left:100%;border-radius:0 8px 0 0}
-#pins-container{position:absolute;top:12%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;z-index:5}
-.pin-row{display:flex;gap:10px;justify-content:center}
-.pin{width:18px;height:42px;background:linear-gradient(180deg,#fff,#f0e8ff);border-radius:9px 9px 6px 6px;position:relative;box-shadow:0 4px 10px rgba(0,0,0,0.3);transition:transform 0.5s ease,opacity 0.5s ease}
-.pin::before{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);width:12px;height:4px;background:#ff3f6b;border-radius:4px}
-.pin.fallen{transform:translateY(20px) rotate(90deg) !important;opacity:0}
-#ball{position:absolute;bottom:12px;left:8%;width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 30% 28%,rgba(255,255,255,0.9) 0 8%,rgba(255,255,255,0.15) 9%,transparent 16%),radial-gradient(circle at 68% 32%,rgba(107,231,255,0.8) 0 10%,transparent 12%),linear-gradient(135deg,#ff5ca8,#ffd84b,#ff5ca8);box-shadow:0 8px 20px rgba(0,0,0,0.4);z-index:10}
-#ball::after{content:"";position:absolute;width:8px;height:8px;background:rgba(0,0,0,0.25);border-radius:50%;top:22px;left:12px;box-shadow:10px 0 0 rgba(0,0,0,0.25),5px 10px 0 rgba(0,0,0,0.25)}
-#ball.roll{animation:roll 900ms cubic-bezier(.2,.8,.2,1) forwards}
-#ball.miss{animation:miss 900ms ease-in forwards}
-@keyframes roll{0%{left:8%;bottom:12px;transform:rotate(0)}60%{left:52%;bottom:18px;transform:rotate(500deg)}100%{left:72%;bottom:10px;transform:rotate(800deg)}}
-@keyframes miss{0%{left:8%;bottom:12px}60%{left:38%;bottom:15px}100%{left:22%;bottom:12px;transform:rotate(200deg) scale(0.7);opacity:0.3}}
-.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex-shrink:0}
-.choice{background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:14px;padding:12px 8px;font-size:clamp(13px,2vw,16px);font-weight:700;color:#fff;cursor:pointer;transition:all 0.15s;min-height:56px}
-.choice:hover:not(:disabled){background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4);transform:translateY(-2px)}
-.choice.correct{background:rgba(41,208,127,0.25);border-color:#29d07f;color:#a7ffd0}
-.choice.wrong{background:rgba(255,80,80,0.2);border-color:#ff5050;color:#ffc2c2}
-.choice:disabled{cursor:not-allowed;opacity:0.8}
-.footer{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;min-height:38px}
-.msg{font-weight:700;font-size:15px;color:#ffcf4d}
-.btn{border:none;border-radius:12px;padding:10px 20px;font-size:15px;font-weight:800;cursor:pointer;background:#ffcf4d;color:#2d2466}
-.btn.start-btn{background:linear-gradient(135deg,#7c5cff,#ff5ca8);color:#fff;font-size:18px;padding:14px 32px;border-radius:16px;margin-top:20px;width:100%}
-.btn.restart-btn{background:linear-gradient(135deg,#29d07f,#0a9f5a);color:#fff;font-size:16px;padding:12px 28px;border-radius:14px;margin-top:16px}
-.btn.hidden{display:none}
-.inst-panel{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:24px;max-width:480px;width:100%}
-.inst-panel h2{text-align:center;font-size:22px;margin-bottom:16px;color:#ffcf4d}
-.inst-panel ul{list-style:none}
-.inst-panel li{padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:14px;color:#d4c8f0}
-#result{text-align:center}
-.result-panel{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:24px;padding:32px 24px;max-width:400px;width:100%}
-.result-panel h2{font-size:28px;margin-bottom:12px;color:#ffcf4d}
-.stars-display{font-size:32px;letter-spacing:4px;margin-bottom:12px}
-.final-score-big{font-size:64px;font-weight:900;background:linear-gradient(135deg,#ffcf4d,#ff7ac8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
-.score-label{font-size:16px;color:#9b89cc;margin-bottom:20px}
-#confetti{position:fixed;inset:0;pointer-events:none;z-index:100;overflow:hidden}
-.piece{position:absolute;border-radius:3px;animation:cffall linear forwards}
-@keyframes cffall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+body{background:#1a0533;font-family:system-ui,sans-serif;color:#fff;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+#splash,#instructions,#result{display:none;position:fixed;inset:0;align-items:center;justify-content:center;flex-direction:column;background:#1a0533;z-index:50}
+.on{display:flex!important}
+#game{display:flex;flex-direction:column;height:100vh;padding:8px;gap:6px}
+.topbar{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.pill{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700}
+.score-p{background:rgba(255,207,77,0.25);border-color:#ffcf4d;color:#ffcf4d}
+.timer-p{background:rgba(107,231,255,0.15);border-color:#6be7ff;color:#6be7ff;min-width:70px;text-align:center}
+.timer-p.red{background:rgba(255,80,80,0.2);border-color:#ff5050;color:#ff5050}
+#tbar-wrap{flex:1;height:7px;background:rgba(255,255,255,0.1);border-radius:999px;overflow:hidden}
+#tbar{height:100%;width:100%;background:linear-gradient(90deg,#6be7ff,#7b5cff);border-radius:999px;transition:width 1s linear}
+.qbox{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 14px;text-align:center;flex-shrink:0}
+.qbox h2{font-size:clamp(13px,2.2vw,18px);line-height:1.45;color:#fff;font-weight:600}
+#cvs{flex:1;min-height:0;border-radius:16px;display:block;width:100%}
+.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;flex-shrink:0}
+.ans{background:rgba(255,255,255,0.09);border:2px solid rgba(255,255,255,0.2);border-radius:12px;padding:10px 6px;font-size:clamp(12px,1.9vw,15px);font-weight:700;color:#fff;cursor:pointer;min-height:50px;transition:all 0.12s}
+.ans:hover:not(:disabled){background:rgba(255,255,255,0.18);transform:translateY(-2px)}
+.ans.ok{background:rgba(41,208,127,0.3);border-color:#29d07f;color:#a7ffd0}
+.ans.bad{background:rgba(255,70,70,0.25);border-color:#ff5050;color:#ffc2c2}
+.ans:disabled{cursor:default}
+.foot{display:flex;justify-content:space-between;align-items:center;flex-shrink:0;min-height:36px}
+.msg{font-weight:700;font-size:14px;color:#ffcf4d}
+.btn{border:none;border-radius:11px;padding:9px 20px;font-size:14px;font-weight:800;cursor:pointer}
+.gbtn{background:linear-gradient(135deg,#7c5cff,#ff5ca8);color:#fff;padding:13px 30px;font-size:17px;border-radius:14px;margin-top:16px;border:none;cursor:pointer;width:100%}
+.rbtn{background:linear-gradient(135deg,#29d07f,#0a9f5a);color:#fff;border-radius:14px;padding:12px 26px;font-size:15px;margin-top:14px;border:none;cursor:pointer}
+.nbtn{background:#ffcf4d;color:#2d2466;display:none}
+#splash h1{font-size:clamp(22px,4vw,40px);font-weight:900;background:linear-gradient(90deg,#ffcf4d,#ff7ac8,#6be7ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:8px}
+.sp{color:#c9b8f0;text-align:center;font-size:15px;margin-bottom:4px}
+.ip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:22px;max-width:440px;width:92%}
+.ip h2{color:#ffcf4d;text-align:center;font-size:20px;margin-bottom:14px;font-weight:800}
+.ip li{color:#d4c8f0;font-size:14px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);list-style:none}
+.rp{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.18);border-radius:20px;padding:28px 22px;max-width:380px;width:92%;text-align:center}
+.rp h2{color:#ffcf4d;font-size:26px;margin-bottom:10px}
+.big{font-size:62px;font-weight:900;background:linear-gradient(135deg,#ffcf4d,#ff7ac8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+@keyframes cf{to{transform:translateY(101vh) rotate(720deg);opacity:0}}
 @media(max-width:480px){.answers{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<div id="splash" class="screen active">
-  <div class="logo-ball"></div>
+<div id="splash" class="on">
+  <div style="width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 30% 28%,#fff 0 8%,rgba(255,255,255,0.2) 9%,transparent 18%),linear-gradient(135deg,#ff5ca8,#ffd84b);box-shadow:0 8px 24px rgba(0,0,0,0.5);margin-bottom:20px;position:relative">
+    <div style="position:absolute;width:10px;height:10px;background:rgba(0,0,0,0.3);border-radius:50%;top:30px;left:15px;box-shadow:13px 0 0 rgba(0,0,0,0.3),6px 12px 0 rgba(0,0,0,0.3)"></div>
+  </div>
   <h1>Bowling Grammar Game</h1>
-  <p>Master continuous tenses — one strike at a time!</p>
-  <button class="btn start-btn" onclick="goInstructions()">Play Now</button>
+  <p class="sp">Master continuous tenses — one strike at a time!</p>
+  <button class="gbtn" style="width:auto;padding:13px 40px" onclick="goI()">Play Now</button>
 </div>
 
-<div id="instructions" class="screen">
-  <div class="inst-panel">
+<div id="instructions">
+  <div class="ip">
     <h2>How to play</h2>
     <ul>
-      <li>🎳 Fill in the blank with the correct continuous tense</li>
-      <li>⏱ You have <strong style="color:#6be7ff">45 seconds</strong> per question</li>
-      <li>✅ Correct = strike! Ball rolls and knocks all pins</li>
-      <li>❌ Wrong = gutter ball, only some pins fall</li>
-      <li>🏆 15 questions total — get the highest score!</li>
+      <li>🎳 Pick the correct continuous tense to fill the blank</li>
+      <li>⏱ 45 seconds per question — watch the timer bar!</li>
+      <li>✅ Correct = ball rolls and HITS the pins!</li>
+      <li>❌ Wrong = gutter ball, pins stay standing</li>
+      <li>🏆 15 questions — aim for a perfect score!</li>
     </ul>
-    <button class="btn start-btn" onclick="startGame()">Start Game</button>
+    <button class="gbtn" onclick="startGame()">Start Game</button>
   </div>
 </div>
 
-<div id="game" class="screen">
+<div id="game">
   <div class="topbar">
-    <div class="pill score-pill">🏆 <span id="score">0</span></div>
-    <div class="pill">Q <span id="qnum">1</span>/15</div>
-    <div id="timer-bar-wrap"><div id="timer-bar" style="width:100%"></div></div>
-    <div class="pill timer-pill" id="timer-pill">⏱ <span id="timer">45</span>s</div>
+    <div class="pill score-p">🏆 <span id="sc">0</span></div>
+    <div class="pill">Q <span id="qn">1</span>/15</div>
+    <div id="tbar-wrap"><div id="tbar"></div></div>
+    <div class="pill timer-p" id="tp">⏱ <span id="tm">45</span>s</div>
   </div>
-  <div class="qbox"><h2 id="question">Loading...</h2></div>
-  <div class="stage">
-    <div class="stars-bg" id="starsBg"></div>
-    <div class="lane-wrap">
-      <div class="lane-surface">
-        <div class="lane-line"></div>
-        <div class="gutter-l"></div>
-        <div class="gutter-r"></div>
-      </div>
-    </div>
-    <div id="pins-container"></div>
-    <div id="ball"></div>
-  </div>
-  <div class="answers" id="answers"></div>
-  <div class="footer">
+  <div class="qbox"><h2 id="qtxt">Loading...</h2></div>
+  <canvas id="cvs"></canvas>
+  <div class="answers" id="ans"></div>
+  <div class="foot">
     <div class="msg" id="msg"></div>
-    <button class="btn hidden" id="nextBtn" onclick="nextQuestion()">Next →</button>
+    <button class="btn nbtn" id="nb" onclick="nextQ()">Next →</button>
   </div>
 </div>
 
-<div id="result" class="screen">
-  <div class="result-panel">
+<div id="result">
+  <div class="rp">
     <h2>Game Over!</h2>
-    <div class="stars-display" id="starsDisplay">⭐⭐⭐⭐⭐</div>
-    <div class="final-score-big" id="finalScore">0</div>
-    <div class="score-label">out of 15</div>
-    <p id="resultMsg" style="color:#c9b8f0;margin-bottom:4px">Great job!</p>
-    <button class="btn restart-btn" onclick="restart()">Play Again</button>
+    <div id="stars" style="font-size:28px;margin-bottom:10px">⭐⭐⭐⭐⭐</div>
+    <div class="big" id="fs">0</div>
+    <div style="color:#9b89cc;font-size:15px;margin-bottom:16px">out of 15</div>
+    <div id="rm" style="color:#c9b8f0;font-size:15px;margin-bottom:4px"></div>
+    <button class="rbtn" onclick="restart()">Play Again</button>
   </div>
 </div>
-
-<div id="confetti"></div>
 
 <script>
-const questions = [
+const Qs=[
   {q:"The little girl in the yellow dress ___ a cheerful song on the small stage.",a:["is singing","was singing","are singing"],c:0},
   {q:"My brother ___ his brand-new sneakers before school started this morning.",a:["are tying","is tying","were tying"],c:2},
   {q:"They ___ in the park near the fountain while the birds flew above them.",a:["will be playing","were playing","is playing"],c:1},
@@ -155,197 +115,349 @@ const questions = [
   {q:"She ___ a story later today during the classroom reading time.",a:["is telling","was telling","will be telling"],c:2}
 ];
 
-let idx=0, score=0, timerId=null, timeLeft=45, locked=false;
+let idx=0,score=0,tLeft=45,tId=null,locked=false;
+let ballX=0,ballY=0,ballVX=0,ballVY=0,ballR=22,ballMoving=false,ballDone=false;
+let pins=[],animId=null;
+const canvas=document.getElementById('cvs');
+const ctx=canvas.getContext('2d');
 
-function goInstructions(){ show('instructions'); }
-
-function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function goI(){
+  document.getElementById('splash').classList.remove('on');
+  document.getElementById('instructions').classList.add('on');
 }
 
-function startGame(){
-  idx=0; score=0;
-  document.getElementById('score').textContent=0;
-  show('game');
-  buildStars();
-  renderQ();
+function hideAll(){
+  ['splash','instructions','result'].forEach(id=>document.getElementById(id).classList.remove('on'));
 }
 
-function buildStars(){
-  const bg=document.getElementById('starsBg');
-  bg.innerHTML='';
-  for(let i=0;i<30;i++){
-    const s=document.createElement('div');
-    s.className='star';
-    s.style.cssText=`width:${1+Math.random()*3}px;height:${1+Math.random()*3}px;left:${Math.random()*100}%;top:${Math.random()*50}%;animation-delay:${Math.random()*2}s;animation-duration:${1.5+Math.random()*2}s`;
-    bg.appendChild(s);
-  }
-}
+const PIN_LAYOUT=[[0],[1,2],[3,4,5],[6,7,8,9]];
 
-function makePins(){
-  const c=document.getElementById('pins-container');
-  c.innerHTML='';
-  [1,2,3,4].forEach(n=>{
-    const row=document.createElement('div');
-    row.className='pin-row';
-    for(let i=0;i<n;i++){
-      const p=document.createElement('div');
-      p.className='pin';
-      row.appendChild(p);
-    }
-    c.appendChild(row);
+function setupPins(){
+  pins=[];
+  const W=canvas.width, H=canvas.height;
+  const cx=W/2;
+  const topY=H*0.10;
+  const sx=Math.min(34, W*0.07);
+  const sy=Math.min(38, H*0.09);
+  PIN_LAYOUT.forEach((row,ri)=>{
+    row.forEach((id,ci)=>{
+      const tw=(row.length-1)*sx;
+      pins.push({
+        id, fallen:false, angle:0,
+        x: cx - tw/2 + ci*sx,
+        y: topY + ri*sy,
+        r:10
+      });
+    });
   });
 }
 
-function knockPins(all){
-  const allPins=[...document.querySelectorAll('.pin')];
-  if(all){
-    allPins.forEach((p,i)=>setTimeout(()=>p.classList.add('fallen'),80+i*60));
-  } else {
-    const n=Math.floor(1+Math.random()*2);
-    allPins.sort(()=>Math.random()-0.5).slice(0,n)
-      .forEach((p,i)=>setTimeout(()=>p.classList.add('fallen'),100+i*80));
-  }
+function resetBall(){
+  ballX=canvas.width/2;
+  ballY=canvas.height - ballR - 8;
+  ballVX=0; ballVY=0;
+  ballMoving=false; ballDone=false;
 }
 
-function resetBall(){
-  const b=document.getElementById('ball');
-  b.className='';
-  void b.offsetWidth;
+function resizeCanvas(){
+  const rect=canvas.getBoundingClientRect();
+  canvas.width=Math.floor(rect.width);
+  canvas.height=Math.floor(rect.height);
+  setupPins();
+  resetBall();
+  draw();
+}
+
+function drawScene(){
+  const W=canvas.width, H=canvas.height;
+  // Background
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#0d1b4b');
+  bg.addColorStop(1,'#2d1b6e');
+  ctx.fillStyle=bg;
+  ctx.fillRect(0,0,W,H);
+
+  // Lane
+  const lw=Math.min(W*0.70, 420);
+  const lx=(W-lw)/2;
+  const lg=ctx.createLinearGradient(lx,0,lx+lw,0);
+  lg.addColorStop(0,'#4a1b8c');
+  lg.addColorStop(0.5,'#7b3dc8');
+  lg.addColorStop(1,'#4a1b8c');
+  ctx.fillStyle=lg;
+  ctx.beginPath();
+  ctx.roundRect(lx,0,lw,H,12);
+  ctx.fill();
+
+  // Lane centre line
+  ctx.strokeStyle='rgba(255,255,255,0.2)';
+  ctx.lineWidth=4;
+  ctx.setLineDash([16,14]);
+  ctx.beginPath();
+  ctx.moveTo(W/2,0); ctx.lineTo(W/2,H);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Gutters dark overlay
+  ctx.fillStyle='rgba(0,0,0,0.35)';
+  ctx.fillRect(0,0,lx,H);
+  ctx.fillRect(lx+lw,0,W-lx-lw,H);
+}
+
+function drawPin(p){
+  if(p.fallen) return;
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.rotate(p.angle);
+
+  // Shadow
+  ctx.shadowColor='rgba(0,0,0,0.5)';
+  ctx.shadowBlur=8;
+
+  // Body
+  const pg=ctx.createLinearGradient(-p.r/2,-p.r*2.4,p.r/2,p.r*0.6);
+  pg.addColorStop(0,'#ffffff');
+  pg.addColorStop(1,'#d8ccff');
+  ctx.fillStyle=pg;
+  ctx.beginPath();
+  ctx.roundRect(-p.r/2,-p.r*2.4,p.r,p.r*3,p.r/2);
+  ctx.fill();
+
+  // Red stripe
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#ff3f6b';
+  ctx.fillRect(-p.r/2+1,-p.r*1.55,p.r-2,5);
+  // Pink stripe
+  ctx.fillStyle='#ff9ab3';
+  ctx.fillRect(-p.r/2+2,-p.r*0.9,p.r-4,3);
+
+  ctx.restore();
+}
+
+function drawBall(){
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.55)';
+  ctx.shadowBlur=14;
+
+  const g=ctx.createRadialGradient(
+    ballX-ballR*0.32, ballY-ballR*0.32, 2,
+    ballX, ballY, ballR
+  );
+  g.addColorStop(0,'#ffd84b');
+  g.addColorStop(0.45,'#ff5ca8');
+  g.addColorStop(1,'#9e1f5c');
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.arc(ballX, ballY, ballR, 0, Math.PI*2);
+  ctx.fill();
+
+  // Gloss
+  ctx.shadowBlur=0;
+  ctx.fillStyle='rgba(255,255,255,0.75)';
+  ctx.beginPath();
+  ctx.ellipse(ballX-ballR*0.28, ballY-ballR*0.3, ballR*0.2, ballR*0.11, -0.6, 0, Math.PI*2);
+  ctx.fill();
+
+  // Finger holes
+  ctx.fillStyle='rgba(0,0,0,0.32)';
+  ctx.beginPath(); ctx.arc(ballX-ballR*0.3, ballY+ballR*0.12, 4.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(ballX+ballR*0.18, ballY+ballR*0.14, 4.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(ballX-ballR*0.07, ballY+ballR*0.38, 4.5, 0, Math.PI*2); ctx.fill();
+
+  ctx.restore();
+}
+
+function draw(){
+  drawScene();
+  pins.forEach(p=>drawPin(p));
+  drawBall();
+}
+
+function checkCollisions(){
+  pins.forEach(p=>{
+    if(p.fallen) return;
+    const dx=ballX-p.x, dy=ballY-p.y;
+    if(Math.sqrt(dx*dx+dy*dy) < ballR+p.r+2){
+      p.fallen=true;
+      p.angle=(Math.random()-0.5)*1.4;
+      // knock neighbours
+      pins.forEach(n=>{
+        if(n.fallen||n.id===p.id) return;
+        const nx=n.x-p.x, ny=n.y-p.y;
+        if(Math.sqrt(nx*nx+ny*ny)<60){
+          setTimeout(()=>{n.fallen=true; n.angle=(Math.random()-0.5)*1.2;}, 80+Math.random()*180);
+        }
+      });
+    }
+  });
+}
+
+function gameLoop(){
+  if(!ballMoving){draw();return;}
+  ballX+=ballVX;
+  ballY+=ballVY;
+  ballVY-=0.35;
+  checkCollisions();
+  draw();
+  if(ballY < -ballR-10 || ballX < -60 || ballX > canvas.width+60){
+    ballMoving=false;
+    cancelAnimationFrame(animId);
+    animId=null;
+    return;
+  }
+  animId=requestAnimationFrame(gameLoop);
+}
+
+function launchBall(strike){
+  resetBall();
+  const W=canvas.width, H=canvas.height;
+  let tx, ty;
+  if(strike){
+    tx=W/2+(Math.random()*30-15);
+    ty=H*0.12;
+  } else {
+    tx=(Math.random()<0.5)? W*0.12 : W*0.88;
+    ty=H*0.5;
+  }
+  const dx=tx-ballX, dy=ty-ballY;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  const spd=22;
+  ballVX=dx/dist*spd*0.38;
+  ballVY=-(spd);
+  ballMoving=true;
+  if(animId) cancelAnimationFrame(animId);
+  animId=requestAnimationFrame(gameLoop);
+}
+
+function startGame(){
+  hideAll();
+  idx=0; score=0;
+  document.getElementById('sc').textContent=0;
+  setTimeout(()=>{ resizeCanvas(); renderQ(); }, 60);
 }
 
 function renderQ(){
   locked=false;
-  document.getElementById('nextBtn').classList.add('hidden');
+  document.getElementById('nb').style.display='none';
   document.getElementById('msg').textContent='';
+  setupPins();
   resetBall();
-  makePins();
-  const item=questions[idx];
-  document.getElementById('qnum').textContent=idx+1;
-  document.getElementById('question').textContent=item.q;
-  const ans=document.getElementById('answers');
-  ans.innerHTML='';
-  item.a.forEach((txt,i)=>{
+  draw();
+
+  const item=Qs[idx];
+  document.getElementById('qn').textContent=idx+1;
+  document.getElementById('qtxt').textContent=item.q;
+
+  const ad=document.getElementById('ans');
+  ad.innerHTML='';
+  item.a.forEach((t,i)=>{
     const b=document.createElement('button');
-    b.className='choice';
-    b.textContent=txt;
+    b.className='ans'; b.textContent=t;
     b.onclick=()=>choose(i);
-    ans.appendChild(b);
+    ad.appendChild(b);
   });
   startTimer();
 }
 
 function startTimer(){
-  clearInterval(timerId);
-  timeLeft=45;
-  updateTimerUI();
-  timerId=setInterval(()=>{
-    timeLeft--;
-    updateTimerUI();
-    if(timeLeft<=0){ clearInterval(timerId); autoMiss(); }
+  clearInterval(tId); tLeft=45; updTimer();
+  tId=setInterval(()=>{
+    tLeft--;
+    updTimer();
+    if(tLeft<=0){ clearInterval(tId); autoMiss(); }
   },1000);
 }
 
-function updateTimerUI(){
-  document.getElementById('timer').textContent=timeLeft;
-  document.getElementById('timer-bar').style.width=(timeLeft/45*100)+'%';
-  const urgent=timeLeft<=10;
-  document.getElementById('timer-bar').style.background=urgent
+function updTimer(){
+  document.getElementById('tm').textContent=tLeft;
+  document.getElementById('tbar').style.width=(tLeft/45*100)+'%';
+  const u=tLeft<=10;
+  document.getElementById('tbar').style.background=u
     ?'linear-gradient(90deg,#ff5050,#ff8f50)'
     :'linear-gradient(90deg,#6be7ff,#7b5cff)';
-  document.getElementById('timer-pill').classList.toggle('urgent',urgent);
+  document.getElementById('tp').className='pill timer-p'+(u?' red':'');
 }
 
-function disableAll(){
-  document.querySelectorAll('.choice').forEach(b=>b.disabled=true);
+function disableAnswers(){
+  document.querySelectorAll('.ans').forEach(b=>b.disabled=true);
 }
 
 function choose(i){
-  if(locked)return;
+  if(locked) return;
   locked=true;
-  clearInterval(timerId);
-  disableAll();
-  const correct=questions[idx].c;
-  document.querySelectorAll('.choice').forEach((b,j)=>{
-    if(j===correct) b.classList.add('correct');
-    else if(j===i) b.classList.add('wrong');
+  clearInterval(tId);
+  disableAnswers();
+  const c=Qs[idx].c;
+  document.querySelectorAll('.ans').forEach((b,j)=>{
+    if(j===c) b.classList.add('ok');
+    else if(j===i) b.classList.add('bad');
   });
-  resetBall();
-  const ball=document.getElementById('ball');
-  if(i===correct){
+  if(i===c){
     score++;
-    document.getElementById('score').textContent=score;
-    document.getElementById('msg').textContent='🎳 Strike! Perfect!';
-    ball.classList.add('roll');
-    setTimeout(()=>knockPins(true),700);
+    document.getElementById('sc').textContent=score;
+    document.getElementById('msg').textContent='STRIKE! Perfect shot!';
+    launchBall(true);
     burst();
   } else {
-    document.getElementById('msg').textContent='❌ Gutter ball! Correct answer highlighted.';
-    ball.classList.add('miss');
-    setTimeout(()=>knockPins(false),500);
+    document.getElementById('msg').textContent='Gutter ball! Correct answer is highlighted.';
+    launchBall(false);
   }
-  const nb=document.getElementById('nextBtn');
-  nb.classList.remove('hidden');
-  nb.textContent=idx===questions.length-1?'Finish 🏆':'Next →';
+  const nb=document.getElementById('nb');
+  nb.style.display='inline-block';
+  nb.textContent=idx===Qs.length-1?'Finish':'Next →';
 }
 
 function autoMiss(){
-  if(locked)return;
+  if(locked) return;
   locked=true;
-  disableAll();
-  const correct=questions[idx].c;
-  document.querySelectorAll('.choice').forEach((b,j)=>{
-    if(j===correct) b.classList.add('correct');
-  });
-  document.getElementById('msg').textContent='⏰ Time up! See the correct answer.';
-  resetBall();
-  document.getElementById('ball').classList.add('miss');
-  setTimeout(()=>knockPins(false),500);
-  const nb=document.getElementById('nextBtn');
-  nb.classList.remove('hidden');
-  nb.textContent=idx===questions.length-1?'Finish 🏆':'Next →';
+  disableAnswers();
+  document.querySelectorAll('.ans').forEach((b,j)=>{ if(j===Qs[idx].c) b.classList.add('ok'); });
+  document.getElementById('msg').textContent='Time up! Correct answer highlighted.';
+  launchBall(false);
+  const nb=document.getElementById('nb');
+  nb.style.display='inline-block';
+  nb.textContent=idx===Qs.length-1?'Finish':'Next →';
 }
 
-function nextQuestion(){
-  if(!locked)return;
+function nextQ(){
+  if(!locked) return;
   idx++;
-  if(idx>=questions.length){ showResult(); return; }
+  if(idx>=Qs.length){ showResult(); return; }
   renderQ();
 }
 
 function showResult(){
-  clearInterval(timerId);
-  document.getElementById('finalScore').textContent=score;
-  const pct=score/15;
-  let stars,msg;
-  if(pct>=0.9){stars='⭐⭐⭐⭐⭐';msg="Outstanding! You're a grammar champion!"}
-  else if(pct>=0.7){stars='⭐⭐⭐⭐';msg="Great work! Almost perfect!"}
-  else if(pct>=0.5){stars='⭐⭐⭐';msg="Good effort! Keep practicing!"}
-  else if(pct>=0.3){stars='⭐⭐';msg="Keep going — you'll improve!"}
-  else{stars='⭐';msg="Don't give up — try again!"}
-  document.getElementById('starsDisplay').textContent=stars;
-  document.getElementById('resultMsg').textContent=msg;
-  show('result');
-  if(pct>=0.5) burst();
+  clearInterval(tId);
+  document.getElementById('fs').textContent=score;
+  const p=score/15;
+  let st,msg;
+  if(p>=0.9){st='⭐⭐⭐⭐⭐';msg="Outstanding! Grammar champion!"}
+  else if(p>=0.7){st='⭐⭐⭐⭐';msg="Great work! Almost perfect!"}
+  else if(p>=0.5){st='⭐⭐⭐';msg="Good effort! Keep practicing!"}
+  else if(p>=0.3){st='⭐⭐';msg="Keep going, you'll get there!"}
+  else{st='⭐';msg="Don't give up — try again!"}
+  document.getElementById('stars').textContent=st;
+  document.getElementById('rm').textContent=msg;
+  document.getElementById('result').classList.add('on');
 }
 
-function restart(){ show('instructions'); }
+function restart(){
+  document.getElementById('result').classList.remove('on');
+  document.getElementById('splash').classList.add('on');
+}
 
 function burst(){
-  const el=document.getElementById('confetti');
-  el.innerHTML='';
-  const cols=['#ff5d7a','#ffcc33','#67e8f9','#7c5cff','#2dd4bf','#34d399','#ff9de2'];
-  for(let i=0;i<55;i++){
-    const p=document.createElement('div');
-    p.className='piece';
-    p.style.cssText=`left:${Math.random()*100}vw;top:-20px;width:${6+Math.random()*10}px;height:${8+Math.random()*14}px;background:${cols[i%cols.length]};transform:rotate(${Math.random()*180}deg);animation-duration:${1.3+Math.random()*1.2}s`;
-    el.appendChild(p);
+  const cols=['#ff5d7a','#ffcc33','#67e8f9','#7c5cff','#2dd4bf','#ff9de2'];
+  for(let i=0;i<45;i++){
+    const d=document.createElement('div');
+    const sz=6+Math.random()*9;
+    d.style.cssText=`position:fixed;pointer-events:none;z-index:999;width:${sz}px;height:${sz}px;background:${cols[i%cols.length]};border-radius:3px;left:${Math.random()*100}vw;top:-12px;animation:cf ${1.2+Math.random()*0.9}s linear forwards`;
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),2200);
   }
-  setTimeout(()=>el.innerHTML='',2500);
 }
 
-show('splash');
+window.addEventListener('resize',()=>{ if(!document.getElementById('splash').classList.contains('on') && !document.getElementById('instructions').classList.contains('on') && !document.getElementById('result').classList.contains('on')) resizeCanvas(); });
 </script>
 </body>
 </html>
