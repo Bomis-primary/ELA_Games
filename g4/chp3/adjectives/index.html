@@ -1,1 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Adjective Quest – Grade 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --purple:  #7C3AED;
+    --purple-light: #A78BFA;
+    --pink:    #EC4899;
+    --yellow:  #FBBF24;
+    --green:   #10B981;
+    --red:     #EF4444;
+    --blue:    #3B82F6;
+    --bg:      #0F0A2E;
+    --card:    rgba(255,255,255,0.07);
+    --card-border: rgba(255,255,255,0.15);
+    --white:   #FFFFFF;
+    --text-dim: rgba(255,255,255,0.65);
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  #stars-canvas {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  }
+
+  .screen {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .screen.hidden {
+    opacity: 0; pointer-events: none; transform: scale(0.97);
+  }
+
+  /* SPLASH */
+  #splash {
+    background: linear-gradient(135deg, #0F0A2E 0%, #1E0A4E 100%);
+  }
+  .splash-logo {
+    width: min(280px, 70vw);
+    animation: pulse-logo 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 30px rgba(124,58,237,0.8));
+  }
+  @keyframes pulse-logo {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.05); }
+  }
+  .splash-bar-wrap {
+    margin-top: 40px;
+    width: min(300px, 75vw);
+    height: 6px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .splash-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+    border-radius: 999px;
+    animation: fill-bar 5s linear forwards;
+  }
+  @keyframes fill-bar { to { width: 100%; } }
+  .splash-tag {
+    margin-top: 16px;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* INSTRUCTIONS */
+  #instructions {
+    background: linear-gradient(160deg, #0F0A2E 0%, #1a0845 100%);
+  }
+  .inst-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 36px 32px;
+    max-width: 520px;
+    width: 100%;
+    backdrop-filter: blur(12px);
+    text-align: center;
+  }
+  .inst-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(28px, 6vw, 42px);
+    background: linear-gradient(90deg, var(--yellow), var(--pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .inst-subtitle {
+    font-size: 14px; color: var(--text-dim); margin-bottom: 28px; letter-spacing: 1px;
+  }
+  .inst-rules {
+    list-style: none;
+    text-align: left;
+    display: flex; flex-direction: column; gap: 14px;
+    margin-bottom: 32px;
+  }
+  .inst-rules li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 15px; line-height: 1.5;
+  }
+  .rule-icon {
+    width: 32px; height: 32px; flex-shrink: 0;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .ri-purple { background: rgba(124,58,237,0.3); }
+  .ri-pink   { background: rgba(236,72,153,0.3); }
+  .ri-yellow { background: rgba(251,191,36,0.3); }
+  .ri-green  { background: rgba(16,185,129,0.3); }
+  .ri-blue   { background: rgba(59,130,246,0.3); }
+
+  .btn-start {
+    width: 100%;
+    padding: 16px;
+    border: none; outline: none; cursor: pointer;
+    border-radius: 16px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(124,58,237,0.5);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(124,58,237,0.65); }
+  .btn-start:active { transform: translateY(0); }
+
+  /* GAME */
+  #game {
+    background: linear-gradient(160deg, #0F0A2E 0%, #1a0845 100%);
+    justify-content: flex-start;
+    padding-top: 0;
+    overflow-y: auto;
+  }
+
+  .game-header {
+    width: 100%; max-width: 640px;
+    padding: 16px 20px 0;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .hud {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .q-counter {
+    font-size: 13px; font-weight: 700; color: var(--text-dim); letter-spacing: 1px;
+  }
+  .score-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(251,191,36,0.15);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    color: var(--yellow);
+  }
+  .attempts-row {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--text-dim);
+  }
+  .attempt-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--green);
+    transition: background 0.3s;
+  }
+  .attempt-dot.used { background: rgba(255,255,255,0.2); }
+
+  .timer-wrap {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .timer-bar {
+    height: 100%;
+    width: 100%;
+    border-radius: 999px;
+    background: var(--green);
+    transition: width 1s linear, background 0.5s;
+  }
+  .timer-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 15px;
+    text-align: right;
+    color: var(--green);
+    transition: color 0.5s;
+  }
+
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 28px 24px 24px;
+    max-width: 640px;
+    width: calc(100% - 32px);
+    margin: 16px auto 0;
+    backdrop-filter: blur(10px);
+    text-align: center;
+  }
+  .q-emoji { font-size: 48px; margin-bottom: 12px; display: block; }
+  .q-text {
+    font-size: clamp(16px, 4vw, 20px);
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .blank-word {
+    display: inline-block;
+    background: rgba(124,58,237,0.3);
+    border: 2px dashed var(--purple-light);
+    border-radius: 8px;
+    padding: 0 10px;
+    color: var(--purple-light);
+    min-width: 100px;
+    letter-spacing: 1px;
+  }
+  .feedback-msg {
+    height: 28px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 8px;
+    transition: opacity 0.3s;
+  }
+  .feedback-msg.correct { color: var(--green); }
+  .feedback-msg.wrong   { color: var(--red); }
+  .feedback-msg.reveal  { color: var(--yellow); }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 640px;
+    width: calc(100% - 32px);
+    margin: 14px auto 24px;
+  }
+  .opt-btn {
+    position: relative;
+    padding: 16px 12px;
+    border-radius: 16px;
+    border: 2px solid var(--card-border);
+    background: var(--card);
+    color: var(--white);
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(14px, 3.5vw, 17px);
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    backdrop-filter: blur(8px);
+    text-align: center;
+    outline: none;
+  }
+  .opt-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    border-color: var(--purple-light);
+    box-shadow: 0 6px 20px rgba(124,58,237,0.35);
+  }
+  .opt-btn:active:not(:disabled) { transform: translateY(0); }
+  .opt-btn.correct-ans {
+    border-color: var(--green);
+    background: rgba(16,185,129,0.2);
+    box-shadow: 0 0 20px rgba(16,185,129,0.4);
+  }
+  .opt-btn.wrong-ans {
+    border-color: var(--red);
+    background: rgba(239,68,68,0.15);
+    animation: shake 0.4s ease;
+  }
+  .opt-btn.revealed {
+    border-color: var(--yellow);
+    background: rgba(251,191,36,0.15);
+  }
+  .opt-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+  .opt-label {
+    position: absolute; top: 6px; left: 10px;
+    font-size: 10px; font-weight: 900;
+    color: var(--text-dim); letter-spacing: 1px;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+
+  /* SCOREBOARD */
+  #scoreboard {
+    background: linear-gradient(160deg, #0F0A2E 0%, #1a0845 100%);
+    overflow-y: auto;
+  }
+  .score-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 28px;
+    padding: 36px 28px;
+    max-width: 520px;
+    width: 100%;
+    backdrop-filter: blur(12px);
+    text-align: center;
+  }
+  .score-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(26px, 6vw, 38px);
+    background: linear-gradient(90deg, var(--yellow), var(--pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .badge-box {
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 20px;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.35);
+  }
+  .badge-emoji { font-size: 56px; }
+  .badge-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+    color: var(--yellow);
+    margin-top: 8px;
+  }
+  .final-score-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(48px, 12vw, 72px);
+    background: linear-gradient(90deg, var(--purple-light), var(--pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .final-score-label {
+    font-size: 14px; color: var(--text-dim); margin-top: 4px; letter-spacing: 1px;
+  }
+  .stats-row {
+    display: flex; justify-content: space-around; margin: 20px 0;
+  }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px; color: var(--white);
+  }
+  .stat-lbl { font-size: 12px; color: var(--text-dim); letter-spacing: 1px; }
+
+  .btn-restart {
+    width: 100%;
+    padding: 16px;
+    margin-top: 8px;
+    border: none; outline: none; cursor: pointer;
+    border-radius: 16px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: #fff;
+    box-shadow: 0 8px 28px rgba(124,58,237,0.45);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-restart:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(124,58,237,0.6); }
+
+  /* CONFETTI */
+  #confetti-canvas {
+    position: fixed; inset: 0; z-index: 999; pointer-events: none;
+  }
+
+  /* PROGRESS DOTS */
+  .progress-dots {
+    display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 10px;
+  }
+  .pdot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.3s;
+  }
+  .pdot.done-correct { background: var(--green); }
+  .pdot.done-wrong   { background: var(--red); }
+  .pdot.active       { background: var(--yellow); transform: scale(1.4); }
+
+  @media (max-width: 400px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .inst-card { padding: 24px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+<canvas id="confetti-canvas"></canvas>
+
+<!-- SPLASH -->
+<div class="screen" id="splash">
+  <img src="assets/logo.png" alt="Innovine Logo" class="splash-logo"/>
+  <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+  <p class="splash-tag">Powered by Innovine</p>
+</div>
+
+<!-- INSTRUCTIONS -->
+<div class="screen hidden" id="instructions">
+  <div class="inst-card">
+    <div class="inst-title">Adjective Quest</div>
+    <div class="inst-subtitle">GRADE 4 &nbsp;·&nbsp; CHAPTER 3</div>
+    <ul class="inst-rules">
+      <li><div class="rule-icon ri-purple">🎯</div><span>Choose the correct <strong>adjective</strong> to fill in the blank of each sentence.</span></li>
+      <li><div class="rule-icon ri-yellow">⏱️</div><span>You have <strong>45 seconds</strong> per question — answer fast!</span></li>
+      <li><div class="rule-icon ri-green">✅</div><span><strong>+10 points</strong> for first try · <strong>+5 points</strong> for second try · 0 for timeout.</span></li>
+      <li><div class="rule-icon ri-pink">❤️</div><span>You get <strong>2 attempts</strong> per question. After 2 wrong tries, the answer is revealed.</span></li>
+      <li><div class="rule-icon ri-blue">🏆</div><span><strong>15 questions</strong> total. Earn your badge and beat your best score!</span></li>
+    </ul>
+    <button class="btn-start" onclick="startGame()">Let's Play! 🚀</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="screen hidden" id="game">
+  <div class="game-header">
+    <div class="hud">
+      <span class="q-counter" id="q-counter">QUESTION 1 / 15</span>
+      <div class="score-pill">⭐ <span id="score-display">0</span></div>
+    </div>
+    <div class="hud">
+      <div class="attempts-row">
+        ATTEMPTS:
+        <div class="attempt-dot" id="dot1"></div>
+        <div class="attempt-dot" id="dot2"></div>
+      </div>
+      <span class="timer-label" id="timer-label">45s</span>
+    </div>
+    <div class="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+    <div class="progress-dots" id="progress-dots"></div>
+  </div>
+
+  <div class="q-card">
+    <span class="q-emoji" id="q-emoji">🧩</span>
+    <div class="q-text" id="q-text"></div>
+    <div class="feedback-msg" id="feedback-msg"></div>
+  </div>
+
+  <div class="options-grid" id="options-grid"></div>
+</div>
+
+<!-- SCOREBOARD -->
+<div class="screen hidden" id="scoreboard">
+  <div class="score-card">
+    <div class="score-title">Quest Complete! 🎉</div>
+    <div class="final-score-num" id="final-score">0</div>
+    <div class="final-score-label">OUT OF 150 POINTS</div>
+    <div class="badge-box">
+      <div class="badge-emoji" id="badge-emoji">🏆</div>
+      <div class="badge-name" id="badge-name">Adjective Master</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-num" id="stat-correct">0</div>
+        <div class="stat-lbl">CORRECT</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="stat-wrong">0</div>
+        <div class="stat-lbl">WRONG</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="stat-skipped">0</div>
+        <div class="stat-lbl">SKIPPED</div>
+      </div>
+    </div>
+    <button class="btn-restart" onclick="restartGame()">🔁 Play Again</button>
+  </div>
+</div>
+
+<!-- AUDIO -->
+<audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
+<audio id="snd-wrong"   src="assets/wrong.mp3"   preload="auto"></audio>
+<audio id="snd-clap"    src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+<script>
+/* STARS */
+(function(){
+  const c = document.getElementById('stars-canvas');
+  const ctx = c.getContext('2d');
+  let stars = [];
+  function resize(){ c.width=innerWidth; c.height=innerHeight; }
+  function init(){
+    stars=[];
+    for(let i=0;i<160;i++) stars.push({
+      x:Math.random()*c.width, y:Math.random()*c.height,
+      r:Math.random()*1.5+0.3, a:Math.random(),
+      da:(Math.random()*0.005+0.002)*(Math.random()<.5?1:-1)
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s=>{
+      s.a+=s.da; if(s.a>1||s.a<0) s.da*=-1;
+      ctx.globalAlpha=s.a; ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha=1;
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',()=>{resize();init();});
+  resize(); init(); draw();
+})();
+
+/* CONFETTI */
+const confCanvas = document.getElementById('confetti-canvas');
+const confCtx    = confCanvas.getContext('2d');
+confCanvas.width  = innerWidth;
+confCanvas.height = innerHeight;
+window.addEventListener('resize',()=>{ confCanvas.width=innerWidth; confCanvas.height=innerHeight; });
+
+let confetti = [];
+const CONF_COLORS = ['#7C3AED','#EC4899','#FBBF24','#10B981','#3B82F6','#F97316','#fff'];
+
+function spawnConfetti(n=80){
+  for(let i=0;i<n;i++){
+    confetti.push({
+      x: Math.random()*confCanvas.width, y: -10,
+      vx: (Math.random()-0.5)*6, vy: Math.random()*4+2,
+      w: Math.random()*10+4, h: Math.random()*5+3,
+      color: CONF_COLORS[Math.floor(Math.random()*CONF_COLORS.length)],
+      rot: Math.random()*360, rotV: (Math.random()-0.5)*8,
+      life: 1
+    });
+  }
+}
+function drawConfetti(){
+  confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+  confetti = confetti.filter(p=>p.y<confCanvas.height+20 && p.life>0);
+  confetti.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV; p.vy+=0.12;
+    confCtx.save();
+    confCtx.globalAlpha=p.life;
+    confCtx.translate(p.x,p.y); confCtx.rotate(p.rot*Math.PI/180);
+    confCtx.fillStyle=p.color;
+    confCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    confCtx.restore();
+  });
+  requestAnimationFrame(drawConfetti);
+}
+drawConfetti();
+
+/* QUESTIONS */
+const QUESTIONS = [
+  { emoji:'🐉', text:'The _____ dragon guarded the ancient castle.',        correct:'fierce',      opts:['running','loudly','fierce','jumped'] },
+  { emoji:'👗', text:'She wore a _____ dress to the birthday party.',       correct:'sparkly',     opts:['danced','sparkly','before','heavy'] },
+  { emoji:'🌿', text:'The explorer found a _____ cave deep in the jungle.', correct:'mysterious',  opts:['quickly','ate','they','mysterious'] },
+  { emoji:'🐶', text:'A _____ puppy followed the boy home from school.',    correct:'tiny',        opts:['tiny','running','sang','where'] },
+  { emoji:'🍲', text:'The chef made a _____ soup that warmed everyone up.', correct:'delicious',   opts:['jumped','under','delicious','writes'] },
+  { emoji:'🏔️', text:'The _____ mountain was covered in snow all year.',   correct:'enormous',    opts:['swiftly','enormous','played','into'] },
+  { emoji:'😊', text:'She had a _____ smile that lit up the whole room.',   correct:'radiant',     opts:['climbed','never','these','radiant'] },
+  { emoji:'🤖', text:'The _____ robot could solve any puzzle in seconds.',  correct:'brilliant',   opts:['brilliant','laughed','beside','many'] },
+  { emoji:'🌉', text:'They crossed a _____ bridge over the rushing river.', correct:'rickety',     opts:['danced','often','rickety','his'] },
+  { emoji:'💰', text:'The pirate discovered a _____ treasure chest on the island.', correct:'gleaming', opts:['shouted','gleaming','below','fast'] },
+  { emoji:'🌬️', text:'A _____ wind swept through the empty streets at night.', correct:'howling', opts:['skipped','from','seven','howling'] },
+  { emoji:'🔬', text:'The scientist invented a _____ machine that could fly.', correct:'remarkable', opts:['remarkable','whispered','behind','we'] },
+  { emoji:'🐱', text:'The _____ kitten curled up next to the warm fireplace.', correct:'fluffy',  opts:['sprinted','above','fluffy','them'] },
+  { emoji:'🪁', text:'It was a _____ day, perfect for flying kites in the park.', correct:'breezy', opts:['breezy','tumbled','since','our'] },
+  { emoji:'🚀', text:'The astronaut floated in the _____ darkness of outer space.', correct:'vast', opts:['crawled','through','vast','each'] }
+];
+
+const OPT_LABELS = ['A','B','C','D'];
+
+/* STATE */
+let currentQ=0, score=0, attempts=0, timerSecs=45;
+let timerInterval=null, answered=false;
+let correctCount=0, wrongCount=0, skippedCount=0;
+
+/* AUDIO */
+function playSound(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.currentTime=0;
+  el.play().catch(()=>{});
+}
+
+/* SCREENS */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+/* SPLASH → INSTRUCTIONS */
+setTimeout(()=>{ showScreen('instructions'); }, 5200);
+
+/* START */
+function startGame(){
+  currentQ=0; score=0; correctCount=0; wrongCount=0; skippedCount=0;
+  buildProgressDots();
+  showScreen('game');
+  loadQuestion();
+}
+
+function buildProgressDots(){
+  const wrap=document.getElementById('progress-dots');
+  wrap.innerHTML='';
+  QUESTIONS.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='pdot'; d.id='pdot-'+i;
+    wrap.appendChild(d);
+  });
+}
+
+function updateProgressDot(idx,state){
+  const d=document.getElementById('pdot-'+idx);
+  if(!d) return;
+  d.className='pdot';
+  if(state) d.classList.add(state);
+}
+
+/* LOAD QUESTION */
+function loadQuestion(){
+  if(currentQ>=QUESTIONS.length){ endGame(); return; }
+  answered=false; attempts=0;
+  const q=QUESTIONS[currentQ];
+
+  document.getElementById('q-counter').textContent=`QUESTION ${currentQ+1} / ${QUESTIONS.length}`;
+  document.getElementById('score-display').textContent=score;
+  document.getElementById('q-emoji').textContent=q.emoji;
+
+  const display=q.text.replace('_____','<span class="blank-word">_____</span>');
+  document.getElementById('q-text').innerHTML=display;
+  document.getElementById('feedback-msg').textContent='';
+  document.getElementById('feedback-msg').className='feedback-msg';
+
+  updateAttemptDots(0);
+  document.querySelectorAll('.pdot').forEach(d=>d.classList.remove('active'));
+  updateProgressDot(currentQ,'active');
+
+  const grid=document.getElementById('options-grid');
+  grid.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.innerHTML=`<span class="opt-label">${OPT_LABELS[i]}</span>${opt}`;
+    btn.onclick=()=>handleAnswer(opt,btn);
+    grid.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function updateAttemptDots(usedCount){
+  document.getElementById('dot1').className='attempt-dot'+(usedCount>=1?' used':'');
+  document.getElementById('dot2').className='attempt-dot'+(usedCount>=2?' used':'');
+}
+
+/* TIMER */
+function startTimer(){
+  clearInterval(timerInterval);
+  timerSecs=45;
+  updateTimerUI(45);
+  timerInterval=setInterval(()=>{
+    timerSecs--;
+    updateTimerUI(timerSecs);
+    if(timerSecs<=0){ clearInterval(timerInterval); timeOut(); }
+  },1000);
+}
+
+function updateTimerUI(s){
+  const pct=(s/45)*100;
+  const bar=document.getElementById('timer-bar');
+  const lbl=document.getElementById('timer-label');
+  bar.style.width=pct+'%';
+  if(s>20){ bar.style.background='var(--green)'; lbl.style.color='var(--green)'; }
+  else if(s>10){ bar.style.background='var(--yellow)'; lbl.style.color='var(--yellow)'; }
+  else { bar.style.background='var(--red)'; lbl.style.color='var(--red)'; }
+  lbl.textContent=s+'s';
+}
+
+function timeOut(){
+  if(answered) return;
+  answered=true;
+  disableOptions();
+  revealCorrect();
+  showFeedback("⏰ Time's up! The answer was revealed.",'reveal');
+  skippedCount++;
+  updateProgressDot(currentQ,'done-wrong');
+  setTimeout(nextQuestion,2200);
+}
+
+/* ANSWER */
+function handleAnswer(selected,btn){
+  if(answered) return;
+  const q=QUESTIONS[currentQ];
+  attempts++;
+  updateAttemptDots(attempts);
+
+  if(selected===q.correct){
+    clearInterval(timerInterval);
+    answered=true;
+    btn.classList.add('correct-ans');
+    const pts=attempts===1?10:5;
+    score+=pts;
+    document.getElementById('score-display').textContent=score;
+    showFeedback(attempts===1?`✨ Brilliant! +${pts} points`:`👍 Correct! +${pts} points`,'correct');
+    playSound('snd-correct');
+    spawnConfetti(attempts===1?100:55);
+    correctCount++;
+    updateProgressDot(currentQ,'done-correct');
+    setTimeout(nextQuestion,1800);
+  } else {
+    btn.classList.add('wrong-ans');
+    playSound('snd-wrong');
+    if(attempts>=2){
+      answered=true;
+      disableOptions();
+      revealCorrect();
+      showFeedback('❌ Oops! The correct answer is shown.','wrong');
+      wrongCount++;
+      updateProgressDot(currentQ,'done-wrong');
+      setTimeout(nextQuestion,2200);
+    } else {
+      showFeedback('❌ Try again! One attempt left.','wrong');
+      setTimeout(()=>{ btn.classList.remove('wrong-ans'); },600);
+    }
+  }
+}
+
+function disableOptions(){
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+}
+
+function revealCorrect(){
+  const q=QUESTIONS[currentQ];
+  document.querySelectorAll('.opt-btn').forEach(b=>{
+    const txt=b.innerText.replace(/^[A-D]/,'').trim();
+    if(txt===q.correct) b.classList.add('revealed');
+  });
+  const display=q.text.replace('_____',`<span class="blank-word" style="color:var(--yellow);border-color:var(--yellow)">${q.correct}</span>`);
+  document.getElementById('q-text').innerHTML=display;
+}
+
+function showFeedback(msg,type){
+  const el=document.getElementById('feedback-msg');
+  el.textContent=msg;
+  el.className='feedback-msg '+type;
+}
+
+/* NEXT */
+function nextQuestion(){
+  currentQ++;
+  if(currentQ>=QUESTIONS.length){ endGame(); return; }
+  loadQuestion();
+}
+
+/* END */
+function endGame(){
+  clearInterval(timerInterval);
+  showScreen('scoreboard');
+  document.getElementById('final-score').textContent=score;
+  document.getElementById('stat-correct').textContent=correctCount;
+  document.getElementById('stat-wrong').textContent=wrongCount;
+  document.getElementById('stat-skipped').textContent=skippedCount;
+
+  let badge,emoji;
+  if(score>=130){badge='Adjective Master';emoji='🏆';}
+  else if(score>=100){badge='Word Wizard';emoji='🥇';}
+  else if(score>=70){badge='Sentence Star';emoji='🥈';}
+  else if(score>=40){badge='Word Explorer';emoji='🥉';}
+  else{badge='Keep Practicing!';emoji='📚';}
+
+  document.getElementById('badge-name').textContent=badge;
+  document.getElementById('badge-emoji').textContent=emoji;
+  playSound('snd-clap');
+  spawnConfetti(120);
+}
+
+/* RESTART */
+function restartGame(){
+  showScreen('instructions');
+}
+</script>
+</body>
+</html>
