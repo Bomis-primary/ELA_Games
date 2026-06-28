@@ -18,17 +18,17 @@
       --lane1:#5c2db8;
       --lane2:#3c1b84;
       --lane3:#9b5cff;
-      --ball-size:78px;
+      --ball-size:82px;
     }
 
     *{box-sizing:border-box}
     html,body{
-      height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);
+      overflow:hidden;
       background:
         radial-gradient(circle at 20% 20%, rgba(255,255,255,.32), transparent 16%),
         radial-gradient(circle at 80% 15%, rgba(255,255,255,.22), transparent 14%),
         linear-gradient(135deg,var(--bg1),var(--bg2) 55%,var(--bg3));
-      overflow:hidden;color:var(--ink)
     }
 
     .screen{
@@ -38,9 +38,9 @@
 
     .panel{
       width:min(980px,100%);
-      background:rgba(255,255,255,.88);
+      background:rgba(255,255,255,.90);
       backdrop-filter: blur(10px);
-      border:4px solid rgba(255,255,255,.6);
+      border:4px solid rgba(255,255,255,.55);
       border-radius:30px;
       box-shadow:var(--shadow);
       overflow:hidden;
@@ -56,8 +56,18 @@
     .logoWrap{
       width:min(320px,70vw);height:min(320px,70vw);border-radius:32px;background:#fff;display:flex;align-items:center;justify-content:center;
       box-shadow:0 18px 50px rgba(0,0,0,.15);padding:18px;margin-bottom:20px;animation:pop 1.2s ease-in-out infinite alternate;
+      overflow:hidden;
     }
-    .logoWrap img{max-width:100%;max-height:100%;object-fit:contain}
+    .logoWrap img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+    .logoFallback{
+      display:none;
+      font-size:clamp(22px,4vw,42px);
+      font-weight:900;
+      color:#2d2466;
+      text-align:center;
+      padding:20px;
+      line-height:1.1;
+    }
 
     .title{font-size:clamp(28px,4vw,52px);line-height:1.05;margin:0 0 10px;font-weight:900;color:#2d2466;text-shadow:0 3px 0 rgba(255,255,255,.6)}
     .subtitle{font-size:clamp(16px,2.2vw,22px);margin:0;max-width:760px;color:#42506b}
@@ -69,6 +79,7 @@
     .btn:active{transform:translateY(4px);box-shadow:0 8px 0 rgba(0,0,0,.12)}
     .btn.secondary{background:#7c5cff;color:#fff}
     .btn.good{background:#29d07f;color:#fff}
+    .btn.bad{background:#ff5577;color:#fff}
 
     .instructions ul{
       list-style:none;padding:0;margin:18px 0 26px;display:grid;gap:12px;max-width:780px
@@ -162,12 +173,20 @@
       position:absolute;bottom:22px;left:10%;
       width:var(--ball-size);height:var(--ball-size);border-radius:50%;
       background:
-        radial-gradient(circle at 30% 25%, rgba(255,255,255,0.95) 0 12%, transparent 13%),
-        radial-gradient(circle at 30% 72%, rgba(255,255,255,0.65) 0 11%, transparent 12%),
+        radial-gradient(circle at 28% 24%, rgba(255,255,255,.98) 0 10%, rgba(255,255,255,.25) 11%, transparent 18%),
+        radial-gradient(circle at 36% 36%, rgba(255,255,255,.38) 0 2%, transparent 3%),
+        radial-gradient(circle at 60% 38%, rgba(255,255,255,.08) 0 2%, transparent 3%),
         radial-gradient(circle at 70% 35%, rgba(84,214,255,0.85) 0 12%, transparent 13%),
         linear-gradient(135deg,#ff5ca8,#ffd84b);
-      box-shadow:0 18px 28px rgba(0,0,0,.28), inset -8px -10px 20px rgba(0,0,0,.12);
+      box-shadow:0 18px 28px rgba(0,0,0,.28), inset -10px -12px 22px rgba(0,0,0,.16), inset 12px 10px 18px rgba(255,255,255,.10);
       transform-origin:center;z-index:9;pointer-events:none;will-change:left,transform,bottom,opacity;
+    }
+    .ball::after{
+      content:"";
+      position:absolute;inset:16% 18% 18% 18%;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.15), transparent 55%);
+      filter:blur(.2px);
     }
     .ball.roll{animation:ball-roll 900ms cubic-bezier(.2,.8,.2,1) forwards}
     .ball.miss{animation:ball-miss 900ms cubic-bezier(.2,.8,.2,1) forwards}
@@ -238,8 +257,8 @@
     @media (max-width:720px){
       .answers{grid-template-columns:1fr}
       .stage{min-height:260px}
-      .ball,.ball-shadow{width:64px;height:64px}
-      .ball-shadow{height:10px}
+      .ball{width:64px;height:64px}
+      .ball-shadow{width:64px;height:10px}
       .pins{transform:translateX(-50%) scale(.88);transform-origin:top center}
     }
   </style>
@@ -248,7 +267,8 @@
   <div id="splash" class="screen active splash">
     <div class="panel">
       <div class="logoWrap">
-        <img src="g4/chp6/thecontinuoustense/assets/logo.png" alt="Innovine logo">
+        <img id="logoImg" src="g4/chp6/thecontinuoustense/assets/logo.png" alt="Innovine logo">
+        <div class="logoFallback" id="logoFallback">INNOVINE</div>
       </div>
       <h1 class="title">Innovine Bowling Grammar Game</h1>
       <p class="subtitle">A fun continuous tense challenge with sounds, score, timer, and bowling action.</p>
@@ -354,8 +374,15 @@
     const correctSound = document.getElementById('correctSound');
     const wrongSound = document.getElementById('wrongSound');
     const clapSound = document.getElementById('clapSound');
+    const logoImg = document.getElementById('logoImg');
+    const logoFallback = document.getElementById('logoFallback');
 
     let index = 0, score = 0, timer = 45, timerId = null, locked = false, started = false;
+
+    logoImg.onerror = () => {
+      logoImg.style.display = 'none';
+      logoFallback.style.display = 'block';
+    };
 
     function makePins(){
       pins.innerHTML = '';
@@ -372,7 +399,11 @@
     }
 
     function playSafe(a){
-      try{ a.currentTime = 0; a.play(); }catch(e){}
+      try{
+        a.currentTime = 0;
+        const p = a.play();
+        if(p && p.catch) p.catch(()=>{});
+      }catch(e){}
     }
 
     function confettiBurst(){
@@ -409,15 +440,14 @@
 
     function knockPins(all = false){
       const allPins = [...pins.children];
-      const targetCount = all ? allPins.length : Math.max(3, Math.min(7, Math.floor(3 + Math.random()*5)));
-      const shuffled = allPins.sort(()=>Math.random() - 0.5).slice(0, targetCount);
-
+      const count = all ? allPins.length : Math.max(3, Math.min(7, Math.floor(3 + Math.random()*5)));
+      const shuffled = allPins.sort(()=>Math.random() - 0.5).slice(0, count);
       shuffled.forEach((pin, i)=>{
         setTimeout(()=>{
           pin.classList.add('fallen');
           const rot = (Math.random() * 70 - 35).toFixed(1);
           pin.style.transform = `translateY(34px) rotate(${rot}deg)`;
-        }, 120 + i * 70);
+        }, 100 + i * 70);
       });
     }
 
@@ -481,23 +511,15 @@
         playSafe(correctSound);
         playSafe(clapSound);
         confettiBurst();
-
         ball.classList.add('roll');
         ballShadow.classList.add('roll');
-
-        setTimeout(()=>{
-          knockPins(true);
-        }, 700);
+        setTimeout(()=>knockPins(true), 700);
       }else{
         msgEl.textContent = 'Oops, that was a miss!';
         playSafe(wrongSound);
-
         ball.classList.add('miss');
         ballShadow.classList.add('miss');
-
-        setTimeout(()=>{
-          knockPins(false);
-        }, 700);
+        setTimeout(()=>knockPins(false), 700);
       }
 
       nextBtn.classList.remove('hidden');
@@ -510,15 +532,10 @@
       disableChoices();
       msgEl.textContent = 'Time is up!';
       playSafe(wrongSound);
-
       resetBall();
       ball.classList.add('miss');
       ballShadow.classList.add('miss');
-
-      setTimeout(()=>{
-        knockPins(false);
-      }, 700);
-
+      setTimeout(()=>knockPins(false), 700);
       nextBtn.classList.remove('hidden');
       nextBtn.textContent = index === questions.length - 1 ? 'Finish' : 'Next';
     }
@@ -563,7 +580,7 @@
     showScreen(splash);
     setTimeout(()=>{
       if(!started) showScreen(instructions);
-    }, 3000);
+    }, 2500);
   </script>
 </body>
 </html>
