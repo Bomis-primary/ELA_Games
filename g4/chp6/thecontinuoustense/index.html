@@ -1,1 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Continuous Tense Bowling Game</title>
+  <style>
+    :root{
+      --bg1:#6be7ff;
+      --bg2:#7b5cff;
+      --bg3:#ff7ac8;
+      --card:#ffffff;
+      --ink:#20304a;
+      --good:#28c76f;
+      --bad:#ff4d6d;
+      --gold:#ffcc33;
+      --shadow:0 18px 40px rgba(0,0,0,.18);
+      --lane1:#5c2db8;
+      --lane2:#3c1b84;
+      --lane3:#9b5cff;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,.32), transparent 16%),
+      radial-gradient(circle at 80% 15%, rgba(255,255,255,.22), transparent 14%),
+      linear-gradient(135deg,var(--bg1),var(--bg2) 55%,var(--bg3));overflow:hidden;color:var(--ink)}
+    .screen{
+      position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:16px;
+    }
+    .screen.active{display:flex}
+    .panel{
+      width:min(980px,100%);
+      background:rgba(255,255,255,.88);
+      backdrop-filter: blur(10px);
+      border:4px solid rgba(255,255,255,.6);
+      border-radius:30px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .splash .panel,.instructions .panel{
+      min-height:min(92vh,820px);
+      display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px;
+      background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.82));
+    }
+    .logoWrap{
+      width:min(320px,70vw);height:min(320px,70vw);border-radius:32px;background:#fff;display:flex;align-items:center;justify-content:center;
+      box-shadow:0 18px 50px rgba(0,0,0,.15);padding:18px;margin-bottom:20px;animation:pop 1.2s ease-in-out infinite alternate;
+    }
+    .logoWrap img{max-width:100%;max-height:100%;object-fit:contain}
+    .title{font-size:clamp(28px,4vw,52px);line-height:1.05;margin:0 0 10px;font-weight:900;color:#2d2466;text-shadow:0 3px 0 rgba(255,255,255,.6)}
+    .subtitle{font-size:clamp(16px,2.2vw,22px);margin:0;max-width:760px;color:#42506b}
+    .btn{
+      appearance:none;border:none;border-radius:18px;padding:14px 22px;font-size:18px;font-weight:800;cursor:pointer;
+      box-shadow:0 12px 0 rgba(0,0,0,.12);transition:.18s transform,.18s filter;background:#ffcf4d;color:#2d2466;
+    }
+    .btn:active{transform:translateY(4px);box-shadow:0 8px 0 rgba(0,0,0,.12)}
+    .btn.secondary{background:#7c5cff;color:#fff}
+    .btn.good{background:#29d07f;color:#fff}
+    .btn.bad{background:#ff5577;color:#fff}
+    .instructions ul{
+      list-style:none;padding:0;margin:18px 0 26px;display:grid;gap:12px;max-width:780px
+    }
+    .instructions li{
+      background:rgba(255,255,255,.9);padding:14px 16px;border-radius:18px;border:2px solid rgba(124,92,255,.14);
+      font-size:clamp(16px,2vw,20px);text-align:left
+    }
+    .game .panel{min-height:min(94vh,900px);display:flex;flex-direction:column;background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.86))}
+    .topbar{
+      display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:14px 16px;background:linear-gradient(90deg,#fff,#f4f0ff);
+      border-bottom:2px solid rgba(124,92,255,.12)
+    }
+    .pill{
+      min-width:120px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;
+      background:linear-gradient(180deg,#ffffff,#f3efff);box-shadow:inset 0 0 0 2px rgba(124,92,255,.10)
+    }
+    .pill.score{background:linear-gradient(180deg,#fff8d6,#fff0a8)}
+    .pill.timer{background:linear-gradient(180deg,#dff9ff,#baf1ff)}
+    .content{
+      flex:1;display:grid;grid-template-rows:auto auto 1fr auto;gap:14px;padding:16px;
+    }
+    .questionBox{
+      background:linear-gradient(135deg, rgba(123,92,255,.13), rgba(107,231,255,.15));
+      border:2px solid rgba(123,92,255,.16);border-radius:24px;padding:16px 18px;text-align:center
+    }
+    .questionBox h2{margin:0;font-size:clamp(20px,2.8vw,34px);color:#2d2466}
+    .questionBox p{margin:10px 0 0;font-size:clamp(16px,2vw,20px);color:#41506b}
+    .stage{
+      position:relative;display:flex;align-items:center;justify-content:center;min-height:280px;border-radius:28px;overflow:hidden;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255,255,255,.35), transparent 20%),
+        linear-gradient(180deg,#82ebff 0%, #6aa8ff 28%, #3e2b95 29%, #2c176f 100%);
+      box-shadow:inset 0 0 0 3px rgba(255,255,255,.16), 0 18px 35px rgba(38,24,93,.20);
+    }
+    .stars{
+      position:absolute;inset:0;pointer-events:none;opacity:.9;
+      background-image:radial-gradient(circle,#fff 1.5px,transparent 1.8px),radial-gradient(circle,#fff 1px,transparent 1.4px);
+      background-size:90px 90px, 130px 130px;background-position:0 0, 35px 55px;animation:drift 18s linear infinite
+    }
+    .lane{
+      position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:min(670px,92%);height:180px;border-radius:36px 36px 0 0;
+      background:linear-gradient(180deg,var(--lane3),var(--lane1) 45%,var(--lane2));
+      box-shadow:inset 0 12px 0 rgba(255,255,255,.12);
+    }
+    .lane:before{
+      content:"";position:absolute;left:50%;transform:translateX(-50%);top:0;width:10px;height:100%;background:rgba(255,255,255,.35);border-radius:999px;filter:blur(.2px)
+    }
+    .lane:after{
+      content:"";position:absolute;left:50%;transform:translateX(-50%);top:16px;width:64%;height:10px;background:rgba(255,255,255,.32);border-radius:999px
+    }
+    .pins{
+      position:absolute;top:18px;left:50%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(5,44px);grid-template-rows:repeat(3,46px);gap:10px 14px;justify-items:center;align-items:end
+    }
+    .pin{
+      width:32px;height:58px;border-radius:18px 18px 12px 12px;background:linear-gradient(180deg,#ffffff,#fff6f6);
+      position:relative;box-shadow:0 10px 18px rgba(0,0,0,.15)
+    }
+    .pin:before,.pin:after{content:"";position:absolute;left:50%;transform:translateX(-50%);border-radius:999px;background:#ff5d7a}
+    .pin:before{top:14px;width:22px;height:4px}
+    .pin:after{top:24px;width:20px;height:4px}
+    .pin:nth-child(1){grid-column:3;grid-row:1}
+    .pin:nth-child(2){grid-column:2;grid-row:2}
+    .pin:nth-child(3){grid-column:3;grid-row:2}
+    .pin:nth-child(4){grid-column:4;grid-row:2}
+    .pin:nth-child(5){grid-column:1;grid-row:3}
+    .pin:nth-child(6){grid-column:2;grid-row:3}
+    .pin:nth-child(7){grid-column:3;grid-row:3}
+    .pin:nth-child(8){grid-column:4;grid-row:3}
+    .pin:nth-child(9){grid-column:5;grid-row:3}
+    .ball{
+      position:absolute;bottom:22px;left:10%;width:78px;height:78px;border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #ffffff 0 12%, transparent 13%),
+        radial-gradient(circle at 30% 70%, #ffdf6e 0 12%, transparent 13%),
+        radial-gradient(circle at 70% 35%, #54d6ff 0 12%, transparent 13%),
+        radial-gradient(circle at 65% 70%, #ff78b0 0 12%, transparent 13%),
+        linear-gradient(135deg,#ff5ca8,#ffd84b);
+      box-shadow:0 12px 20px rgba(0,0,0,.25), inset -8px -10px 0 rgba(0,0,0,.10);
+      animation:floaty 2s ease-in-out infinite alternate;
+    }
+    .ball.roll{animation:roll 1.1s ease-in forwards}
+    .ball.miss{animation:miss 1.1s ease-in forwards}
+    .gutter{
+      position:absolute;bottom:0;width:14%;height:100%;background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.08));
+      border-top:3px solid rgba(255,255,255,.18)
+    }
+    .gutter.left{left:0}.gutter.right{right:0}
+    .answers{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    }
+    .choice{
+      border:none;border-radius:20px;padding:16px 12px;font-size:clamp(15px,1.8vw,18px);font-weight:900;line-height:1.2;
+      background:linear-gradient(180deg,#fff,#f5f0ff);color:#22304a;cursor:pointer;box-shadow:0 10px 0 rgba(43,32,105,.15);
+      min-height:72px;transition:.18s transform,.18s filter,.18s opacity;border:2px solid rgba(124,92,255,.12)
+    }
+    .choice:hover{transform:translateY(-2px)}
+    .choice:active{transform:translateY(4px);box-shadow:0 6px 0 rgba(43,32,105,.15)}
+    .choice.correct{background:linear-gradient(180deg,#ccffe5,#a7ffd0);border-color:#5af0a1}
+    .choice.wrong{background:linear-gradient(180deg,#ffe0e6,#ffb9c7);border-color:#ff758f}
+    .footer{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:0 16px 16px;
+    }
+    .msg{
+      font-weight:900;font-size:clamp(16px,2vw,20px);min-height:28px;color:#2d2466
+    }
+    .result{
+      text-align:center;padding:30px 18px
+    }
+    .result h2{font-size:clamp(30px,4vw,54px);margin:0 0 8px;color:#2d2466}
+    .result p{font-size:clamp(18px,2.2vw,24px);margin:0 0 18px}
+    .starsRow{font-size:42px;letter-spacing:6px;margin:10px 0 20px}
+    .hidden{display:none !important}
+    .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20}
+    .piece{position:absolute;width:12px;height:18px;border-radius:4px;animation:fall 1.9s linear forwards}
+    @keyframes pop{from{transform:scale(.98)}to{transform:scale(1.03)}}
+    @keyframes floaty{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+    @keyframes roll{0%{left:10%;transform:rotate(0)} 55%{left:58%;transform:rotate(540deg)} 100%{left:76%;transform:rotate(840deg);opacity:0}}
+    @keyframes miss{0%{left:10%;transform:rotate(0)} 60%{left:52%;transform:rotate(360deg)} 100%{left:60%;transform:translateY(70px) rotate(540deg);opacity:0}}
+    @keyframes drift{from{transform:translateY(0)}to{transform:translateY(20px)}}
+    @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+    @media (max-width:720px){
+      .answers{grid-template-columns:1fr}
+      .stage{min-height:250px}
+      .ball{width:64px;height:64px}
+      .pins{transform:translateX(-50%) scale(.88);transform-origin:top center}
+    }
+  </style>
+</head>
+<body>
+  <div id="splash" class="screen active splash">
+    <div class="panel">
+      <div class="logoWrap">
+        <img src="g4/chp6/thecontinuoustense/assets/logo.png" alt="Innovine logo">
+      </div>
+      <h1 class="title">Innovine Bowling Grammar Game</h1>
+      <p class="subtitle">A fun continuous tense challenge with sounds, score, timer, and bowling action.</p>
+    </div>
+  </div>
 
+  <div id="instructions" class="screen instructions">
+    <div class="panel">
+      <h1 class="title">How to play</h1>
+      <ul>
+        <li>Read the sentence and choose the correct answer.</li>
+        <li>You have 45 seconds for each question.</li>
+        <li>Tap the right option to roll the ball and knock the pins.</li>
+        <li>Wrong answers still move the game ahead after feedback.</li>
+        <li>You will play 15 questions, then see your final score.</li>
+      </ul>
+      <button class="btn secondary" id="startBtn">Start Game</button>
+    </div>
+  </div>
+
+  <div id="game" class="screen game">
+    <div class="panel">
+      <div class="topbar">
+        <div class="pill score">Score: <span id="score">0</span></div>
+        <div class="pill">Q <span id="qnum">1</span>/15</div>
+        <div class="pill timer">Time: <span id="timer">45</span>s</div>
+      </div>
+      <div class="content">
+        <div class="questionBox">
+          <h2 id="question"></h2>
+          <p>Choose the sentence that matches the action and tense.</p>
+        </div>
+        <div class="stage" aria-label="bowling game stage">
+          <div class="stars"></div>
+          <div class="gutter left"></div>
+          <div class="gutter right"></div>
+          <div class="pins" id="pins"></div>
+          <div class="lane"></div>
+          <div class="ball" id="ball"></div>
+        </div>
+        <div class="answers" id="answers"></div>
+        <div class="footer">
+          <div class="msg" id="msg"></div>
+          <button class="btn hidden" id="nextBtn">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="result" class="screen">
+    <div class="panel result">
+      <h2>Game Over!</h2>
+      <div class="starsRow">★ ★ ★ ★ ★</div>
+      <p>You scored <strong><span id="finalScore">0</span></strong> out of 15.</p>
+      <button class="btn good" id="restartBtn">Restart</button>
+    </div>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <audio id="correctSound" src="g4/chp6/thecontinuoustense/assets/correct.mp3" preload="auto"></audio>
+  <audio id="wrongSound" src="g4/chp6/thecontinuoustense/assets/wrong.mp3" preload="auto"></audio>
+  <audio id="clapSound" src="g4/chp6/thecontinuoustense/assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+  <script>
+    const questions = [
+      { q:"The little girl in the yellow dress ___ a cheerful song on the small stage.", a:["is singing","was singing","are singing"], c:0 },
+      { q:"My brother ___ his brand-new sneakers before school started this morning.", a:["are tying","is tying","were tying"], c:1 },
+      { q:"They ___ in the park near the fountain while the birds flew above them.", a:["will be playing","are playing","is playing"], c:1 },
+      { q:"The teacher ___ the answers on the whiteboard very carefully.", a:["are writing","is writing","was writing"], c:1 },
+      { q:"I ___ a cookie now because I finished my homework early.", a:["was eating","am eating","will be eating"], c:1 },
+      { q:"The cats ___ under the wooden table because the dog was nearby.", a:["is hiding","are hiding","were hiding"], c:1 },
+      { q:"She ___ a beautiful picture in her notebook yesterday afternoon.", a:["is drawing","will be drawing","was drawing"], c:2 },
+      { q:"We ___ in the rain last evening when the thunder started loudly.", a:["will be walking","were walking","are walking"], c:1 },
+      { q:"He ___ to music at 6 p.m. while waiting for the bus.", a:["is listening","will be listening","was listening"], c:2 },
+      { q:"The children ___ the flowers in the garden with tiny watering cans.", a:["will be watering","are watering","was watering"], c:1 },
+      { q:"I ___ my book tomorrow night when the house becomes quiet.", a:["am reading","will be reading","was reading"], c:1 },
+      { q:"The birds ___ across the sky before the clouds covered the sun.", a:["were flying","is flying","are flying"], c:0 },
+      { q:"Dad ___ dinner when I called him from the school gate.", a:["is cooking","will be cooking","was cooking"], c:2 },
+      { q:"They ___ for the bus at this moment because it has not arrived yet.", a:["were waiting","will be waiting","are waiting"], c:2 },
+      { q:"She ___ a story later today during the classroom reading time.", a:["is telling","was telling","will be telling"], c:2 }
+    ];
+
+    const splash = document.getElementById('splash');
+    const instructions = document.getElementById('instructions');
+    const game = document.getElementById('game');
+    const result = document.getElementById('result');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const scoreEl = document.getElementById('score');
+    const qnumEl = document.getElementById('qnum');
+    const timerEl = document.getElementById('timer');
+    const questionEl = document.getElementById('question');
+    const answersEl = document.getElementById('answers');
+    const msgEl = document.getElementById('msg');
+    const finalScoreEl = document.getElementById('finalScore');
+    const confettiEl = document.getElementById('confetti');
+    const ball = document.getElementById('ball');
+    const pins = document.getElementById('pins');
+    const correctSound = document.getElementById('correctSound');
+    const wrongSound = document.getElementById('wrongSound');
+    const clapSound = document.getElementById('clapSound');
+
+    let index = 0, score = 0, timer = 45, timerId = null, locked = false, started = false;
+
+    function makePins(){
+      pins.innerHTML = '';
+      for(let i=0;i<10;i++) pins.appendChild(document.createElement('div')).className='pin';
+    }
+
+    function showScreen(el){
+      [splash,instructions,game,result].forEach(s=>s.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function playSafe(a){
+      try{ a.currentTime = 0; a.play(); }catch(e){}
+    }
+
+    function confettiBurst(){
+      confettiEl.innerHTML = '';
+      const colors = ['#ff5d7a','#ffcc33','#67e8f9','#7c5cff','#2dd4bf','#34d399'];
+      for(let i=0;i<60;i++){
+        const p = document.createElement('div');
+        p.className = 'piece';
+        p.style.left = Math.random()*100 + 'vw';
+        p.style.top = (-10 - Math.random()*20) + 'px';
+        p.style.background = colors[Math.floor(Math.random()*colors.length)];
+        p.style.transform = `rotate(${Math.random()*180}deg)`;
+        p.style.animationDuration = (1.4 + Math.random()*1.2) + 's';
+        p.style.width = (8 + Math.random()*8) + 'px';
+        p.style.height = (10 + Math.random()*18) + 'px';
+        confettiEl.appendChild(p);
+      }
+      setTimeout(()=>confettiEl.innerHTML='',2300);
+    }
+
+    function renderQuestion(){
+      locked = false;
+      nextBtn.classList.add('hidden');
+      msgEl.textContent = '';
+      makePins();
+      const item = questions[index];
+      qnumEl.textContent = index + 1;
+      questionEl.textContent = item.q;
+      answersEl.innerHTML = '';
+      item.a.forEach((text,i)=>{
+        const b = document.createElement('button');
+        b.className = 'choice';
+        b.textContent = text;
+        b.onclick = ()=>choose(i,b);
+        answersEl.appendChild(b);
+      });
+      timer = 45;
+      timerEl.textContent = timer;
+      clearInterval(timerId);
+      timerId = setInterval(()=>{
+        timer--;
+        timerEl.textContent = timer;
+        if(timer <= 10) timerEl.style.color = '#ff3d5f';
+        else timerEl.style.color = '';
+        if(timer <= 0){
+          clearInterval(timerId);
+          autoMiss();
+        }
+      },1000);
+    }
+
+    function disableChoices(){
+      [...answersEl.children].forEach(b=>b.disabled = true);
+    }
+
+    function choose(choice, btn){
+      if(locked) return;
+      locked = true;
+      clearInterval(timerId);
+      disableChoices();
+
+      const correct = questions[index].c;
+      [...answersEl.children].forEach((b,i)=> {
+        if(i === correct) b.classList.add('correct');
+        if(i === choice && choice !== correct) b.classList.add('wrong');
+      });
+
+      if(choice === correct){
+        score++;
+        scoreEl.textContent = score;
+        msgEl.textContent = 'Great strike!';
+        playSafe(correctSound);
+        playSafe(clapSound);
+        confettiBurst();
+        ball.classList.remove('miss');
+        ball.classList.add('roll');
+      }else{
+        msgEl.textContent = 'Oops, that was a miss!';
+        playSafe(wrongSound);
+        ball.classList.remove('roll');
+        ball.classList.add('miss');
+      }
+
+      nextBtn.classList.remove('hidden');
+      if(index === questions.length - 1) nextBtn.textContent = 'Finish';
+      else nextBtn.textContent = 'Next';
+    }
+
+    function autoMiss(){
+      if(locked) return;
+      locked = true;
+      disableChoices();
+      msgEl.textContent = 'Time is up!';
+      playSafe(wrongSound);
+      ball.classList.remove('roll');
+      ball.classList.add('miss');
+      nextBtn.classList.remove('hidden');
+      nextBtn.textContent = index === questions.length - 1 ? 'Finish' : 'Next';
+    }
+
+    function nextQuestion(){
+      index++;
+      if(index >= questions.length){
+        clearInterval(timerId);
+        finalScoreEl.textContent = score;
+        playSafe(clapSound);
+        showScreen(result);
+        return;
+      }
+      ball.classList.remove('roll','miss');
+      void ball.offsetWidth;
+      renderQuestion();
+    }
+
+    startBtn.onclick = ()=>{
+      started = true;
+      showScreen(game);
+      index = 0;
+      score = 0;
+      scoreEl.textContent = score;
+      timerEl.style.color = '';
+      renderQuestion();
+    };
+
+    nextBtn.onclick = ()=>{
+      if(!locked) return;
+      nextQuestion();
+    };
+
+    restartBtn.onclick = ()=>{
+      index = 0;
+      score = 0;
+      scoreEl.textContent = score;
+      finalScoreEl.textContent = 0;
+      timerEl.style.color = '';
+      showScreen(instructions);
+    };
+
+    makePins();
+    showScreen(splash);
+    setTimeout(()=> {
+      if(!started) showScreen(instructions);
+    }, 3000);
+  </script>
+</body>
+</html>
