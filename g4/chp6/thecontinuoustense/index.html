@@ -1,701 +1,351 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Continuous Tense Bowling Game</title>
-  <style>
-    :root{
-      --bg1:#6be7ff;
-      --bg2:#7b5cff;
-      --bg3:#ff7ac8;
-      --ink:#20304a;
-      --shadow:0 18px 40px rgba(0,0,0,.18);
-      --lane1:#5c2db8;
-      --lane2:#3c1b84;
-      --lane3:#9b5cff;
-      --ball-size:82px;
-    }
-    *{box-sizing:border-box}
-    html,body{
-      height:100%;
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--ink);
-      overflow:hidden;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,.32), transparent 16%),
-        radial-gradient(circle at 80% 15%, rgba(255,255,255,.22), transparent 14%),
-        linear-gradient(135deg,var(--bg1),var(--bg2) 55%,var(--bg3));
-    }
-    .screen{
-      position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:16px;
-    }
-    .screen.active{display:flex}
-    .panel{
-      width:min(980px,100%);
-      background:rgba(255,255,255,.90);
-      backdrop-filter: blur(10px);
-      border:4px solid rgba(255,255,255,.55);
-      border-radius:30px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      position:relative;
-    }
-    .splash .panel,.instructions .panel{
-      min-height:min(92vh,820px);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-      text-align:center;
-      padding:24px;
-      background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.82));
-    }
-    .logoWrap{
-      width:min(320px,70vw);
-      height:min(320px,70vw);
-      border-radius:32px;
-      background:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow:0 18px 50px rgba(0,0,0,.15);
-      padding:18px;
-      margin-bottom:20px;
-      overflow:hidden;
-    }
-    .logoWrap img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-    .logoFallback{
-      display:none;
-      font-size:clamp(22px,4vw,42px);
-      font-weight:900;
-      color:#2d2466;
-      text-align:center;
-      line-height:1.1;
-    }
-    .title{
-      font-size:clamp(28px,4vw,52px);
-      line-height:1.05;
-      margin:0 0 10px;
-      font-weight:900;
-      color:#2d2466;
-    }
-    .subtitle{
-      font-size:clamp(16px,2.2vw,22px);
-      margin:0;
-      max-width:760px;
-      color:#42506b;
-    }
-    .btn{
-      appearance:none;
-      border:none;
-      border-radius:18px;
-      padding:14px 22px;
-      font-size:18px;
-      font-weight:800;
-      cursor:pointer;
-      box-shadow:0 12px 0 rgba(0,0,0,.12);
-      background:#ffcf4d;
-      color:#2d2466;
-    }
-    .btn.secondary{background:#7c5cff;color:#fff}
-    .btn.good{background:#29d07f;color:#fff}
-    .instructions ul{
-      list-style:none;
-      padding:0;
-      margin:18px 0 26px;
-      display:grid;
-      gap:12px;
-      max-width:780px;
-    }
-    .instructions li{
-      background:rgba(255,255,255,.9);
-      padding:14px 16px;
-      border-radius:18px;
-      border:2px solid rgba(124,92,255,.14);
-      font-size:clamp(16px,2vw,20px);
-      text-align:left;
-    }
-    .game .panel{
-      min-height:min(94vh,900px);
-      display:flex;
-      flex-direction:column;
-      background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.86));
-    }
-    .topbar{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      justify-content:space-between;
-      align-items:center;
-      padding:14px 16px;
-      background:linear-gradient(90deg,#fff,#f4f0ff);
-      border-bottom:2px solid rgba(124,92,255,.12);
-    }
-    .pill{
-      min-width:120px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:12px 16px;
-      border-radius:999px;
-      font-weight:900;
-      background:linear-gradient(180deg,#ffffff,#f3efff);
-      box-shadow:inset 0 0 0 2px rgba(124,92,255,.10);
-    }
-    .pill.score{background:linear-gradient(180deg,#fff8d6,#fff0a8)}
-    .pill.timer{background:linear-gradient(180deg,#dff9ff,#baf1ff)}
-    .content{
-      flex:1;
-      display:grid;
-      grid-template-rows:auto auto 1fr auto;
-      gap:14px;
-      padding:16px;
-    }
-    .questionBox{
-      background:linear-gradient(135deg, rgba(123,92,255,.13), rgba(107,231,255,.15));
-      border:2px solid rgba(123,92,255,.16);
-      border-radius:24px;
-      padding:16px 18px;
-      text-align:center;
-    }
-    .questionBox h2{
-      margin:0;
-      font-size:clamp(20px,2.8vw,34px);
-      color:#2d2466;
-    }
-    .questionBox p{
-      margin:10px 0 0;
-      font-size:clamp(16px,2vw,20px);
-      color:#41506b;
-    }
-    .stage{
-      position:relative;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height:360px;
-      border-radius:28px;
-      overflow:hidden;
-      background:
-        radial-gradient(circle at 50% 18%, rgba(255,255,255,.35), transparent 20%),
-        linear-gradient(180deg,#82ebff 0%, #6aa8ff 28%, #3e2b95 29%, #2c176f 100%);
-      box-shadow:inset 0 0 0 3px rgba(255,255,255,.16), 0 18px 35px rgba(38,24,93,.20);
-    }
-    .stars{
-      position:absolute;inset:0;pointer-events:none;opacity:.9;
-      background-image:radial-gradient(circle,#fff 1.5px,transparent 1.8px),radial-gradient(circle,#fff 1px,transparent 1.4px);
-      background-size:90px 90px, 130px 130px;
-      background-position:0 0, 35px 55px;
-      animation:drift 18s linear infinite;
-    }
-    .lane{
-      position:absolute;
-      bottom:0;
-      left:50%;
-      transform:translateX(-50%);
-      width:min(760px,94%);
-      height:240px;
-      border-radius:36px 36px 0 0;
-      background:linear-gradient(180deg,var(--lane3),var(--lane1) 45%,var(--lane2));
-      box-shadow:inset 0 12px 0 rgba(255,255,255,.12);
-    }
-    .lane:before{
-      content:"";
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      top:0;
-      width:10px;
-      height:100%;
-      background:rgba(255,255,255,.35);
-      border-radius:999px;
-    }
-    .lane:after{
-      content:"";
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      top:16px;
-      width:64%;
-      height:10px;
-      background:rgba(255,255,255,.32);
-      border-radius:999px;
-    }
-    .gutter{
-      position:absolute;
-      bottom:0;
-      width:12%;
-      height:100%;
-      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.08));
-      border-top:3px solid rgba(255,255,255,.18);
-    }
-    .gutter.left{left:0}
-    .gutter.right{right:0}
-    .pins{
-      position:absolute;
-      top:34px;
-      left:50%;
-      transform:translateX(-50%);
-      display:grid;
-      grid-template-columns:repeat(5,58px);
-      grid-template-rows:repeat(4,58px);
-      gap:4px 10px;
-      justify-items:center;
-      align-items:end;
-      z-index:7;
-    }
-    .pin{
-      width:28px;
-      height:60px;
-      border-radius:18px 18px 14px 14px;
-      background:linear-gradient(180deg,#fff,#fff8f8);
-      position:relative;
-      box-shadow:0 10px 22px rgba(0,0,0,.18);
-      transform-origin:50% 100%;
-    }
-    .pin:before{
-      content:"";
-      position:absolute;
-      top:10px;
-      left:50%;
-      transform:translateX(-50%);
-      width:18px;
-      height:6px;
-      border-radius:6px;
-      background:#ff3f6b;
-    }
-    .pin:after{
-      content:"";
-      position:absolute;
-      top:22px;
-      left:50%;
-      transform:translateX(-50%);
-      width:15px;
-      height:4px;
-      border-radius:6px;
-      background:#ff6b92;
-    }
-    .pin.fallen{
-      transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .6s;
-      opacity:0;
-    }
-    .ball{
-      position:absolute;
-      bottom:18px;
-      left:15%;
-      width:var(--ball-size);
-      height:var(--ball-size);
-      border-radius:50%;
-      background:
-        radial-gradient(circle at 28% 24%, rgba(255,255,255,.98) 0 10%, rgba(255,255,255,.25) 11%, transparent 18%),
-        radial-gradient(circle at 36% 36%, rgba(255,255,255,.38) 0 2%, transparent 3%),
-        radial-gradient(circle at 70% 35%, rgba(84,214,255,.85) 0 12%, transparent 13%),
-        linear-gradient(135deg,#ff5ca8,#ffd84b);
-      box-shadow:0 18px 28px rgba(0,0,0,.28), inset -10px -12px 22px rgba(0,0,0,.16), inset 12px 10px 18px rgba(255,255,255,.10);
-      transform-origin:center;
-      z-index:9;
-      pointer-events:none;
-      will-change:left,transform,bottom,opacity;
-    }
-    .ball::after{
-      content:"";
-      position:absolute;
-      inset:16% 18% 18% 18%;
-      border-radius:50%;
-      background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.15), transparent 55%);
-    }
-    .ball.roll{animation:ball-roll 900ms cubic-bezier(.2,.8,.2,1) forwards}
-    .ball.miss{animation:ball-miss 900ms cubic-bezier(.2,.8,.2,1) forwards}
-    .ball-shadow{
-      position:absolute;
-      bottom:10px;
-      left:15%;
-      width:var(--ball-size);
-      height:12px;
-      border-radius:50%;
-      background:rgba(0,0,0,.35);
-      filter:blur(6px);
-      transform-origin:center;
-      z-index:8;
-      pointer-events:none;
-    }
-    .ball-shadow.roll{animation:shadow-roll 900ms cubic-bezier(.2,.8,.2,1) forwards}
-    .ball-shadow.miss{animation:shadow-miss 900ms cubic-bezier(.2,.8,.2,1) forwards}
-    .answers{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:12px;
-    }
-    .choice{
-      border:none;
-      border-radius:20px;
-      padding:16px 12px;
-      font-size:clamp(15px,1.8vw,18px);
-      font-weight:900;
-      line-height:1.2;
-      background:linear-gradient(180deg,#fff,#f5f0ff);
-      color:#22304a;
-      cursor:pointer;
-      box-shadow:0 10px 0 rgba(43,32,105,.15);
-      min-height:72px;
-      border:2px solid rgba(124,92,255,.12);
-    }
-    .choice.correct{background:linear-gradient(180deg,#ccffe5,#a7ffd0);border-color:#5af0a1}
-    .choice.wrong{background:linear-gradient(180deg,#ffe0e6,#ffb9c7);border-color:#ff758f}
-    .footer{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-      padding:0 16px 16px;
-    }
-    .msg{
-      font-weight:900;
-      font-size:clamp(16px,2vw,20px);
-      min-height:28px;
-      color:#2d2466;
-    }
-    .hidden{display:none !important}
-    .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20}
-    .piece{position:absolute;width:12px;height:18px;border-radius:4px;animation:fall 1.9s linear forwards}
-    @keyframes drift{from{transform:translateY(0)}to{transform:translateY(20px)}}
-    @keyframes ball-roll{0%{left:15%;transform:rotate(0) scale(1);bottom:18px}55%{left:54%;transform:rotate(540deg) scale(.98);bottom:26px}100%{left:72%;transform:rotate(840deg) scale(.96);bottom:18px;opacity:1}}
-    @keyframes ball-miss{0%{left:15%;transform:rotate(0) scale(1);bottom:18px}60%{left:46%;transform:rotate(360deg) scale(.98);bottom:24px}100%{left:56%;transform:translateY(80px) rotate(540deg) scale(.55);opacity:0}}
-    @keyframes shadow-roll{0%{left:15%;transform:scaleX(.8) scaleY(1);opacity:.6}55%{left:54%;transform:scaleX(1.15) scaleY(.6);opacity:.35}100%{left:72%;transform:scaleX(1.45) scaleY(.5);opacity:.25}}
-    @keyframes shadow-miss{0%{left:15%;transform:scaleX(.8) scaleY(1);opacity:.6}60%{left:46%;transform:scaleX(1.1) scaleY(.7);opacity:.35}100%{left:56%;transform:scaleX(1.25) scaleY(.6);opacity:0}}
-    @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
-    @media (max-width:720px){
-      .answers{grid-template-columns:1fr}
-      .stage{min-height:280px}
-      .ball,.ball-shadow{width:64px;height:64px}
-      .ball-shadow{height:10px}
-      .pins{transform:translateX(-50%) scale(.9);transform-origin:top center}
-      .lane{height:200px}
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Bowling Grammar Game</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#1a0533 0%,#2d1060 50%,#0d2a6e 100%);min-height:100vh;color:#fff;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:12px}
+.screen.active{display:flex}
+#splash h1{font-size:clamp(22px,4vw,42px);font-weight:900;text-align:center;background:linear-gradient(90deg,#ffcf4d,#ff7ac8,#6be7ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+#splash p{color:#c9b8f0;text-align:center;margin-bottom:24px;font-size:16px}
+.logo-ball{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#ff9de2,#ff3498);box-shadow:0 8px 20px rgba(0,0,0,0.4);margin:0 auto 20px;position:relative}
+.logo-ball::after{content:"";position:absolute;width:10px;height:10px;background:rgba(0,0,0,0.3);border-radius:50%;top:28px;left:18px;box-shadow:14px 0 0 rgba(0,0,0,0.3),7px 14px 0 rgba(0,0,0,0.3)}
+#game{width:100%;max-width:700px;height:100vh;display:none;flex-direction:column;gap:8px;padding:8px}
+#game.active{display:flex}
+.topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-shrink:0}
+.pill{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.pill.score-pill{background:rgba(255,207,77,0.2);border-color:#ffcf4d;color:#ffcf4d}
+.pill.timer-pill{background:rgba(107,231,255,0.15);border-color:#6be7ff;color:#6be7ff}
+.pill.timer-pill.urgent{background:rgba(255,80,80,0.2);border-color:#ff5050;color:#ff5050}
+#timer-bar-wrap{height:6px;background:rgba(255,255,255,0.1);border-radius:999px;overflow:hidden;flex:1}
+#timer-bar{height:100%;background:linear-gradient(90deg,#6be7ff,#7b5cff);border-radius:999px;transition:width 1s linear}
+.qbox{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:14px 16px;text-align:center;flex-shrink:0}
+.qbox h2{font-size:clamp(14px,2.5vw,20px);line-height:1.4;color:#fff}
+.stage{position:relative;flex:1;min-height:0;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#0d1b4b 0%,#1a2c6e 30%,#2d1b6e 100%)}
+.stars-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 2s infinite alternate}
+@keyframes twinkle{from{opacity:0.2}to{opacity:0.9}}
+.lane-wrap{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:72%;height:55%}
+.lane-surface{position:absolute;inset:0;background:linear-gradient(180deg,#7b3dc8,#4a1b8c);border-radius:24px 24px 0 0}
+.lane-line{position:absolute;left:50%;transform:translateX(-50%);top:0;width:6px;height:100%;background:rgba(255,255,255,0.25);border-radius:999px}
+.gutter-l,.gutter-r{position:absolute;bottom:0;width:14%;height:100%;background:rgba(0,0,0,0.25);border-top:2px solid rgba(255,255,255,0.1)}
+.gutter-l{right:100%;border-radius:8px 0 0 0}
+.gutter-r{left:100%;border-radius:0 8px 0 0}
+#pins-container{position:absolute;top:12%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;z-index:5}
+.pin-row{display:flex;gap:10px;justify-content:center}
+.pin{width:18px;height:42px;background:linear-gradient(180deg,#fff,#f0e8ff);border-radius:9px 9px 6px 6px;position:relative;box-shadow:0 4px 10px rgba(0,0,0,0.3);transition:transform 0.5s ease,opacity 0.5s ease}
+.pin::before{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);width:12px;height:4px;background:#ff3f6b;border-radius:4px}
+.pin.fallen{transform:translateY(20px) rotate(90deg) !important;opacity:0}
+#ball{position:absolute;bottom:12px;left:8%;width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 30% 28%,rgba(255,255,255,0.9) 0 8%,rgba(255,255,255,0.15) 9%,transparent 16%),radial-gradient(circle at 68% 32%,rgba(107,231,255,0.8) 0 10%,transparent 12%),linear-gradient(135deg,#ff5ca8,#ffd84b,#ff5ca8);box-shadow:0 8px 20px rgba(0,0,0,0.4);z-index:10}
+#ball::after{content:"";position:absolute;width:8px;height:8px;background:rgba(0,0,0,0.25);border-radius:50%;top:22px;left:12px;box-shadow:10px 0 0 rgba(0,0,0,0.25),5px 10px 0 rgba(0,0,0,0.25)}
+#ball.roll{animation:roll 900ms cubic-bezier(.2,.8,.2,1) forwards}
+#ball.miss{animation:miss 900ms ease-in forwards}
+@keyframes roll{0%{left:8%;bottom:12px;transform:rotate(0)}60%{left:52%;bottom:18px;transform:rotate(500deg)}100%{left:72%;bottom:10px;transform:rotate(800deg)}}
+@keyframes miss{0%{left:8%;bottom:12px}60%{left:38%;bottom:15px}100%{left:22%;bottom:12px;transform:rotate(200deg) scale(0.7);opacity:0.3}}
+.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex-shrink:0}
+.choice{background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:14px;padding:12px 8px;font-size:clamp(13px,2vw,16px);font-weight:700;color:#fff;cursor:pointer;transition:all 0.15s;min-height:56px}
+.choice:hover:not(:disabled){background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4);transform:translateY(-2px)}
+.choice.correct{background:rgba(41,208,127,0.25);border-color:#29d07f;color:#a7ffd0}
+.choice.wrong{background:rgba(255,80,80,0.2);border-color:#ff5050;color:#ffc2c2}
+.choice:disabled{cursor:not-allowed;opacity:0.8}
+.footer{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;min-height:38px}
+.msg{font-weight:700;font-size:15px;color:#ffcf4d}
+.btn{border:none;border-radius:12px;padding:10px 20px;font-size:15px;font-weight:800;cursor:pointer;background:#ffcf4d;color:#2d2466}
+.btn.start-btn{background:linear-gradient(135deg,#7c5cff,#ff5ca8);color:#fff;font-size:18px;padding:14px 32px;border-radius:16px;margin-top:20px;width:100%}
+.btn.restart-btn{background:linear-gradient(135deg,#29d07f,#0a9f5a);color:#fff;font-size:16px;padding:12px 28px;border-radius:14px;margin-top:16px}
+.btn.hidden{display:none}
+.inst-panel{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:24px;max-width:480px;width:100%}
+.inst-panel h2{text-align:center;font-size:22px;margin-bottom:16px;color:#ffcf4d}
+.inst-panel ul{list-style:none}
+.inst-panel li{padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:14px;color:#d4c8f0}
+#result{text-align:center}
+.result-panel{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:24px;padding:32px 24px;max-width:400px;width:100%}
+.result-panel h2{font-size:28px;margin-bottom:12px;color:#ffcf4d}
+.stars-display{font-size:32px;letter-spacing:4px;margin-bottom:12px}
+.final-score-big{font-size:64px;font-weight:900;background:linear-gradient(135deg,#ffcf4d,#ff7ac8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.score-label{font-size:16px;color:#9b89cc;margin-bottom:20px}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:100;overflow:hidden}
+.piece{position:absolute;border-radius:3px;animation:cffall linear forwards}
+@keyframes cffall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@media(max-width:480px){.answers{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div id="splash" class="screen active splash">
-    <div class="panel">
-      <div class="logoWrap">
-        <img id="logoImg" src="./assets/logo.png" alt="Innovine logo">
-        <div class="logoFallback" id="logoFallback">INNOVINE</div>
-      </div>
-      <h1 class="title">Innovine Bowling Grammar Game</h1>
-      <p class="subtitle">A fun continuous tense challenge with sounds, score, timer, and bowling action.</p>
-    </div>
-  </div>
 
-  <div id="instructions" class="screen instructions">
-    <div class="panel">
-      <h1 class="title">How to play</h1>
-      <ul>
-        <li>Read the sentence and choose the correct answer.</li>
-        <li>You have 45 seconds for each question.</li>
-        <li>Tap the right option to roll the ball and knock the pins.</li>
-        <li>Wrong answers still move the game ahead after feedback.</li>
-        <li>You will play 15 questions, then see your final score.</li>
-      </ul>
-      <button class="btn secondary" id="startBtn">Start Game</button>
-    </div>
-  </div>
+<div id="splash" class="screen active">
+  <div class="logo-ball"></div>
+  <h1>Bowling Grammar Game</h1>
+  <p>Master continuous tenses — one strike at a time!</p>
+  <button class="btn start-btn" onclick="goInstructions()">Play Now</button>
+</div>
 
-  <div id="game" class="screen game">
-    <div class="panel">
-      <div class="topbar">
-        <div class="pill score">Score: <span id="score">0</span></div>
-        <div class="pill">Q <span id="qnum">1</span>/15</div>
-        <div class="pill timer">Time: <span id="timer">45</span>s</div>
-      </div>
-      <div class="content">
-        <div class="questionBox">
-          <h2 id="question"></h2>
-          <p>Choose the sentence that matches the action and tense.</p>
-        </div>
-        <div class="stage" aria-label="bowling game stage">
-          <div class="stars"></div>
-          <div class="gutter left"></div>
-          <div class="gutter right"></div>
-          <div class="pins" id="pins"></div>
-          <div class="lane"></div>
-          <div class="ball-shadow" id="ballShadow"></div>
-          <div class="ball" id="ball"></div>
-        </div>
-        <div class="answers" id="answers"></div>
-        <div class="footer">
-          <div class="msg" id="msg"></div>
-          <button class="btn hidden" id="nextBtn">Next</button>
-        </div>
+<div id="instructions" class="screen">
+  <div class="inst-panel">
+    <h2>How to play</h2>
+    <ul>
+      <li>🎳 Fill in the blank with the correct continuous tense</li>
+      <li>⏱ You have <strong style="color:#6be7ff">45 seconds</strong> per question</li>
+      <li>✅ Correct = strike! Ball rolls and knocks all pins</li>
+      <li>❌ Wrong = gutter ball, only some pins fall</li>
+      <li>🏆 15 questions total — get the highest score!</li>
+    </ul>
+    <button class="btn start-btn" onclick="startGame()">Start Game</button>
+  </div>
+</div>
+
+<div id="game" class="screen">
+  <div class="topbar">
+    <div class="pill score-pill">🏆 <span id="score">0</span></div>
+    <div class="pill">Q <span id="qnum">1</span>/15</div>
+    <div id="timer-bar-wrap"><div id="timer-bar" style="width:100%"></div></div>
+    <div class="pill timer-pill" id="timer-pill">⏱ <span id="timer">45</span>s</div>
+  </div>
+  <div class="qbox"><h2 id="question">Loading...</h2></div>
+  <div class="stage">
+    <div class="stars-bg" id="starsBg"></div>
+    <div class="lane-wrap">
+      <div class="lane-surface">
+        <div class="lane-line"></div>
+        <div class="gutter-l"></div>
+        <div class="gutter-r"></div>
       </div>
     </div>
+    <div id="pins-container"></div>
+    <div id="ball"></div>
   </div>
-
-  <div id="result" class="screen">
-    <div class="panel result">
-      <h2>Game Over!</h2>
-      <div class="starsRow">★ ★ ★ ★ ★</div>
-      <p>You scored <strong><span id="finalScore">0</span></strong> out of 15.</p>
-      <button class="btn good" id="restartBtn">Restart</button>
-    </div>
+  <div class="answers" id="answers"></div>
+  <div class="footer">
+    <div class="msg" id="msg"></div>
+    <button class="btn hidden" id="nextBtn" onclick="nextQuestion()">Next →</button>
   </div>
+</div>
 
-  <div class="confetti" id="confetti"></div>
+<div id="result" class="screen">
+  <div class="result-panel">
+    <h2>Game Over!</h2>
+    <div class="stars-display" id="starsDisplay">⭐⭐⭐⭐⭐</div>
+    <div class="final-score-big" id="finalScore">0</div>
+    <div class="score-label">out of 15</div>
+    <p id="resultMsg" style="color:#c9b8f0;margin-bottom:4px">Great job!</p>
+    <button class="btn restart-btn" onclick="restart()">Play Again</button>
+  </div>
+</div>
 
-  <audio id="correctSound" src="./assets/correct.mp3" preload="auto"></audio>
-  <audio id="wrongSound" src="./assets/wrong.mp3" preload="auto"></audio>
-  <audio id="clapSound" src="./assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+<div id="confetti"></div>
 
-  <script>
-    const questions = [
-      { q:"The little girl in the yellow dress ___ a cheerful song on the small stage.", a:["is singing","was singing","are singing"], c:0 },
-      { q:"My brother ___ his brand-new sneakers before school started this morning.", a:["are tying","is tying","were tying"], c:1 },
-      { q:"They ___ in the park near the fountain while the birds flew above them.", a:["will be playing","are playing","is playing"], c:1 },
-      { q:"The teacher ___ the answers on the whiteboard very carefully.", a:["are writing","is writing","was writing"], c:1 },
-      { q:"I ___ a cookie now because I finished my homework early.", a:["was eating","am eating","will be eating"], c:1 },
-      { q:"The cats ___ under the wooden table because the dog was nearby.", a:["is hiding","are hiding","were hiding"], c:1 },
-      { q:"She ___ a beautiful picture in her notebook yesterday afternoon.", a:["is drawing","will be drawing","was drawing"], c:2 },
-      { q:"We ___ in the rain last evening when the thunder started loudly.", a:["will be walking","were walking","are walking"], c:1 },
-      { q:"He ___ to music at 6 p.m. while waiting for the bus.", a:["is listening","will be listening","was listening"], c:2 },
-      { q:"The children ___ the flowers in the garden with tiny watering cans.", a:["will be watering","are watering","was watering"], c:1 },
-      { q:"I ___ my book tomorrow night when the house becomes quiet.", a:["am reading","will be reading","was reading"], c:1 },
-      { q:"The birds ___ across the sky before the clouds covered the sun.", a:["were flying","is flying","are flying"], c:0 },
-      { q:"Dad ___ dinner when I called him from the school gate.", a:["is cooking","will be cooking","was cooking"], c:2 },
-      { q:"They ___ for the bus at this moment because it has not arrived yet.", a:["were waiting","will be waiting","are waiting"], c:2 },
-      { q:"She ___ a story later today during the classroom reading time.", a:["is telling","was telling","will be telling"], c:2 }
-    ];
+<script>
+const questions = [
+  {q:"The little girl in the yellow dress ___ a cheerful song on the small stage.",a:["is singing","was singing","are singing"],c:0},
+  {q:"My brother ___ his brand-new sneakers before school started this morning.",a:["are tying","is tying","were tying"],c:2},
+  {q:"They ___ in the park near the fountain while the birds flew above them.",a:["will be playing","were playing","is playing"],c:1},
+  {q:"The teacher ___ the answers on the whiteboard very carefully right now.",a:["are writing","is writing","was writing"],c:1},
+  {q:"I ___ a cookie now because I finished my homework early.",a:["was eating","am eating","will be eating"],c:1},
+  {q:"The cats ___ under the wooden table because the dog was nearby.",a:["is hiding","are hiding","were hiding"],c:2},
+  {q:"She ___ a beautiful picture in her notebook yesterday afternoon.",a:["is drawing","will be drawing","was drawing"],c:2},
+  {q:"We ___ in the rain last evening when the thunder started loudly.",a:["will be walking","were walking","are walking"],c:1},
+  {q:"He ___ to music at 6 p.m. while waiting for the bus.",a:["is listening","will be listening","was listening"],c:2},
+  {q:"The children ___ the flowers in the garden with tiny watering cans right now.",a:["will be watering","are watering","was watering"],c:1},
+  {q:"I ___ my book tomorrow night when the house becomes quiet.",a:["am reading","will be reading","was reading"],c:1},
+  {q:"The birds ___ across the sky before the clouds covered the sun.",a:["were flying","is flying","are flying"],c:0},
+  {q:"Dad ___ dinner when I called him from the school gate.",a:["is cooking","will be cooking","was cooking"],c:2},
+  {q:"They ___ for the bus at this moment because it has not arrived yet.",a:["were waiting","will be waiting","are waiting"],c:2},
+  {q:"She ___ a story later today during the classroom reading time.",a:["is telling","was telling","will be telling"],c:2}
+];
 
-    const splash = document.getElementById('splash');
-    const instructions = document.getElementById('instructions');
-    const game = document.getElementById('game');
-    const result = document.getElementById('result');
-    const startBtn = document.getElementById('startBtn');
-    const restartBtn = document.getElementById('restartBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const scoreEl = document.getElementById('score');
-    const qnumEl = document.getElementById('qnum');
-    const timerEl = document.getElementById('timer');
-    const questionEl = document.getElementById('question');
-    const answersEl = document.getElementById('answers');
-    const msgEl = document.getElementById('msg');
-    const finalScoreEl = document.getElementById('finalScore');
-    const confettiEl = document.getElementById('confetti');
-    const ball = document.getElementById('ball');
-    const ballShadow = document.getElementById('ballShadow');
-    const pins = document.getElementById('pins');
-    const correctSound = document.getElementById('correctSound');
-    const wrongSound = document.getElementById('wrongSound');
-    const clapSound = document.getElementById('clapSound');
-    const logoImg = document.getElementById('logoImg');
-    const logoFallback = document.getElementById('logoFallback');
+let idx=0, score=0, timerId=null, timeLeft=45, locked=false;
 
-    let index = 0, score = 0, timer = 45, timerId = null, locked = false, started = false;
+function goInstructions(){ show('instructions'); }
 
-    logoImg.onerror = () => {
-      logoImg.style.display = 'none';
-      logoFallback.style.display = 'block';
-    };
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
 
-    function makePins(){
-      pins.innerHTML = '';
-      for(let i=0;i<10;i++){
-        const p = document.createElement('div');
-        p.className = 'pin';
-        pins.appendChild(p);
-      }
+function startGame(){
+  idx=0; score=0;
+  document.getElementById('score').textContent=0;
+  show('game');
+  buildStars();
+  renderQ();
+}
+
+function buildStars(){
+  const bg=document.getElementById('starsBg');
+  bg.innerHTML='';
+  for(let i=0;i<30;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    s.style.cssText=`width:${1+Math.random()*3}px;height:${1+Math.random()*3}px;left:${Math.random()*100}%;top:${Math.random()*50}%;animation-delay:${Math.random()*2}s;animation-duration:${1.5+Math.random()*2}s`;
+    bg.appendChild(s);
+  }
+}
+
+function makePins(){
+  const c=document.getElementById('pins-container');
+  c.innerHTML='';
+  [1,2,3,4].forEach(n=>{
+    const row=document.createElement('div');
+    row.className='pin-row';
+    for(let i=0;i<n;i++){
+      const p=document.createElement('div');
+      p.className='pin';
+      row.appendChild(p);
     }
+    c.appendChild(row);
+  });
+}
 
-    function showScreen(el){
-      [splash,instructions,game,result].forEach(s=>s.classList.remove('active'));
-      el.classList.add('active');
-    }
+function knockPins(all){
+  const allPins=[...document.querySelectorAll('.pin')];
+  if(all){
+    allPins.forEach((p,i)=>setTimeout(()=>p.classList.add('fallen'),80+i*60));
+  } else {
+    const n=Math.floor(1+Math.random()*2);
+    allPins.sort(()=>Math.random()-0.5).slice(0,n)
+      .forEach((p,i)=>setTimeout(()=>p.classList.add('fallen'),100+i*80));
+  }
+}
 
-    function playSafe(a){
-      try{
-        a.currentTime = 0;
-        const p = a.play();
-        if(p && p.catch) p.catch(()=>{});
-      }catch(e){}
-    }
+function resetBall(){
+  const b=document.getElementById('ball');
+  b.className='';
+  void b.offsetWidth;
+}
 
-    function confettiBurst(){
-      confettiEl.innerHTML = '';
-      const colors = ['#ff5d7a','#ffcc33','#67e8f9','#7c5cff','#2dd4bf','#34d399'];
-      for(let i=0;i<60;i++){
-        const p = document.createElement('div');
-        p.className = 'piece';
-        p.style.left = Math.random()*100 + 'vw';
-        p.style.top = (-10 - Math.random()*20) + 'px';
-        p.style.background = colors[Math.floor(Math.random()*colors.length)];
-        p.style.transform = `rotate(${Math.random()*180}deg)`;
-        p.style.animationDuration = (1.4 + Math.random()*1.2) + 's';
-        p.style.width = (8 + Math.random()*8) + 'px';
-        p.style.height = (10 + Math.random()*18) + 'px';
-        confettiEl.appendChild(p);
-      }
-      setTimeout(()=>confettiEl.innerHTML='',2300);
-    }
+function renderQ(){
+  locked=false;
+  document.getElementById('nextBtn').classList.add('hidden');
+  document.getElementById('msg').textContent='';
+  resetBall();
+  makePins();
+  const item=questions[idx];
+  document.getElementById('qnum').textContent=idx+1;
+  document.getElementById('question').textContent=item.q;
+  const ans=document.getElementById('answers');
+  ans.innerHTML='';
+  item.a.forEach((txt,i)=>{
+    const b=document.createElement('button');
+    b.className='choice';
+    b.textContent=txt;
+    b.onclick=()=>choose(i);
+    ans.appendChild(b);
+  });
+  startTimer();
+}
 
-    function resetBall(){
-      ball.classList.remove('roll','miss');
-      ballShadow.classList.remove('roll','miss');
-      ball.style.animation = 'none';
-      ballShadow.style.animation = 'none';
-      void ball.offsetWidth;
-      ball.style.animation = '';
-      ballShadow.style.animation = '';
-    }
+function startTimer(){
+  clearInterval(timerId);
+  timeLeft=45;
+  updateTimerUI();
+  timerId=setInterval(()=>{
+    timeLeft--;
+    updateTimerUI();
+    if(timeLeft<=0){ clearInterval(timerId); autoMiss(); }
+  },1000);
+}
 
-    function resetPins(){
-      makePins();
-    }
+function updateTimerUI(){
+  document.getElementById('timer').textContent=timeLeft;
+  document.getElementById('timer-bar').style.width=(timeLeft/45*100)+'%';
+  const urgent=timeLeft<=10;
+  document.getElementById('timer-bar').style.background=urgent
+    ?'linear-gradient(90deg,#ff5050,#ff8f50)'
+    :'linear-gradient(90deg,#6be7ff,#7b5cff)';
+  document.getElementById('timer-pill').classList.toggle('urgent',urgent);
+}
 
-    function knockPins(all = false){
-      const allPins = [...pins.children];
-      const count = all ? allPins.length : Math.max(3, Math.min(7, Math.floor(3 + Math.random()*5)));
-      const shuffled = allPins.sort(()=>Math.random() - 0.5).slice(0, count);
-      shuffled.forEach((pin, i)=>{
-        setTimeout(()=>{
-          pin.classList.add('fallen');
-          const rot = (Math.random() * 70 - 35).toFixed(1);
-          pin.style.transform = `translateY(34px) rotate(${rot}deg)`;
-        }, 100 + i * 70);
-      });
-    }
+function disableAll(){
+  document.querySelectorAll('.choice').forEach(b=>b.disabled=true);
+}
 
-    function renderQuestion(){
-      locked = false;
-      nextBtn.classList.add('hidden');
-      msgEl.textContent = '';
-      resetPins();
+function choose(i){
+  if(locked)return;
+  locked=true;
+  clearInterval(timerId);
+  disableAll();
+  const correct=questions[idx].c;
+  document.querySelectorAll('.choice').forEach((b,j)=>{
+    if(j===correct) b.classList.add('correct');
+    else if(j===i) b.classList.add('wrong');
+  });
+  resetBall();
+  const ball=document.getElementById('ball');
+  if(i===correct){
+    score++;
+    document.getElementById('score').textContent=score;
+    document.getElementById('msg').textContent='🎳 Strike! Perfect!';
+    ball.classList.add('roll');
+    setTimeout(()=>knockPins(true),700);
+    burst();
+  } else {
+    document.getElementById('msg').textContent='❌ Gutter ball! Correct answer highlighted.';
+    ball.classList.add('miss');
+    setTimeout(()=>knockPins(false),500);
+  }
+  const nb=document.getElementById('nextBtn');
+  nb.classList.remove('hidden');
+  nb.textContent=idx===questions.length-1?'Finish 🏆':'Next →';
+}
 
-      const item = questions[index];
-      qnumEl.textContent = index + 1;
-      questionEl.textContent = item.q;
-      answersEl.innerHTML = '';
+function autoMiss(){
+  if(locked)return;
+  locked=true;
+  disableAll();
+  const correct=questions[idx].c;
+  document.querySelectorAll('.choice').forEach((b,j)=>{
+    if(j===correct) b.classList.add('correct');
+  });
+  document.getElementById('msg').textContent='⏰ Time up! See the correct answer.';
+  resetBall();
+  document.getElementById('ball').classList.add('miss');
+  setTimeout(()=>knockPins(false),500);
+  const nb=document.getElementById('nextBtn');
+  nb.classList.remove('hidden');
+  nb.textContent=idx===questions.length-1?'Finish 🏆':'Next →';
+}
 
-      item.a.forEach((text,i)=>{
-        const b = document.createElement('button');
-        b.className = 'choice';
-        b.textContent = text;
-        b.onclick = ()=>choose(i);
-        answersEl.appendChild(b);
-      });
+function nextQuestion(){
+  if(!locked)return;
+  idx++;
+  if(idx>=questions.length){ showResult(); return; }
+  renderQ();
+}
 
-      timer = 45;
-      timerEl.textContent = timer;
-      timerEl.style.color = '';
-      clearInterval(timerId);
-      timerId = setInterval(()=>{
-        timer--;
-        timerEl.textContent = timer;
-        if(timer <= 10) timerEl.style.color = '#ff3d5f';
-        else timerEl.style.color = '';
-        if(timer <= 0){
-          clearInterval(timerId);
-          autoMiss();
-        }
-      },1000);
-    }
+function showResult(){
+  clearInterval(timerId);
+  document.getElementById('finalScore').textContent=score;
+  const pct=score/15;
+  let stars,msg;
+  if(pct>=0.9){stars='⭐⭐⭐⭐⭐';msg="Outstanding! You're a grammar champion!"}
+  else if(pct>=0.7){stars='⭐⭐⭐⭐';msg="Great work! Almost perfect!"}
+  else if(pct>=0.5){stars='⭐⭐⭐';msg="Good effort! Keep practicing!"}
+  else if(pct>=0.3){stars='⭐⭐';msg="Keep going — you'll improve!"}
+  else{stars='⭐';msg="Don't give up — try again!"}
+  document.getElementById('starsDisplay').textContent=stars;
+  document.getElementById('resultMsg').textContent=msg;
+  show('result');
+  if(pct>=0.5) burst();
+}
 
-    function disableChoices(){
-      [...answersEl.children].forEach(b=>b.disabled = true);
-    }
+function restart(){ show('instructions'); }
 
-    function choose(choice){
-      if(locked) return;
-      locked = true;
-      clearInterval(timerId);
-      disableChoices();
+function burst(){
+  const el=document.getElementById('confetti');
+  el.innerHTML='';
+  const cols=['#ff5d7a','#ffcc33','#67e8f9','#7c5cff','#2dd4bf','#34d399','#ff9de2'];
+  for(let i=0;i<55;i++){
+    const p=document.createElement('div');
+    p.className='piece';
+    p.style.cssText=`left:${Math.random()*100}vw;top:-20px;width:${6+Math.random()*10}px;height:${8+Math.random()*14}px;background:${cols[i%cols.length]};transform:rotate(${Math.random()*180}deg);animation-duration:${1.3+Math.random()*1.2}s`;
+    el.appendChild(p);
+  }
+  setTimeout(()=>el.innerHTML='',2500);
+}
 
-      const correct = questions[index].c;
-      [...answersEl.children].forEach((b,i)=>{
-        if(i === correct) b.classList.add('correct');
-        if(i === choice && choice !== correct) b.classList.add('wrong');
-      });
-
-      resetBall();
-
-      if(choice === correct){
-        score++;
-        scoreEl.textContent = score;
-        msgEl.textContent = 'Great strike!';
-        playSafe(correctSound);
-        playSafe(clapSound);
-        confettiBurst();
-        ball.classList.add('roll');
-        ballShadow.classList.add('roll');
-        setTimeout(()=>knockPins(true), 700);
-      }else{
-        msgEl.textContent = 'Oops, that was a miss!';
-        playSafe(wrongSound);
-        ball.classList.add('miss');
-        ballShadow.classList.add('miss');
-        setTimeout(()=>knockPins(false), 700);
-      }
-
-      nextBtn.classList.remove('hidden');
-      nextBtn.textContent = index === questions.length - 1 ? 'Finish' : 'Next';
-    }
-
-    function autoMiss(){
-      if(locked) return;
-      locked = true;
-      disableChoices();
-      msgEl.textContent = 'Time is up!';
-      playSafe(wrongSound);
-      resetBall();
-      ball.classList.add('miss');
-      ballShadow.classList.add('miss');
-      setTimeout(()=>knockPins(false), 700);
-      nextBtn.classList.remove('hidden');
-      nextBtn.textContent = index === questions.length - 1 ? 'Finish' : 'Next';
-    }
-
-    function nextQuestion(){
-      index++;
-      if(index >= questions.length){
-        clearInterval(timerId);
-        finalScoreEl.textContent = score;
-        playSafe(clapSound);
-        showScreen(result);
-        return;
-      }
-      resetBall();
-      renderQuestion();
-    }
-
-    startBtn.onclick = ()=>{
-      started = true;
-      showScreen(game);
-      index = 0;
-      score = 0;
-      scoreEl.textContent = score;
-      renderQuestion();
-    };
-
-    nextBtn.onclick = ()=>{
-      if(!locked) return;
-      nextQuestion();
-    };
-
-    restartBtn.onclick = ()=>{
-      index = 0;
-      score = 0;
-      scoreEl.textContent = score;
-      finalScoreEl.textContent = 0;
-      timerEl.style.color = '';
-      showScreen(instructions);
-    };
-
-    makePins();
-    showScreen(splash);
-    setTimeout(()=>{
-      if(!started) showScreen(instructions);
-    }, 2500);
-  </script>
+show('splash');
+</script>
 </body>
 </html>
