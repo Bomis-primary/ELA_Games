@@ -81,6 +81,15 @@
       pointer-events: none;
       z-index: 50;
     }
+
+    /* Water stream splash particle style */
+    .water-droplet {
+      position: absolute;
+      background: radial-gradient(circle, #e0f7fa 0%, #29b6f6 80%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 40;
+    }
   </style>
 </head>
 <body class="bg-railway text-[#1b5e20] min-h-screen flex flex-col justify-between overflow-x-hidden relative">
@@ -132,7 +141,7 @@
 
       <button
         onclick="startGame()"
-        class="w-full bg-[#ffb74d] hover:bg-[#ffa726] text-white font-fun font-black text-xl md:text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-[#fb8c00] uppercase tracking-wider"
+        class="w-full bg-[#ffb74d] hover:bg-[#ffa726] text-white font-fun font-black text-xl md:text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-[#fb8c00] uppercase tracking-wider animate-bob"
       >
         Start Mission 🚂
       </button>
@@ -203,10 +212,10 @@
             <div class="absolute inset-x-0 h-1 bg-slate-600 top-1"></div>
             <!-- Dynamic wooden ties -->
             <div class="w-full flex justify-between px-2">
-              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1 h-3 bg-8d6e63"></span>
-              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1 h-3 bg-8d6e63"></span>
-              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1 h-3 bg-8d6e63"></span>
-              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1 h-3 bg-8d6e63"></span>
+              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1.5 h-3 bg-amber-900"></span>
+              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1.5 h-3 bg-amber-900"></span>
+              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1.5 h-3 bg-amber-900"></span>
+              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1.5 h-3 bg-amber-900"></span>
             </div>
           </div>
 
@@ -275,6 +284,38 @@
 
     </div>
 
+  </div>
+
+  <!-- ==========================================
+       SCREEN 4: END / SUMMARY SCREEN
+       ========================================== -->
+  <div id="screen-summary" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-lg mx-auto w-full relative z-10">
+    <div class="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-[#81c784] text-center w-full animate-bob">
+      <span id="trophy-emoji" class="text-7xl block mb-4">🏆</span>
+      
+      <h1 id="trophy-title" class="text-3xl md:text-4xl font-fun font-black text-[#1b5e20] mb-1">Stellar Splaster!</h1>
+      <p id="trophy-msg" class="text-sm md:text-base font-extrabold text-[#2e7d32] uppercase tracking-widest mb-8">
+        Phonics Mission Complete!
+      </p>
+
+      <!-- Scoreboard Container -->
+      <div class="bg-[#e8f5e9] rounded-3xl p-6 border-2 border-[#81c784]/30 space-y-4 mb-8 shadow-inner font-bold text-[#2e7d32]">
+        <div class="flex justify-between items-center text-lg md:text-xl font-black text-[#1b5e20]">
+          <span>Total Score:</span>
+          <span id="final-score" class="text-3xl font-black text-[#ff9800]">0 / 15</span>
+        </div>
+        <p id="summary-feedback" class="text-xs md:text-sm text-left leading-relaxed border-t border-[#81c784]/20 pt-3 font-semibold">
+          Excellent job! You correctly navigated standalone double consonant letter recognition and application inside spelling bubbles.
+        </p>
+      </div>
+
+      <button
+        onclick="location.reload()"
+        class="w-full bg-[#ffb74d] hover:bg-[#ffa726] text-white font-fun font-black text-2xl py-5 px-8 rounded-2xl shadow-lg transition-all transform active:scale-95 border-b-4 border-[#fb8c00] uppercase tracking-wider"
+      >
+        PLAY AGAIN
+      </button>
+    </div>
   </div>
 
   <!-- ==========================================
@@ -917,7 +958,7 @@
 
     // Summary screen builder
     function endGame() {
-      stopIdleWaterDrips();
+      stopIdleDrips();
       document.getElementById('screen-game').classList.add('hidden');
       document.getElementById('screen-summary').classList.remove('hidden');
 
@@ -951,6 +992,12 @@
       document.getElementById("summary-feedback").textContent = feedbackText;
 
       triggerAudio('clap');
+    }
+
+    // Colors
+    function randomColor() {
+      const colors = ["#e91e63", "#9c27b0", "#3f51b5", "#009688", "#ff9800"];
+      return colors[Math.floor(Math.random() * colors.length)];
     }
   </script>
 </body>
