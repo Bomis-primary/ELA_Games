@@ -7,198 +7,385 @@
 <style>
   body {
     margin: 0;
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(120deg, #4a90e2, #50e3c2);
-    overflow: hidden;
-    height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #2e3192, #1bffff);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     color: #fff;
+    overflow-x: hidden;
+  }
+
+  #logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    transition: opacity 0.5s ease;
   }
 
   #logo {
-    width: 150px;
-    display: none;
-    margin-bottom: 20px;
+    width: 220px;
+    filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.3));
   }
 
   #game-container {
     display: none;
     flex-direction: column;
     align-items: center;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255,255,255,0.2);
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
   }
 
-  #wheel-container {
+  #score-board {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding-bottom: 10px;
+  }
+
+  #wheel-wrapper {
     position: relative;
-    width: 300px;
-    height: 300px;
-    margin-bottom: 20px;
+    width: 260px;
+    height: 260px;
+    margin-bottom: 25px;
+  }
+
+  #indicator {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 25px solid #ff4757;
+    z-index: 10;
+    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));
   }
 
   #wheel {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 5px solid #fff;
+    border: 8px solid #fff;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
   }
 
-  #wheel div {
+  .segment {
     position: absolute;
-    width: 50%;
-    height: 50%;
-    background: rgba(255,255,255,0.2);
-    transform-origin: 100% 100%;
-    text-align: right;
-    padding: 10px;
-    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    transform-origin: 50% 50%;
+    clip-path: polygon(50% 50%, 50% 0%, 100% 36%, 50% 50%);
+  }
+
+  .segment:nth-child(1) { background-color: #ff6b6b; transform: rotate(0deg); }
+  .segment:nth-child(2) { background-color: #feca57; transform: rotate(72deg); }
+  .segment:nth-child(3) { background-color: #1dd1a1; transform: rotate(144deg); }
+  .segment:nth-child(4) { background-color: #54a0ff; transform: rotate(216deg); }
+  .segment:nth-child(5) { background-color: #9c88ff; transform: rotate(288deg); }
+
+  .segment-text {
+    position: absolute;
+    top: 15%;
+    left: 62%;
+    transform: rotate(36deg);
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
   }
 
   #spin-btn {
-    padding: 10px 20px;
-    background-color: #f5a623;
+    padding: 12px 35px;
+    background: linear-gradient(135deg, #ff9f43, #ff6b6b);
     border: none;
-    border-radius: 10px;
+    border-radius: 25px;
     font-size: 18px;
+    font-weight: bold;
+    color: white;
     cursor: pointer;
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
     margin-bottom: 20px;
+  }
+
+  #spin-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6);
+  }
+
+  #spin-btn:disabled {
+    background: #cccccc;
+    box-shadow: none;
+    cursor: not-allowed;
   }
 
   #sentence-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+  }
+
+  #target-prompt {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    min-height: 24px;
+    color: #feca57;
   }
 
   #noun-input {
-    padding: 10px;
-    font-size: 18px;
-    width: 300px;
-    margin-bottom: 10px;
+    padding: 12px;
+    font-size: 16px;
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 15px;
     border-radius: 8px;
-    border: none;
+    border: 2px solid transparent;
+    outline: none;
+    text-align: center;
+    box-sizing: border-box;
+    transition: border 0.3s;
   }
 
-  #teacher-buttons button {
-    padding: 10px 20px;
-    margin: 0 10px;
-    font-size: 16px;
-    border-radius: 8px;
+  #noun-input:focus {
+    border: 2px solid #ff9f43;
+  }
+
+  #submit-btn {
+    padding: 10px 25px;
+    background-color: #1dd1a1;
+    color: white;
     border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
     cursor: pointer;
   }
 
-  #teacher-buttons #correct { background-color: green; color: #fff; }
-  #teacher-buttons #wrong { background-color: red; color: #fff; }
+  #feedback {
+    margin-top: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    min-height: 25px;
+  }
 
-  #feedback { margin-top: 10px; font-size: 18px; font-weight: bold; }
+  .success-text { color: #2ed573; }
+  .error-text { color: #ff4757; }
 
-  /* Floating bubbles */
+  /* Floating background bubbles */
   .bubble {
     position: absolute;
-    background: #d7ff4a;
-    width: 15px;
-    height: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    animation: float 6s infinite;
-    opacity: 0.7;
+    animation: floatUp 8s infinite linear;
+    bottom: -50px;
+    z-index: -1;
   }
 
-  @keyframes float {
-    0% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(-200px) translateX(100px); }
-    100% { transform: translateY(0) translateX(0); }
+  @keyframes floatUp {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.5; }
+    90% { opacity: 0.5; }
+    100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
   }
-
 </style>
 </head>
 <body>
 
-<img src="g4/chp1/nouns/assets/logo.png" id="logo" alt="Innovine Logo">
+<div id="logo-container">
+  <img src="g4/chp1/nouns/assets/logo.png" id="logo" alt="Innovine Logo">
+</div>
 
 <div id="game-container">
-  <div id="wheel-container">
-    <div id="wheel"></div>
+  <div id="score-board">
+    <div id="round-display">Round: 1/5</div>
+    <div id="score-display">Score: 0</div>
+  </div>
+
+  <div id="wheel-wrapper">
+    <div id="indicator"></div>
+    <div id="wheel">
+      <div class="segment"><span class="segment-text">Common</span></div>
+      <div class="segment"><span class="segment-text">Proper</span></div>
+      <div class="segment"><span class="segment-text">Abstract</span></div>
+      <div class="segment"><span class="segment-text">Collective</span></div>
+      <div class="segment"><span class="segment-text">Concrete</span></div>
+    </div>
   </div>
 
   <button id="spin-btn">Spin the Wheel</button>
 
   <div id="sentence-container">
-    <input type="text" id="noun-input" placeholder="Type a sentence using the noun type">
-    <div id="teacher-buttons">
-      <button id="correct">Correct</button>
-      <button id="wrong">Wrong</button>
-    </div>
+    <div id="target-prompt">Spin the wheel to begin!</div>
+    <input type="text" id="noun-input" placeholder="Type your sentence here..." disabled>
+    <button id="submit-btn" disabled>Submit Answer</button>
     <div id="feedback"></div>
   </div>
 </div>
 
 <script>
-const logo = document.getElementById('logo');
+const logoContainer = document.getElementById('logo-container');
 const gameContainer = document.getElementById('game-container');
 const wheel = document.getElementById('wheel');
 const spinBtn = document.getElementById('spin-btn');
 const feedback = document.getElementById('feedback');
 const nounInput = document.getElementById('noun-input');
-const correctBtn = document.getElementById('correct');
-const wrongBtn = document.getElementById('wrong');
+const submitBtn = document.getElementById('submit-btn');
+const targetPrompt = document.getElementById('target-prompt');
+const scoreDisplay = document.getElementById('score-display');
+const roundDisplay = document.getElementById('round-display');
 
 const nouns = ['Common', 'Proper', 'Abstract', 'Collective', 'Concrete'];
+
+// Built-in validation banks suited for Grade 4 validation
+const nounValidationBanks = {
+  common: ['boy', 'girl', 'dog', 'cat', 'house', 'car', 'tree', 'book', 'school', 'city', 'country', 'river', 'chair', 'table', 'apple', 'teacher', 'student', 'friend', 'bird', 'toy'],
+  proper: ['john', 'mary', 'london', 'paris', 'monday', 'tuesday', 'january', 'february', 'christmas', 'halloween', 'india', 'america', 'nike', 'disney', 'microsoft', 'amazon', 'earth', 'mars'],
+  abstract: ['love', 'hate', 'anger', 'joy', 'peace', 'courage', 'fear', 'honesty', 'trust', 'friendship', 'happiness', 'sadness', 'bravery', 'kindness', 'patience', 'wisdom', 'beauty', 'truth'],
+  collective: ['team', 'family', 'class', 'flock', 'herd', 'pack', 'swarm', 'bunch', 'band', 'choir', 'group', 'crowd', 'gang', 'army', 'school of fish', 'pride', 'collection', 'set'],
+  concrete: ['dog', 'cat', 'rock', 'water', 'ice', 'phone', 'computer', 'pizza', 'milk', 'ball', 'shoe', 'flower', 'tree', 'sand', 'desk', 'pencil', 'window', 'door', 'coin', 'cake']
+};
+
 let currentNoun = '';
 let rotation = 0;
+let score = 0;
+let currentRound = 1;
+const maxRounds = 5;
 
-function createWheel() {
-  for (let i = 0; i < nouns.length; i++) {
-    const div = document.createElement('div');
-    div.style.transform = `rotate(${i * 72}deg) skewY(-36deg)`;
-    div.textContent = nouns[i];
-    div.style.fontSize = "16px";
-    div.style.fontWeight = "bold";
-    wheel.appendChild(div);
-  }
-}
-
-// Show Innovine logo for 2.5 seconds
-logo.style.display = "block";
+// Show Innovine logo for 2.5 seconds, then cleanly reveal the game board
 setTimeout(() => {
-  logo.style.display = "none";
-  gameContainer.style.display = "flex";
+  logoContainer.style.opacity = '0';
+  setTimeout(() => {
+    logoContainer.style.display = "none";
+    gameContainer.style.display = "flex";
+  }, 500);
 }, 2500);
 
-// Spin the wheel
+// Spin Logic
 spinBtn.addEventListener('click', () => {
-  const rand = Math.floor(Math.random() * nouns.length);
-  const degrees = rand * 72 + 1440 + rotation; 
-  rotation += degrees;
-  wheel.style.transition = 'transform 4s ease-out';
-  wheel.style.transform = `rotate(${rotation}deg)`;
-  setTimeout(() => {
-    currentNoun = nouns[rand];
-    feedback.textContent = `Pin landed on: ${currentNoun}`;
-  }, 4000);
-});
-
-// Teacher buttons
-correctBtn.addEventListener('click', () => {
-  feedback.textContent = "Marked Correct!";
+  spinBtn.disabled = true;
   nounInput.value = '';
-});
-wrongBtn.addEventListener('click', () => {
-  feedback.textContent = "Marked Wrong!";
+  nounInput.disabled = true;
+  submitBtn.disabled = true;
+  feedback.textContent = '';
+  
+  // Choose random target index
+  const randomIndex = Math.floor(Math.random() * nouns.length);
+  
+  // Calculate precise stopping alignment (0 point matches segment 1 center, offsetting -36deg)
+  const segmentArc = 72;
+  const targetDegrees = 360 - (randomIndex * segmentArc);
+  
+  // Add multiple complete turns for high speed simulation
+  const standardSpins = 1800; 
+  rotation += standardSpins + targetDegrees - (rotation % 360);
+  
+  wheel.style.transition = 'transform 3.5s cubic-bezier(0.1, 0.8, 0.3, 1)';
+  wheel.style.transform = `rotate(${rotation}deg)`;
+  
+  setTimeout(() => {
+    currentNoun = nouns[randomIndex];
+    targetPrompt.textContent = `Write a sentence using a ${currentNoun} Noun:`;
+    nounInput.disabled = false;
+    submitBtn.disabled = false;
+    nounInput.focus();
+  }, 3500);
 });
 
-createWheel();
+// Self-Assessing Automated Validation Engine
+submitBtn.addEventListener('click', () => {
+  const userInput = nounInput.value.trim();
+  if (!userInput) {
+    feedback.className = "error-text";
+    feedback.textContent = "Please write a sentence first!";
+    return;
+  }
 
-// Create floating bubbles
-for(let i=0;i<20;i++){
+  const cleanWords = userInput.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").split(/\s+/);
+  const targetBank = nounValidationBanks[currentNoun.toLowerCase()];
+  
+  // Self-assesses if user words match the specific targeted linguistic property bank
+  let isCorrect = cleanWords.some(word => targetBank.includes(word));
+
+  // Special programmatic fail-safes for specific Noun classes
+  if (currentNoun === 'Proper') {
+    const rawWords = userInput.split(/\s+/);
+    const hasCapital = rawWords.some(word => {
+      const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+      return cleanWord && cleanWord[0] === cleanWord[0].toUpperCase() && isNaN(cleanWord[0]);
+    });
+    if (!hasCapital) isCorrect = false; 
+  }
+
+  if (isCorrect) {
+    feedback.className = "success-text";
+    feedback.textContent = "✨ Correct! Well done. +10 Points.";
+    score += 10;
+    scoreDisplay.textContent = `Score: ${score}`;
+  } else {
+    feedback.className = "error-text";
+    feedback.textContent = `❌ Try again! That didn't seem to contain a ${currentNoun} noun.`;
+  }
+
+  submitBtn.disabled = true;
+  nounInput.disabled = true;
+
+  // Progress or end round handler
+  setTimeout(() => {
+    if (currentRound < maxRounds) {
+      currentRound++;
+      roundDisplay.textContent = `Round: ${currentRound}/${maxRounds}`;
+      targetPrompt.textContent = "Spin the wheel for the next round!";
+      feedback.textContent = "";
+      spinBtn.disabled = false;
+    } else {
+      // Game End State
+      targetPrompt.innerHTML = `🎉 Game Over!<br>Your final score is ${score}/${maxRounds * 10}`;
+      feedback.textContent = "";
+      nounInput.style.display = "none";
+      submitBtn.style.display = "none";
+      
+      // Transform spin button to Reset button
+      spinBtn.textContent = "Play Again";
+      spinBtn.disabled = false;
+      spinBtn.onclick = () => { location.reload(); };
+    }
+  }, 3000);
+});
+
+// Create dynamic random background bubbles
+for (let i = 0; i < 15; i++) {
   const bubble = document.createElement('div');
   bubble.classList.add('bubble');
-  bubble.style.left = Math.random()*100 + 'vw';
-  bubble.style.top = Math.random()*100 + 'vh';
-  bubble.style.animationDuration = (4+Math.random()*4) + 's';
+  bubble.style.left = Math.random() * 100 + 'vw';
+  bubble.style.width = (Math.random() * 30 + 10) + 'px';
+  bubble.style.height = bubble.style.width;
+  bubble.style.animationDuration = (Math.random() * 5 + 5) + 's';
+  bubble.style.animationDelay = (Math.random() * 5) + 's';
   document.body.appendChild(bubble);
 }
 </script>
