@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Common and Proper Nouns Adventure</title>
+  <!-- Tailwind CSS CDN for premium layout and utility classes -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Prevent selection and scroll elasticity on mobile */
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    /* Playful animated cloud and sky background gradient */
+    .bg-clouds {
+      background: linear-gradient(180deg, #a0c4ff 0%, #c1f0f6 50%, #ffd6d6 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 50% 0%; }
+      50% { background-position: 50% 100%; }
+      100% { background-position: 50% 0%; }
+    }
+
+    /* Keyframe animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(1deg); }
+    }
+    .animate-float {
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-soft {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .animate-pulse-soft {
+      animation: pulse-soft 2s ease-in-out infinite;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+    .animate-shake {
+      animation: shake 0.25s ease-in-out 2;
+    }
+
+    /* Floating cloud styling layers */
+    .sky-cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 99px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Dynamic particle container */
+    .confetti-particle {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      z-index: 9999;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-clouds text-[#3f148c] min-h-screen flex flex-col justify-between overflow-x-hidden relative font-sans">
+
+  <!-- Background decorative floating elements -->
+  <div class="sky-cloud w-36 h-12 top-10 left-10 animate-float opacity-50" style="animation-duration: 5s;"></div>
+  <div class="sky-cloud w-56 h-16 top-24 right-12 animate-float opacity-40" style="animation-delay: 1.5s; animation-duration: 6s;"></div>
+  <div class="sky-cloud w-44 h-12 bottom-48 left-16 animate-float opacity-50" style="animation-delay: 3s; animation-duration: 5.5s;"></div>
+
+  <!-- Decorative Hot Air Balloon SVG -->
+  <div class="absolute top-1/3 left-8 w-16 h-24 opacity-30 animate-float pointer-events-none hidden md:block">
+    <svg viewBox="0 0 100 150" class="w-full h-full">
+      <path d="M50,10 C20,10 10,40 10,60 C10,90 40,110 50,110 C60,110 90,90 90,60 C90,40 80,10 50,10 Z" fill="#ff7043" />
+      <rect x="44" y="125" width="12" height="12" fill="#8d6e63" />
+      <line x1="25" y1="90" x2="44" y2="125" stroke="#4a148c" stroke-width="2" />
+      <line x1="75" y1="90" x2="56" y2="125" stroke="#4a148c" stroke-width="2" />
+    </svg>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 1: 5-SECOND SPLASH SCREEN
+       Contains strictly ONLY the logo as requested
+       ========================================== -->
+  <div id="screen-splash" class="flex-1 flex flex-col items-center justify-center relative z-10">
+    <div class="scale-125 p-4 animate-pulse-soft">
+      <img 
+        id="splash-logo" 
+        src="assets/innovine-logo.png" 
+        class="w-72 h-72 md:w-80 md:h-80 object-contain" 
+        alt="Innovine Logo"
+        onerror="handleLogoError(this)"
+      />
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 2: START / TITLE SCREEN
+       ========================================== -->
+  <div id="screen-start" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full relative z-10">
+    <div class="mb-8 drop-shadow-xl">
+      <img 
+        src="assets/innovine-logo.png" 
+        class="w-44 h-44 md:w-52 md:h-52 object-contain animate-float" 
+        alt="Innovine Logo"
+        onerror="handleLogoError(this)"
+      />
+    </div>
+
+    <div class="bg-white/90 backdrop-blur-md rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-[#ba68c8] text-center w-full max-w-xl">
+      <h1 class="text-4xl md:text-5xl font-black text-[#4a148c] tracking-wide mb-3 leading-tight">
+        🎯 Noun Adventure
+      </h1>
+      <p class="text-lg md:text-xl font-extrabold text-[#7b1fa2] uppercase tracking-wider mb-8">
+        Common & Proper Nouns
+      </p>
+
+      <div class="bg-[#f3e5f5] rounded-3xl p-6 border-2 border-[#e1bee7] text-left space-y-4 mb-8 shadow-inner">
+        <h2 class="font-extrabold text-[#4a148c] text-xl md:text-2xl">How to Play:</h2>
+        <ul class="text-base md:text-lg space-y-3 text-[#6a1b9a] list-disc list-inside font-semibold">
+          <li>Look at the colorful noun floating in the sky!</li>
+          <li>Decide if it is a <strong>Common</strong> or <strong>Proper Noun</strong>.</li>
+          <li><strong>Drag & Drop</strong> the noun card into the matching basket!</li>
+          <li>Or, simply <strong>tap the card</strong>, then <strong>tap your chosen basket</strong>!</li>
+          <li>Watch the timer before it ticks down! ⏱</li>
+        </ul>
+      </div>
+
+      <button
+        onclick="startGame()"
+        class="w-full bg-[#4a148c] hover:bg-[#6a1b9a] text-white font-black text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-[#300a5d]"
+      >
+        START GAME
+      </button>
+    </div>
+
+    <div class="mt-8 text-sm text-[#4a148c] font-black">
+      Perfect for Mobile, Tablets, & Laptops • Optimized for Low Bandwidth
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 3: GAMEPLAY SCREEN
+       ========================================== -->
+  <div id="screen-game" class="hidden flex-1 flex flex-col w-full max-w-5xl mx-auto p-4 justify-between relative z-10">
+    
+    <!-- Top Progress, Timer, & Score Bar -->
+    <div class="flex items-center justify-between bg-white/80 backdrop-blur rounded-2xl p-4 shadow-md border-2 border-[#e1bee7] mb-4">
+      <div class="flex flex-col">
+        <span class="text-xs md:text-sm font-black uppercase text-[#7b1fa2] tracking-wider">Progress</span>
+        <span id="game-progress-text" class="text-xl md:text-2xl font-black text-[#4a148c]">1 / 15</span>
+      </div>
+
+      <!-- Playful Balloon Progress Bar -->
+      <div class="flex-1 mx-6 h-4 bg-[#e1bee7] rounded-full overflow-hidden hidden sm:block relative">
+        <div id="game-progress-bar" class="h-full bg-gradient-to-r from-[#ab47bc] to-[#4a148c] transition-all duration-500 rounded-full" style="width: 0%"></div>
+      </div>
+
+      <!-- Timer Box -->
+      <div id="timer-box" class="flex items-center space-x-2 bg-[#f3e5f5] px-4 py-2 rounded-full border-2 border-[#ba68c8] transition-all duration-300">
+        <span class="text-xl">⏱</span>
+        <span id="timer" class="text-xl md:text-2xl font-black text-[#4a148c]">30</span><span class="font-extrabold text-sm text-[#7b1fa2]">s</span>
+      </div>
+    </div>
+
+    <!-- Main Game Arena -->
+    <div class="flex-1 bg-white/70 backdrop-blur-sm rounded-[2rem] p-6 md:p-8 shadow-2xl border-4 border-[#ba68c8] flex flex-col justify-between min-h-[380px] relative mb-6">
+      
+      <div class="text-center">
+        <h2 class="text-2xl md:text-3xl font-black text-[#4a148c] tracking-wide">
+          Drag the word card into the correct category!
+        </h2>
+        <p class="text-xs md:text-sm font-bold text-[#7b1fa2] mt-1">
+          (Or tap the word, then tap your chosen basket)
+        </p>
+      </div>
+
+      <!-- Main Category Hot-Drop Zones -->
+      <div id="zones" class="flex justify-around items-stretch gap-4 md:gap-8 my-6">
+        
+        <!-- Common Noun Zone -->
+        <div 
+          id="common" 
+          onclick="handleZoneClickFallback('common')"
+          class="zone w-[46%] rounded-3xl border-4 border-dashed border-[#8e24aa] bg-white/60 hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex flex-col items-center justify-center p-4 text-center cursor-pointer shadow-md min-h-[140px] md:min-h-[180px] relative overflow-hidden"
+        >
+          <div class="absolute inset-2 border-2 border-purple-800/10 rounded-2xl"></div>
+          <div class="text-4xl md:text-5xl mb-2 pointer-events-none">🧸</div>
+          <span class="text-xl md:text-2xl font-black text-[#6a1b9a] pointer-events-none">Common Noun</span>
+          <span class="text-xs font-bold text-[#8e24aa] mt-1 opacity-70 pointer-events-none uppercase">General Name</span>
+        </div>
+
+        <!-- Proper Noun Zone -->
+        <div 
+          id="proper" 
+          onclick="handleZoneClickFallback('proper')"
+          class="zone w-[46%] rounded-3xl border-4 border-dashed border-[#8e24aa] bg-white/60 hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex flex-col items-center justify-center p-4 text-center cursor-pointer shadow-md min-h-[140px] md:min-h-[180px] relative overflow-hidden"
+        >
+          <div class="absolute inset-2 border-2 border-purple-800/10 rounded-2xl"></div>
+          <div class="text-4xl md:text-5xl mb-2 pointer-events-none">👑</div>
+          <span class="text-xl md:text-2xl font-black text-[#6a1b9a] pointer-events-none">Proper Noun</span>
+          <span class="text-xs font-bold text-[#8e24aa] mt-1 opacity-70 pointer-events-none uppercase">Special Name</span>
+        </div>
+
+      </div>
+
+      <!-- Spawning Drag & Drop Word -->
+      <div class="flex justify-center items-center py-4">
+        <div 
+          id="word" 
+          class="inline-block px-10 py-5 md:px-14 md:py-6 rounded-[2rem] text-white text-2xl md:text-4xl font-black tracking-wide shadow-xl cursor-grab active:cursor-grabbing transform hover:scale-105 active:scale-95 transition-all duration-150 select-none touch-none relative z-10"
+          style="background: #e91e63;"
+        >
+          <!-- Spawns dynamically -->
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       SCREEN 4: END / SUMMARY SCREEN
+       ========================================== -->
+  <div id="screen-summary" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-lg mx-auto w-full relative z-10">
+    <div class="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-[#ba68c8] text-center w-full animate-float">
+      <span id="trophy" class="text-7xl block mb-4">🏆</span>
+      
+      <h1 id="trophy-title" class="text-3xl md:text-4xl font-black text-[#4a148c] mb-1">Gold Champion!</h1>
+      <p id="trophy-msg" class="text-sm md:text-base font-bold text-[#7b1fa2] uppercase tracking-wider mb-8">
+        Perfect Adventure!
+      </p>
+
+      <!-- Scoreboard Container -->
+      <div class="bg-[#f3e5f5] rounded-3xl p-6 border-2 border-[#e1bee7] space-y-4 mb-8 shadow-inner font-bold text-[#6a1b9a]">
+        <div class="flex justify-between items-center text-lg md:text-xl font-black text-[#3f148c]">
+          <span>Total Score:</span>
+          <span id="final-score" class="text-3xl font-black text-[#4a148c]">0 / 15</span>
+        </div>
+        <p id="resultText" class="text-sm md:text-base text-left font-semibold border-t border-[#e1bee7] pt-3 leading-relaxed">
+          <!-- Text loads dynamically -->
+        </p>
+      </div>
+
+      <button
+        onclick="location.reload()"
+        class="w-full bg-[#4a148c] hover:bg-[#6a1b9a] text-white font-black text-2xl py-5 px-8 rounded-2xl shadow-lg transition-all transform active:scale-95 border-b-4 border-[#300a5d]"
+      >
+        PLAY AGAIN
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       AUDIO ELEMENTS
+       ========================================== -->
+  <audio id="correctSound" src="assets/correct.mp3" preload="auto"></audio>
+  <audio id="wrongSound" src="assets/wrong.mp3" preload="auto"></audio>
+  <audio id="clapSound" src="assets/clapping.mp3" preload="auto"></audio>
+
+  <!-- ==========================================
+       GAME ENGINE & INTERACTIVITY
+       ========================================== -->
+  <script>
+    // System fallback branding logo error handler
+    function handleLogoError(img) {
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"><circle cx="50" cy="50" r="45" fill="%234a148c" stroke="%23ba68c8" stroke-width="4"/><text x="50" y="62" fill="%23FFF" font-size="34" font-weight="bold" text-anchor="middle">?</text></svg>';
+    }
+
+    // Backend Question Pool (Exactly 20 questions randomized, 10 common and 10 proper)
+    const BACKEND_WORD_POOL = [
+      ["dog", "common"], ["school", "common"], ["book", "common"], ["city", "common"], ["river", "common"],
+      ["apple", "common"], ["car", "common"], ["bird", "common"], ["chair", "common"], ["ball", "common"],
+
+      ["Riya", "proper"], ["Mumbai", "proper"], ["Rahul", "proper"], ["Ganga", "proper"], ["India", "proper"],
+      ["Ananya", "proper"], ["Delhi", "proper"], ["Chennai", "proper"], ["London", "proper"], ["Kiran", "proper"]
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let timeLeft = 30;
+    let timerInterval = null;
+    let selectedAnswerId = null;
+    let isFeedbackRunning = false;
+
+    // Pointer event dragging coordinates
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    // Splash screen routing (Exactly 5 seconds) & Initial Listeners Setup
+    window.addEventListener('DOMContentLoaded', () => {
+      // Set up draggable listeners EXACTLY ONCE to avoid duplicate listener accumulation
+      setupPointerDragging();
+
+      setTimeout(() => {
+        switchScreen('screen-start');
+      }, 5000);
+    });
+
+    function switchScreen(screenId) {
+      document.getElementById('screen-splash').classList.add('hidden');
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.add('hidden');
+      
+      document.getElementById(screenId).classList.remove('hidden');
+    }
+
+    // Bootstraps 15 random nouns out of the 20 backend questions
+    function startGame() {
+      // Audio engine initialization play safety
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume();
+      } catch (e) {}
+
+      // Native audio trigger on start game
+      const correctSnd = document.getElementById('correctSound');
+      const wrongSnd = document.getElementById('wrongSound');
+      const clapSnd = document.getElementById('clapSound');
+      
+      // Warm up audio objects to bypass browser auto-play policies
+      correctSnd.load();
+      wrongSnd.load();
+      clapSnd.load();
+
+      currentQuestions = [...BACKEND_WORD_POOL].sort(() => Math.random() - 0.5).slice(0, 15);
+      
+      currentIndex = 0;
+      score = 0;
+      selectedAnswerId = null;
+      isFeedbackRunning = false;
+
+      switchScreen('screen-game');
+      renderQuestion();
+      startTimer();
+    }
+
+    function renderQuestion() {
+      if (currentIndex >= 15) {
+        endGame();
+        return;
+      }
+
+      selectedAnswerId = null;
+      isFeedbackRunning = false;
+
+      const q = currentQuestions[currentIndex];
+      const wordBox = document.getElementById('word');
+      
+      // Load card values
+      wordBox.textContent = q[0];
+      wordBox.dataset.correct = q[1];
+      wordBox.style.background = randomColor();
+      
+      // Reset drop zone aesthetics
+      resetZonesUI();
+
+      // UI stats update
+      document.getElementById('game-progress-text').innerText = `${currentIndex + 1} / 15`;
+      document.getElementById('game-progress-bar').style.width = `${((currentIndex) / 15) * 100}%`;
+      
+      resetTimer();
+    }
+
+    // Master Native MP3 player with dynamic synthesize support as backup
+    function triggerAudio(type) {
+      try {
+        const correctSnd = document.getElementById('correctSound');
+        const wrongSnd = document.getElementById('wrongSound');
+        const clapSnd = document.getElementById('clapSound');
+
+        if (type === 'correct') {
+          correctSnd.currentTime = 0;
+          correctSnd.play().catch(() => playSynthFallback('correct'));
+          
+          clapSnd.currentTime = 0;
+          setTimeout(() => {
+            clapSnd.play().catch(() => {});
+          }, 150);
+        } else if (type === 'wrong') {
+          wrongSnd.currentTime = 0;
+          wrongSnd.play().catch(() => playSynthFallback('wrong'));
+        } else if (type === 'click') {
+          playSynthFallback('click');
+        }
+      } catch (e) {
+        playSynthFallback(type);
+      }
+    }
+
+    // Direct Web Audio API synthesizer fallback
+    function playSynthFallback(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        if (type === 'correct') {
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc1.type = 'sine'; osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc1.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          osc2.frequency.setValueAtTime(783.99, ctx.currentTime + 0.15);
+          osc2.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.25);
+          gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+          osc1.connect(gainNode); osc2.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc1.start(); osc2.start();
+          osc1.stop(ctx.currentTime + 0.4); osc2.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(140, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(90, ctx.currentTime + 0.25);
+          gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        } else if (type === 'click') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.05);
+          gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.06);
+        }
+      } catch (e) {
+        console.log("Synthesizer bypassed");
+      }
+    }
+
+    // Drag / Tap Selector highlighting
+    function handleCardSelection(optionId) {
+      if (isFeedbackRunning) return;
+      triggerAudio('click');
+      selectedAnswerId = optionId;
+
+      // Pulse the chosen active card
+      const card = document.getElementById('word');
+      card.classList.add('ring-4', 'ring-[#ba68c8]', 'scale-105');
+    }
+
+    // Tap Fallback logic
+    function handleZoneClickFallback(zoneId) {
+      if (!selectedAnswerId || isFeedbackRunning) return;
+      validateCategoryChoice(zoneId);
+    }
+
+    // Global answer validation
+    function validateCategoryChoice(chosenId) {
+      isFeedbackRunning = true;
+      clearInterval(timerInterval);
+
+      const q = currentQuestions[currentIndex];
+      const correctCategory = q[1];
+      const chosenZone = document.getElementById(chosenId);
+
+      if (chosenId === correctCategory) {
+        score++;
+        triggerAudio('correct');
+        chosenZone.className = "zone w-[46%] rounded-3xl border-4 border-solid border-green-500 bg-green-100 flex flex-col items-center justify-center p-4 text-center shadow-inner scale-105 transition-all duration-200 min-h-[140px] md:min-h-[180px] relative overflow-hidden";
+        confettiExplosion(chosenId);
+      } else {
+        triggerAudio('wrong');
+        chosenZone.className = "zone w-[46%] rounded-3xl border-4 border-solid border-red-500 bg-red-100 animate-shake flex flex-col items-center justify-center p-4 text-center scale-105 transition-all duration-200 min-h-[140px] md:min-h-[180px] relative overflow-hidden";
+        
+        // Highlight the correct container to aid visual feedback
+        const correctZone = document.getElementById(correctCategory);
+        correctZone.classList.add('bg-green-100', 'border-green-400');
+      }
+
+      // Transition to next question
+      setTimeout(() => {
+        currentIndex++;
+        renderQuestion();
+        startTimer();
+      }, 1500);
+    }
+
+    // Drag UI resets
+    function resetZonesUI() {
+      const common = document.getElementById('common');
+      const proper = document.getElementById('proper');
+
+      common.className = "zone w-[46%] rounded-3xl border-4 border-dashed border-[#8e24aa] bg-white/60 hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex flex-col items-center justify-center p-4 text-center cursor-pointer shadow-md min-h-[140px] md:min-h-[180px] relative overflow-hidden";
+      proper.className = "zone w-[46%] rounded-3xl border-4 border-dashed border-[#8e24aa] bg-white/60 hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex flex-col items-center justify-center p-4 text-center cursor-pointer shadow-md min-h-[140px] md:min-h-[180px] relative overflow-hidden";
+
+      const wordBox = document.getElementById('word');
+      wordBox.classList.remove('ring-4', 'ring-[#ba68c8]', 'scale-105');
+    }
+
+    // One-time initialization of Pointer Down, Move, and Up Events (Solves the locking/no-drag bug)
+    function setupPointerDragging() {
+      const card = document.getElementById('word');
+
+      card.addEventListener('pointerdown', (e) => {
+        if (isFeedbackRunning) return;
+        isDragging = true;
+        card.setPointerCapture(e.pointerId);
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        handleCardSelection('word-element');
+      });
+
+      card.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        card.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.05)`;
+        card.style.zIndex = "1000";
+        card.classList.add('shadow-2xl', 'opacity-90');
+      });
+
+      card.addEventListener('pointerup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        card.releasePointerCapture(e.pointerId);
+
+        card.style.transform = '';
+        card.style.zIndex = '';
+        card.classList.remove('shadow-2xl', 'opacity-90');
+
+        // Overlap boundaries checks using center bounds of card (highly reliable on touch devices)
+        const wordRect = card.getBoundingClientRect();
+        const commonZone = document.getElementById('common').getBoundingClientRect();
+        const properZone = document.getElementById('proper').getBoundingClientRect();
+
+        const cx = wordRect.left + wordRect.width / 2;
+        const cy = wordRect.top + wordRect.height / 2;
+
+        if (
+          cx >= commonZone.left && cx <= commonZone.right &&
+          cy >= commonZone.top && cy <= commonZone.bottom
+        ) {
+          validateCategoryChoice('common');
+        } else if (
+          cx >= properZone.left && cx <= properZone.right &&
+          cy >= properZone.top && cy <= properZone.bottom
+        ) {
+          validateCategoryChoice('proper');
+        } else {
+          // Reset highlights if dropped outside active baskets
+          triggerAudio('click');
+          card.classList.remove('ring-4', 'ring-[#ba68c8]', 'scale-105');
+        }
+      });
+    }
+
+    // Playful particle generation
+    function confettiExplosion(zoneId) {
+      const zone = document.getElementById(zoneId);
+      const rect = zone.getBoundingClientRect();
+
+      for (let i = 0; i < 30; i++) {
+        const c = document.createElement("div");
+        c.className = "confetti-particle";
+        c.style.background = randomColor();
+
+        let x = rect.left + rect.width / 2;
+        let y = rect.top + rect.height / 2;
+
+        c.style.left = x + "px";
+        c.style.top = y + "px";
+
+        document.body.appendChild(c);
+
+        let angle = Math.random() * 2 * Math.PI;
+        let speed = Math.random() * 7 + 3;
+        let vx = Math.cos(angle) * speed;
+        let vy = Math.sin(angle) * speed;
+        let gravity = 0.2;
+
+        function animate() {
+          x += vx;
+          y += vy;
+          vy += gravity;
+
+          c.style.left = x + "px";
+          c.style.top = y + "px";
+
+          if (y < window.innerHeight + 50) {
+            requestAnimationFrame(animate);
+          } else {
+            c.remove();
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+    }
+
+    // Standard Game Timer Engine
+    function startTimer() {
+      resetTimer();
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = timeLeft;
+        
+        // Timer warning display
+        if (timeLeft <= 5) {
+          document.getElementById('timer-box').classList.add('bg-red-100', 'border-red-400');
+        } else {
+          document.getElementById('timer-box').classList.remove('bg-red-100', 'border-red-400');
+        }
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          currentIndex++;
+          renderQuestion();
+          startTimer();
+        }
+      }, 1000);
+    }
+
+    function resetTimer() {
+      timeLeft = 30;
+      document.getElementById("timer").textContent = timeLeft;
+      document.getElementById('timer-box').classList.remove('bg-red-100', 'border-red-400');
+    }
+
+    // Score Board Star and Trophy Decider
+    function endGame() {
+      clearInterval(timerInterval);
+      
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.remove('hidden');
+
+      document.getElementById('final-score').innerText = `${score} / 15`;
+
+      let trophy = "🏆 Gold";
+      let emoji = "🏆";
+      let msg = "Excellent!";
+
+      if (score >= 11) {
+        trophy = "🏆 Gold";
+        emoji = "🏆";
+        msg = "Excellent!";
+      } else if (score >= 6) {
+        trophy = "🥈 Silver";
+        emoji = "🥈";
+        msg = "Well Done!";
+      } else {
+        trophy = "🥉 Bronze";
+        emoji = "🥉";
+        msg = "Good Try!";
+      }
+
+      document.getElementById("trophy").textContent = emoji;
+      document.getElementById("trophy-title").textContent = `${trophy} Trophy`;
+      document.getElementById("resultText").textContent = `Score: ${score}/15 - ${msg}`;
+    }
+
+    // Colors
+    function randomColor() {
+      const colors = ["#e91e63", "#9c27b0", "#3f51b5", "#009688", "#ff9800"];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+  </script>
+</body>
+</html>
