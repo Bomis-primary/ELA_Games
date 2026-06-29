@@ -1,916 +1,690 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cafe Question Words</title>
-    <!-- Tailwind CSS for modern premium layout -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for playful, friendly typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka+One&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: #fef3c7; /* Bright Sunny Amber-100 base */
-            overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
-        }
-        .playful-font {
-            font-family: 'Fredoka One', cursive;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Curious Coffee Shop</title>
+  <!-- Tailwind CSS CDN for modern utility styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Prevent text selection and default scrolling bounces on mobile */
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    /* Animation classes */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+    .animate-shake {
+      animation: shake 0.25s ease-in-out 2;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    /* Absolute centering for dragging items */
+    .dragging-active {
+      position: fixed;
+      pointer-events: none;
+      z-index: 100;
+      transform: scale(1.1);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+    }
+  </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-6 text-slate-800">
+<body class="bg-[#FAF5F0] text-[#4A3B32] min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-    <!-- Main Game Container with stable responsive height to prevent collapse -->
-    <div class="relative w-full max-w-5xl bg-amber-50 rounded-3xl border-4 border-amber-400 shadow-2xl shadow-amber-900/10 overflow-hidden flex flex-col h-[92vh] md:h-[650px]">
-        
-        <!-- Header / Stats Dashboard HUD (Visible during gameplay) -->
-        <header id="game-header" class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 px-4 py-3 border-b-2 border-amber-400 flex flex-wrap justify-between items-center gap-2 z-10 hidden">
-            <div class="flex items-center gap-2">
-                <span class="text-2xl animate-bounce">☕</span>
-                <h1 class="text-lg md:text-xl font-extrabold tracking-wide text-amber-950 playful-font">
-                    CAFE QUESTIONS
-                </h1>
-            </div>
-            
-            <div class="flex items-center gap-3 text-xs md:text-sm font-semibold text-slate-900">
-                <div class="bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
-                    Order: <span id="question-index" class="text-amber-700 font-bold">1/15</span>
-                </div>
-                <div class="bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
-                    Score: <span id="score" class="text-emerald-600 font-bold">0</span>
-                </div>
-                <div class="bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
-                    Streak: <span id="streak" class="text-blue-600 font-bold">🔥 0</span>
-                </div>
-            </div>
-        </header>
+  <!-- ==========================================
+       SCREEN 1: 5-SECOND SPLASH SCREEN
+       ========================================== -->
+  <div id="screen-splash" class="flex-1 flex flex-col items-center justify-center bg-[#FAF5F0]">
+    <div class="transition-all duration-1000 scale-125 p-4 animate-pulse">
+      <img 
+        id="splash-logo" 
+        src="assets/innovine-logo.png" 
+        class="w-48 h-48 object-contain" 
+        alt="Innovine Logo"
+        onerror="handleLogoError(this)"
+      />
+    </div>
+    <div class="mt-8 text-sm tracking-widest text-[#B5835A] uppercase font-black animate-bounce">
+      Loading Learning Journey...
+    </div>
+  </div>
 
-        <!-- Brand Splash Page (ONLY LOGO, occupies maximum screen space, runs for 5 seconds) -->
-        <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
-            <div class="w-full h-full flex flex-col items-center justify-center space-y-6">
-                <!-- Large scaled Logo image with reliable typography backup -->
-                <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="w-4/5 max-w-lg h-auto max-h-[60vh] object-contain transition-all duration-300" onerror="this.style.display='none'; document.getElementById('logo-fallback-big').style.display='block';">
-                <!-- Fallback premium layout for local directory tests -->
-                <div id="logo-fallback-big" class="hidden text-center">
-                    <div class="text-6xl md:text-8xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-600 playful-font">INNOVINE</div>
-                    <div class="text-lg md:text-2xl text-slate-500 uppercase tracking-widest font-extrabold mt-3">Learning Games</div>
-                </div>
-                <div class="pt-10 flex flex-col items-center space-y-3">
-                    <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p class="text-slate-400 font-medium text-sm tracking-wider uppercase">Entering Cozy Cafe...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Second Page: Start Menu Splash Screen -->
-        <div id="start-screen" class="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 flex flex-col items-center justify-center p-6 text-center z-25 hidden animate-fade-in">
-            <div class="max-w-xl bg-white/95 p-8 md:p-10 rounded-3xl border-2 border-amber-300 backdrop-blur-md shadow-2xl">
-                <div class="text-7xl md:text-8xl mb-4">🥐☕</div>
-                <h1 class="text-3xl md:text-5xl font-extrabold text-amber-800 mb-2 playful-font tracking-wide animate-pulse">
-                    CAFE QUESTIONS
-                </h1>
-                <h2 class="text-lg md:text-2xl text-slate-700 font-semibold mb-4 border-b pb-2 border-amber-100">Grade 1: Question Words Challenge</h2>
-                <p class="text-base md:text-xl text-slate-600 mb-8 leading-relaxed font-medium">
-                    Our baristas and customers are placing coffee orders, but their sentences are missing some magical words! Read the order ticket at the top, select the correct question cup at the bottom, and <strong class="text-amber-600">drag it onto the customer's tray</strong>!
-                </p>
-                <button id="start-btn" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-white font-black py-4 px-6 rounded-2xl shadow-lg shadow-amber-400/20 transform transition active:scale-95 text-xl md:text-2xl playful-font">
-                    Open Cafe
-                </button>
-            </div>
-        </div>
-
-        <!-- Main Gameplay Split-Screen Area (Canvas Left/Top, Interaction Right/Bottom) -->
-        <div id="gameplay-area" class="flex-grow flex flex-col lg:flex-row h-full relative hidden animate-fade-in">
-            
-            <!-- Left Side: Cozy Coffee Counter Canvas (Preserves drag coordinate scaling) -->
-            <div class="w-full lg:w-3/5 h-1/2 lg:h-full relative bg-amber-50/20 border-r-0 lg:border-r-2 lg:border-b-0 border-b-2 border-amber-200 flex items-center justify-center">
-                <canvas id="gameCanvas" class="w-full h-full block"></canvas>
-                <!-- Touch & drag hint label -->
-                <div id="drag-hint" class="absolute bottom-3 left-3 bg-white/90 px-3 py-1.5 rounded-lg border border-amber-300 text-xs text-amber-800 pointer-events-none flex items-center gap-1.5 opacity-0 transition-opacity">
-                    <span>✨ Touch & Drag a cup into the serving tray!</span>
-                </div>
-            </div>
-
-            <!-- Right Side: Sentence Ticket & Interactive Drag Selection -->
-            <div class="w-full lg:w-2/5 h-1/2 lg:h-full bg-amber-50/50 flex flex-col justify-between p-3 md:p-5 space-y-3 overflow-y-auto">
-                
-                <!-- Ticket Sentences Panel -->
-                <div class="flex-grow flex flex-col justify-center space-y-3">
-                    <div class="bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-md relative overflow-hidden">
-                        <!-- Red ribbon on the ticket -->
-                        <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-red-400 to-orange-400"></div>
-                        <div class="text-center pt-1">
-                            <span class="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">CUSTOMER'S ORDER TICKET</span>
-                            <!-- Sentence with beautiful curly ELA blank decoration -->
-                            <h3 id="question-text" class="text-xl md:text-2xl font-bold tracking-normal leading-relaxed text-slate-800 playful-font">
-                                Loading sentence...
-                            </h3>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Coffee Cup Selection Tray -->
-                <div class="flex flex-col justify-center space-y-2 pb-2">
-                    <div class="text-center">
-                        <span class="text-xs uppercase tracking-widest text-amber-600 font-bold block mb-1">DRAG THE CUP OR TAP YOUR ANSWER BELOW</span>
-                    </div>
-
-                    <!-- Draggable / Clickable Options Container -->
-                    <div id="options-container" class="grid grid-cols-3 gap-2 py-1">
-                        <!-- Elements rendered dynamically as interactive boxes acting as drag anchors -->
-                        <div id="drag-btn-0" class="bg-white hover:bg-amber-50 border-2 border-amber-200 rounded-2xl p-2 flex flex-col items-center justify-center space-y-1 shadow-sm active:scale-95 transition cursor-pointer select-none">
-                            <span id="opt-emoji-0" class="text-2xl md:text-3xl">☕</span>
-                            <span id="opt-word-0" class="text-xs md:text-sm font-extrabold text-amber-800 tracking-wider uppercase playful-font">WHO</span>
-                        </div>
-                        <div id="drag-btn-1" class="bg-white hover:bg-amber-50 border-2 border-amber-200 rounded-2xl p-2 flex flex-col items-center justify-center space-y-1 shadow-sm active:scale-95 transition cursor-pointer select-none">
-                            <span id="opt-emoji-1" class="text-2xl md:text-3xl">🍵</span>
-                            <span id="opt-word-1" class="text-xs md:text-sm font-extrabold text-amber-800 tracking-wider uppercase playful-font">WHAT</span>
-                        </div>
-                        <div id="drag-btn-2" class="bg-white hover:bg-amber-50 border-2 border-amber-200 rounded-2xl p-2 flex flex-col items-center justify-center space-y-1 shadow-sm active:scale-95 transition cursor-pointer select-none">
-                            <span id="opt-emoji-2" class="text-2xl md:text-3xl">🥛</span>
-                            <span id="opt-word-2" class="text-xs md:text-sm font-extrabold text-amber-800 tracking-wider uppercase playful-font">WHERE</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Session Victory / Cafe Completed Overlay -->
-        <div id="gameover-screen" class="absolute inset-0 bg-amber-50/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden animate-fade-in">
-            <div class="max-w-md bg-white p-8 rounded-3xl border-4 border-amber-400 shadow-2xl">
-                <div class="text-7xl mb-4">🏆🥐</div>
-                <h2 class="text-3xl font-extrabold text-amber-700 mb-1 playful-font">Perfect Cafe Service!</h2>
-                <p class="text-slate-600 text-sm mb-6">You served all customers with excellent grammar skills!</p>
-                
-                <div class="grid grid-cols-2 gap-4 mb-6 text-slate-800">
-                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
-                        <span class="block text-xs text-slate-500 font-bold uppercase">Final Score</span>
-                        <span id="final-score" class="text-2xl font-black text-amber-600">0</span>
-                    </div>
-                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
-                        <span class="block text-xs text-slate-500 font-bold uppercase">Accuracy</span>
-                        <span id="final-accuracy" class="text-2xl font-black text-emerald-600">0%</span>
-                    </div>
-                </div>
-
-                <p id="performance-message" class="text-amber-800 italic mb-6 font-semibold"></p>
-
-                <div class="space-y-3">
-                    <button id="restart-btn" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-white font-black py-4 px-6 rounded-xl shadow-lg shadow-amber-400/20 text-lg playful-font">
-                        Serve More Coffee!
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Interactive HUD Action Alert Banner -->
-        <div id="hit-notification" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
-            <div id="hud-text" class="text-5xl md:text-7xl font-black tracking-wider drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] text-center playful-font">
-                CORRECT!
-            </div>
-        </div>
-
+  <!-- ==========================================
+       SCREEN 2: START / INSTRUCTION SCREEN
+       ========================================== -->
+  <div id="screen-start" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full">
+    <div class="mb-6 drop-shadow-md">
+      <img 
+        src="assets/innovine-logo.png" 
+        class="w-28 h-28 object-contain" 
+        alt="Innovine Logo"
+        onerror="handleLogoError(this)"
+      />
     </div>
 
-    <!-- Gameplay Script -->
-    <script>
-        // High-Performance custom rounded rectangle drawing helper for legacy systems
-        function drawRoundRect(c, x, y, w, h, r) {
-            if (typeof r === 'undefined') r = 0;
-            if (w < 2 * r) r = w / 2;
-            if (h < 2 * r) r = h / 2;
-            c.moveTo(x + r, y);
-            c.arcTo(x + w, y, x + w, y + h, r);
-            c.arcTo(x + w, y + h, x, y + h, r);
-            c.arcTo(x, y + h, x, y, r);
-            c.arcTo(x, y, x + w, y, r);
+    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-[#D4A373] text-center w-full max-w-md">
+      <h1 class="text-3xl md:text-4xl font-extrabold text-[#4A3B32] tracking-wide mb-2">
+        The Curious <span class="text-[#9C6644]">Coffee Shop</span>
+      </h1>
+      <p class="text-sm font-semibold text-[#B5835A] uppercase tracking-wide mb-6">
+        Grade 1 Question Words
+      </p>
+
+      <div class="bg-[#FAF6F0] rounded-2xl p-4 border border-[#E6CCB2] text-left space-y-3 mb-8">
+        <h2 class="font-bold text-[#4A3B32] text-base">How to Play:</h2>
+        <ul class="text-sm space-y-2 text-[#5C4D3C] list-disc list-inside">
+          <li>Read the question from the cafe customer or barista.</li>
+          <li>Find the picture card that matches the question word.</li>
+          <li><strong>Drag & Drop</strong> the card onto the <strong>Serving Tray</strong>!</li>
+          <li>Or, simply <strong>tap a card</strong>, then <strong>tap the tray</strong>!</li>
+        </ul>
+      </div>
+
+      <button
+        onclick="startNewGame()"
+        class="w-full bg-[#9C6644] hover:bg-[#7F5539] text-white font-black text-2xl py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-[#5C3D2E]"
+      >
+        START GAME
+      </button>
+    </div>
+
+    <div class="mt-8 text-xs text-[#9C6644] font-medium">
+      Compatible with Phones, Tablets, & Laptops • Optimized for Low Bandwidth
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 3: GAMEPLAY SCREEN
+       ========================================== -->
+  <div id="screen-game" class="hidden flex-1 flex flex-col w-full max-w-5xl mx-auto p-3 md:p-6 justify-between">
+    
+    <!-- Top Progress & Score Info Bar -->
+    <div class="flex items-center justify-between bg-white/80 backdrop-blur rounded-2xl p-3 shadow-md border border-[#E6CCB2] mb-4">
+      <div class="flex flex-col">
+        <span class="text-xs font-bold uppercase text-[#B5835A] tracking-wider">Progress</span>
+        <span id="game-progress-text" class="text-lg font-black text-[#4A3B32]">1 / 15</span>
+      </div>
+
+      <!-- Horizontal Progress Bar -->
+      <div class="flex-1 mx-4 h-3 bg-[#E6CCB2] rounded-full overflow-hidden hidden sm:block">
+        <div id="game-progress-bar" class="h-full bg-[#9C6644] transition-all duration-500 rounded-full" style="width: 0%"></div>
+      </div>
+
+      <div class="flex items-center space-x-2 bg-[#F5EBE0] px-4 py-1.5 rounded-full border border-[#D4A373]">
+        <span class="text-lg">⭐</span>
+        <span id="game-score-text" class="font-black text-[#4A3B32]">0</span>
+      </div>
+    </div>
+
+    <!-- Cozy Coffee Shop Dialog Scene -->
+    <div class="flex-1 bg-[#F5EBE0] rounded-3xl p-4 md:p-6 shadow-inner border-4 border-[#D4A373] flex flex-col justify-between min-h-[340px] relative mb-4">
+      
+      <!-- Café Backdrop Menu -->
+      <div class="absolute top-4 right-6 bg-[#3E2723] text-[#F5EBE0] py-2 px-4 rounded-lg hidden md:block border-2 border-[#8D6E63] transform rotate-1 shadow-md">
+        <p class="font-mono text-xs uppercase tracking-widest text-center border-b border-[#8D6E63] pb-1 font-bold">TODAY'S SPECIAL</p>
+        <p class="font-mono text-[10px] mt-1">WHO, WHAT, WHERE</p>
+        <p class="font-mono text-[10px]">WHEN, WHY, WHICH</p>
+      </div>
+
+      <!-- Character avatar & Speak Bubble -->
+      <div class="flex items-start space-x-3 md:space-x-6">
+        <div id="character-container" class="w-20 h-20 md:w-28 md:h-28 bg-white rounded-full p-1 shadow-lg border-2 border-[#9C6644] flex-shrink-0 animate-float">
+          <!-- Dynamic Character SVG gets loaded here -->
+        </div>
+
+        <div class="flex-1 bg-white rounded-2xl rounded-tl-none p-4 shadow-md border-2 border-[#9C6644] relative min-h-[90px]">
+          <div class="absolute -left-3 top-0 w-0 h-0 border-y-8 border-y-transparent border-r-8 border-r-white"></div>
+          
+          <div id="question-word-badge" class="inline-block bg-[#9C6644] text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+            Question Word: Who
+          </div>
+
+          <p id="question-text" class="text-lg md:text-xl font-bold text-[#4A3B32] tracking-wide">
+            ... is wiping down the sticky counter?
+          </p>
+        </div>
+      </div>
+
+      <!-- Serving Tray Drop Target Area -->
+      <div class="my-6 flex flex-col items-center justify-center">
+        <div 
+          id="serving-tray" 
+          onclick="handleTrayClickFallback()"
+          class="relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-dashed bg-white/40 border-[#D4A373] hover:bg-white/60 transition-all duration-300 flex flex-col items-center justify-center p-2 cursor-pointer"
+        >
+          <div class="absolute inset-2 border-2 border-amber-800/10 rounded-xl"></div>
+          
+          <div id="tray-idle" class="flex flex-col items-center justify-center">
+            <svg class="w-10 h-10 text-[#9C6644] mb-1 opacity-70 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-6l-7 7-7-7" />
+            </svg>
+            <p class="text-xs md:text-sm font-black text-[#5C3D2E] text-center uppercase tracking-wider">
+              DROP THE ANSWER HERE
+            </p>
+            <p class="text-[10px] text-[#9C6644] text-center mt-1 hidden sm:block">
+              (Or tap answer, then tap here)
+            </p>
+          </div>
+
+          <div id="tray-holding" class="hidden text-center animate-bounce">
+            <p class="text-xs font-bold text-[#9C6644] uppercase mb-1">READY TO SERVE!</p>
+            <span id="tray-holding-label" class="inline-block bg-[#9C6644] text-white px-4 py-1.5 rounded-full text-sm font-black shadow"></span>
+            <p class="text-[10px] text-[#9C6644] mt-2">TAP HERE TO PLACE</p>
+          </div>
+
+          <div id="tray-correct" class="hidden text-center">
+            <span class="text-3xl">🎉</span>
+            <p class="text-green-600 font-black text-lg uppercase tracking-wider mt-1">CORRECT!</p>
+          </div>
+
+          <div id="tray-wrong" class="hidden text-center">
+            <span class="text-3xl">😢</span>
+            <p class="text-red-600 font-black text-sm uppercase tracking-wider mt-1">TRY ANOTHER!</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full h-3 bg-[#8D6E63] rounded-full mt-2 shadow"></div>
+    </div>
+
+    <!-- Answer Choices Grid -->
+    <div>
+      <div class="text-center mb-3">
+        <span class="text-xs font-extrabold uppercase tracking-widest text-[#B5835A]">
+          Choose your answer card:
+        </span>
+      </div>
+
+      <div id="options-grid" class="grid grid-cols-3 gap-3 md:gap-6 relative">
+        <!-- Draggable cards loaded dynamically -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       SCREEN 4: SUMMARY / SCORE SCREEN
+       ========================================== -->
+  <div id="screen-summary" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-lg mx-auto w-full">
+    <div class="bg-white rounded-3xl p-8 shadow-2xl border-4 border-[#D4A373] text-center w-full animate-float">
+      <span class="text-6xl block mb-4">🏆</span>
+      
+      <h1 class="text-3xl font-black text-[#4A3B32] mb-1">Awesome Job!</h1>
+      <p class="text-sm font-semibold text-[#B5835A] uppercase tracking-wider mb-6">
+        You are a Coffee Shop Master!
+      </p>
+
+      <!-- Three Stars Score Container -->
+      <div id="stars-container" class="flex justify-center space-x-3 mb-6 text-5xl">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Scoreboard info -->
+      <div class="bg-[#FAF5F0] rounded-2xl p-5 border border-[#E6CCB2] space-y-3 mb-8">
+        <div class="flex justify-between items-center text-sm font-bold">
+          <span class="text-[#5C4D3C]">Correct on First Try:</span>
+          <span id="final-score" class="text-xl font-black text-[#9C6644]">0 / 15</span>
+        </div>
+        <div class="text-xs text-left text-[#B5835A] leading-relaxed border-t border-[#E6CCB2] pt-2">
+          Wonderful! You understand how "Who, What, Where, When, Why, & Which" are used inside the coffee shop!
+        </div>
+      </div>
+
+      <button
+        onclick="startNewGame()"
+        class="w-full bg-[#9C6644] hover:bg-[#7F5539] text-white font-black text-xl py-4 px-6 rounded-2xl shadow-lg transition-all transform active:scale-95 border-b-4 border-[#5C3D2E]"
+      >
+        PLAY AGAIN
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SOUND ASSETS ENGINE
+       ========================================== -->
+  <script>
+    // System fallback branding logo error handler
+    function handleLogoError(img) {
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"><circle cx="50" cy="50" r="45" fill="%234A3B32" stroke="%23D4A373" stroke-width="4"/><text x="50" y="62" fill="%23FFF" font-size="34" font-weight="bold" text-anchor="middle">?</text></svg>';
+    }
+
+    // Audio file player with dynamically synthesized web fallbacks
+    function triggerAudio(type) {
+      try {
+        if (type === 'correct') {
+          const snd = new Audio('assets/correct.mp3');
+          snd.play().catch(() => playSynthFallback('correct'));
+        } else if (type === 'wrong') {
+          const snd = new Audio('assets/wrong.mp3');
+          snd.play().catch(() => playSynthFallback('wrong'));
+        } else if (type === 'click') {
+          playSynthFallback('click');
+        }
+      } catch (e) {
+        playSynthFallback(type);
+      }
+    }
+
+    // Direct Web Audio API synthesizer fallback
+    function playSynthFallback(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        if (type === 'correct') {
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc1.type = 'sine'; osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc1.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          osc2.frequency.setValueAtTime(783.99, ctx.currentTime + 0.15);
+          osc2.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.25);
+          gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+          osc1.connect(gainNode); osc2.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc1.start(); osc2.start();
+          osc1.stop(ctx.currentTime + 0.4); osc2.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(140, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(90, ctx.currentTime + 0.25);
+          gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        } else if (type === 'click') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(500, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.05);
+          gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.06);
+        }
+      } catch (e) {
+        console.log("Synthesizer bypassed");
+      }
+    }
+  </script>
+
+  <!-- ==========================================
+       SVG DESIGN LIBRARY
+       ========================================== -->
+  <script>
+    const SVGS = {
+      'barista_female': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="40" r="22" fill="#FBC490"/><path d="M26 40 C24 20, 76 20, 74 40 C74 20, 26 20, 26 40" fill="#4A3B32"/><circle cx="70" cy="30" r="8" fill="#4A3B32"/><path d="M30 26 Q50 15 70 26 Z" fill="#5C3D2E"/><circle cx="42" cy="38" r="2.5" fill="#000"/><circle cx="58" cy="38" r="2.5" fill="#000"/><path d="M44 48 Q50 54 56 48" stroke="#D32F2F" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M25 80 C25 65, 75 65, 75 80 Z" fill="#2E7D32"/><path d="M38 65 L44 80 H56 L62 65 Z" fill="#8D6E63"/></svg>`,
+      'barista_male': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="40" r="22" fill="#FFCC80"/><path d="M28 32 Q50 15 72 32" stroke="#1A120B" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="42" cy="40" r="2.5" fill="#000"/><circle cx="58" cy="40" r="2.5" fill="#000"/><path d="M44 50 Q50 56 56 50" stroke="#000" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M25 80 C25 65, 75 65, 75 80 Z" fill="#1B5E20"/><path d="M40 65 L45 80 H55 L60 65 Z" fill="#A1887F"/></svg>`,
+      'customer_boy': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="40" r="22" fill="#FBC490"/><path d="M28 32 Q50 15 72 32" fill="#1565C0"/><path d="M65 30 L85 24 L82 34 Z" fill="#0D47A1"/><circle cx="42" cy="42" r="2.5" fill="#000"/><circle cx="58" cy="42" r="2.5" fill="#000"/><path d="M43 51 Q50 57 57 51" stroke="#FF5722" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M25 80 C25 65, 75 65, 75 80 Z" fill="#EF5350"/></svg>`,
+      'customer_boy_opt': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="40" r="22" fill="#FBC490"/><path d="M28 32 Q50 15 72 32" fill="#1565C0"/><path d="M65 30 L85 24 L82 34 Z" fill="#0D47A1"/><circle cx="42" cy="42" r="2.5" fill="#000"/><circle cx="58" cy="42" r="2.5" fill="#000"/><path d="M43 51 Q50 57 57 51" stroke="#FF5722" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M25 80 C25 65, 75 65, 75 80 Z" fill="#EF5350"/></svg>`,
+      'customer_girl': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="42" r="21" fill="#FFCC80"/><path d="M25 45 C15 15, 85 15, 75 45" fill="#F48FB1"/><circle cx="32" cy="25" r="7" fill="#AD1457"/><circle cx="68" cy="25" r="7" fill="#AD1457"/><circle cx="42" cy="42" r="2.5" fill="#000"/><circle cx="58" cy="42" r="2.5" fill="#000"/><path d="M44 52 Q50 58 56 52" stroke="#AD1457" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M26 80 C26 66, 74 66, 74 80 Z" fill="#9C27B0"/></svg>`,
+      'customer_girl_opt': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="42" r="21" fill="#FFCC80"/><path d="M25 45 C15 15, 85 15, 75 45" fill="#F48FB1"/><circle cx="32" cy="25" r="7" fill="#AD1457"/><circle cx="68" cy="25" r="7" fill="#AD1457"/><circle cx="42" cy="42" r="2.5" fill="#000"/><circle cx="58" cy="42" r="2.5" fill="#000"/><path d="M44 52 Q50 58 56 52" stroke="#AD1457" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M26 80 C26 66, 74 66, 74 80 Z" fill="#9C27B0"/></svg>`,
+      'barista_helper': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="40" r="20" fill="#FFD1A9"/><path d="M30 35 Q50 18 70 35" stroke="#3E2723" stroke-width="8" fill="none"/><path d="M25 80 C25 65, 75 65, 75 80" fill="#3E2723" stroke="#8D6E63" stroke-width="4"/><rect x="30" y="65" width="12" height="18" rx="2" fill="#29B6F6"/><rect x="55" y="68" width="18" height="12" rx="1" fill="#FFEB3B"/></svg>`,
+      'coffee_cup': `<svg class="w-full h-full" viewBox="0 0 100 100"><path d="M30 35 H70 L65 75 C65 80, 35 80, 35 75 Z" fill="#795548" stroke="#3E2723" stroke-width="3"/><path d="M70 42 C76 42, 80 46, 79 52 C78 58, 70 58, 70 54" stroke="#3E2723" stroke-width="4" fill="none"/><ellipse cx="50" cy="35" rx="20" ry="6" fill="#F5EBE0"/><path d="M45 22 Q48 15 51 22 T57 22" stroke="#8D6E63" stroke-width="2" fill="none"/></svg>`,
+      'moon': `<svg class="w-full h-full" viewBox="0 0 100 100"><path d="M30 25 C50 25, 65 40, 65 60 C65 72, 58 82, 48 87 C68 87, 82 70, 82 50 C82 30, 62 15, 30 25 Z" fill="#FFEB3B"/><circle cx="20" cy="40" r="2" fill="#FFF"/><circle cx="75" cy="20" r="1.5" fill="#FFF"/><circle cx="50" cy="80" r="2.5" fill="#FFF"/></svg>`,
+      'cookie': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#D7CCC8" stroke="#8D6E63" stroke-width="3"/><circle cx="40" cy="40" r="4" fill="#3E2723"/><circle cx="60" cy="45" r="3" fill="#3E2723"/><circle cx="48" cy="62" r="5" fill="#3E2723"/><circle cx="36" cy="55" r="3" fill="#3E2723"/><circle cx="58" cy="58" r="4.5" fill="#3E2723"/></svg>`,
+      'table': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="25" y="45" width="50" height="10" rx="3" fill="#A1887F" stroke="#5D4037" stroke-width="3"/><rect x="35" y="55" width="6" height="30" fill="#5D4037"/><rect x="59" y="55" width="6" height="30" fill="#5D4037"/><path d="M15 55 H22 V85 H15 Z" fill="#8D6E63"/><path d="M78 55 H85 V85 H78 Z" fill="#8D6E63"/></svg>`,
+      'clock_day': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#E0F7FA" stroke="#00838F" stroke-width="4"/><line x1="50" y1="50" x2="50" y2="28" stroke="#006064" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="50" x2="68" y2="50" stroke="#006064" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="50" r="4" fill="#006064"/><circle cx="20" cy="20" r="6" fill="#FFB300"/></svg>`,
+      'spoon': `<svg class="w-full h-full" viewBox="0 0 100 100"><ellipse cx="35" cy="50" rx="15" ry="10" fill="#B0BEC5" stroke="#78909C" stroke-width="2" transform="rotate(-30 35 50)"/><rect x="45" y="45" width="40" height="5" rx="2" fill="#CFD8DC" stroke="#78909C" stroke-width="2" transform="rotate(-30 45 45)"/></svg>`,
+      'baker': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="45" r="18" fill="#FBC490"/><path d="M35 30 C25 15, 75 15, 65 30 Z" fill="#FFFFFF" stroke="#B0BEC5" stroke-width="2"/><rect x="38" y="27" width="24" height="6" fill="#FFFFFF" stroke="#B0BEC5" stroke-width="2"/><path d="M45 52 Q50 56 55 52" stroke="#000" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="44" cy="42" r="2" fill="#000"/><circle cx="56" cy="42" r="2" fill="#000"/></svg>`,
+      'hot_cocoa': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="30" y="38" width="40" height="42" rx="6" fill="#E57373" stroke="#C62828" stroke-width="3"/><path d="M70 48 C76 48, 80 52, 79 58 C78 64, 70 64, 70 60" stroke="#C62828" stroke-width="4.5" fill="none"/><ellipse cx="50" cy="38" rx="20" ry="5" fill="#5D4037"/><rect x="40" y="33" width="8" height="6" rx="2" fill="#FFF"/><rect x="52" y="32" width="7" height="7" rx="2" fill="#FFF"/></svg>`,
+      'donut_pink': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#F5C299" stroke="#E0A97E" stroke-width="2"/><circle cx="50" cy="50" r="28" fill="#FF80AB"/><circle cx="50" cy="50" r="12" fill="#FFF"/><rect x="38" y="34" width="6" height="2" rx="1" fill="#FFF" transform="rotate(15 38 34)"/><rect x="58" y="32" width="6" height="2" rx="1" fill="#FFEB3B" transform="rotate(-25 58 32)"/><rect x="64" y="52" width="6" height="2" rx="1" fill="#29B6F6" transform="rotate(45 64 52)"/><rect x="32" y="54" width="6" height="2" rx="1" fill="#66BB6A" transform="rotate(-40 32 54)"/></svg>`,
+      'donut_brown': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#F5C299" stroke="#E0A97E" stroke-width="2"/><circle cx="50" cy="50" r="28" fill="#5D4037"/><circle cx="50" cy="50" r="12" fill="#FFF"/><rect x="42" y="34" width="6" height="2" rx="1" fill="#FF80AB"/><rect x="60" y="44" width="6" height="2" rx="1" fill="#FFF"/></svg>`,
+      'donut_yellow': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#F5C299" stroke="#E0A97E" stroke-width="2"/><circle cx="50" cy="50" r="28" fill="#FFF59D"/><circle cx="50" cy="50" r="12" fill="#FFF"/><rect x="42" y="34" width="6" height="2" rx="1" fill="#FF5722"/><rect x="60" y="44" width="6" height="2" rx="1" fill="#4CAF50"/></svg>`,
+      'yummy_cake_reason': `<svg class="w-full h-full" viewBox="0 0 100 100"><path d="M25 65 L50 25 L75 65 Z" fill="#FF8A80" stroke="#C62828" stroke-width="3"/><rect x="23" y="65" width="54" height="12" fill="#FFD54F" rx="3"/><circle cx="50" cy="22" r="6" fill="#D32F2F"/><path d="M50 16 Q55 8 62 12" stroke="#D32F2F" stroke-width="2" fill="none"/></svg>`,
+      'table_under': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="25" y="40" width="50" height="8" rx="2" fill="#8D6E63"/><rect x="32" y="48" width="5" height="32" fill="#5D4037"/><rect x="63" y="48" width="5" height="32" fill="#5D4037"/><rect x="42" y="62" width="16" height="16" rx="2" fill="#FFD54F" stroke="#FFB300" stroke-width="2"/><text x="50" y="74" fill="#E65100" font-size="12" font-weight="bold" text-anchor="middle">?</text></svg>`,
+      'sugar_jar': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="32" y="35" width="36" height="44" rx="6" fill="#E0F7FA" stroke="#00ACC1" stroke-width="3"/><rect x="40" y="27" width="20" height="8" rx="2" fill="#00ACC1"/><text x="50" y="62" fill="#006064" font-size="14" font-weight="bold" text-anchor="middle">SUGAR</text></svg>`,
+      'paper_bag': `<svg class="w-full h-full" viewBox="0 0 100 100"><path d="M30 30 L70 30 L66 80 L34 80 Z" fill="#D7CCC8" stroke="#8D6E63" stroke-width="3"/><path d="M30 30 L40 40 L50 30 L60 40 L70 30" stroke="#8D6E63" stroke-width="2" fill="none"/><circle cx="50" cy="58" r="8" fill="#8D6E63" opacity="0.4"/></svg>`,
+      'cash_register': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="25" y="55" width="50" height="25" rx="3" fill="#78909C" stroke="#37474F" stroke-width="3"/><rect x="32" y="30" width="36" height="25" rx="3" fill="#CFD8DC" stroke="#37474F" stroke-width="3"/><rect x="38" y="36" width="24" height="12" fill="#263238"/><text x="50" y="46" fill="#00E676" font-size="8" font-family="monospace" text-anchor="middle">$ 4.50</text><circle cx="35" cy="63" r="2.5" fill="#FFF"/><circle cx="45" cy="63" r="2.5" fill="#FFF"/><circle cx="55" cy="63" r="2.5" fill="#FFF"/><circle cx="65" cy="63" r="2.5" fill="#FFF"/><circle cx="35" cy="71" r="2.5" fill="#FFF"/><circle cx="45" cy="71" r="2.5" fill="#FFF"/><circle cx="55" cy="71" r="2.5" fill="#FFF"/><circle cx="65" cy="71" r="2.5" fill="#FFF"/></svg>`,
+      'teapot': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="55" r="25" fill="#E0F2F1" stroke="#00796B" stroke-width="3"/><rect x="42" y="25" width="16" height="5" fill="#00796B" rx="1"/><path d="M25 55 Q10 45 12 35" stroke="#00796B" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M75 55 C85 55, 85 40, 75 40" stroke="#00796B" stroke-width="5" fill="none"/></svg>`,
+      'cookie_jar': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="28" y="35" width="44" height="48" rx="8" fill="#FFF" stroke="#78909C" stroke-width="3" opacity="0.9"/><ellipse cx="50" cy="35" rx="22" ry="6" fill="#78909C"/><circle cx="50" cy="27" r="4" fill="#37474F"/><circle cx="42" cy="52" r="6" fill="#D7CCC8"/><circle cx="58" cy="65" r="7" fill="#D7CCC8"/><circle cx="45" cy="70" r="5" fill="#D7CCC8"/></svg>`,
+      'apron_clean': `<svg class="w-full h-full" viewBox="0 0 100 100"><path d="M35 30 H65 L58 85 H42 Z" fill="#2E7D32" stroke="#1B5E20" stroke-width="3"/><circle cx="50" cy="50" r="6" fill="#FFF" opacity="0.3"/><path d="M35 30 Q50 42 65 30" stroke="#1B5E20" stroke-width="2" fill="none"/><path d="M35 30 Q50 15 65 30" stroke="#1B5E20" stroke-width="3" fill="none"/></svg>`,
+      'jam_jar': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="32" y="38" width="36" height="42" rx="6" fill="#FFCDD2" stroke="#E53935" stroke-width="3"/><rect x="36" y="30" width="28" height="8" fill="#E53935" rx="2"/><circle cx="50" cy="58" r="8" fill="#D32F2F"/></svg>`,
+      'cup_tall': `<svg class="w-full h-full" viewBox="0 0 100 100"><path d="M30 20 H70 L62 85 H38 Z" fill="#3F51B5" stroke="#1A237E" stroke-width="3"/><path d="M28 20 H72 V26 H28 Z" fill="#1A237E"/><text x="50" y="55" fill="#FFF" font-size="12" font-weight="bold" text-anchor="middle">SUPER</text></svg>`,
+      'cup_tiny': `<svg class="w-full h-full" viewBox="0 0 100 100"><path d="M38 60 H62 L60 85 H40 Z" fill="#E0E0E0" stroke="#9E9E9E" stroke-width="2"/><ellipse cx="50" cy="60" rx="12" ry="3" fill="#5D4037"/></svg>`,
+      'fridge': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="25" y="15" width="50" height="70" rx="5" fill="#ECEFF1" stroke="#90A4AE" stroke-width="4"/><line x1="25" y1="50" x2="75" y2="50" stroke="#90A4AE" stroke-width="3"/><rect x="63" y="30" width="4" height="12" rx="1" fill="#546E7A"/><rect x="63" y="56" width="4" height="12" rx="1" fill="#546E7A"/></svg>`,
+      'beans_bag': `<svg class="w-full h-full" viewBox="0 0 100 100"><path d="M30 25 L70 25 L65 80 L35 80 Z" fill="#8D6E63" stroke="#4E342E" stroke-width="3"/><ellipse cx="50" cy="52" rx="12" ry="16" fill="#4E342E"/><line x1="50" y1="36" x2="50" y2="68" stroke="#8D6E63" stroke-width="2"/></svg>`,
+      'smoothie': `<svg class="w-full h-full" viewBox="0 0 100 100"><path d="M32 30 H68 L62 82 H38 Z" fill="#F48FB1" stroke="#C2185B" stroke-width="3"/><line x1="55" y1="12" x2="45" y2="40" stroke="#4CAF50" stroke-width="5" stroke-linecap="round"/><path d="M32 30 C32 18, 68 18, 68 30 Z" fill="#FFF"/><circle cx="50" cy="20" r="4" fill="#FFF"/></svg>`,
+      'boiling_water': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="30" y="45" width="40" height="35" rx="4" fill="#B0BEC5" stroke="#37474F" stroke-width="3"/><path d="M70 50 L82 45 L80 55 Z" fill="#37474F"/><path d="M30 52 C20 52, 20 68, 30 68" stroke="#37474F" stroke-width="4" fill="none"/><path d="M84 40 Q88 30 84 20" stroke="#78909C" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M88 43 Q92 33 88 23" stroke="#78909C" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`,
+      'plate_cookies': `<svg class="w-full h-full" viewBox="0 0 100 100"><ellipse cx="50" cy="65" rx="35" ry="12" fill="#E0F7FA" stroke="#00ACC1" stroke-width="3"/><circle cx="38" cy="60" r="10" fill="#D7CCC8" stroke="#8D6E63" stroke-width="2"/><circle cx="38" cy="60" r="1.5" fill="#3E2723"/><circle cx="43" cy="58" r="1.5" fill="#3E2723"/><circle cx="50" cy="56" r="10" fill="#D7CCC8" stroke="#8D6E63" stroke-width="2"/><circle cx="48" cy="52" r="1.5" fill="#3E2723"/><circle cx="54" cy="54" r="1.5" fill="#3E2723"/><circle cx="60" cy="61" r="10" fill="#D7CCC8" stroke="#8D6E63" stroke-width="2"/><circle cx="58" cy="59" r="1.5" fill="#3E2723"/><circle cx="62" cy="62" r="1.5" fill="#3E2723"/></svg>`,
+      'plate_empty': `<svg class="w-full h-full" viewBox="0 0 100 100"><ellipse cx="50" cy="65" rx="35" ry="12" fill="#ECEFF1" stroke="#78909C" stroke-width="3"/><ellipse cx="50" cy="65" rx="25" ry="8" fill="#CFD8DC"/></svg>`,
+      'plate_sandwich': `<svg class="w-full h-full" viewBox="0 0 100 100"><ellipse cx="50" cy="65" rx="35" ry="12" fill="#FFF9C4" stroke="#FBC02D" stroke-width="3"/><path d="M30 65 L70 65 L50 50 Z" fill="#FFE082" stroke="#FFA000" stroke-width="2"/><rect x="38" y="60" width="24" height="4" fill="#4CAF50"/></svg>`,
+      'spill_floor': `<svg class="w-full h-full" viewBox="0 0 100 100"><line x1="10" y1="75" x2="90" y2="75" stroke="#D7CCC8" stroke-width="2"/><path d="M30 65 Q45 52 65 60 T80 70 T50 78 Z" fill="#FF9800" opacity="0.9"/><circle cx="28" cy="58" r="3" fill="#FF9800"/><circle cx="76" cy="62" r="2" fill="#FF9800"/></svg>`,
+      'napkin': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="28" y="32" width="44" height="44" rx="2" fill="#FFF" stroke="#B0BEC5" stroke-width="3"/><line x1="28" y1="32" x2="72" y2="76" stroke="#CFD8DC" stroke-width="2"/></svg>`
+    };
+  </script>
+
+  <!-- ==========================================
+       GAME DATA AND LOGIC SYSTEM
+       ========================================== -->
+  <script>
+    const QUESTIONS_POOL = [
+      { id: 1, character: 'barista_female', questionWord: 'Who', questionText: '... is wiping down the sticky counter?', options: [{ id: 'a', label: 'The Barista', svgType: 'barista_helper', isCorrect: true }, { id: 'b', label: 'Coffee Cup', svgType: 'coffee_cup', isCorrect: false }, { id: 'c', label: 'Evening Star', svgType: 'moon', isCorrect: false }] },
+      { id: 2, character: 'customer_boy', questionWord: 'Where', questionText: '... do we sit to enjoy our sweet treats?', options: [{ id: 'a', label: 'A Cookie', svgType: 'cookie', isCorrect: false }, { id: 'b', label: 'Cozy Table', svgType: 'table', isCorrect: true }, { id: 'c', label: 'Tomorrow', svgType: 'clock_day', isCorrect: false }] },
+      { id: 3, character: 'barista_male', questionWord: 'What', questionText: '... is hot, sweet, and inside this mug?', options: [{ id: 'a', label: 'A Spoon', svgType: 'spoon', isCorrect: false }, { id: 'b', label: 'The Baker', svgType: 'baker', isCorrect: false }, { id: 'c', label: 'Hot Cocoa', svgType: 'hot_cocoa', isCorrect: true }] },
+      { id: 4, character: 'customer_girl', questionWord: 'When', questionText: '... does the cozy shop open for breakfast?', options: [{ id: 'a', label: 'Sunny Morning', svgType: 'clock_day', isCorrect: true }, { id: 'b', label: 'Pink Donut', svgType: 'donut_pink', isCorrect: false }, { id: 'c', label: 'Happy Customer', svgType: 'customer_boy_opt', isCorrect: false }] },
+      { id: 5, character: 'barista_female', questionWord: 'Why', questionText: '... are you smiling so big today?', options: [{ id: 'a', label: '"Yummy cake!"', svgType: 'yummy_cake_reason', isCorrect: true }, { id: 'b', label: 'Under Table', svgType: 'table_under', isCorrect: false }, { id: 'c', label: 'Sugar Jar', svgType: 'sugar_jar', isCorrect: false }] },
+      { id: 6, character: 'customer_boy', questionWord: 'Which', questionText: '... sweet donut has pink frosting?', options: [{ id: 'a', label: 'Choco Donut', svgType: 'donut_brown', isCorrect: false }, { id: 'b', label: 'Lemon Donut', svgType: 'donut_yellow', isCorrect: false }, { id: 'c', label: 'Pink Donut', svgType: 'donut_pink', isCorrect: true }] },
+      { id: 7, character: 'barista_male', questionWord: 'Who', questionText: '... is buying the big chocolate muffin?', options: [{ id: 'a', label: 'Paper Bag', svgType: 'paper_bag', isCorrect: false }, { id: 'b', label: 'Little Boy', svgType: 'customer_boy_opt', isCorrect: true }, { id: 'c', label: 'At 9 O\'clock', svgType: 'clock_day', isCorrect: false }] },
+      { id: 8, character: 'customer_girl', questionWord: 'Where', questionText: '... do we pay for our tasty snacks?', options: [{ id: 'a', label: 'Cash Register', svgType: 'cash_register', isCorrect: true }, { id: 'b', label: 'Hot Teapot', svgType: 'teapot', isCorrect: false }, { id: 'c', label: 'Friendly Baker', svgType: 'baker', isCorrect: false }] },
+      { id: 9, character: 'barista_female', questionWord: 'What', questionText: '... do we use to stir the warm milk?', options: [{ id: 'a', label: 'The Barista', svgType: 'barista_helper', isCorrect: false }, { id: 'b', label: 'At Night', svgType: 'moon', isCorrect: false }, { id: 'c', label: 'Metal Spoon', svgType: 'spoon', isCorrect: true }] },
+      { id: 10, character: 'customer_boy', questionWord: 'When', questionText: '... do we eat our delicious breakfast?', options: [{ id: 'a', label: '8:00 AM clock', svgType: 'clock_day', isCorrect: true }, { id: 'b', label: 'Blue Chair', svgType: 'table', isCorrect: false }, { id: 'c', label: 'Cookie Jar', svgType: 'cookie_jar', isCorrect: false }] },
+      { id: 11, character: 'barista_male', questionWord: 'Why', questionText: '... do we wear clean aprons in the shop?', options: [{ id: 'a', label: 'Strawberry Jam', svgType: 'jam_jar', isCorrect: false }, { id: 'b', label: '"Keep clean!"', svgType: 'apron_clean', isCorrect: true }, { id: 'c', label: 'Behind Counter', svgType: 'cash_register', isCorrect: false }] },
+      { id: 12, character: 'customer_girl', questionWord: 'Which', questionText: '... coffee cup is the biggest tall one?', options: [{ id: 'a', label: 'Tall Mug', svgType: 'cup_tall', isCorrect: true }, { id: 'b', label: 'Tiny Cup', svgType: 'cup_tiny', isCorrect: false }, { id: 'c', label: 'Medium Cup', svgType: 'coffee_cup', isCorrect: false }] },
+      { id: 13, character: 'barista_female', questionWord: 'Who', questionText: '... bakes the fresh blueberry muffins?', options: [{ id: 'a', label: 'Yummy Baker', svgType: 'baker', isCorrect: true }, { id: 'b', label: 'Rolling Pin', svgType: 'spoon', isCorrect: false }, { id: 'c', label: 'On the Shelf', svgType: 'table', isCorrect: false }] },
+      { id: 14, character: 'customer_boy', questionWord: 'Where', questionText: '... is the fresh, cold milk kept?', options: [{ id: 'a', label: 'In the Fridge', svgType: 'fridge', isCorrect: true }, { id: 'b', label: 'Coffee Beans', svgType: 'beans_bag', isCorrect: false }, { id: 'c', label: 'Next Tuesday', svgType: 'clock_day', isCorrect: false }] },
+      { id: 15, character: 'barista_male', questionWord: 'What', questionText: '... is cold, blended, and made of sweet fruit?', options: [{ id: 'a', label: 'The Cashier', svgType: 'barista_helper', isCorrect: false }, { id: 'b', label: 'Fruit Smoothie', svgType: 'smoothie', isCorrect: true }, { id: 'c', label: 'Yesterday', svgType: 'moon', isCorrect: false }] },
+      { id: 16, character: 'customer_girl', questionWord: 'When', questionText: '... is the quiet cafe closed and dark?', options: [{ id: 'a', label: 'Starry Night', svgType: 'moon', isCorrect: true }, { id: 'b', label: 'Choco Cookie', svgType: 'cookie', isCorrect: false }, { id: 'c', label: 'Under Chair', svgType: 'table_under', isCorrect: false }] },
+      { id: 17, character: 'barista_female', questionWord: 'Why', questionText: '... is the silver kettle whistling loud?', options: [{ id: 'a', label: '"Boiling water!"', svgType: 'boiling_water', isCorrect: true }, { id: 'b', label: 'Cold Water', svgType: 'smoothie', isCorrect: false }, { id: 'c', label: 'The Customer', svgType: 'customer_boy_opt', isCorrect: false }] },
+      { id: 18, character: 'customer_boy', questionWord: 'Which', questionText: '... plate has delicious cookies on it?', options: [{ id: 'a', label: 'Cookie Plate', svgType: 'plate_cookies', isCorrect: true }, { id: 'b', label: 'Empty Plate', svgType: 'plate_empty', isCorrect: false }, { id: 'c', label: 'Sandwich Plate', svgType: 'plate_sandwich', isCorrect: false }] },
+      { id: 19, character: 'barista_male', questionWord: 'Who', questionText: '... is waving hello at the glass door?', options: [{ id: 'a', label: 'Cheerful Girl', svgType: 'customer_girl_opt', isCorrect: true }, { id: 'b', label: 'Warm Teapot', svgType: 'teapot', isCorrect: false }, { id: 'c', label: 'By Window', svgType: 'table', isCorrect: false }] },
+      { id: 20, character: 'customer_girl', questionWord: 'Where', questionText: '... is the spilled orange juice?', options: [{ id: 'a', label: 'On the Floor', svgType: 'spill_floor', isCorrect: true }, { id: 'b', label: 'Paper Napkin', svgType: 'napkin', isCorrect: false }, { id: 'c', label: 'At 3 o\'clock', svgType: 'clock_day', isCorrect: false }] }
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let selectedAnswerId = null;
+    let firstTry = true;
+    let isFeedbackRunning = false;
+
+    // Splash screen timer - transitions automatically to start screen after 5 seconds
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        switchScreen('screen-start');
+      }, 5000);
+    });
+
+    function switchScreen(screenId) {
+      document.getElementById('screen-splash').classList.add('hidden');
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.add('hidden');
+      
+      document.getElementById(screenId).classList.remove('hidden');
+    }
+
+    // Initialize 15 randomized questions out of 20
+    function startNewGame() {
+      triggerAudio('click');
+      
+      const shuffled = [...QUESTIONS_POOL].sort(() => Math.random() - 0.5);
+      currentQuestions = shuffled.slice(0, 15);
+      
+      currentIndex = 0;
+      score = 0;
+      selectedAnswerId = null;
+      firstTry = true;
+      isFeedbackRunning = false;
+      
+      renderQuestion();
+      switchScreen('screen-game');
+    }
+
+    function renderQuestion() {
+      if (currentIndex >= currentQuestions.length) {
+        showFinalSummary();
+        return;
+      }
+
+      const q = currentQuestions[currentIndex];
+      selectedAnswerId = null;
+      
+      // Update info texts
+      document.getElementById('game-progress-text').innerText = `${currentIndex + 1} / 15`;
+      document.getElementById('game-progress-bar').style.width = `${((currentIndex) / 15) * 100}%`;
+      document.getElementById('game-score-text').innerText = score;
+      
+      // Update character & dialogue balloon
+      document.getElementById('character-container').innerHTML = SVGS[q.character];
+      document.getElementById('question-word-badge').innerText = `Question Word: ${q.questionWord}`;
+      document.getElementById('question-text').innerText = `"${q.questionText}"`;
+
+      // Reset tray layout
+      resetTrayUI();
+
+      // Render answer option cards
+      const optionsGrid = document.getElementById('options-grid');
+      optionsGrid.innerHTML = '';
+
+      q.options.forEach(opt => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl p-3 md:p-5 shadow-md border-4 border-[#E6CCB2] hover:border-[#D4A373] flex flex-col items-center justify-between text-center cursor-grab active:cursor-grabbing transition-all duration-150 transform hover:-translate-y-1 select-none touch-none relative";
+        card.id = `card-${opt.id}`;
+        card.setAttribute('data-id', opt.id);
+        
+        // Inner markup
+        card.innerHTML = `
+          <div class="w-16 h-16 md:w-24 md:h-24 flex items-center justify-center pointer-events-none mb-3">
+            ${SVGS[opt.svgType] || ''}
+          </div>
+          <span class="text-sm md:text-base font-extrabold text-[#4A3B32] leading-tight pointer-events-none">
+            ${opt.label}
+          </span>
+          <div class="mt-2 text-[9px] uppercase tracking-wider font-bold text-[#B5835A] pointer-events-none bg-[#FAF6F0] px-2 py-0.5 rounded-full border border-[#E6CCB2]">
+            DRAG OR TAP
+          </div>
+        `;
+
+        // Handle Tap-to-select and Drag/Touch actions
+        card.addEventListener('click', () => handleCardSelection(opt.id));
+        setupDragging(card, opt.id);
+
+        optionsGrid.appendChild(card);
+      });
+    }
+
+    // Highlighting & selecting card on Tap
+    function handleCardSelection(optionId) {
+      if (isFeedbackRunning) return;
+      triggerAudio('click');
+
+      // Clear other selections
+      const cards = document.querySelectorAll('#options-grid > div');
+      cards.forEach(c => c.classList.remove('border-[#9C6644]', 'ring-4', 'ring-[#D4A373]/30'));
+
+      // Highlight target card
+      const targetCard = document.getElementById(`card-${optionId}`);
+      if (targetCard) {
+        targetCard.classList.add('border-[#9C6644]', 'ring-4', 'ring-[#D4A373]/30');
+      }
+
+      selectedAnswerId = optionId;
+      updateTrayUIWithSelection(optionId);
+    }
+
+    function updateTrayUIWithSelection(optionId) {
+      const q = currentQuestions[currentIndex];
+      const selectedOption = q.options.find(o => o.id === optionId);
+
+      document.getElementById('tray-idle').classList.add('hidden');
+      document.getElementById('tray-correct').classList.add('hidden');
+      document.getElementById('tray-wrong').classList.add('hidden');
+
+      const holdingDiv = document.getElementById('tray-holding');
+      holdingDiv.classList.remove('hidden');
+      document.getElementById('tray-holding-label').innerText = selectedOption.label;
+      
+      // Animate selection drop target
+      const tray = document.getElementById('serving-tray');
+      tray.className = "relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-2 cursor-pointer bg-[#FFE8D6] border-[#9C6644] animate-pulse scale-105";
+    }
+
+    function resetTrayUI() {
+      document.getElementById('tray-idle').classList.remove('hidden');
+      document.getElementById('tray-holding').classList.add('hidden');
+      document.getElementById('tray-correct').classList.add('hidden');
+      document.getElementById('tray-wrong').classList.add('hidden');
+
+      const tray = document.getElementById('serving-tray');
+      tray.className = "relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-2 cursor-pointer bg-white/40 border-[#D4A373] hover:bg-white/60";
+    }
+
+    // Tap/Click fallback validation
+    function handleTrayClickFallback() {
+      if (!selectedAnswerId || isFeedbackRunning) return;
+      
+      const q = currentQuestions[currentIndex];
+      const chosenOption = q.options.find(opt => opt.id === selectedAnswerId);
+      if (chosenOption) {
+        validateAnswer(chosenOption);
+      }
+    }
+
+    // Master validation and feedback animations
+    function validateAnswer(option) {
+      isFeedbackRunning = true;
+      const tray = document.getElementById('serving-tray');
+      
+      document.getElementById('tray-holding').classList.add('hidden');
+
+      if (option.isCorrect) {
+        triggerAudio('correct');
+        document.getElementById('tray-correct').classList.remove('hidden');
+        tray.className = "relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-solid transition-all duration-300 flex flex-col items-center justify-center p-2 bg-green-100 border-green-500 scale-105";
+
+        if (firstTry) {
+          score++;
         }
 
-        // Lazy-loaded Audio elements sequence
-        let audioAssets = {};
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        let audioCtx = null;
-
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new AudioCtx();
-                try {
-                    audioAssets.correct = new Audio('assets/correct.mp3');
-                    audioAssets.wrong = new Audio('assets/wrong.mp3');
-                    audioAssets.clapping = new Audio('assets/clapping.mp3');
-                    
-                    for (const key in audioAssets) {
-                        audioAssets[key].load();
-                    }
-                } catch(e) {
-                    console.log("Audio deferred initialization.");
-                }
-            }
-        }
-
-        function playSound(type) {
-            initAudio();
-            if (type === 'correct') {
-                if (audioAssets.correct) {
-                    audioAssets.correct.play().catch(() => playSynthFallback('correct'));
-                } else {
-                    playSynthFallback('correct');
-                }
-            } else if (type === 'wrong') {
-                if (audioAssets.wrong) {
-                    audioAssets.wrong.play().catch(() => playSynthFallback('wrong'));
-                } else {
-                    playSynthFallback('wrong');
-                }
-            } else if (type === 'win') {
-                if (audioAssets.clapping) {
-                    audioAssets.clapping.play().catch(() => {
-                        if (audioAssets.correct) {
-                            audioAssets.correct.play().catch(() => playSynthFallback('win'));
-                        } else {
-                            playSynthFallback('win');
-                        }
-                    });
-                } else {
-                    playSynthFallback('win');
-                }
-            }
-        }
-
-        // Web Audio Synthesizer fallback if folder path structures are missing/slow
-        function playSynthFallback(type) {
-            if (!audioCtx) return;
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                if (type === 'correct') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
-                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
-                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.4);
-                } else if (type === 'wrong') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
-                    osc.frequency.linearRampToValueAtTime(90, audioCtx.currentTime + 0.25);
-                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.25);
-                } else if (type === 'win') {
-                    const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
-                    notes.forEach((freq, idx) => {
-                        const noteOsc = audioCtx.createOscillator();
-                        const noteGain = audioCtx.createGain();
-                        noteOsc.connect(noteGain);
-                        noteGain.connect(audioCtx.destination);
-                        noteOsc.type = 'triangle';
-                        noteOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
-                        noteGain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.08);
-                        noteGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.08 + 0.3);
-                        noteOsc.start(audioCtx.currentTime + idx * 0.08);
-                        noteOsc.stop(audioCtx.currentTime + idx * 0.08 + 0.3);
-                    });
-                }
-            } catch (e) {
-                console.warn(e);
-            }
-        }
-
-        // 20 Simple Grade 1 Question Words ELA Sentences
-        const allQuestions = [
-            { question: "___ is baking the cookies? (The chef)", answer: "who", choices: ["who", "what", "where"] },
-            { question: "___ is inside your big coffee mug? (Hot tea)", answer: "what", choices: ["who", "what", "why"] },
-            { question: "___ is the cozy cafe? (Down the street)", answer: "where", choices: ["where", "when", "why"] },
-            { question: "___ does the cafe open? (At 8 o'clock)", answer: "when", choices: ["when", "which", "where"] },
-            { question: "___ is that boy crying? (Because his milk fell)", answer: "why", choices: ["why", "what", "who"] },
-            { question: "___ sweet cookie do you want? (The red one)", answer: "which", choices: ["which", "who", "when"] },
-            { question: "___ is making the hot cocoa? (The barista)", answer: "who", choices: ["who", "what", "where"] },
-            { question: "___ is on the brown plate? (A warm donut)", answer: "what", choices: ["what", "why", "where"] },
-            { question: "___ did you put the milk? (In the fridge)", answer: "where", choices: ["where", "who", "when"] },
-            { question: "___ do we eat sweet cake? (After lunch)", answer: "when", choices: ["when", "which", "why"] },
-            { question: "___ are you so happy? (Because of my cookie)", answer: "why", choices: ["why", "what", "who"] },
-            { question: "___ drink is yours? (The orange juice)", answer: "which", choices: ["which", "when", "where"] },
-            { question: "___ is sitting on the high stool? (My dad)", answer: "who", choices: ["who", "what", "where"] },
-            { question: "___ are we having for breakfast? (Pancakes)", answer: "what", choices: ["what", "why", "who"] },
-            { question: "___ is the cozy spoon? (Next to the mug)", answer: "where", choices: ["where", "who", "when"] },
-            { question: "___ do you go to sleep? (At bedtime)", answer: "when", choices: ["when", "which", "why"] },
-            { question: "___ is she laughing? (Because the joke was funny)", answer: "why", choices: ["why", "what", "where"] },
-            { question: "___ cupcake do you like? (The pink one)", answer: "which", choices: ["which", "who", "when"] },
-            { question: "___ is holding the silver tray? (The server)", answer: "who", choices: ["who", "what", "where"] },
-            { question: "___ is that cute noise? (It is the kitten)", answer: "what", choices: ["what", "why", "who"] }
-        ];
-
-        let sessionQuestions = [];
-        let currentQuestionIndex = 0;
-
-        // Core Game state machine
-        let score = 0;
-        let streak = 0;
-        let correctAnswers = 0;
-        let activeCorrectAnswer = "";
-        let scaleFactor = 1;
-
-        // Global DOM Elements
-        let canvas, ctx;
-        let logoScreen, startScreen, startBtn, gameplayArea, gameHeader, gameoverScreen, dragHint;
-        let scoreEl, streakEl, questionIndexEl, finalScoreEl, finalAccuracyEl, performanceMessageEl, questionTextEl;
-
-        // Interactive Drag variables
-        let draggableCups = []; // Placed cups waiting to be dragged
-        let draggingCup = null;
-        let dragOffset = { x: 0, y: 0 };
-        let trayTarget = { x: 0, y: 0, r: 0 }; // serving tray coordinates inside canvas
-
-        // Setup DOM Elements safely
-        function initDOMElements() {
-            canvas = document.getElementById("gameCanvas");
-            ctx = canvas ? canvas.getContext("2d") : null;
-
-            logoScreen = document.getElementById("logo-screen");
-            startScreen = document.getElementById("start-screen");
-            startBtn = document.getElementById("start-btn");
-            gameplayArea = document.getElementById("gameplay-area");
-            gameHeader = document.getElementById("game-header");
-            gameoverScreen = document.getElementById("gameover-screen");
-            dragHint = document.getElementById("drag-hint");
-
-            scoreEl = document.getElementById("score");
-            streakEl = document.getElementById("streak");
-            questionIndexEl = document.getElementById("question-index");
-            finalScoreEl = document.getElementById("final-score");
-            finalAccuracyEl = document.getElementById("final-accuracy");
-            performanceMessageEl = document.getElementById("performance-message");
-            questionTextEl = document.getElementById("question-text");
-
-            // Event bindings with safety checks
-            if (startBtn) startBtn.addEventListener('click', onStartGame);
-            
-            const restartBtn = document.getElementById("restart-btn");
-            if (restartBtn) restartBtn.addEventListener('click', onRestartGame);
-
-            // Connect tap fallbacks to option cards
-            const opt0 = document.getElementById("drag-btn-0");
-            const opt1 = document.getElementById("drag-btn-1");
-            const opt2 = document.getElementById("drag-btn-2");
-            if (opt0) opt0.addEventListener('click', () => handleOptionClick(0));
-            if (opt1) opt1.addEventListener('click', () => handleOptionClick(1));
-            if (opt2) opt2.addEventListener('click', () => handleOptionClick(2));
-
-            if (canvas) {
-                canvas.addEventListener('mousedown', handlePointerDown);
-                canvas.addEventListener('mousemove', handlePointerMove);
-                window.addEventListener('mouseup', handlePointerUp);
-
-                canvas.addEventListener('touchstart', (e) => { handlePointerDown(e); e.preventDefault(); }, {passive: false});
-                canvas.addEventListener('touchmove', (e) => { handlePointerMove(e); e.preventDefault(); }, {passive: false});
-                canvas.addEventListener('touchend', handlePointerUp);
-            }
-        }
-
-        function resizeCanvas() {
-            if (!canvas) return;
-            const parent = canvas.parentElement;
-            if (!parent) return;
-
-            let w = parent.clientWidth;
-            let h = parent.clientHeight;
-
-            // Safe bounding fallback coordinates if layout engine hasn't computed css yet
-            if (w === 0 || h === 0) {
-                const container = document.querySelector('.relative.w-full');
-                if (container) {
-                    w = container.clientWidth * 0.6;
-                    h = container.clientHeight;
-                }
-            }
-
-            canvas.width = w || 400;
-            canvas.height = h || 400;
-            scaleFactor = Math.min(1, canvas.width / 500);
-
-            // Update Serving Tray target bounds inside Coffee counter vector
-            trayTarget = {
-                x: canvas.width * 0.5,
-                y: canvas.height * 0.76,
-                r: 55 * scaleFactor
-            };
-
-            // Recalculate options coordinates
-            repositionSelectionCups();
-        }
-
-        function prepareSession() {
-            // Shuffle and slice exactly 15 questions
-            const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
-            sessionQuestions = shuffled.slice(0, 15);
-            currentQuestionIndex = 0;
-        }
-
-        function initGame() {
-            score = 0;
-            streak = 0;
-            correctAnswers = 0;
-            draggingCup = null;
-
-            if (scoreEl) scoreEl.textContent = score;
-            if (streakEl) streakEl.textContent = "🔥 " + streak;
-
-            prepareSession();
-            loadQuestion();
-            resizeCanvas();
-        }
-
-        function loadQuestion() {
-            if (currentQuestionIndex >= 15) {
-                endGameSession();
-                return;
-            }
-
-            if (questionIndexEl) questionIndexEl.textContent = `${currentQuestionIndex + 1}/15`;
-            const currentQ = sessionQuestions[currentQuestionIndex];
-            activeCorrectAnswer = currentQ.answer;
-
-            // Load ELA sentence banner
-            if (questionTextEl) {
-                questionTextEl.innerHTML = currentQ.question.replace("___", "<span class='text-amber-500 underline font-black decoration-2 decoration-wavy px-1'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
-            }
-
-            // Populate the three selection question word cups
-            for (let i = 0; i < 3; i++) {
-                const word = currentQ.choices[i];
-                const labelEl = document.getElementById(`opt-word-${i}`);
-                if (labelEl) { // Fixed reference error crash
-                    labelEl.textContent = word.toUpperCase();
-                }
-                const emojiEl = document.getElementById(`opt-emoji-${i}`);
-                if (emojiEl) {
-                    // Map cute icons matching ELA Question word cups
-                    if (word === "who") emojiEl.textContent = "👦";
-                    else if (word === "what") emojiEl.textContent = "🧁";
-                    else if (word === "where") emojiEl.textContent = "🗺️";
-                    else if (word === "when") emojiEl.textContent = "⏰";
-                    else if (word === "why") emojiEl.textContent = "❓";
-                    else if (word === "which") emojiEl.textContent = "🍦";
-                }
-            }
-
-            repositionSelectionCups();
-        }
-
-        // Tap option action handler
-        function handleOptionClick(idx) {
-            if (currentQuestionIndex >= 15 || !sessionQuestions[currentQuestionIndex]) return;
-            const currentQ = sessionQuestions[currentQuestionIndex];
-            const word = currentQ.choices[idx];
-            const isCorrect = (word === activeCorrectAnswer);
-            handleAnswerResult(isCorrect);
-        }
-
-        // Position options dynamically inside canvas workspace for the Drag experience
-        function repositionSelectionCups() {
-            if (!canvas) return;
-            const currentQ = sessionQuestions[currentQuestionIndex];
-            if (!currentQ) return;
-
-            draggableCups = [];
-            const spacing = canvas.width / 4;
-            const spawnY = canvas.height * 0.42;
-
-            for (let i = 0; i < 3; i++) {
-                const word = currentQ.choices[i];
-                let emoji = "☕";
-                if (word === "who") emoji = "👦";
-                else if (word === "what") emoji = "🧁";
-                else if (word === "where") emoji = "🗺️";
-                else if (word === "when") emoji = "⏰";
-                else if (word === "why") emoji = "❓";
-                else if (word === "which") emoji = "🍦";
-
-                draggableCups.push({
-                    id: i,
-                    word: word,
-                    emoji: emoji,
-                    x: spacing * (i + 1),
-                    y: spawnY,
-                    origX: spacing * (i + 1),
-                    origY: spawnY,
-                    w: 75 * scaleFactor,
-                    h: 70 * scaleFactor,
-                    color: i === 0 ? '#3b82f6' : (i === 1 ? '#fb923c' : '#a855f7') // Cozy Blue, Orange, Purple
-                });
-            }
-        }
-
-        // Pointer Down: Check cup grab
-        function handlePointerDown(e) {
-            initAudio();
-            const coords = getCoordinates(e);
-
-            for (let i = draggableCups.length - 1; i >= 0; i--) {
-                const cup = draggableCups[i];
-                if (coords.x >= cup.x - cup.w/2 && coords.x <= cup.x + cup.w/2 &&
-                    coords.y >= cup.y - cup.h/2 && coords.y <= cup.y + cup.h/2) {
-                    
-                    draggingCup = cup;
-                    dragOffset.x = coords.x - cup.x;
-                    dragOffset.y = coords.y - cup.y;
-                    break;
-                }
-            }
-        }
-
-        function handlePointerMove(e) {
-            if (!draggingCup) return;
-            const coords = getCoordinates(e);
-
-            let newX = coords.x - dragOffset.x;
-            let newY = coords.y - dragOffset.y;
-
-            // Contain boundaries inside Canvas borders
-            draggingCup.x = Math.max(draggingCup.w/2, Math.min(canvas.width - draggingCup.w/2, newX));
-            draggingCup.y = Math.max(draggingCup.h/2, Math.min(canvas.height - draggingCup.h/2, newY));
-        }
-
-        function handlePointerUp() {
-            if (!draggingCup) return;
-
-            // Check if dropped onto the serving tray target zone
-            const dx = draggingCup.x - trayTarget.x;
-            const dy = draggingCup.y - trayTarget.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < trayTarget.r + 20) {
-                // Check if correct word
-                const isCorrect = (draggingCup.word === activeCorrectAnswer);
-                handleAnswerResult(isCorrect);
-            } else {
-                // Snap back to origin immediately
-                draggingCup.x = draggingCup.origX;
-                draggingCup.y = draggingCup.origY;
-            }
-
-            draggingCup = null;
-        }
-
-        function handleAnswerResult(isCorrect) {
-            if (isCorrect) {
-                score += 10 + Math.floor(streak / 3) * 5;
-                streak++;
-                correctAnswers++;
-                playSound('correct');
-                triggerHUDNotification("YUMMY ORDER!", true);
-                
-                currentQuestionIndex++;
-                setTimeout(loadQuestion, 1200);
-            } else {
-                streak = 0;
-                playSound('wrong');
-                triggerHUDNotification("TRY AGAIN!", false);
-                
-                // Snap all back
-                repositionSelectionCups();
-            }
-
-            if (scoreEl) scoreEl.textContent = score;
-            if (streakEl) streakEl.textContent = "🔥 " + streak;
-        }
-
-        function triggerHUDNotification(text, isCorrect) {
-            const hitNotification = document.getElementById("hit-notification");
-            const hudText = document.getElementById("hud-text");
-            if (!hitNotification || !hudText) return;
-
-            hudText.textContent = text;
-            if (isCorrect) {
-                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-emerald-600 drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] text-center playful-font";
-            } else {
-                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-rose-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] text-center playful-font";
-            }
-
-            hitNotification.style.opacity = "1";
-            hitNotification.style.transform = "translate(-50%, -50%) scale(1.1)";
-            
-            setTimeout(() => {
-                hitNotification.style.opacity = "0";
-                hitNotification.style.transform = "translate(-50%, -50%) scale(0.75)";
-            }, 1200);
-        }
-
-        function endGameSession() {
-            if (gameHeader) gameHeader.classList.add("hidden");
-            if (gameplayArea) gameplayArea.classList.add("hidden");
-            if (gameoverScreen) gameoverScreen.classList.remove("hidden");
-            playSound('win');
-
-            if (finalScoreEl) finalScoreEl.textContent = score;
-            const accuracy = Math.round((correctAnswers / 15) * 100);
-            if (finalAccuracyEl) finalAccuracyEl.textContent = accuracy + "%";
-
-            let msg = "";
-            if (accuracy >= 85) {
-                msg = "🏆 Question Master! Your ELA skills are absolutely outstanding!";
-            } else if (accuracy >= 65) {
-                msg = "🥈 Excellent Barista! You completed our coffee service wonderfully!";
-            } else {
-                msg = "☕ Keep learning! Try serving another round of questions to practice!";
-            }
-            if (performanceMessageEl) performanceMessageEl.textContent = msg;
-        }
-
-        function onStartGame() {
-            initAudio();
-            if (startScreen) startScreen.classList.add("hidden");
-            if (gameHeader) gameHeader.classList.remove("hidden");
-            if (gameplayArea) gameplayArea.classList.remove("hidden");
-            gameState = 'PLAYING';
-            initGame();
-            setTimeout(resizeCanvas, 50); // Safe layout recalculations
-        }
-
-        function onRestartGame() {
-            if (gameoverScreen) gameoverScreen.classList.add("hidden");
-            if (gameHeader) gameHeader.classList.remove("hidden");
-            if (gameplayArea) gameplayArea.classList.remove("hidden");
-            gameState = 'PLAYING';
-            initGame();
-        }
-
-        // --- Vector-based Coffee Shop Rendering engine ---
-        function drawCafeBackground() {
-            // Warm cozy wall gradient
-            const wallGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            wallGrad.addColorStop(0, '#fef3c7'); // Warm amber wall
-            wallGrad.addColorStop(0.6, '#fde68a'); // Richer golden wall
-            wallGrad.addColorStop(1, '#fed7aa'); // Orange horizon floor line
-            ctx.fillStyle = wallGrad;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Coffee shelves on back wall
-            ctx.fillStyle = '#b45309'; // Warm brown wood
-            ctx.fillRect(20 * scaleFactor, canvas.height * 0.15, canvas.width - 40 * scaleFactor, 10 * scaleFactor);
-
-            // Cute small decor on shelves
-            ctx.font = `${Math.floor(22 * scaleFactor)}px serif`;
-            ctx.fillText("☕", 60 * scaleFactor, canvas.height * 0.13);
-            ctx.fillText("🌱", 120 * scaleFactor, canvas.height * 0.13);
-            ctx.fillText("🧁", 180 * scaleFactor, canvas.height * 0.13);
-            ctx.fillText("🍯", canvas.width - 80 * scaleFactor, canvas.height * 0.13);
-
-            // Countertop block
-            const counterY = canvas.height * 0.65;
-            const counterH = canvas.height - counterY;
-            ctx.fillStyle = '#78350f'; // Solid dark mahogany counter
-            ctx.fillRect(0, counterY, canvas.width, counterH);
-
-            // Counter laminate highlight trim
-            ctx.fillStyle = '#ea580c';
-            ctx.fillRect(0, counterY, canvas.width, 10 * scaleFactor);
-
-            // Serving tray Target Drop Zone (Pulses smoothly)
-            const pulse = 1 + Math.sin(Date.now() * 0.006) * 0.06;
-            ctx.save();
-            ctx.translate(trayTarget.x, trayTarget.y);
-            
-            // Outer glow pedestal ring
-            ctx.fillStyle = 'rgba(251, 191, 36, 0.15)';
-            ctx.beginPath();
-            ctx.ellipse(0, 5 * scaleFactor, trayTarget.r * pulse, (trayTarget.r * 0.45) * pulse, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Tray plate
-            ctx.fillStyle = '#cbd5e1'; // Silver tray
-            ctx.strokeStyle = '#94a3b8';
-            ctx.lineWidth = 4 * scaleFactor;
-            ctx.beginPath();
-            ctx.ellipse(0, 5 * scaleFactor, trayTarget.r, trayTarget.r * 0.45, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // Inner tray rim
-            ctx.strokeStyle = '#e2e8f0';
-            ctx.lineWidth = 2 * scaleFactor;
-            ctx.beginPath();
-            ctx.ellipse(0, 5 * scaleFactor, trayTarget.r * 0.8, trayTarget.r * 0.35, 0, 0, Math.PI * 2);
-            ctx.stroke();
-
-            // Label tag on tray
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
-            ctx.beginPath();
-            drawRoundRect(ctx, -40 * scaleFactor, 12 * scaleFactor, 80 * scaleFactor, 18 * scaleFactor, 4 * scaleFactor);
-            ctx.fill();
-            
-            ctx.fillStyle = '#fef08a';
-            ctx.font = `bold ${Math.floor(9 * scaleFactor)}px "Outfit"`;
-            ctx.textAlign = 'center';
-            ctx.fillText("SERVE HERE", 0, 24 * scaleFactor);
-
-            ctx.restore();
-        }
-
-        function drawCharacters() {
-            // Friendly Barista on Left behind counter
-            const baristaX = canvas.width * 0.22;
-            const baristaY = canvas.height * 0.46;
-
-            ctx.save();
-            ctx.translate(baristaX, baristaY);
-
-            // Green apron chest block
-            ctx.fillStyle = '#047857'; 
-            ctx.beginPath();
-            ctx.moveTo(-20 * scaleFactor, 70 * scaleFactor);
-            ctx.lineTo(-12 * scaleFactor, 25 * scaleFactor);
-            ctx.lineTo(12 * scaleFactor, 25 * scaleFactor);
-            ctx.lineTo(20 * scaleFactor, 70 * scaleFactor);
-            ctx.closePath();
-            ctx.fill();
-
-            // Face Skin
-            ctx.fillStyle = '#ffedd5';
-            ctx.beginPath();
-            ctx.arc(0, 0, 20 * scaleFactor, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Hair/Cap
-            ctx.fillStyle = '#1e293b'; // Black cap
-            ctx.beginPath();
-            ctx.arc(-2 * scaleFactor, -8 * scaleFactor, 21 * scaleFactor, Math.PI, 0);
-            ctx.fill();
-            ctx.fillRect(-22 * scaleFactor, -8 * scaleFactor, 44 * scaleFactor, 6 * scaleFactor);
-
-            // Face Smile
-            ctx.strokeStyle = '#9d174d';
-            ctx.lineWidth = 2.5 * scaleFactor;
-            ctx.beginPath();
-            ctx.arc(0, 4 * scaleFactor, 6 * scaleFactor, 0, Math.PI);
-            ctx.stroke();
-
-            // Big friendly eyes
-            ctx.fillStyle = '#0f172a';
-            ctx.beginPath();
-            ctx.arc(-7 * scaleFactor, -3 * scaleFactor, 3 * scaleFactor, 0, Math.PI * 2);
-            ctx.arc(7 * scaleFactor, -3 * scaleFactor, 3 * scaleFactor, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
-
-            // Cozy Customer on Right waiting
-            const customerX = canvas.width * 0.78;
-            const customerY = canvas.height * 0.44;
-
-            ctx.save();
-            ctx.translate(customerX, customerY);
-
-            // Cozy yellow collar sweater
-            ctx.fillStyle = '#f97316'; 
-            ctx.beginPath();
-            ctx.moveTo(-18 * scaleFactor, 75 * scaleFactor);
-            ctx.lineTo(-10 * scaleFactor, 25 * scaleFactor);
-            ctx.lineTo(10 * scaleFactor, 25 * scaleFactor);
-            ctx.lineTo(18 * scaleFactor, 75 * scaleFactor);
-            ctx.closePath();
-            ctx.fill();
-
-            // Face
-            ctx.fillStyle = '#fed7aa';
-            ctx.beginPath();
-            ctx.arc(0, 0, 21 * scaleFactor, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Soft brown wavy hair
-            ctx.fillStyle = '#78350f';
-            ctx.beginPath();
-            ctx.arc(0, -10 * scaleFactor, 23 * scaleFactor, Math.PI, 0);
-            ctx.fill();
-
-            // Happy smile
-            ctx.strokeStyle = '#ea580c';
-            ctx.lineWidth = 3 * scaleFactor;
-            ctx.beginPath();
-            ctx.arc(0, 3 * scaleFactor, 8 * scaleFactor, 0, Math.PI);
-            ctx.stroke();
-
-            // Big curious ELA eyes
-            ctx.fillStyle = '#1e293b';
-            ctx.beginPath();
-            ctx.arc(-7 * scaleFactor, -4 * scaleFactor, 3.5 * scaleFactor, 0, Math.PI * 2);
-            ctx.arc(7 * scaleFactor, -4 * scaleFactor, 3.5 * scaleFactor, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
-        }
-
-        // Draw Coffee Cup selections
-        function drawCupOptions() {
-            draggableCups.forEach(cup => {
-                ctx.save();
-                ctx.translate(cup.x, cup.y);
-
-                // Add nice selection glow
-                ctx.shadowColor = 'rgba(15, 23, 42, 0.15)';
-                ctx.shadowBlur = 8;
-
-                // Cup Mug Body (Handled vector style)
-                ctx.fillStyle = cup.color;
-                ctx.beginPath();
-                drawRoundRect(ctx, -cup.w/2, -cup.h/3, cup.w, cup.h * 0.8, 12 * scaleFactor);
-                ctx.fill();
-
-                // Cup Side Handle
-                ctx.strokeStyle = cup.color;
-                ctx.lineWidth = 7 * scaleFactor;
-                ctx.beginPath();
-                ctx.arc(cup.w/2, 0, cup.h/5, -Math.PI/2, Math.PI/2);
-                ctx.stroke();
-
-                // White paper badge front on cup for text
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                drawRoundRect(ctx, -cup.w/2.4, -cup.h/6, cup.w/1.2, cup.h * 0.45, 6 * scaleFactor);
-                ctx.fill();
-
-                // Question word label inside white badge
-                ctx.shadowColor = 'transparent';
-                ctx.fillStyle = '#374151';
-                ctx.font = `bold ${Math.floor(14 * scaleFactor)}px "Fredoka One"`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(cup.word.toUpperCase(), 0, 0);
-
-                // Draw floating tiny food/drink emoji above cup
-                ctx.font = `${Math.floor(21 * scaleFactor)}px Arial`;
-                ctx.fillText(cup.emoji, 0, -cup.h * 0.65);
-
-                ctx.restore();
-            });
-        }
-
-        function draw() {
-            if (!ctx) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            drawCafeBackground();
-            drawCharacters();
-
-            if (gameState === 'PLAYING') {
-                drawCupOptions();
-            }
-        }
-
-        // Core animation runner ticks
-        function gameLoop() {
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Safe initializations sequencing 
-        let logoTimerStarted = false;
-        function startLogoTimer() {
-            if (logoTimerStarted) return;
-            logoTimerStarted = true;
-
-            initDOMElements(); // Run safe selector bindings
-            resizeCanvas();
-            requestAnimationFrame(gameLoop);
-
-            // Fade and hide intro splash panel exactly at 5 seconds
-            setTimeout(() => {
-                const logoScreenEl = document.getElementById("logo-screen");
-                const startScreenEl = document.getElementById("start-screen");
-                if (logoScreenEl) {
-                    logoScreenEl.classList.add("opacity-0");
-                    setTimeout(() => {
-                        logoScreenEl.classList.add("hidden");
-                        if (startScreenEl) {
-                            startScreenEl.classList.remove("hidden");
-                        }
-                        gameState = 'START';
-                    }, 1000);
-                }
-            }, 5000);
-        }
-
-        // Safeguard DOM states on boot
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            startLogoTimer();
+        setTimeout(() => {
+          currentIndex++;
+          firstTry = true;
+          isFeedbackRunning = false;
+          renderQuestion();
+        }, 1800);
+
+      } else {
+        triggerAudio('wrong');
+        document.getElementById('tray-wrong').classList.remove('hidden');
+        tray.className = "relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-solid transition-all duration-300 flex flex-col items-center justify-center p-2 bg-red-100 border-red-500 animate-shake";
+        
+        firstTry = false;
+
+        setTimeout(() => {
+          // Reset tray so child can try other options
+          resetTrayUI();
+          selectedAnswerId = null;
+          isFeedbackRunning = false;
+          
+          // Clear current highlight selection
+          const cards = document.querySelectorAll('#options-grid > div');
+          cards.forEach(c => c.classList.remove('border-[#9C6644]', 'ring-4', 'ring-[#D4A373]/30'));
+        }, 1200);
+      }
+    }
+
+    // Standard Universal Touch & Mouse pointer dragging engine
+    function setupDragging(card, optionId) {
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let originalX = 0;
+      let originalY = 0;
+
+      card.addEventListener('pointerdown', (e) => {
+        if (isFeedbackRunning) return;
+        isDragging = true;
+        card.setPointerCapture(e.pointerId);
+
+        const rect = card.getBoundingClientRect();
+        originalX = rect.left;
+        originalY = rect.top;
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        // Visual click feed
+        handleCardSelection(optionId);
+      });
+
+      card.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        card.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.05)`;
+        card.style.zIndex = "1000";
+        card.classList.add('shadow-2xl', 'opacity-90');
+      });
+
+      card.addEventListener('pointerup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        card.releasePointerCapture(e.pointerId);
+
+        // Reset elements style
+        card.style.transform = '';
+        card.style.zIndex = '';
+        card.classList.remove('shadow-2xl', 'opacity-90');
+
+        // Check drop collision with the serving tray target boundaries
+        const tray = document.getElementById('serving-tray');
+        const trayRect = tray.getBoundingClientRect();
+        
+        const pointerX = e.clientX;
+        const pointerY = e.clientY;
+
+        if (
+          pointerX >= trayRect.left &&
+          pointerX <= trayRect.right &&
+          pointerY >= trayRect.top &&
+          pointerY <= trayRect.bottom
+        ) {
+          // Drop inside tray boundary succeeded! Validate instantly
+          const q = currentQuestions[currentIndex];
+          const chosenOption = q.options.find(opt => opt.id === optionId);
+          validateAnswer(chosenOption);
         } else {
-            document.addEventListener('DOMContentLoaded', startLogoTimer);
+          // Missed drops clear selection highlights gracefully
+          triggerAudio('click');
         }
-    </script>
+      });
+    }
+
+    // Summary screen score calculator and star renderer
+    function showFinalSummary() {
+      document.getElementById('final-score').innerText = `${score} / 15`;
+      
+      const starsContainer = document.getElementById('stars-container');
+      starsContainer.innerHTML = '';
+
+      let count = 1;
+      if (score === 15) count = 3;
+      else if (score >= 11) count = 2;
+
+      for (let i = 1; i <= 3; i++) {
+        const star = document.createElement('span');
+        star.innerText = '⭐';
+        star.className = `transition-all duration-700 transform ${i <= count ? 'opacity-100 scale-110' : 'opacity-25'}`;
+        starsContainer.appendChild(star);
+      }
+
+      switchScreen('screen-summary');
+    }
+  </script>
 </body>
 </html>
