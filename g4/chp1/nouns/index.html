@@ -18,7 +18,7 @@
     overflow-x: hidden;
   }
 
-  /* Dedicated Splash Screen for Logo */
+  /* Safe Dedicated Splash Container for Logo Presentation */
   #splash-screen {
     position: fixed;
     top: 0;
@@ -274,9 +274,13 @@ const targetPrompt = document.getElementById('target-prompt');
 const scoreDisplay = document.getElementById('score-display');
 const roundDisplay = document.getElementById('round-display');
 
+// Instantiate Audios using Asset Folder System Paths
+const sndCorrect = new Audio('g4/chp1/nouns/assets/correct.mp3');
+const sndWrong = new Audio('g4/chp1/nouns/assets/wrong.mp3');
+const sndClaps = new Audio('g4/chp1/nouns/assets/freesound_community-claps-44774.mp3');
+
 const nouns = ['Common', 'Proper', 'Abstract', 'Collective', 'Concrete'];
 
-// Basic Validation Engine Dictionary 
 const nounValidationBanks = {
   common: ['boy', 'girl', 'dog', 'cat', 'house', 'car', 'tree', 'book', 'school', 'city', 'country', 'river', 'chair', 'table', 'apple', 'teacher', 'student', 'friend', 'bird', 'toy'],
   proper: ['john', 'mary', 'london', 'paris', 'monday', 'tuesday', 'january', 'february', 'christmas', 'halloween', 'india', 'america', 'nike', 'disney', 'microsoft', 'amazon', 'earth', 'mars'],
@@ -289,18 +293,15 @@ let rotation = 0;
 let score = 0;
 let currentRoundIndex = 0;
 
-// Setup game rounds dynamically (Between 10 and 12 total targets max)
+// Set Max Rounds anywhere between 10 to 12 dynamically
 const maxRounds = Math.floor(Math.random() * 3) + 10; 
 let gameSequence = [];
 
-// Build game loop sequence ensuring repetitions occur cleanly
 function generateGameSequence() {
-  // Populate first entries with each noun type at least once
   let baseList = [...nouns, ...nouns]; 
   while(baseList.length < maxRounds) {
     baseList.push(nouns[Math.floor(Math.random() * nouns.length)]);
   }
-  // Shuffle array using Fisher-Yates
   for (let i = baseList.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [baseList[i], baseList[j]] = [baseList[j], baseList[i]];
@@ -311,7 +312,6 @@ function generateGameSequence() {
 gameSequence = generateGameSequence();
 roundDisplay.textContent = `Round: 1/${maxRounds}`;
 
-// Pure CSS Splash timer handover
 setTimeout(() => {
   splashScreen.style.opacity = '0';
   setTimeout(() => {
@@ -320,7 +320,7 @@ setTimeout(() => {
   }, 500);
 }, 2500);
 
-// Pin Perfect Spin Execution
+// Centered Alignment Landings
 spinBtn.addEventListener('click', () => {
   spinBtn.disabled = true;
   nounInput.value = '';
@@ -331,11 +331,10 @@ spinBtn.addEventListener('click', () => {
   const targetNoun = gameSequence[currentRoundIndex];
   const targetIndex = nouns.indexOf(targetNoun);
   
-  // Angle calculations: 36deg centers alignment exactly inside the 72deg slices cleanly away from splitting borders
   const segmentArc = 72;
-  const targetDegrees = 360 - (targetIndex * segmentArc) - 36;
+  const targetDegrees = 360 - (targetIndex * segmentArc) - 36; // -36 centers it exactly away from edges
   
-  const totalSpins = 1440; // 4 clean full fast spins
+  const totalSpins = 1440; 
   rotation += totalSpins + ((targetDegrees - (rotation % 360) + 360) % 360);
   
   wheel.style.transition = 'transform 3.5s cubic-bezier(0.15, 0.85, 0.35, 1)';
@@ -349,7 +348,7 @@ spinBtn.addEventListener('click', () => {
   }, 3540);
 });
 
-// Self Assessment
+// Self-Assessment and Asset Audio Engine Playbacks
 submitBtn.addEventListener('click', () => {
   const userInput = nounInput.value.trim();
   if (!userInput) {
@@ -364,7 +363,6 @@ submitBtn.addEventListener('click', () => {
   
   let isCorrect = cleanWords.some(word => targetBank.includes(word));
 
-  // Cap Check rule filter explicitly for proper nouns
   if (currentNoun === 'Proper') {
     const rawWords = userInput.split(/\s+/);
     const hasCapital = rawWords.some(word => {
@@ -375,11 +373,13 @@ submitBtn.addEventListener('click', () => {
   }
 
   if (isCorrect) {
+    sndCorrect.play().catch(e => console.log("Audio play blocked"));
     feedback.className = "success-text";
     feedback.textContent = "✨ Correct! +10 Points.";
     score += 10;
     scoreDisplay.textContent = `Score: ${score}`;
   } else {
+    sndWrong.play().catch(e => console.log("Audio play blocked"));
     feedback.className = "error-text";
     feedback.textContent = `❌ That didn't seem to contain a ${currentNoun} noun.`;
   }
@@ -395,7 +395,7 @@ submitBtn.addEventListener('click', () => {
       feedback.textContent = "";
       spinBtn.disabled = false;
     } else {
-      // Definitive Termination State reached
+      sndClaps.play().catch(e => console.log("Audio play blocked"));
       targetPrompt.innerHTML = `🎉 Game Completed!<br>Final Score: ${score}/${maxRounds * 10}`;
       feedback.textContent = "";
       nounInput.style.display = "none";
@@ -408,7 +408,6 @@ submitBtn.addEventListener('click', () => {
   }, 2500);
 });
 
-// Generate structural background bubbles
 for (let i = 0; i < 15; i++) {
   const bubble = document.createElement('div');
   bubble.classList.add('bubble');
