@@ -106,7 +106,6 @@
     left: 0;
     top: 0;
     transform-origin: 50% 50%;
-    /* Clips the divs into exact 72-degree pie slices */
     clip-path: polygon(50% 50%, 50% 0%, 100% 36%, 50% 50%);
   }
 
@@ -232,7 +231,7 @@
 <body>
 
 <div id="splash-screen">
-  <img src="g4/chp1/nouns/assets/logo.png" id="logo" alt="Innovine Logo">
+  <img src="assets/logo.png" id="logo" alt="Innovine Logo">
 </div>
 
 <div id="game-container">
@@ -274,10 +273,10 @@ const targetPrompt = document.getElementById('target-prompt');
 const scoreDisplay = document.getElementById('score-display');
 const roundDisplay = document.getElementById('round-display');
 
-// Instantiate Audios using Asset Folder System Paths
-const sndCorrect = new Audio('g4/chp1/nouns/assets/correct.mp3');
-const sndWrong = new Audio('g4/chp1/nouns/assets/wrong.mp3');
-const sndClaps = new Audio('g4/chp1/nouns/assets/freesound_community-claps-44774.mp3');
+// Fixed Audio Paths relative to index.html
+const sndCorrect = new Audio('assets/correct.mp3');
+const sndWrong = new Audio('assets/wrong.mp3');
+const sndClaps = new Audio('assets/freesound_community-claps-44774.mp3');
 
 const nouns = ['Common', 'Proper', 'Abstract', 'Collective', 'Concrete'];
 
@@ -293,7 +292,6 @@ let rotation = 0;
 let score = 0;
 let currentRoundIndex = 0;
 
-// Set Max Rounds anywhere between 10 to 12 dynamically
 const maxRounds = Math.floor(Math.random() * 3) + 10; 
 let gameSequence = [];
 
@@ -320,7 +318,6 @@ setTimeout(() => {
   }, 500);
 }, 2500);
 
-// Centered Alignment Landings
 spinBtn.addEventListener('click', () => {
   spinBtn.disabled = true;
   nounInput.value = '';
@@ -332,7 +329,7 @@ spinBtn.addEventListener('click', () => {
   const targetIndex = nouns.indexOf(targetNoun);
   
   const segmentArc = 72;
-  const targetDegrees = 360 - (targetIndex * segmentArc) - 36; // -36 centers it exactly away from edges
+  const targetDegrees = 360 - (targetIndex * segmentArc) - 36; 
   
   const totalSpins = 1440; 
   rotation += totalSpins + ((targetDegrees - (rotation % 360) + 360) % 360);
@@ -348,7 +345,6 @@ spinBtn.addEventListener('click', () => {
   }, 3540);
 });
 
-// Self-Assessment and Asset Audio Engine Playbacks
 submitBtn.addEventListener('click', () => {
   const userInput = nounInput.value.trim();
   if (!userInput) {
