@@ -32,11 +32,8 @@
       animation: float 3s ease-in-out infinite;
     }
 
-    /* Absolute centering for dragging items */
+    /* Styling for dragging helper feedback */
     .dragging-active {
-      position: fixed;
-      pointer-events: none;
-      z-index: 100;
       transform: scale(1.1);
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
     }
@@ -84,9 +81,9 @@
       <div class="bg-[#FAF6F0] rounded-2xl p-4 border border-[#E6CCB2] text-left space-y-3 mb-8">
         <h2 class="font-bold text-[#4A3B32] text-base">How to Play:</h2>
         <ul class="text-sm space-y-2 text-[#5C4D3C] list-disc list-inside">
-          <li>Read the question from the cafe customer or barista.</li>
-          <li>Find the picture card that matches the question word.</li>
-          <li><strong>Drag & Drop</strong> the card onto the <strong>Serving Tray</strong>!</li>
+          <li>Look at the picture <strong>Hint</strong> and read the sentence.</li>
+          <li>Find the correct <strong>Wh-word</strong> card that fills the blank!</li>
+          <li><strong>Drag & Drop</strong> the Wh-word card onto the <strong>Serving Tray</strong>!</li>
           <li>Or, simply <strong>tap a card</strong>, then <strong>tap the tray</strong>!</li>
         </ul>
       </div>
@@ -128,7 +125,7 @@
     </div>
 
     <!-- Cozy Coffee Shop Dialog Scene -->
-    <div class="flex-1 bg-[#F5EBE0] rounded-3xl p-4 md:p-6 shadow-inner border-4 border-[#D4A373] flex flex-col justify-between min-h-[340px] relative mb-4">
+    <div class="flex-1 bg-[#F5EBE0] rounded-3xl p-4 md:p-6 shadow-inner border-4 border-[#D4A373] flex flex-col justify-between min-h-[360px] relative mb-4">
       
       <!-- Café Backdrop Menu -->
       <div class="absolute top-4 right-6 bg-[#3E2723] text-[#F5EBE0] py-2 px-4 rounded-lg hidden md:block border-2 border-[#8D6E63] transform rotate-1 shadow-md">
@@ -143,16 +140,22 @@
           <!-- Dynamic Character SVG gets loaded here -->
         </div>
 
-        <div class="flex-1 bg-white rounded-2xl rounded-tl-none p-4 shadow-md border-2 border-[#9C6644] relative min-h-[90px]">
+        <div class="flex-1 bg-white rounded-2xl rounded-tl-none p-4 shadow-md border-2 border-[#9C6644] relative min-h-[90px] flex flex-col justify-between">
           <div class="absolute -left-3 top-0 w-0 h-0 border-y-8 border-y-transparent border-r-8 border-r-white"></div>
           
-          <div id="question-word-badge" class="inline-block bg-[#9C6644] text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider mb-2">
-            Question Word: Who
-          </div>
-
-          <p id="question-text" class="text-lg md:text-xl font-bold text-[#4A3B32] tracking-wide">
-            ... is wiping down the sticky counter?
+          <!-- Sentence with empty slots -->
+          <p id="question-text" class="text-lg md:text-xl font-bold text-[#4A3B32] tracking-wide mb-2">
+            _______ is wiping down the sticky counter?
           </p>
+
+          <!-- Interactive Hint box inside bubble -->
+          <div class="flex items-center space-x-3 bg-[#FAF5F0] border border-[#E6CCB2] rounded-xl p-2 mt-1">
+            <span class="text-xs font-black uppercase text-[#9C6644] tracking-wider">Hint:</span>
+            <div id="hint-graphic-container" class="w-8 h-8 flex-shrink-0">
+              <!-- Svg will load here -->
+            </div>
+            <span id="hint-label-text" class="text-xs font-bold text-[#5C4D3C]">The Barista</span>
+          </div>
         </div>
       </div>
 
@@ -170,16 +173,16 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-6l-7 7-7-7" />
             </svg>
             <p class="text-xs md:text-sm font-black text-[#5C3D2E] text-center uppercase tracking-wider">
-              DROP THE ANSWER HERE
+              DROP CHOSEN WORD HERE
             </p>
             <p class="text-[10px] text-[#9C6644] text-center mt-1 hidden sm:block">
-              (Or tap answer, then tap here)
+              (Or tap Wh-word, then tap here)
             </p>
           </div>
 
           <div id="tray-holding" class="hidden text-center animate-bounce">
             <p class="text-xs font-bold text-[#9C6644] uppercase mb-1">READY TO SERVE!</p>
-            <span id="tray-holding-label" class="inline-block bg-[#9C6644] text-white px-4 py-1.5 rounded-full text-sm font-black shadow"></span>
+            <span id="tray-holding-label" class="inline-block bg-[#9C6644] text-white px-5 py-1.5 rounded-full text-base font-black shadow-md tracking-wide"></span>
             <p class="text-[10px] text-[#9C6644] mt-2">TAP HERE TO PLACE</p>
           </div>
 
@@ -198,16 +201,16 @@
       <div class="w-full h-3 bg-[#8D6E63] rounded-full mt-2 shadow"></div>
     </div>
 
-    <!-- Answer Choices Grid -->
+    <!-- Answer Choices Grid (Strictly Wh-Words) -->
     <div>
       <div class="text-center mb-3">
         <span class="text-xs font-extrabold uppercase tracking-widest text-[#B5835A]">
-          Choose your answer card:
+          Select the correct Question Word:
         </span>
       </div>
 
-      <div id="options-grid" class="grid grid-cols-3 gap-3 md:gap-6 relative">
-        <!-- Draggable cards loaded dynamically -->
+      <div id="options-grid" class="grid grid-cols-3 gap-3 md:gap-4 relative max-w-2xl mx-auto">
+        <!-- Rendered dynamically -->
       </div>
     </div>
 
@@ -379,27 +382,38 @@
        GAME DATA AND LOGIC SYSTEM
        ========================================== -->
   <script>
+    // 20 Questions mapped: each asks for a specific Wh-word and includes an answer Hint
     const QUESTIONS_POOL = [
-      { id: 1, character: 'barista_female', questionWord: 'Who', questionText: '... is wiping down the sticky counter?', options: [{ id: 'a', label: 'The Barista', svgType: 'barista_helper', isCorrect: true }, { id: 'b', label: 'Coffee Cup', svgType: 'coffee_cup', isCorrect: false }, { id: 'c', label: 'Evening Star', svgType: 'moon', isCorrect: false }] },
-      { id: 2, character: 'customer_boy', questionWord: 'Where', questionText: '... do we sit to enjoy our sweet treats?', options: [{ id: 'a', label: 'A Cookie', svgType: 'cookie', isCorrect: false }, { id: 'b', label: 'Cozy Table', svgType: 'table', isCorrect: true }, { id: 'c', label: 'Tomorrow', svgType: 'clock_day', isCorrect: false }] },
-      { id: 3, character: 'barista_male', questionWord: 'What', questionText: '... is hot, sweet, and inside this mug?', options: [{ id: 'a', label: 'A Spoon', svgType: 'spoon', isCorrect: false }, { id: 'b', label: 'The Baker', svgType: 'baker', isCorrect: false }, { id: 'c', fill: '#000', label: 'Hot Cocoa', svgType: 'hot_cocoa', isCorrect: true }] },
-      { id: 4, character: 'customer_girl', questionWord: 'When', questionText: '... does the cozy shop open for breakfast?', options: [{ id: 'a', label: 'Sunny Morning', svgType: 'clock_day', isCorrect: true }, { id: 'b', label: 'Pink Donut', svgType: 'donut_pink', isCorrect: false }, { id: 'c', label: 'Happy Customer', svgType: 'customer_boy_opt', isCorrect: false }] },
-      { id: 5, character: 'barista_female', questionWord: 'Why', questionText: '... are you smiling so big today?', options: [{ id: 'a', label: '"Yummy cake!"', svgType: 'yummy_cake_reason', isCorrect: true }, { id: 'b', label: 'Under Table', svgType: 'table_under', isCorrect: false }, { id: 'c', label: 'Sugar Jar', svgType: 'sugar_jar', isCorrect: false }] },
-      { id: 6, character: 'customer_boy', questionWord: 'Which', questionText: '... sweet donut has pink frosting?', options: [{ id: 'a', label: 'Choco Donut', svgType: 'donut_brown', isCorrect: false }, { id: 'b', label: 'Lemon Donut', svgType: 'donut_yellow', isCorrect: false }, { id: 'c', label: 'Pink Donut', svgType: 'donut_pink', isCorrect: true }] },
-      { id: 7, character: 'barista_male', questionWord: 'Who', questionText: '... is buying the big chocolate muffin?', options: [{ id: 'a', label: 'Paper Bag', svgType: 'paper_bag', isCorrect: false }, { id: 'b', label: 'Little Boy', svgType: 'customer_boy_opt', isCorrect: true }, { id: 'c', label: 'At 9 O\'clock', svgType: 'clock_day', isCorrect: false }] },
-      { id: 8, character: 'customer_girl', questionWord: 'Where', questionText: '... do we pay for our tasty snacks?', options: [{ id: 'a', label: 'Cash Register', svgType: 'cash_register', isCorrect: true }, { id: 'b', label: 'Hot Teapot', svgType: 'teapot', isCorrect: false }, { id: 'c', label: 'Friendly Baker', svgType: 'baker', isCorrect: false }] },
-      { id: 9, character: 'barista_female', questionWord: 'What', questionText: '... do we use to stir the warm milk?', options: [{ id: 'a', label: 'The Barista', svgType: 'barista_helper', isCorrect: false }, { id: 'b', label: 'At Night', svgType: 'moon', isCorrect: false }, { id: 'c', label: 'Metal Spoon', svgType: 'spoon', isCorrect: true }] },
-      { id: 10, character: 'customer_boy', questionWord: 'When', questionText: '... do we eat our delicious breakfast?', options: [{ id: 'a', label: '8:00 AM clock', svgType: 'clock_day', isCorrect: true }, { id: 'b', label: 'Blue Chair', svgType: 'table', isCorrect: false }, { id: 'c', label: 'Cookie Jar', svgType: 'cookie_jar', isCorrect: false }] },
-      { id: 11, character: 'barista_male', questionWord: 'Why', questionText: '... do we wear clean aprons in the shop?', options: [{ id: 'a', label: 'Strawberry Jam', svgType: 'jam_jar', isCorrect: false }, { id: 'b', label: '"Keep clean!"', svgType: 'apron_clean', isCorrect: true }, { id: 'c', label: 'Behind Counter', svgType: 'cash_register', isCorrect: false }] },
-      { id: 12, character: 'customer_girl', questionWord: 'Which', questionText: '... coffee cup is the biggest tall one?', options: [{ id: 'a', label: 'Tall Mug', svgType: 'cup_tall', isCorrect: true }, { id: 'b', label: 'Tiny Cup', svgType: 'cup_tiny', isCorrect: false }, { id: 'c', label: 'Medium Cup', svgType: 'coffee_cup', isCorrect: false }] },
-      { id: 13, character: 'barista_female', questionWord: 'Who', questionText: '... bakes the fresh blueberry muffins?', options: [{ id: 'a', label: 'Yummy Baker', svgType: 'baker', isCorrect: true }, { id: 'b', label: 'Rolling Pin', svgType: 'spoon', isCorrect: false }, { id: 'c', label: 'On the Shelf', svgType: 'table', isCorrect: false }] },
-      { id: 14, character: 'customer_boy', questionWord: 'Where', questionText: '... is the fresh, cold milk kept?', options: [{ id: 'a', label: 'In the Fridge', svgType: 'fridge', isCorrect: true }, { id: 'b', label: 'Coffee Beans', svgType: 'beans_bag', isCorrect: false }, { id: 'c', label: 'Next Tuesday', svgType: 'clock_day', isCorrect: false }] },
-      { id: 15, character: 'barista_male', questionWord: 'What', questionText: '... is cold, blended, and made of sweet fruit?', options: [{ id: 'a', label: 'The Cashier', svgType: 'barista_helper', isCorrect: false }, { id: 'b', label: 'Fruit Smoothie', svgType: 'smoothie', isCorrect: true }, { id: 'c', label: 'Yesterday', svgType: 'moon', isCorrect: false }] },
-      { id: 16, character: 'customer_girl', questionWord: 'When', questionText: '... is the quiet cafe closed and dark?', options: [{ id: 'a', label: 'Starry Night', svgType: 'moon', isCorrect: true }, { id: 'b', label: 'Choco Cookie', svgType: 'cookie', isCorrect: false }, { id: 'c', label: 'Under Chair', svgType: 'table_under', isCorrect: false }] },
-      { id: 17, character: 'barista_female', questionWord: 'Why', questionText: '... is the silver kettle whistling loud?', options: [{ id: 'a', label: '"Boiling water!"', svgType: 'boiling_water', isCorrect: true }, { id: 'b', label: 'Cold Water', svgType: 'smoothie', isCorrect: false }, { id: 'c', label: 'The Customer', svgType: 'customer_boy_opt', isCorrect: false }] },
-      { id: 18, character: 'customer_boy', questionWord: 'Which', questionText: '... plate has delicious cookies on it?', options: [{ id: 'a', label: 'Cookie Plate', svgType: 'plate_cookies', isCorrect: true }, { id: 'b', label: 'Empty Plate', svgType: 'plate_empty', isCorrect: false }, { id: 'c', label: 'Sandwich Plate', svgType: 'plate_sandwich', isCorrect: false }] },
-      { id: 19, character: 'barista_male', questionWord: 'Who', questionText: '... is waving hello at the glass door?', options: [{ id: 'a', label: 'Cheerful Girl', svgType: 'customer_girl_opt', isCorrect: true }, { id: 'b', label: 'Warm Teapot', svgType: 'teapot', isCorrect: false }, { id: 'c', label: 'By Window', svgType: 'table', isCorrect: false }] },
-      { id: 20, character: 'customer_girl', questionWord: 'Where', questionText: '... is the spilled orange juice?', options: [{ id: 'a', label: 'On the Floor', svgType: 'spill_floor', isCorrect: true }, { id: 'b', label: 'Paper Napkin', svgType: 'napkin', isCorrect: false }, { id: 'c', label: 'At 3 o\'clock', svgType: 'clock_day', isCorrect: false }] }
+      { id: 1, character: 'barista_female', correctWord: 'Who', sentenceText: '_______ is wiping down the sticky counter?', hintLabel: 'The Barista', hintSvg: 'barista_helper' },
+      { id: 2, character: 'customer_boy', correctWord: 'Where', sentenceText: '_______ do we sit to enjoy our sweet treats?', hintLabel: 'Cozy Table', hintSvg: 'table' },
+      { id: 3, character: 'barista_male', correctWord: 'What', sentenceText: '_______ is hot, sweet, and inside this mug?', hintLabel: 'Hot Cocoa', hintSvg: 'hot_cocoa' },
+      { id: 4, character: 'customer_girl', correctWord: 'When', sentenceText: '_______ does the cozy shop open for breakfast?', hintLabel: 'Sunny Morning', hintSvg: 'clock_day' },
+      { id: 5, character: 'barista_female', correctWord: 'Why', sentenceText: '_______ are you smiling so big today?', hintLabel: '"Yummy cake!"', hintSvg: 'yummy_cake_reason' },
+      { id: 6, character: 'customer_boy', correctWord: 'Which', sentenceText: '_______ sweet donut has pink frosting?', hintLabel: 'Pink Donut', hintSvg: 'donut_pink' },
+      { id: 7, character: 'barista_male', correctWord: 'Who', sentenceText: '_______ is buying the big chocolate muffin?', hintLabel: 'Little Boy', hintSvg: 'customer_boy_opt' },
+      { id: 8, character: 'customer_girl', correctWord: 'Where', sentenceText: '_______ do we pay for our tasty snacks?', hintLabel: 'Cash Register', hintSvg: 'cash_register' },
+      { id: 9, character: 'barista_female', correctWord: 'What', sentenceText: '_______ do we use to stir the warm milk?', hintLabel: 'Metal Spoon', hintSvg: 'spoon' },
+      { id: 10, character: 'customer_boy', correctWord: 'When', sentenceText: '_______ do we eat our delicious breakfast?', hintLabel: '8:00 AM', hintSvg: 'clock_day' },
+      { id: 11, character: 'barista_male', correctWord: 'Why', sentenceText: '_______ do we wear clean aprons in the shop?', hintLabel: '"Keep clean!"', hintSvg: 'apron_clean' },
+      { id: 12, character: 'customer_girl', correctWord: 'Which', sentenceText: '_______ coffee cup is the biggest tall one?', hintLabel: 'Tall Mug', hintSvg: 'cup_tall' },
+      { id: 13, character: 'barista_female', correctWord: 'Who', sentenceText: '_______ bakes the fresh blueberry muffins?', hintLabel: 'Yummy Baker', hintSvg: 'baker' },
+      { id: 14, character: 'customer_boy', correctWord: 'Where', sentenceText: '_______ is the fresh, cold milk kept?', hintLabel: 'In the Fridge', hintSvg: 'fridge' },
+      { id: 15, character: 'barista_male', correctWord: 'What', sentenceText: '_______ is cold, blended, and made of sweet fruit?', hintLabel: 'Fruit Smoothie', hintSvg: 'smoothie' },
+      { id: 16, character: 'customer_girl', correctWord: 'When', sentenceText: '_______ is the quiet cafe closed and dark?', hintLabel: 'Starry Night', hintSvg: 'moon' },
+      { id: 17, character: 'barista_female', correctWord: 'Why', sentenceText: '_______ is the silver kettle whistling loud?', hintLabel: '"Boiling water!"', hintSvg: 'boiling_water' },
+      { id: 18, character: 'customer_boy', correctWord: 'Which', sentenceText: '_______ plate has delicious cookies on it?', hintLabel: 'Cookie Plate', hintSvg: 'plate_cookies' },
+      { id: 19, character: 'barista_male', correctWord: 'Who', sentenceText: '_______ is waving hello at the glass door?', hintLabel: 'Cheerful Girl', hintSvg: 'customer_girl_opt' },
+      { id: 20, character: 'customer_girl', correctWord: 'Where', sentenceText: '_______ is the spilled orange juice?', hintLabel: 'On the Floor', hintSvg: 'spill_floor' }
+    ];
+
+    // Constant draggable options for Wh-Words
+    const WH_WORDS_OPTIONS = [
+      { id: 'who', label: 'Who' },
+      { id: 'what', label: 'What' },
+      { id: 'when', label: 'When' },
+      { id: 'where', label: 'Where' },
+      { id: 'why', label: 'Why' },
+      { id: 'which', label: 'Which' }
     ];
 
     let currentQuestions = [];
@@ -456,34 +470,35 @@
       document.getElementById('game-progress-bar').style.width = `${((currentIndex) / 15) * 100}%`;
       document.getElementById('game-score-text').innerText = score;
       
-      // Update character & dialogue balloon
+      // Update character & sentence with blank slot
       document.getElementById('character-container').innerHTML = SVGS[q.character];
-      document.getElementById('question-word-badge').innerText = `Question Word: ${q.questionWord}`;
-      document.getElementById('question-text').innerText = `"${q.questionText}"`;
+      document.getElementById('question-text').innerText = q.sentenceText;
+
+      // Load correct answer hint SVG and text label
+      document.getElementById('hint-graphic-container').innerHTML = SVGS[q.hintSvg];
+      document.getElementById('hint-label-text').innerText = q.hintLabel;
 
       // Reset tray layout
       resetTrayUI();
 
-      // Render answer option cards
+      // Render answer option cards (Always 6 Wh-words)
       const optionsGrid = document.getElementById('options-grid');
       optionsGrid.innerHTML = '';
 
-      q.options.forEach(opt => {
+      WH_WORDS_OPTIONS.forEach(opt => {
         const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl p-3 md:p-5 shadow-md border-4 border-[#E6CCB2] hover:border-[#D4A373] flex flex-col items-center justify-between text-center cursor-grab active:cursor-grabbing transition-all duration-150 transform hover:-translate-y-1 select-none touch-none relative";
+        // Compact premium cards designed to highlight Wh text elegantly
+        card.className = "bg-white rounded-2xl py-3 px-2 shadow-md border-4 border-[#E6CCB2] hover:border-[#D4A373] flex flex-col items-center justify-center text-center cursor-grab active:cursor-grabbing transition-all duration-150 transform hover:-translate-y-1 select-none touch-none relative";
         card.id = `card-${opt.id}`;
         card.setAttribute('data-id', opt.id);
         
         // Inner markup
         card.innerHTML = `
-          <div class="w-16 h-16 md:w-24 md:h-24 flex items-center justify-center pointer-events-none mb-3">
-            ${SVGS[opt.svgType] || ''}
-          </div>
-          <span class="text-sm md:text-base font-extrabold text-[#4A3B32] leading-tight pointer-events-none">
+          <span class="text-xl md:text-2xl font-black text-[#4A3B32] py-2 pointer-events-none tracking-wide">
             ${opt.label}
           </span>
-          <div class="mt-2 text-[9px] uppercase tracking-wider font-bold text-[#B5835A] pointer-events-none bg-[#FAF6F0] px-2 py-0.5 rounded-full border border-[#E6CCB2]">
-            DRAG OR TAP
+          <div class="text-[9px] uppercase tracking-wider font-extrabold text-[#B5835A] pointer-events-none bg-[#FAF6F0] px-3 py-0.5 rounded-full border border-[#E6CCB2] mt-1">
+            DRAG
           </div>
         `;
 
@@ -515,8 +530,7 @@
     }
 
     function updateTrayUIWithSelection(optionId) {
-      const q = currentQuestions[currentIndex];
-      const selectedOption = q.options.find(o => o.id === optionId);
+      const selectedOption = WH_WORDS_OPTIONS.find(o => o.id === optionId);
 
       document.getElementById('tray-idle').classList.add('hidden');
       document.getElementById('tray-correct').classList.add('hidden');
@@ -545,8 +559,7 @@
     function handleTrayClickFallback() {
       if (!selectedAnswerId || isFeedbackRunning) return;
       
-      const q = currentQuestions[currentIndex];
-      const chosenOption = q.options.find(opt => opt.id === selectedAnswerId);
+      const chosenOption = WH_WORDS_OPTIONS.find(opt => opt.id === selectedAnswerId);
       if (chosenOption) {
         validateAnswer(chosenOption);
       }
@@ -556,13 +569,18 @@
     function validateAnswer(option) {
       isFeedbackRunning = true;
       const tray = document.getElementById('serving-tray');
+      const q = currentQuestions[currentIndex];
       
       document.getElementById('tray-holding').classList.add('hidden');
 
-      if (option.isCorrect) {
+      // Compare text value (case insensitive)
+      if (option.label.toLowerCase() === q.correctWord.toLowerCase()) {
         triggerAudio('correct');
         document.getElementById('tray-correct').classList.remove('hidden');
         tray.className = "relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-solid transition-all duration-300 flex flex-col items-center justify-center p-2 bg-green-100 border-green-500 scale-105";
+
+        // Display the correct word inside the sentence instantly for positive reinforcement
+        document.getElementById('question-text').innerHTML = `<span class="text-green-600 underline font-black">${q.correctWord}</span> ${q.sentenceText.replace('_______', '')}`;
 
         if (firstTry) {
           score++;
@@ -583,7 +601,6 @@
         firstTry = false;
 
         setTimeout(() => {
-          // Reset tray so child can try other options
           resetTrayUI();
           selectedAnswerId = null;
           isFeedbackRunning = false;
@@ -653,8 +670,7 @@
           pointerY <= trayRect.bottom
         ) {
           // Drop inside tray boundary succeeded! Validate instantly
-          const q = currentQuestions[currentIndex];
-          const chosenOption = q.options.find(opt => opt.id === optionId);
+          const chosenOption = WH_WORDS_OPTIONS.find(opt => opt.id === optionId);
           validateAnswer(chosenOption);
         } else {
           // Missed drops clear selection highlights gracefully
