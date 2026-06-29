@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cozy Room Designer: Joining Words</title>
+    <!-- Tailwind CSS for modern premium layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for playful, friendly typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #fef3c7; /* Bright Sunny Amber-100 base */
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .playful-font {
+            font-family: 'Fredoka One', cursive;
+        }
+        /* Custom scrollbar styling for selections scroll */
+        ::-webkit-scrollbar {
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        /* Pulse glow for items to let kids know they can drag them */
+        @keyframes pulse-drag {
+            0%, 100% { box-shadow: 0 0 5px rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 15px rgba(245, 158, 11, 1); }
+        }
+        .drag-guide {
+            animation: pulse-drag 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-6 text-slate-800">
+
+    <!-- Main Game Container -->
+    <div class="relative w-full max-w-5xl bg-amber-50 rounded-3xl border-4 border-amber-400 shadow-2xl shadow-amber-900/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
+        
+        <!-- Header / Stats Dashboard HUD (Visible during gameplay) -->
+        <header id="game-header" class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 px-4 py-3 border-b-2 border-amber-400 flex flex-wrap justify-between items-center gap-2 z-10 hidden">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-bounce">🏠</span>
+                <h1 class="text-lg md:text-xl font-extrabold tracking-wide text-amber-950 playful-font">
+                    COZY ROOM DESIGNER
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-3 text-xs md:text-sm font-semibold text-slate-900">
+                <div class="bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
+                    Task: <span id="question-index" class="text-amber-700 font-bold">1/15</span>
+                </div>
+                <div class="bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
+                    Score: <span id="score" class="text-emerald-600 font-bold">0</span>
+                </div>
+                <div class="bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
+                    Streak: <span id="streak" class="text-blue-600 font-bold">🔥 0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Brand Splash Page (ONLY LOGO, occupies maximum screen space, runs for 5 seconds) -->
+        <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+            <div class="w-full h-full flex flex-col items-center justify-center space-y-6">
+                <!-- Large scaled Logo image with reliable typography backup -->
+                <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="w-4/5 max-w-lg h-auto max-h-[60vh] object-contain transition-all duration-300" onerror="this.style.display='none'; document.getElementById('logo-fallback-big').style.display='block';">
+                <!-- Fallback premium layout for local directory tests -->
+                <div id="logo-fallback-big" class="hidden text-center">
+                    <div class="text-6xl md:text-8xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-yellow-600 playful-font">INNOVINE</div>
+                    <div class="text-lg md:text-2xl text-slate-500 uppercase tracking-widest font-semibold mt-1">Learning Games</div>
+                </div>
+                <div class="pt-10 flex flex-col items-center space-y-3">
+                    <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-slate-400 font-medium text-sm tracking-wider uppercase">Loading Dream Room...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Page: Start Menu Splash Screen -->
+        <div id="start-screen" class="absolute inset-0 bg-gradient-to-br from-sky-100 via-amber-50 to-orange-50 flex flex-col items-center justify-center p-6 text-center z-25 hidden">
+            <div class="max-w-lg bg-white/95 p-8 rounded-3xl border-2 border-amber-300 backdrop-blur-md shadow-2xl">
+                <div class="text-7xl mb-4">🛋️✨</div>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-amber-600 mb-2 playful-font tracking-wide">
+                    COZY ROOM DESIGNER
+                </h1>
+                <h2 class="text-lg text-slate-600 font-semibold mb-4">Grade 1: Joining Words (And / But)</h2>
+                <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+                    Build and decorate your dream room! Every correct joining word gives you a beautiful accessory. Choose your favorite look and drag it around the room to customize your home!
+                </p>
+                <button id="start-btn" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black py-4 px-6 rounded-2xl shadow-lg shadow-amber-400/20 transform transition active:scale-95 text-xl playful-font">
+                    Enter the Dream Room
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Gameplay Split-Screen Area (Canvas Left/Top, Question Right/Bottom) -->
+        <div id="gameplay-area" class="flex-grow flex flex-col lg:flex-row h-[70vh] md:h-[550px] relative hidden">
+            
+            <!-- Left Side: Cozy Room Canvas (Preserves drag coordinate scaling) -->
+            <div class="w-full lg:w-3/5 h-1/2 lg:h-full relative bg-sky-50 border-r-0 lg:border-r-2 lg:border-b-0 border-b-2 border-amber-200 flex items-center justify-center">
+                <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+                <!-- Small indicator telling kids they can adjust items -->
+                <div id="drag-hint" class="absolute bottom-3 left-3 bg-white/90 px-3 py-1.5 rounded-lg border border-amber-300 text-xs text-amber-800 pointer-events-none flex items-center gap-1.5 opacity-0 transition-opacity">
+                    <span>✨ Touch & Drag items to move them!</span>
+                </div>
+            </div>
+
+            <!-- Right Side: Interaction Command Center (Grammar panel & Decor Unlocks) -->
+            <div class="w-full lg:w-2/5 h-1/2 lg:h-full bg-amber-50/50 flex flex-col justify-between p-4 md:p-6 space-y-4">
+                
+                <!-- Active Question Section -->
+                <div id="question-section" class="flex-grow flex flex-col justify-center space-y-4">
+                    <div class="text-center">
+                        <span class="text-xs uppercase tracking-widest text-amber-600 font-bold">Pick the Correct Word!</span>
+                        <!-- Sentence display -->
+                        <h3 id="question-text" class="text-lg md:text-2xl font-bold tracking-normal leading-relaxed text-slate-800 mt-2 p-4 bg-white rounded-2xl border border-amber-200 playful-font">
+                            Loading sentence...
+                        </h3>
+                    </div>
+
+                    <!-- Multiple Choice Action Buttons -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="handleAnswer('and')" class="bg-gradient-to-b from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-white font-extrabold py-5 px-4 rounded-2xl shadow-lg border-2 border-sky-300/40 text-xl tracking-wider active:scale-95 transition playful-font">
+                            AND
+                        </button>
+                        <button onclick="handleAnswer('but')" class="bg-gradient-to-b from-orange-400 to-amber-500 hover:from-orange-300 hover:to-orange-400 text-white font-extrabold py-5 px-4 rounded-2xl shadow-lg border-2 border-orange-300/40 text-xl tracking-wider active:scale-95 transition playful-font">
+                            BUT
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Decor Style Chooser (Appears after correctly answering a question) -->
+                <div id="decor-selector-panel" class="hidden flex flex-col justify-center space-y-3 animate-fade-in">
+                    <div class="text-center">
+                        <span class="text-xs uppercase tracking-widest text-emerald-600 font-bold block">✨ MAGICAL UNLOCK!</span>
+                        <h4 id="decor-theme-title" class="text-md md:text-lg font-bold text-amber-800 mt-1">Select a Rug style:</h4>
+                    </div>
+
+                    <!-- Style choices -->
+                    <div class="grid grid-cols-3 gap-2 py-2 overflow-x-auto">
+                        <button id="choice-btn-0" onclick="selectStyle(0)" class="bg-white hover:bg-slate-50 border-2 border-amber-200 rounded-xl p-3 flex flex-col items-center space-y-2 active:scale-95 transition">
+                            <span id="choice-emoji-0" class="text-3xl">⭐</span>
+                            <span id="choice-name-0" class="text-xs font-semibold text-slate-700 text-center truncate w-full">Star Style</span>
+                        </button>
+                        <button id="choice-btn-1" onclick="selectStyle(1)" class="bg-white hover:bg-slate-50 border-2 border-amber-200 rounded-xl p-3 flex flex-col items-center space-y-2 active:scale-95 transition">
+                            <span id="choice-emoji-1" class="text-3xl">🐻</span>
+                            <span id="choice-name-1" class="text-xs font-semibold text-slate-700 text-center truncate w-full">Bear Style</span>
+                        </button>
+                        <button id="choice-btn-2" onclick="selectStyle(2)" class="bg-white hover:bg-slate-50 border-2 border-amber-200 rounded-xl p-3 flex flex-col items-center space-y-2 active:scale-95 transition">
+                            <span id="choice-emoji-2" class="text-3xl">🌈</span>
+                            <span id="choice-name-2" class="text-xs font-semibold text-slate-700 text-center truncate w-full">Rainbow Style</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Session Victory / Room Completed Overlay -->
+        <div id="gameover-screen" class="absolute inset-0 bg-amber-50/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden">
+            <div class="max-w-md bg-white p-8 rounded-3xl border-4 border-amber-400 shadow-2xl">
+                <div class="text-7xl mb-4">🏰🎉</div>
+                <h2 class="text-3xl font-extrabold text-amber-600 mb-1 playful-font">Dream Room Complete!</h2>
+                <p class="text-slate-600 text-sm mb-6">Your customized room is absolutely spectacular!</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6 text-slate-800">
+                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                        <span class="block text-xs text-slate-500 font-bold uppercase">Perfect Score</span>
+                        <span id="final-score" class="text-2xl font-black text-amber-600">0</span>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                        <span class="block text-xs text-slate-500 font-bold uppercase">Accuracy</span>
+                        <span id="final-accuracy" class="text-2xl font-black text-emerald-600">0%</span>
+                    </div>
+                </div>
+
+                <p id="performance-message" class="text-amber-700 italic mb-6 font-semibold"></p>
+
+                <div class="space-y-3">
+                    <button id="show-room-btn" onclick="viewRoomOnly()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-xl border border-slate-200">
+                        👀 View My Room
+                    </button>
+                    <button id="restart-btn" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black py-4 px-6 rounded-xl shadow-lg shadow-amber-400/20 text-lg playful-font">
+                        Design Another Room
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Room Only Overlay Controls (Allows clicking to review designed room after completion) -->
+        <button id="back-to-results-btn" onclick="exitViewRoomOnly()" class="absolute bottom-6 right-6 bg-white/95 border-2 border-amber-400 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 shadow-lg text-amber-600 z-40 hidden">
+            ⬅ Show Score Details
+        </button>
+
+        <!-- Interactive HUD Action Alert Banner -->
+        <div id="hit-notification" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
+            <div id="hud-text" class="text-5xl md:text-7xl font-black tracking-wider drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] text-center playful-font">
+                CORRECT!
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Gameplay Script -->
+    <script>
+        // Safety Polyfill for older tablets, iPads, and legacy browsers (roundRect support was added recently)
+        if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+                if (typeof r === 'undefined') r = 0;
+                if (Array.isArray(r)) {
+                    r = r[0] || 0; // Simple fallback for array of radii
+                }
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                return this;
+            };
+        }
+
+        // Delayed initialization for audio assets to ensure instantaneous page loading (no blocking requests)
+        let audioAssets = {};
+
+        // Web Audio API Synthesizer fallback engine
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+                // Instantiate HTML5 audio inside interaction trigger to avoid blocking render thread on slow networks
+                try {
+                    audioAssets.correct = new Audio('assets/correct.mp3');
+                    audioAssets.wrong = new Audio('assets/wrong.mp3');
+                    audioAssets.clapping = new Audio('assets/clapping.mp3');
+                    
+                    for (const key in audioAssets) {
+                        audioAssets[key].load();
+                    }
+                } catch(e) {
+                    console.log("Audio files initialization skipped or deferred.");
+                }
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (type === 'correct') {
+                if (audioAssets.correct) {
+                    audioAssets.correct.play().catch(() => playSynthFallback('correct'));
+                } else {
+                    playSynthFallback('correct');
+                }
+            } else if (type === 'wrong') {
+                if (audioAssets.wrong) {
+                    audioAssets.wrong.play().catch(() => playSynthFallback('wrong'));
+                } else {
+                    playSynthFallback('wrong');
+                }
+            } else if (type === 'win') {
+                if (audioAssets.clapping) {
+                    audioAssets.clapping.play().catch(() => {
+                        if (audioAssets.correct) {
+                            audioAssets.correct.play().catch(() => playSynthFallback('win'));
+                        } else {
+                            playSynthFallback('win');
+                        }
+                    });
+                } else {
+                    playSynthFallback('win');
+                }
+            }
+        }
+
+        // Web Audio Synthesizer fallback if file structures fail
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(90, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'win') {
+                    const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+                        noteGain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.08);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.08 + 0.3);
+                        noteOsc.start(audioCtx.currentTime + idx * 0.08);
+                        noteOsc.stop(audioCtx.currentTime + idx * 0.08 + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        // 20 Simple Grade 1 appropriate questions covering AND & BUT
+        const allQuestions = [
+            { question: "I like apples ___ I like sweet bananas.", answer: "and" },
+            { question: "The sun is warm ___ the wind is very cold.", answer: "but" },
+            { question: "I have a green ball ___ a red bat.", answer: "and" },
+            { question: "He wanted to play ___ it was raining outside.", answer: "but" },
+            { question: "She can sing ___ she can dance too.", answer: "and" },
+            { question: "I ran fast ___ I missed the school bus.", answer: "but" },
+            { question: "We went to the zoo ___ saw a huge elephant.", answer: "and" },
+            { question: "I want to eat cookies ___ the jar is empty.", answer: "but" },
+            { question: "The pup is small ___ he is very loud.", answer: "but" },
+            { question: "I washed my hands ___ ate my lunch.", answer: "and" },
+            { question: "My dog can bark ___ run very fast.", answer: "and" },
+            { question: "The cake looks yummy ___ I am too full.", answer: "but" },
+            { question: "I have a toy car ___ a blue train.", answer: "and" },
+            { question: "She wore a yellow hat ___ a warm coat.", answer: "and" },
+            { question: "I looked for my pen ___ I could not find it.", answer: "but" },
+            { question: "He likes chocolate ___ his sister likes vanilla.", answer: "but" },
+            { question: "The sky is blue ___ there are no clouds.", answer: "and" },
+            { question: "I want to jump ___ the trampoline is wet.", answer: "but" },
+            { question: "The boy fell down ___ he did not cry.", answer: "but" },
+            { question: "We sat by the window ___ read a storybook.", answer: "and" }
+        ];
+
+        // 15 Decoration steps matching correct answers
+        const decorationSteps = [
+            {
+                theme: "Choose a cozy Rug style:",
+                options: [
+                    { name: "Fluffy Rug", emoji: "🧶", drawShape: "rug-fluffy", color: "#fb7185" },
+                    { name: "Star Rug", emoji: "⭐", drawShape: "rug-star", color: "#fde047" },
+                    { name: "Rainbow Rug", emoji: "🌈", drawShape: "rug-rainbow", color: "#38bdf8" }
+                ]
+            },
+            {
+                theme: "Pick a wooden Table:",
+                options: [
+                    { name: "Study Desk", emoji: "🪵", drawShape: "table-desk", color: "#b45309" },
+                    { name: "Pink Desk", emoji: "🌸", drawShape: "table-pink", color: "#f472b6" },
+                    { name: "Modern Table", emoji: "📐", drawShape: "table-modern", color: "#64748b" }
+                ]
+            },
+            {
+                theme: "Select a Cozy Chair:",
+                options: [
+                    { name: "Beanbag Chair", emoji: "🛋️", drawShape: "chair-bean", color: "#ec4899" },
+                    { name: "Rocking Chair", emoji: "🪵", drawShape: "chair-rocker", color: "#854d0e" },
+                    { name: "Gamer Chair", emoji: "🎮", drawShape: "chair-gaming", color: "#06b6d4" }
+                ]
+            },
+            {
+                theme: "Select a Table Lamp:",
+                options: [
+                    { name: "Mushroom Lamp", emoji: "🍄", drawShape: "lamp-mushroom", color: "#ef4444" },
+                    { name: "Star Lamp", emoji: "✨", drawShape: "lamp-star", color: "#fbbf24" },
+                    { name: "Flower Lamp", emoji: "🌷", drawShape: "lamp-flower", color: "#c084fc" }
+                ]
+            },
+            {
+                theme: "Hang a beautiful Painting:",
+                options: [
+                    { name: "Space Painting", emoji: "🚀", drawShape: "paint-space", color: "#1e1b4b" },
+                    { name: "Kitten Sketch", emoji: "🐱", drawShape: "paint-cat", color: "#fed7aa" },
+                    { name: "Rainbow Canvas", emoji: "🎨", drawShape: "paint-rainbow", color: "#f43f5e" }
+                ]
+            },
+            {
+                theme: "Add window Streamers:",
+                options: [
+                    { name: "Star Streamers", emoji: "✨", drawShape: "stream-star", color: "#eab308" },
+                    { name: "Heart Garlands", emoji: "💖", drawShape: "stream-heart", color: "#ec4899" },
+                    { name: "Paper Cranes", emoji: "🏮", drawShape: "stream-crane", color: "#06b6d4" }
+                ]
+            },
+            {
+                theme: "Choose an Indoor Plant:",
+                options: [
+                    { name: "Tall Monstera", emoji: "🌿", drawShape: "plant-monstera", color: "#059669" },
+                    { name: "Potted Cactus", emoji: "🌵", drawShape: "plant-cactus", color: "#10b981" },
+                    { name: "Hanging Ivy", emoji: "🌱", drawShape: "plant-ivy", color: "#34d399" }
+                ]
+            },
+            {
+                theme: "Unlock a Toy Box style:",
+                options: [
+                    { name: "Lego Chest", emoji: "🧱", drawShape: "box-lego", color: "#dc2626" },
+                    { name: "Wooden Trunk", emoji: "📦", drawShape: "box-wood", color: "#a16207" },
+                    { name: "Wicker Basket", emoji: "🧺", drawShape: "box-wicker", color: "#d97706" }
+                ]
+            },
+            {
+                theme: "Choose a Plush Toy:",
+                options: [
+                    { name: "Teddy Bear", emoji: "🧸", drawShape: "toy-teddy", color: "#b45309" },
+                    { name: "Baby Dino", emoji: "🦖", drawShape: "toy-dino", color: "#22c55e" },
+                    { name: "Smiley Star", emoji: "🌟", drawShape: "toy-star", color: "#eab308" }
+                ]
+            },
+            {
+                theme: "Place a Cozy Cushion:",
+                options: [
+                    { name: "Heart Cushion", emoji: "❤️", drawShape: "cushion-heart", color: "#f43f5e" },
+                    { name: "Cloud Cushion", emoji: "☁️", drawShape: "cushion-cloud", color: "#e2e8f0" },
+                    { name: "Happy Face", emoji: "🙂", drawShape: "cushion-smile", color: "#facc15" }
+                ]
+            },
+            {
+                theme: "Put up a cute Wall Clock:",
+                options: [
+                    { name: "Kitty Clock", emoji: "🐱", drawShape: "clock-cat", color: "#64748b" },
+                    { name: "Sun Clock", emoji: "☀️", drawShape: "clock-sun", color: "#f97316" },
+                    { name: "Balloon Clock", emoji: "🎈", drawShape: "clock-balloon", color: "#a855f7" }
+                ]
+            },
+            {
+                theme: "Add a little Bookshelf:",
+                options: [
+                    { name: "Hanging Shelf", emoji: "📚", drawShape: "shelf-hang", color: "#78350f" },
+                    { name: "Ladder Shelf", emoji: "🪜", drawShape: "shelf-ladder", color: "#854d0e" },
+                    { name: "Cabinet Stand", emoji: "🗄️", drawShape: "shelf-cabinet", color: "#b45309" }
+                ]
+            },
+            {
+                theme: "Pick a cozy Pet Bed:",
+                options: [
+                    { name: "Sleeping Pup", emoji: "🐶", drawShape: "pet-pup", color: "#e2e8f0" },
+                    { name: "Sleeping Cat", emoji: "🐱", drawShape: "pet-cat", color: "#fcd34d" },
+                    { name: "Sleeping Bunny", emoji: "🐰", drawShape: "pet-bunny", color: "#ffffff" }
+                ]
+            },
+            {
+                theme: "Hang some Fairy Lights:",
+                options: [
+                    { name: "Warm Globes", emoji: "💡", drawShape: "lights-globes", color: "#fef08a" },
+                    { name: "Magic Stars", emoji: "✨", drawShape: "lights-stars", color: "#fbbf24" },
+                    { name: "Neon Lines", emoji: "⚡", drawShape: "lights-neon", color: "#ec4899" }
+                ]
+            },
+            {
+                theme: "Finally, add an Accessory:",
+                options: [
+                    { name: "Acoustic Guitar", emoji: "🎸", drawShape: "acc-guitar", color: "#d97706" },
+                    { name: "Painting Easel", emoji: "🎨", drawShape: "acc-easel", color: "#b45309" },
+                    { name: "Dream Telescope", emoji: "🔭", drawShape: "acc-telescope", color: "#1e3a8a" }
+                ]
+            }
+        ];
+
+        let sessionQuestions = [];
+        let currentQuestionIndex = 0;
+
+        // Canvas Settings
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // UI HTML Selectors
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn"); // Declared missing selector variable
+        const gameplayArea = document.getElementById("gameplay-area");
+        const gameHeader = document.getElementById("game-header");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const backToResultsBtn = document.getElementById("back-to-results-btn");
+        const dragHint = document.getElementById("drag-hint");
+
+        const questionSection = document.getElementById("question-section");
+        const decorSelectorPanel = document.getElementById("decor-selector-panel");
+        const decorThemeTitle = document.getElementById("decor-theme-title");
+
+        // Stats Selectors
+        const scoreEl = document.getElementById("score");
+        const streakEl = document.getElementById("streak");
+        const questionIndexEl = document.getElementById("question-index");
+        const finalScoreEl = document.getElementById("final-score");
+        const finalAccuracyEl = document.getElementById("final-accuracy");
+        const performanceMessageEl = document.getElementById("performance-message");
+        const questionTextEl = document.getElementById("question-text");
+
+        // State Machine variables
+        let score = 0;
+        let streak = 0;
+        let correctAnswers = 0;
+        let activeCorrectAnswer = "";
+
+        // Placed items in dream room (Scale-proof with Relative Coordinates)
+        let roomDecorations = [];
+        let itemToPlace = null; // Staged item during selection
+
+        // Responsive rendering scale factors
+        let scaleFactor = 1;
+
+        // Drag and drop tracking coordinates
+        let selectedItem = null;
+        let dragOffset = { x: 0, y: 0 };
+
+        function prepareSession() {
+            // Shuffle and slice exactly 15 questions
+            const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+            sessionQuestions = shuffled.slice(0, 15);
+            currentQuestionIndex = 0;
+            roomDecorations = [];
+        }
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            scaleFactor = Math.min(1, canvas.width / 600);
+        }
+
+        function initGame() {
+            score = 0;
+            streak = 0;
+            correctAnswers = 0;
+            roomDecorations = [];
+            itemToPlace = null;
+
+            scoreEl.textContent = score;
+            streakEl.textContent = "🔥 " + streak;
+
+            prepareSession();
+            loadQuestion();
+            resizeCanvas();
+        }
+
+        function loadQuestion() {
+            // Un-staged choices hide style selection panel
+            decorSelectorPanel.classList.add("hidden");
+            questionSection.classList.remove("hidden");
+
+            if (currentQuestionIndex >= 15) {
+                endGameSession();
+                return;
+            }
+
+            questionIndexEl.textContent = `${currentQuestionIndex + 1}/15`;
+            const currentQ = sessionQuestions[currentQuestionIndex];
+            activeCorrectAnswer = currentQ.answer;
+
+            // Simple sentences with highlighted blank box
+            questionTextEl.innerHTML = currentQ.question.replace("___", "<span class='text-amber-600 underline font-black decoration-2 decoration-wavy'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+        }
+
+        function handleAnswer(userWord) {
+            const isCorrect = (userWord === activeCorrectAnswer);
+            
+            if (isCorrect) {
+                score += 10 + Math.floor(streak / 3) * 5;
+                streak++;
+                correctAnswers++;
+                playSound('correct');
+                triggerHUDNotification("EXCELLENT!", true);
+
+                // Prepare unlocked options style choice panel
+                setTimeout(revealDecorSelector, 1200);
+            } else {
+                streak = 0;
+                playSound('wrong');
+                triggerHUDNotification("TRY AGAIN!", false);
+
+                // For Grade 1 encouragement, we move to style select to still construct the room!
+                setTimeout(revealDecorSelector, 1200);
+            }
+
+            scoreEl.textContent = score;
+            streakEl.textContent = "🔥 " + streak;
+        }
+
+        function triggerHUDNotification(text, isCorrect) {
+            const hitNotification = document.getElementById("hit-notification");
+            const hudText = document.getElementById("hud-text");
+            hudText.textContent = text;
+            
+            if (isCorrect) {
+                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-emerald-600 drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] text-center playful-font";
+            } else {
+                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-rose-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] text-center playful-font";
+            }
+
+            hitNotification.style.opacity = "1";
+            hitNotification.style.transform = "translate(-50%, -50%) scale(1.1)";
+            
+            setTimeout(() => {
+                hitNotification.style.opacity = "0";
+                hitNotification.style.transform = "translate(-50%, -50%) scale(0.75)";
+            }, 1200);
+        }
+
+        // Show choice selector panel
+        function revealDecorSelector() {
+            questionSection.classList.add("hidden");
+            decorSelectorPanel.classList.remove("hidden");
+
+            const currentStep = decorationSteps[currentQuestionIndex];
+            decorThemeTitle.textContent = currentStep.theme;
+
+            // Load values to 3 style selection cards
+            for (let i = 0; i < 3; i++) {
+                const choice = currentStep.options[i];
+                document.getElementById(`choice-emoji-${i}`).textContent = choice.emoji;
+                document.getElementById(`choice-name-${i}`).textContent = choice.name;
+                
+                // Store styles on button parameters
+                const btn = document.getElementById(`choice-btn-${i}`);
+                btn.dataset.styleId = i;
+            }
+        }
+
+        function selectStyle(idx) {
+            const currentStep = decorationSteps[currentQuestionIndex];
+            const choice = currentStep.options[idx];
+
+            // Set up relative coordinates to ensure it scales perfectly on resize!
+            // Spawn items centered in the room so the player can drag it
+            const relX = 0.5;
+            const relY = 0.65;
+
+            // Specific default size bounds for different categories
+            let itemW = 80;
+            let itemH = 80;
+
+            if (choice.drawShape.startsWith("rug")) { itemW = 150; itemH = 60; }
+            else if (choice.drawShape.startsWith("table")) { itemW = 100; itemH = 75; }
+            else if (choice.drawShape.startsWith("chair")) { itemW = 80; itemH = 80; }
+            else if (choice.drawShape.startsWith("stream")) { itemW = 280; itemH = 40; }
+            else if (choice.drawShape.startsWith("paint")) { itemW = 75; itemH = 65; }
+
+            const newDecor = {
+                id: Date.now(),
+                label: choice.name,
+                emoji: choice.emoji,
+                drawShape: choice.drawShape,
+                color: choice.color,
+                relX: relX,
+                relY: relY,
+                width: itemW,
+                height: itemH,
+                isPlaced: true
+            };
+
+            roomDecorations.push(newDecor);
+
+            // Shift timeline to next question
+            currentQuestionIndex++;
+            loadQuestion();
+
+            // Show short drag hint to guide Grade 1 students
+            dragHint.style.opacity = "1";
+            setTimeout(() => {
+                dragHint.style.opacity = "0";
+            }, 3500);
+        }
+
+        function endGameSession() {
+            gameHeader.classList.add("hidden");
+            gameplayArea.classList.add("hidden");
+            gameoverScreen.classList.remove("hidden");
+            playSound('win');
+
+            finalScoreEl.textContent = score;
+            const accuracy = Math.round((correctAnswers / 15) * 100);
+            finalAccuracyEl.textContent = accuracy + "%";
+
+            let msg = "";
+            if (accuracy >= 85) {
+                msg = "🏆 Legendary Architect! You are an expert joining-word designer!";
+            } else if (accuracy >= 65) {
+                msg = "🥈 Creative Star! Your room looks absolutely stunning!";
+            } else {
+                msg = "🛋️ Cozy Builder! Practice makes perfect. Try again to design a new space!";
+            }
+            performanceMessageEl.textContent = msg;
+        }
+
+        // View Room Only feature hooks
+        function viewRoomOnly() {
+            gameoverScreen.classList.add("hidden");
+            gameplayArea.classList.remove("hidden");
+            backToResultsBtn.classList.remove("hidden");
+            
+            // Hide control panel so canvas occupies full side view
+            document.getElementById("decor-selector-panel").classList.add("hidden");
+            document.getElementById("question-section").classList.add("hidden");
+        }
+
+        function exitViewRoomOnly() {
+            backToResultsBtn.classList.add("hidden");
+            gameplayArea.classList.add("hidden");
+            gameoverScreen.classList.remove("hidden");
+        }
+
+        // --- Drag & Drop Mechanics Supporting Multi-touch & Mouse Devices ---
+        function getCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            // Handle both touch & mouse coordinate calculations
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function handlePointerDown(e) {
+            initAudio(); // Initialize audio context on touch action
+            const coords = getCoordinates(e);
+
+            // Search placed list backwards (top-drawn elements are clicked first)
+            for (let i = roomDecorations.length - 1; i >= 0; i--) {
+                const item = roomDecorations[i];
+                
+                // Convert relative back to viewport pixel coordinates
+                const itemX = item.relX * canvas.width;
+                const itemY = item.relY * canvas.height;
+                const itemW = item.width * scaleFactor;
+                const itemH = item.height * scaleFactor;
+
+                // Collision detection box bounding checks
+                if (coords.x >= itemX - itemW/2 && coords.x <= itemX + itemW/2 &&
+                    coords.y >= itemY - itemH/2 && coords.y <= itemY + itemH/2) {
+                    
+                    selectedItem = item;
+                    // Store clicked offset to prevent item from centering jumps
+                    dragOffset.x = coords.x - itemX;
+                    dragOffset.y = coords.y - itemY;
+                    break;
+                }
+            }
+        }
+
+        // Pointer moves and records scaled relative coordinates
+        function handlePointerMove(e) {
+            if (!selectedItem) return;
+            const coords = getCoordinates(e);
+
+            // Compute ideal coordinates
+            let newX = coords.x - dragOffset.x;
+            let newY = coords.y - dragOffset.y;
+
+            // Restrict bounds so items don't float completely out of Cozy Room
+            newX = Math.max(30 * scaleFactor, Math.min(canvas.width - 30 * scaleFactor, newX));
+            newY = Math.max(40 * scaleFactor, Math.min(canvas.height - 40 * scaleFactor, newY));
+
+            // Record as scalable relative coordinates
+            selectedItem.relX = newX / canvas.width;
+            selectedItem.relY = newY / canvas.height;
+        }
+
+        function handlePointerUp() {
+            selectedItem = null;
+        }
+
+        // Binds
+        canvas.addEventListener('mousedown', handlePointerDown);
+        canvas.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+
+        canvas.addEventListener('touchstart', (e) => { handlePointerDown(e); e.preventDefault(); }, {passive: false});
+        canvas.addEventListener('touchmove', (e) => { handlePointerMove(e); e.preventDefault(); }, {passive: false});
+        canvas.addEventListener('touchend', handlePointerUp);
+
+
+        // --- Beautiful Isometric / 2D Cozy Room Vector Canvas Drawers ---
+        function drawRoomBackground() {
+            // Sunlit Sky background
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGrad.addColorStop(0, '#bae6fd'); // Sky blue
+            skyGrad.addColorStop(1, '#fef08a'); // Warm horizon
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Golden sun beams
+            ctx.fillStyle = 'rgba(253, 224, 71, 0.25)';
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2 + 100 * scaleFactor, canvas.height);
+            ctx.lineTo(canvas.width / 2 - 100 * scaleFactor, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // Cozy Room Walls base geometry outline (Pastel lavender/warm cream backdrop)
+            const wallHeight = canvas.height * 0.72;
+
+            ctx.fillStyle = '#fffdf5'; // Cheery warm cream walls
+            ctx.fillRect(0, 0, canvas.width, wallHeight);
+
+            // Draw a big sunny window centered on the wall looking out to hills
+            const winW = 180 * scaleFactor;
+            const winH = 110 * scaleFactor;
+            const winX = canvas.width / 2 - winW / 2;
+            const winY = 60 * scaleFactor;
+
+            // Draw green grassy hills through window
+            ctx.save();
+            // Clip context inside window frame
+            ctx.beginPath();
+            ctx.rect(winX, winY, winW, winH);
+            ctx.clip();
+
+            // Window scenery
+            ctx.fillStyle = '#7dd3fc'; // Sky
+            ctx.fillRect(winX, winY, winW, winH);
+            ctx.fillStyle = '#fde047'; // Distant sun
+            ctx.beginPath();
+            ctx.arc(winX + winW/2 - 20, winY + 20, 20, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.fillStyle = '#4ade80'; // Green lawn hills
+            ctx.beginPath();
+            ctx.arc(winX + 40, winY + winH + 10, 50, 0, Math.PI*2);
+            ctx.arc(winX + winW - 20, winY + winH + 20, 70, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.restore();
+
+            // Window glass pane white framework lines
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 4 * scaleFactor;
+            ctx.strokeRect(winX, winY, winW, winH);
+            
+            // Panes divider cross
+            ctx.beginPath();
+            ctx.moveTo(winX + winW/2, winY);
+            ctx.lineTo(winX + winW/2, winY + winH);
+            ctx.moveTo(winX, winY + winH/2);
+            ctx.lineTo(winX + winW, winY + winH/2);
+            ctx.stroke();
+
+            // Room Baseboards divider strip
+            ctx.fillStyle = '#fef3c7';
+            ctx.fillRect(0, wallHeight - 12 * scaleFactor, canvas.width, 12 * scaleFactor);
+
+            // Rich warm oak floor plank graphics
+            ctx.fillStyle = '#fbbf24'; // Cheerful light oak floor
+            const floorHeight = canvas.height - wallHeight;
+            ctx.fillRect(0, wallHeight, canvas.width, floorHeight);
+
+            // Draw clean vertical wood planks lines
+            ctx.strokeStyle = '#d97706'; // warm amber lines
+            ctx.globalAlpha = 0.12;
+            ctx.lineWidth = 2 * scaleFactor;
+            const plankWidth = 50 * scaleFactor;
+            for (let x = 0; x < canvas.width; x += plankWidth) {
+                ctx.beginPath();
+                ctx.moveTo(x, wallHeight);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1.0;
+        }
+
+        // --- Custom high-performance scalable vector drawers for unlocked furniture ---
+        function drawFurnitureItem(item) {
+            const x = item.relX * canvas.width;
+            const y = item.relY * canvas.height;
+            const w = item.width * scaleFactor;
+            const h = item.height * scaleFactor;
+
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Shadow
+            ctx.shadowColor = 'rgba(15, 23, 42, 0.1)';
+            ctx.shadowBlur = 6;
+            ctx.shadowOffsetY = 4;
+
+            switch (item.drawShape) {
+                // --- RUGS ---
+                case "rug-fluffy":
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, w/2, h/2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.lineWidth = 3 * scaleFactor;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+                    break;
+                case "rug-star":
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * (w/2),
+                                   Math.sin((18 + i * 72) * Math.PI / 180) * (h/2));
+                        ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (w/4),
+                                   Math.sin((54 + i * 72) * Math.PI / 180) * (h/4));
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+                case "rug-rainbow":
+                    const numBands = 4;
+                    const bandColors = ["#f43f5e", "#fb923c", "#facc15", "#22c55e"];
+                    for (let i = numBands; i > 0; i--) {
+                        ctx.fillStyle = bandColors[i-1];
+                        ctx.beginPath();
+                        ctx.arc(0, h/2, (w/2) * (i / numBands), Math.PI, 0, false);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    break;
+
+                // --- TABLES ---
+                case "table-desk":
+                    // Legs
+                    ctx.fillStyle = '#78350f';
+                    ctx.fillRect(-w/2.5, 0, 8 * scaleFactor, h/2);
+                    ctx.fillRect(w/2.5 - 8 * scaleFactor, 0, 8 * scaleFactor, h/2);
+                    // Tabletop
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    ctx.roundRect(-w/2, -h/6, w, h/3, 5 * scaleFactor);
+                    ctx.fill();
+                    break;
+                case "table-pink":
+                    ctx.fillStyle = '#fbcfe8';
+                    ctx.fillRect(-w/2.5, 0, 6 * scaleFactor, h/2);
+                    ctx.fillRect(w/2.5 - 6 * scaleFactor, 0, 6 * scaleFactor, h/2);
+                    // Circular pink top
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    ctx.ellipse(0, -h/6, w/2.2, h/4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                case "table-modern":
+                    ctx.fillStyle = '#475569';
+                    ctx.beginPath();
+                    ctx.moveTo(0, h/2);
+                    ctx.lineTo(-w/3, 0);
+                    ctx.lineTo(w/3, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    // Tabletop
+                    ctx.fillStyle = item.color;
+                    ctx.fillRect(-w/2, -h/10, w, h/5);
+                    break;
+
+                // --- CHAIRS ---
+                case "chair-bean":
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, w/2.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Fluffy inner indentation
+                    ctx.fillStyle = '#fbcfe8';
+                    ctx.beginPath();
+                    ctx.arc(0, h/10, w/3.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                case "chair-rocker":
+                    ctx.strokeStyle = item.color;
+                    ctx.lineWidth = 4 * scaleFactor;
+                    // Rocking curves
+                    ctx.beginPath();
+                    ctx.arc(0, h/10, w/2, Math.PI * 0.25, Math.PI * 0.75);
+                    ctx.stroke();
+                    // Slats
+                    ctx.fillRect(-w/4, -h/3, w/2, h/1.5);
+                    break;
+                case "chair-gaming":
+                    ctx.fillStyle = '#1e293b';
+                    ctx.fillRect(-w/2.5, -h/2.2, w/1.25, h/1.2);
+                    ctx.fillStyle = item.color;
+                    ctx.fillRect(-w/3.5, -h/2.5, w/1.75, h/1.3);
+                    break;
+
+                // --- LAMPS ---
+                case "lamp-mushroom":
+                    // Stem
+                    ctx.fillStyle = '#fef08a';
+                    ctx.fillRect(-w/10, -h/6, w/5, h/1.2);
+                    // Red dotted dome cap
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    ctx.arc(0, -h/5, w/3.2, Math.PI, 0);
+                    ctx.fill();
+                    // White dots
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(-8 * scaleFactor, -h/3.2, 3 * scaleFactor, 0, Math.PI*2);
+                    ctx.arc(8 * scaleFactor, -h/3.2, 3 * scaleFactor, 0, Math.PI*2);
+                    ctx.fill();
+                    break;
+                case "lamp-star":
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillRect(-2 * scaleFactor, -h/8, 4 * scaleFactor, h/1.3);
+                    // Gold Glowing Star bulb
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    ctx.arc(0, -h/5, w/4, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                case "lamp-flower":
+                    ctx.fillStyle = '#10b981';
+                    ctx.fillRect(-2 * scaleFactor, -h/8, 4 * scaleFactor, h/1.3);
+                    // Flower bulb
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    ctx.arc(0, -h/5, w/5, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                // --- STREAMERS ---
+                case "stream-star":
+                case "stream-heart":
+                case "stream-crane":
+                    ctx.strokeStyle = '#cbd5e1';
+                    ctx.lineWidth = 1.5 * scaleFactor;
+                    // Garland string
+                    ctx.beginPath();
+                    ctx.quadraticCurveTo(0, h/2, w/2, 0);
+                    ctx.moveTo(0, 0);
+                    ctx.quadraticCurveTo(-w/4, h/2, -w/2, 0);
+                    ctx.stroke();
+
+                    // Mini attachments
+                    ctx.fillStyle = item.color;
+                    ctx.font = `bold ${Math.floor(16 * scaleFactor)}px "Fredoka One"`;
+                    ctx.fillText(item.emoji, -w/4, h/3);
+                    ctx.fillText(item.emoji, 0, h/2.5);
+                    ctx.fillText(item.emoji, w/4, h/3);
+                    break;
+
+                // --- PLANTS ---
+                case "plant-monstera":
+                case "plant-cactus":
+                case "plant-ivy":
+                    // Terracotta clay pot
+                    ctx.fillStyle = '#ea580c';
+                    ctx.beginPath();
+                    ctx.moveTo(-15 * scaleFactor, 15 * scaleFactor);
+                    ctx.lineTo(15 * scaleFactor, 15 * scaleFactor);
+                    ctx.lineTo(10 * scaleFactor, 40 * scaleFactor);
+                    ctx.lineTo(-10 * scaleFactor, 40 * scaleFactor);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Flora
+                    ctx.fillStyle = item.color;
+                    ctx.font = `bold ${Math.floor(32 * scaleFactor)}px "Fredoka One"`;
+                    ctx.fillText(item.emoji, -16 * scaleFactor, 5 * scaleFactor);
+                    break;
+
+                // --- PLUSH TOYS ---
+                case "toy-teddy":
+                case "toy-dino":
+                case "toy-star":
+                    ctx.font = `bold ${Math.floor(45 * scaleFactor)}px "Fredoka One"`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(item.emoji, 0, 0);
+                    break;
+
+                // Default Emojis Draw
+                default:
+                    ctx.shadowColor = 'transparent';
+                    ctx.font = `bold ${Math.floor(45 * scaleFactor)}px "Fredoka One"`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(item.emoji, 0, 0);
+                    break;
+            }
+
+            ctx.restore();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawRoomBackground();
+
+            // Draw placed decorations in placed layers
+            roomDecorations.forEach(item => {
+                drawFurnitureItem(item);
+            });
+
+            // Draw active selected drag glow indicators
+            if (selectedItem) {
+                ctx.save();
+                ctx.strokeStyle = '#d97706'; // Warm amber outline
+                ctx.lineWidth = 3 * scaleFactor;
+                ctx.setLineDash([4, 4]);
+                
+                const sX = selectedItem.relX * canvas.width;
+                const sY = selectedItem.relY * canvas.height;
+                const sW = selectedItem.width * scaleFactor;
+                const sH = selectedItem.height * scaleFactor;
+                
+                ctx.strokeRect(sX - sW/2 - 4, sY - sH/2 - 4, sW + 8, sH + 8);
+                ctx.restore();
+            }
+        }
+
+        // Standard game frame ticks
+        function gameLoop() {
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Hook Splash Menu play events
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            gameHeader.classList.remove("hidden");
+            gameplayArea.classList.remove("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        });
+
+        document.getElementById("restart-btn").addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            gameHeader.classList.remove("hidden");
+            gameplayArea.classList.remove("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Core robust timer to guarantee the logo screen disappears in exactly 5 seconds
+        let logoTimerStarted = false;
+        function startLogoTimer() {
+            if (logoTimerStarted) return;
+            logoTimerStarted = true;
+
+            resizeCanvas();
+            requestAnimationFrame(gameLoop);
+
+            // Execute transitions independently of slow network requests or asset downloads
+            setTimeout(() => {
+                const logoScreenEl = document.getElementById("logo-screen");
+                const startScreenEl = document.getElementById("start-screen");
+                if (logoScreenEl) {
+                    logoScreenEl.classList.add("opacity-0");
+                    setTimeout(() => {
+                        logoScreenEl.classList.add("hidden");
+                        if (startScreenEl) {
+                            startScreenEl.classList.remove("hidden");
+                        }
+                        gameState = 'START';
+                    }, 1000);
+                }
+            }, 5000);
+        }
+
+        // Check document status and initialize immediately or on DOM ready
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            startLogoTimer();
+        } else {
+            document.addEventListener('DOMContentLoaded', startLogoTimer);
+        }
+    </script>
+</body>
+</html>
