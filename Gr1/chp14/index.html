@@ -50,7 +50,7 @@
       <img 
         id="splash-logo" 
         src="assets/innovine-logo.png" 
-        class="w-48 h-48 object-contain" 
+        class="w-72 h-72 md:w-80 md:h-80 object-contain" 
         alt="Innovine Logo"
         onerror="handleLogoError(this)"
       />
@@ -61,26 +61,26 @@
        SCREEN 2: START / INSTRUCTION SCREEN
        ========================================== -->
   <div id="screen-start" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full">
-    <div class="mb-6 drop-shadow-md">
+    <div class="mb-8 drop-shadow-md">
       <img 
         src="assets/innovine-logo.png" 
-        class="w-28 h-28 object-contain" 
+        class="w-44 h-44 md:w-48 md:h-48 object-contain animate-float" 
         alt="Innovine Logo"
         onerror="handleLogoError(this)"
       />
     </div>
 
-    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-[#D4A373] text-center w-full max-w-md">
-      <h1 class="text-3xl md:text-4xl font-extrabold text-[#4A3B32] tracking-wide mb-2">
+    <div class="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-[#D4A373] text-center w-full max-w-xl">
+      <h1 class="text-4xl md:text-5xl font-black text-[#4A3B32] tracking-wide mb-3">
         The Curious <span class="text-[#9C6644]">Coffee Shop</span>
       </h1>
-      <p class="text-sm font-semibold text-[#B5835A] uppercase tracking-wide mb-6">
+      <p class="text-lg md:text-xl font-bold text-[#B5835A] uppercase tracking-wider mb-8">
         Grade 1 Question Words
       </p>
 
-      <div class="bg-[#FAF6F0] rounded-2xl p-4 border border-[#E6CCB2] text-left space-y-3 mb-8">
-        <h2 class="font-bold text-[#4A3B32] text-base">How to Play:</h2>
-        <ul class="text-sm space-y-2 text-[#5C4D3C] list-disc list-inside">
+      <div class="bg-[#FAF6F0] rounded-3xl p-6 border border-[#E6CCB2] text-left space-y-4 mb-8">
+        <h2 class="font-extrabold text-[#4A3B32] text-xl md:text-2xl">How to Play:</h2>
+        <ul class="text-base md:text-lg space-y-3 text-[#5C4D3C] list-disc list-inside font-medium">
           <li>Look at the picture <strong>Hint</strong> and read the sentence.</li>
           <li>Find the correct <strong>Wh-word</strong> card that fills the blank!</li>
           <li><strong>Drag & Drop</strong> the Wh-word card onto the <strong>Serving Tray</strong>!</li>
@@ -90,13 +90,13 @@
 
       <button
         onclick="startNewGame()"
-        class="w-full bg-[#9C6644] hover:bg-[#7F5539] text-white font-black text-2xl py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-[#5C3D2E]"
+        class="w-full bg-[#9C6644] hover:bg-[#7F5539] text-white font-black text-2xl md:text-3xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-[#5C3D2E]"
       >
         START GAME
       </button>
     </div>
 
-    <div class="mt-8 text-xs text-[#9C6644] font-medium">
+    <div class="mt-8 text-sm text-[#9C6644] font-bold">
       Compatible with Phones, Tablets, & Laptops • Optimized for Low Bandwidth
     </div>
   </div>
@@ -107,93 +107,93 @@
   <div id="screen-game" class="hidden flex-1 flex flex-col w-full max-w-5xl mx-auto p-3 md:p-6 justify-between">
     
     <!-- Top Progress & Score Info Bar -->
-    <div class="flex items-center justify-between bg-white/80 backdrop-blur rounded-2xl p-3 shadow-md border border-[#E6CCB2] mb-4">
+    <div class="flex items-center justify-between bg-white/80 backdrop-blur rounded-2xl p-4 shadow-md border border-[#E6CCB2] mb-4">
       <div class="flex flex-col">
-        <span class="text-xs font-bold uppercase text-[#B5835A] tracking-wider">Progress</span>
-        <span id="game-progress-text" class="text-lg font-black text-[#4A3B32]">1 / 15</span>
+        <span class="text-xs md:text-sm font-black uppercase text-[#B5835A] tracking-wider">Progress</span>
+        <span id="game-progress-text" class="text-xl md:text-2xl font-black text-[#4A3B32]">1 / 15</span>
       </div>
 
       <!-- Horizontal Progress Bar -->
-      <div class="flex-1 mx-4 h-3 bg-[#E6CCB2] rounded-full overflow-hidden hidden sm:block">
+      <div class="flex-1 mx-6 h-4 bg-[#E6CCB2] rounded-full overflow-hidden hidden sm:block">
         <div id="game-progress-bar" class="h-full bg-[#9C6644] transition-all duration-500 rounded-full" style="width: 0%"></div>
       </div>
 
-      <div class="flex items-center space-x-2 bg-[#F5EBE0] px-4 py-1.5 rounded-full border border-[#D4A373]">
-        <span class="text-lg">⭐</span>
-        <span id="game-score-text" class="font-black text-[#4A3B32]">0</span>
+      <div class="flex items-center space-x-2 bg-[#F5EBE0] px-5 py-2 rounded-full border-2 border-[#D4A373]">
+        <span class="text-2xl">⭐</span>
+        <span id="game-score-text" class="text-xl md:text-2xl font-black text-[#4A3B32]">0</span>
       </div>
     </div>
 
     <!-- Cozy Coffee Shop Dialog Scene -->
-    <div class="flex-1 bg-[#F5EBE0] rounded-3xl p-4 md:p-6 shadow-inner border-4 border-[#D4A373] flex flex-col justify-between min-h-[360px] relative mb-4">
+    <div class="flex-1 bg-[#F5EBE0] rounded-[2rem] p-5 md:p-8 shadow-inner border-4 border-[#D4A373] flex flex-col justify-between min-h-[380px] relative mb-4">
       
       <!-- Café Backdrop Menu -->
-      <div class="absolute top-4 right-6 bg-[#3E2723] text-[#F5EBE0] py-2 px-4 rounded-lg hidden md:block border-2 border-[#8D6E63] transform rotate-1 shadow-md">
-        <p class="font-mono text-xs uppercase tracking-widest text-center border-b border-[#8D6E63] pb-1 font-bold">TODAY'S SPECIAL</p>
-        <p class="font-mono text-[10px] mt-1">WHO, WHAT, WHERE</p>
-        <p class="font-mono text-[10px]">WHEN, WHY, WHICH</p>
+      <div class="absolute top-4 right-6 bg-[#3E2723] text-[#F5EBE0] py-2.5 px-5 rounded-xl hidden md:block border-2 border-[#8D6E63] transform rotate-1 shadow-md">
+        <p class="font-mono text-sm uppercase tracking-widest text-center border-b border-[#8D6E63] pb-1 font-bold text-[#D4A373]">TODAY'S SPECIAL</p>
+        <p class="font-mono text-xs mt-1">WHO • WHAT • WHERE</p>
+        <p class="font-mono text-xs text-[#E6CCB2]">WHEN • WHY • WHICH</p>
       </div>
 
       <!-- Character avatar & Speak Bubble -->
-      <div class="flex items-start space-x-3 md:space-x-6">
-        <div id="character-container" class="w-20 h-20 md:w-28 md:h-28 bg-white rounded-full p-1 shadow-lg border-2 border-[#9C6644] flex-shrink-0 animate-float">
+      <div class="flex items-start space-x-4 md:space-x-8">
+        <div id="character-container" class="w-24 h-24 md:w-36 md:h-36 bg-white rounded-full p-1.5 shadow-lg border-4 border-[#9C6644] flex-shrink-0 animate-float">
           <!-- Dynamic Character SVG gets loaded here -->
         </div>
 
-        <div class="flex-1 bg-white rounded-2xl rounded-tl-none p-4 shadow-md border-2 border-[#9C6644] relative min-h-[90px] flex flex-col justify-between">
-          <div class="absolute -left-3 top-0 w-0 h-0 border-y-8 border-y-transparent border-r-8 border-r-white"></div>
+        <div class="flex-1 bg-white rounded-3xl rounded-tl-none p-5 shadow-md border-4 border-[#9C6644] relative min-h-[120px] flex flex-col justify-between">
+          <div class="absolute -left-4 top-0 w-0 h-0 border-y-[12px] border-y-transparent border-r-[12px] border-r-white"></div>
           
-          <!-- Sentence with empty slots -->
-          <p id="question-text" class="text-lg md:text-xl font-bold text-[#4A3B32] tracking-wide mb-2">
+          <!-- Sentence with empty slots - significantly larger -->
+          <p id="question-text" class="text-2xl md:text-3xl font-black text-[#4A3B32] tracking-wide mb-3 leading-relaxed">
             _______ is wiping down the sticky counter?
           </p>
 
-          <!-- Interactive Hint box inside bubble -->
-          <div class="flex items-center space-x-3 bg-[#FAF5F0] border border-[#E6CCB2] rounded-xl p-2 mt-1">
-            <span class="text-xs font-black uppercase text-[#9C6644] tracking-wider">Hint:</span>
-            <div id="hint-graphic-container" class="w-8 h-8 flex-shrink-0">
+          <!-- Interactive Hint box inside bubble - upscaled -->
+          <div class="flex items-center space-x-4 bg-[#FAF5F0] border-2 border-[#E6CCB2] rounded-2xl p-3 mt-1">
+            <span class="text-sm md:text-base font-black uppercase text-[#9C6644] tracking-wider">Hint:</span>
+            <div id="hint-graphic-container" class="w-14 h-14 flex-shrink-0 bg-white rounded-xl p-1 border border-[#E6CCB2] shadow-sm">
               <!-- Svg will load here -->
             </div>
-            <span id="hint-label-text" class="text-xs font-bold text-[#5C4D3C]">The Barista</span>
+            <span id="hint-label-text" class="text-lg md:text-xl font-extrabold text-[#5C4D3C]">The Barista</span>
           </div>
         </div>
       </div>
 
-      <!-- Serving Tray Drop Target Area -->
+      <!-- Serving Tray Drop Target Area - Large, tactile and easy to target -->
       <div class="my-6 flex flex-col items-center justify-center">
         <div 
           id="serving-tray" 
           onclick="handleTrayClickFallback()"
-          class="relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-dashed bg-white/40 border-[#D4A373] hover:bg-white/60 transition-all duration-300 flex flex-col items-center justify-center p-2 cursor-pointer"
+          class="relative w-80 h-44 md:w-[420px] md:h-48 rounded-[2rem] border-4 border-dashed bg-white/40 border-[#D4A373] hover:bg-white/60 transition-all duration-300 flex flex-col items-center justify-center p-4 cursor-pointer"
         >
-          <div class="absolute inset-2 border-2 border-amber-800/10 rounded-xl"></div>
+          <div class="absolute inset-2 border-2 border-amber-800/10 rounded-[1.5rem]"></div>
           
-          <div id="tray-idle" class="flex flex-col items-center justify-center">
-            <svg class="w-10 h-10 text-[#9C6644] mb-1 opacity-70 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div id="tray-idle" class="flex flex-col items-center justify-center text-center">
+            <svg class="w-12 h-12 text-[#9C6644] mb-1 opacity-70 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-6l-7 7-7-7" />
             </svg>
-            <p class="text-xs md:text-sm font-black text-[#5C3D2E] text-center uppercase tracking-wider">
+            <p class="text-base md:text-lg font-black text-[#5C3D2E] uppercase tracking-wider">
               DROP CHOSEN WORD HERE
             </p>
-            <p class="text-[10px] text-[#9C6644] text-center mt-1 hidden sm:block">
+            <p class="text-xs text-[#9C6644] mt-1 hidden sm:block">
               (Or tap Wh-word, then tap here)
             </p>
           </div>
 
           <div id="tray-holding" class="hidden text-center animate-bounce">
-            <p class="text-xs font-bold text-[#9C6644] uppercase mb-1">READY TO SERVE!</p>
-            <span id="tray-holding-label" class="inline-block bg-[#9C6644] text-white px-5 py-1.5 rounded-full text-base font-black shadow-md tracking-wide"></span>
-            <p class="text-[10px] text-[#9C6644] mt-2">TAP HERE TO PLACE</p>
+            <p class="text-xs md:text-sm font-bold text-[#9C6644] uppercase mb-1">READY TO SERVE!</p>
+            <span id="tray-holding-label" class="inline-block bg-[#9C6644] text-white px-6 py-2 rounded-full text-xl md:text-2xl font-black shadow-md tracking-wide"></span>
+            <p class="text-xs text-[#9C6644] mt-2 font-bold">TAP HERE TO PLACE</p>
           </div>
 
           <div id="tray-correct" class="hidden text-center">
-            <span class="text-3xl">🎉</span>
-            <p class="text-green-600 font-black text-lg uppercase tracking-wider mt-1">CORRECT!</p>
+            <span class="text-4xl">🎉</span>
+            <p class="text-green-600 font-black text-2xl uppercase tracking-wider mt-1">CORRECT!</p>
           </div>
 
           <div id="tray-wrong" class="hidden text-center">
-            <span class="text-3xl">😢</span>
-            <p class="text-red-600 font-black text-sm uppercase tracking-wider mt-1">TRY ANOTHER!</p>
+            <span class="text-4xl">😢</span>
+            <p class="text-red-600 font-black text-lg uppercase tracking-wider mt-1">TRY ANOTHER!</p>
           </div>
         </div>
       </div>
@@ -201,15 +201,15 @@
       <div class="w-full h-3 bg-[#8D6E63] rounded-full mt-2 shadow"></div>
     </div>
 
-    <!-- Answer Choices Grid (Strictly Wh-Words) -->
+    <!-- Answer Choices Grid (Strictly Wh-Words) - Boosted button sizes -->
     <div>
-      <div class="text-center mb-3">
-        <span class="text-xs font-extrabold uppercase tracking-widest text-[#B5835A]">
+      <div class="text-center mb-4">
+        <span class="text-xs md:text-sm font-black uppercase tracking-widest text-[#B5835A]">
           Select the correct Question Word:
         </span>
       </div>
 
-      <div id="options-grid" class="grid grid-cols-3 gap-3 md:gap-4 relative max-w-2xl mx-auto">
+      <div id="options-grid" class="grid grid-cols-3 gap-3 md:gap-4 relative max-w-3xl mx-auto">
         <!-- Rendered dynamically -->
       </div>
     </div>
@@ -220,33 +220,33 @@
        SCREEN 4: SUMMARY / SCORE SCREEN
        ========================================== -->
   <div id="screen-summary" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-lg mx-auto w-full">
-    <div class="bg-white rounded-3xl p-8 shadow-2xl border-4 border-[#D4A373] text-center w-full animate-float">
-      <span class="text-6xl block mb-4">🏆</span>
+    <div class="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-[#D4A373] text-center w-full animate-float">
+      <span class="text-7xl block mb-4">🏆</span>
       
-      <h1 class="text-3xl font-black text-[#4A3B32] mb-1">Awesome Job!</h1>
-      <p class="text-sm font-semibold text-[#B5835A] uppercase tracking-wider mb-6">
+      <h1 class="text-4xl font-black text-[#4A3B32] mb-1">Awesome Job!</h1>
+      <p class="text-lg font-bold text-[#B5835A] uppercase tracking-wider mb-8">
         You are a Coffee Shop Master!
       </p>
 
       <!-- Three Stars Score Container -->
-      <div id="stars-container" class="flex justify-center space-x-3 mb-6 text-5xl">
+      <div id="stars-container" class="flex justify-center space-x-4 mb-8 text-6xl">
         <!-- Rendered dynamically -->
       </div>
 
       <!-- Scoreboard info -->
-      <div class="bg-[#FAF5F0] rounded-2xl p-5 border border-[#E6CCB2] space-y-3 mb-8">
-        <div class="flex justify-between items-center text-sm font-bold">
+      <div class="bg-[#FAF5F0] rounded-2xl p-6 border border-[#E6CCB2] space-y-4 mb-8">
+        <div class="flex justify-between items-center text-base md:text-lg font-bold">
           <span class="text-[#5C4D3C]">Correct on First Try:</span>
-          <span id="final-score" class="text-xl font-black text-[#9C6644]">0 / 15</span>
+          <span id="final-score" class="text-2xl md:text-3xl font-black text-[#9C6644]">0 / 15</span>
         </div>
-        <div class="text-xs text-left text-[#B5835A] leading-relaxed border-t border-[#E6CCB2] pt-2">
+        <div class="text-sm md:text-base text-left text-[#B5835A] leading-relaxed border-t border-[#E6CCB2] pt-3 font-semibold">
           Wonderful! You understand how "Who, What, Where, When, Why, & Which" are used inside the coffee shop!
         </div>
       </div>
 
       <button
         onclick="startNewGame()"
-        class="w-full bg-[#9C6644] hover:bg-[#7F5539] text-white font-black text-xl py-4 px-6 rounded-2xl shadow-lg transition-all transform active:scale-95 border-b-4 border-[#5C3D2E]"
+        class="w-full bg-[#9C6644] hover:bg-[#7F5539] text-white font-black text-2xl py-5 px-8 rounded-2xl shadow-lg transition-all transform active:scale-95 border-b-4 border-[#5C3D2E]"
       >
         PLAY AGAIN
       </button>
@@ -352,7 +352,7 @@
       'spoon': `<svg class="w-full h-full" viewBox="0 0 100 100"><ellipse cx="35" cy="50" rx="15" ry="10" fill="#B0BEC5" stroke="#78909C" stroke-width="2" transform="rotate(-30 35 50)"/><rect x="45" y="45" width="40" height="5" rx="2" fill="#CFD8DC" stroke="#78909C" stroke-width="2" transform="rotate(-30 45 45)"/></svg>`,
       'baker': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="45" r="18" fill="#FBC490"/><path d="M35 30 C25 15, 75 15, 65 30 Z" fill="#FFFFFF" stroke="#B0BEC5" stroke-width="2"/><rect x="38" y="27" width="24" height="6" fill="#FFFFFF" stroke="#B0BEC5" stroke-width="2"/><path d="M45 52 Q50 56 55 52" stroke="#000" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="44" cy="42" r="2" fill="#000"/><circle cx="56" cy="42" r="2" fill="#000"/></svg>`,
       'hot_cocoa': `<svg class="w-full h-full" viewBox="0 0 100 100"><rect x="30" y="38" width="40" height="42" rx="6" fill="#E57373" stroke="#C62828" stroke-width="3"/><path d="M70 48 C76 48, 80 52, 79 58 C78 64, 70 64, 70 60" stroke="#C62828" stroke-width="4.5" fill="none"/><ellipse cx="50" cy="38" rx="20" ry="5" fill="#5D4037"/><rect x="40" y="33" width="8" height="6" rx="2" fill="#FFF"/><rect x="52" y="32" width="7" height="7" rx="2" fill="#FFF"/></svg>`,
-      'donut_pink': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#F5C299" stroke="#E0A97E" stroke-width="2"/><circle cx="50" cy="50" r="28" fill="#FF80AB"/><circle cx="50" cy="50" r="12" fill="#FFF"/><rect x="38" y="34" width="6" height="2" rx="1" fill="#FFF" transform="rotate(15 38 34)"/><rect x="58" y="32" width="6" height="2" rx="1" fill="#FFEB3B" transform="rotate(-25 58 32)"/><rect x="64" y="52" width="6" height="2" rx="1" fill="#29B6F6" transform="rotate(45 64 52)"/><rect x="32" y="54" width="6" height="2" rx="1" fill="#66BB6A" transform="rotate(-40 32 54)"/></svg>`,
+      'donut_pink': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#F5C299" stroke="#E0A97E" stroke-width="2"/><circle cx="50" cy="50" r="28" fill="#FF80AB"/><circle cx="50" cy="50" r="12" fill="#FFF"/><rect x="38" y="34" width="6" height="2" rx="1" fill="#FFF" transform="rotate(15 38 34)"/><rect x="58" y="32" width="6" height="2" rx="1" fill="#FFEB3B" transform="rotate(-25 58 32)"/><rect x="64" y="52" width="6" height="2" rx="1" fill="#29B6F6" transform="rotate(45 64(52)"/><rect x="32" y="54" width="6" height="2" rx="1" fill="#66BB6A" transform="rotate(-40 32 54)"/></svg>`,
       'donut_brown': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#F5C299" stroke="#E0A97E" stroke-width="2"/><circle cx="50" cy="50" r="28" fill="#5D4037"/><circle cx="50" cy="50" r="12" fill="#FFF"/><rect x="42" y="34" width="6" height="2" rx="1" fill="#FF80AB"/><rect x="60" y="44" width="6" height="2" rx="1" fill="#FFF"/></svg>`,
       'donut_yellow': `<svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#F5C299" stroke="#E0A97E" stroke-width="2"/><circle cx="50" cy="50" r="28" fill="#FFF59D"/><circle cx="50" cy="50" r="12" fill="#FFF"/><rect x="42" y="34" width="6" height="2" rx="1" fill="#FF5722"/><rect x="60" y="44" width="6" height="2" rx="1" fill="#4CAF50"/></svg>`,
       'yummy_cake_reason': `<svg class="w-full h-full" viewBox="0 0 100 100"><path d="M25 65 L50 25 L75 65 Z" fill="#FF8A80" stroke="#C62828" stroke-width="3"/><rect x="23" y="65" width="54" height="12" fill="#FFD54F" rx="3"/><circle cx="50" cy="22" r="6" fill="#D32F2F"/><path d="M50 16 Q55 8 62 12" stroke="#D32F2F" stroke-width="2" fill="none"/></svg>`,
@@ -487,17 +487,17 @@
 
       WH_WORDS_OPTIONS.forEach(opt => {
         const card = document.createElement('div');
-        // Compact premium cards designed to highlight Wh text elegantly
-        card.className = "bg-white rounded-2xl py-3 px-2 shadow-md border-4 border-[#E6CCB2] hover:border-[#D4A373] flex flex-col items-center justify-center text-center cursor-grab active:cursor-grabbing transition-all duration-150 transform hover:-translate-y-1 select-none touch-none relative";
+        // Compact premium cards designed to highlight Wh text elegantly - upscaled padding and fonts
+        card.className = "bg-white rounded-2xl py-5 px-4 shadow-md border-4 border-[#E6CCB2] hover:border-[#D4A373] flex flex-col items-center justify-center text-center cursor-grab active:cursor-grabbing transition-all duration-150 transform hover:-translate-y-1 select-none touch-none relative";
         card.id = `card-${opt.id}`;
         card.setAttribute('data-id', opt.id);
         
         // Inner markup
         card.innerHTML = `
-          <span class="text-xl md:text-2xl font-black text-[#4A3B32] py-2 pointer-events-none tracking-wide">
+          <span class="text-2xl md:text-4xl font-black text-[#4A3B32] py-2 pointer-events-none tracking-wide">
             ${opt.label}
           </span>
-          <div class="text-[9px] uppercase tracking-wider font-extrabold text-[#B5835A] pointer-events-none bg-[#FAF6F0] px-3 py-0.5 rounded-full border border-[#E6CCB2] mt-1">
+          <div class="text-[10px] md:text-xs uppercase tracking-wider font-extrabold text-[#B5835A] pointer-events-none bg-[#FAF6F0] px-4 py-1 rounded-full border border-[#E6CCB2] mt-1">
             DRAG
           </div>
         `;
@@ -542,7 +542,7 @@
       
       // Animate selection drop target
       const tray = document.getElementById('serving-tray');
-      tray.className = "relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-2 cursor-pointer bg-[#FFE8D6] border-[#9C6644] animate-pulse scale-105";
+      tray.className = "relative w-80 h-44 md:w-[420px] md:h-48 rounded-[2rem] border-4 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-4 cursor-pointer bg-[#FFE8D6] border-[#9C6644] animate-pulse scale-105";
     }
 
     function resetTrayUI() {
@@ -552,7 +552,7 @@
       document.getElementById('tray-wrong').classList.add('hidden');
 
       const tray = document.getElementById('serving-tray');
-      tray.className = "relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-2 cursor-pointer bg-white/40 border-[#D4A373] hover:bg-white/60";
+      tray.className = "relative w-80 h-44 md:w-[420px] md:h-48 rounded-[2rem] border-4 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-4 cursor-pointer bg-white/40 border-[#D4A373] hover:bg-white/60";
     }
 
     // Tap/Click fallback validation
@@ -577,7 +577,7 @@
       if (option.label.toLowerCase() === q.correctWord.toLowerCase()) {
         triggerAudio('correct');
         document.getElementById('tray-correct').classList.remove('hidden');
-        tray.className = "relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-solid transition-all duration-300 flex flex-col items-center justify-center p-2 bg-green-100 border-green-500 scale-105";
+        tray.className = "relative w-80 h-44 md:w-[420px] md:h-48 rounded-[2rem] border-4 border-solid transition-all duration-300 flex flex-col items-center justify-center p-4 bg-green-100 border-green-500 scale-105";
 
         // Display the correct word inside the sentence instantly for positive reinforcement
         document.getElementById('question-text').innerHTML = `<span class="text-green-600 underline font-black">${q.correctWord}</span> ${q.sentenceText.replace('_______', '')}`;
@@ -596,7 +596,7 @@
       } else {
         triggerAudio('wrong');
         document.getElementById('tray-wrong').classList.remove('hidden');
-        tray.className = "relative w-64 h-32 md:w-80 md:h-36 rounded-2xl border-4 border-solid transition-all duration-300 flex flex-col items-center justify-center p-2 bg-red-100 border-red-500 animate-shake";
+        tray.className = "relative w-80 h-44 md:w-[420px] md:h-48 rounded-[2rem] border-4 border-solid transition-all duration-300 flex flex-col items-center justify-center p-4 bg-red-100 border-red-500 animate-shake";
         
         firstTry = false;
 
