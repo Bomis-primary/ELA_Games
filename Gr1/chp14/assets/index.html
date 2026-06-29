@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cafe Question Words</title>
+    <!-- Tailwind CSS for modern premium layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for playful, friendly typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #fef3c7; /* Bright Sunny Amber-100 base */
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .playful-font {
+            font-family: 'Fredoka One', cursive;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-6 text-slate-800">
+
+    <!-- Main Game Container with stable responsive height to prevent collapse -->
+    <div class="relative w-full max-w-5xl bg-amber-50 rounded-3xl border-4 border-amber-400 shadow-2xl shadow-amber-900/10 overflow-hidden flex flex-col h-[92vh] md:h-[650px]">
+        
+        <!-- Header / Stats Dashboard HUD (Visible during gameplay) -->
+        <header id="game-header" class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 px-4 py-3 border-b-2 border-amber-400 flex flex-wrap justify-between items-center gap-2 z-10 hidden">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-bounce">☕</span>
+                <h1 class="text-lg md:text-xl font-extrabold tracking-wide text-amber-950 playful-font">
+                    CAFE QUESTIONS
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-3 text-xs md:text-sm font-semibold text-slate-900">
+                <div class="bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
+                    Order: <span id="question-index" class="text-amber-700 font-bold">1/15</span>
+                </div>
+                <div class="bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
+                    Score: <span id="score" class="text-emerald-600 font-bold">0</span>
+                </div>
+                <div class="bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
+                    Streak: <span id="streak" class="text-blue-600 font-bold">🔥 0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Brand Splash Page (ONLY LOGO, occupies maximum screen space, runs for 5 seconds) -->
+        <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+            <div class="w-full h-full flex flex-col items-center justify-center space-y-6">
+                <!-- Large scaled Logo image with reliable typography backup -->
+                <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="w-4/5 max-w-lg h-auto max-h-[60vh] object-contain transition-all duration-300" onerror="this.style.display='none'; document.getElementById('logo-fallback-big').style.display='block';">
+                <!-- Fallback premium layout for local directory tests -->
+                <div id="logo-fallback-big" class="hidden text-center">
+                    <div class="text-6xl md:text-8xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-600 playful-font">INNOVINE</div>
+                    <div class="text-lg md:text-2xl text-slate-500 uppercase tracking-widest font-extrabold mt-3">Learning Games</div>
+                </div>
+                <div class="pt-10 flex flex-col items-center space-y-3">
+                    <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-slate-400 font-medium text-sm tracking-wider uppercase">Entering Cozy Cafe...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Page: Start Menu Splash Screen -->
+        <div id="start-screen" class="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 flex flex-col items-center justify-center p-6 text-center z-25 hidden animate-fade-in">
+            <div class="max-w-lg bg-white/95 p-8 rounded-3xl border-2 border-amber-300 backdrop-blur-md shadow-2xl">
+                <div class="text-7xl mb-4">🥐☕</div>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-amber-800 mb-2 playful-font tracking-wide">
+                    CAFE QUESTIONS
+                </h1>
+                <h2 class="text-md text-slate-600 font-semibold mb-4">Grade 1: Question Words Challenge</h2>
+                <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+                    Our baristas and customers are placing coffee orders, but their sentences are missing some magical words! Read the order ticket at the top, select the correct question cup at the bottom, and <strong class="text-amber-600">drag it onto the customer's tray</strong>!
+                </p>
+                <button id="start-btn" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-white font-black py-4 px-6 rounded-2xl shadow-lg shadow-amber-400/20 transform transition active:scale-95 text-xl playful-font">
+                    Open Cafe
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Gameplay Split-Screen Area (Canvas Left/Top, Interaction Right/Bottom) -->
+        <div id="gameplay-area" class="flex-grow flex flex-col lg:flex-row h-full relative hidden">
+            
+            <!-- Left Side: Cozy Coffee Counter Canvas (Preserves drag coordinate scaling) -->
+            <div class="w-full lg:w-3/5 h-1/2 lg:h-full relative bg-amber-50/20 border-r-0 lg:border-r-2 lg:border-b-0 border-b-2 border-amber-200 flex items-center justify-center">
+                <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+                <!-- Touch & drag hint label -->
+                <div id="drag-hint" class="absolute bottom-3 left-3 bg-white/90 px-3 py-1.5 rounded-lg border border-amber-300 text-xs text-amber-800 pointer-events-none flex items-center gap-1.5 opacity-0 transition-opacity">
+                    <span>✨ Touch & Drag a cup into the serving tray!</span>
+                </div>
+            </div>
+
+            <!-- Right Side: Sentence Ticket & Interactive Drag Selection -->
+            <div class="w-full lg:w-2/5 h-1/2 lg:h-full bg-amber-50/50 flex flex-col justify-between p-4 md:p-6 space-y-4">
+                
+                <!-- Ticket Sentences Panel -->
+                <div class="flex-grow flex flex-col justify-center space-y-3">
+                    <div class="bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-md relative overflow-hidden">
+                        <!-- Red ribbon on the ticket -->
+                        <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-red-400 to-orange-400"></div>
+                        <div class="text-center pt-1">
+                            <span class="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">CUSTOMER'S ORDER TICKET</span>
+                            <!-- Sentence with beautiful curly ELA blank decoration -->
+                            <h3 id="question-text" class="text-xl md:text-2xl font-bold tracking-normal leading-relaxed text-slate-800 playful-font">
+                                Loading sentence...
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coffee Cup Selection Tray -->
+                <div class="flex flex-col justify-center space-y-2">
+                    <div class="text-center">
+                        <span class="text-xs uppercase tracking-widest text-amber-600 font-bold block">DRAG A QUESTION CUP TO THE CANVAS TRAY</span>
+                    </div>
+
+                    <!-- Draggable Options Container -->
+                    <div id="options-container" class="grid grid-cols-3 gap-2 py-2">
+                        <!-- Elements rendered dynamically as interactive boxes acting as drag anchors -->
+                        <div id="drag-btn-0" class="bg-white hover:bg-amber-50 border-2 border-amber-200 rounded-2xl p-2.5 flex flex-col items-center justify-center space-y-1 shadow-sm active:scale-95 transition cursor-pointer select-none">
+                            <span id="opt-emoji-0" class="text-3xl">☕</span>
+                            <span id="opt-word-0" class="text-sm font-extrabold text-amber-800 tracking-wider uppercase playful-font">WHO</span>
+                        </div>
+                        <div id="drag-btn-1" class="bg-white hover:bg-amber-50 border-2 border-amber-200 rounded-2xl p-2.5 flex flex-col items-center justify-center space-y-1 shadow-sm active:scale-95 transition cursor-pointer select-none">
+                            <span id="opt-emoji-1" class="text-3xl">🍵</span>
+                            <span id="opt-word-1" class="text-sm font-extrabold text-amber-800 tracking-wider uppercase playful-font">WHAT</span>
+                        </div>
+                        <div id="drag-btn-2" class="bg-white hover:bg-amber-50 border-2 border-amber-200 rounded-2xl p-2.5 flex flex-col items-center justify-center space-y-1 shadow-sm active:scale-95 transition cursor-pointer select-none">
+                            <span id="opt-emoji-2" class="text-3xl">🥛</span>
+                            <span id="opt-word-2" class="text-sm font-extrabold text-amber-800 tracking-wider uppercase playful-font">WHERE</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Session Victory / Cafe Completed Overlay -->
+        <div id="gameover-screen" class="absolute inset-0 bg-amber-50/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden animate-fade-in">
+            <div class="max-w-md bg-white p-8 rounded-3xl border-4 border-amber-400 shadow-2xl">
+                <div class="text-7xl mb-4">🏆🥐</div>
+                <h2 class="text-3xl font-extrabold text-amber-700 mb-1 playful-font">Perfect Cafe Service!</h2>
+                <p class="text-slate-600 text-sm mb-6">You served all customers with excellent grammar skills!</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6 text-slate-800">
+                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                        <span class="block text-xs text-slate-500 font-bold uppercase">Final Score</span>
+                        <span id="final-score" class="text-2xl font-black text-amber-600">0</span>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                        <span class="block text-xs text-slate-500 font-bold uppercase">Accuracy</span>
+                        <span id="final-accuracy" class="text-2xl font-black text-emerald-600">0%</span>
+                    </div>
+                </div>
+
+                <p id="performance-message" class="text-amber-800 italic mb-6 font-semibold"></p>
+
+                <div class="space-y-3">
+                    <button id="restart-btn" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-white font-black py-4 px-6 rounded-xl shadow-lg shadow-amber-400/20 text-lg playful-font">
+                        Serve More Coffee!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive HUD Action Alert Banner -->
+        <div id="hit-notification" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
+            <div id="hud-text" class="text-5xl md:text-7xl font-black tracking-wider drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] text-center playful-font">
+                CORRECT!
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Gameplay Script -->
+    <script>
+        // High-Performance custom rounded rectangle drawing helper for legacy systems
+        function drawRoundRect(c, x, y, w, h, r) {
+            if (typeof r === 'undefined') r = 0;
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            c.moveTo(x + r, y);
+            c.arcTo(x + w, y, x + w, y + h, r);
+            c.arcTo(x + w, y + h, x, y + h, r);
+            c.arcTo(x, y + h, x, y, r);
+            c.arcTo(x, y, x + w, y, r);
+        }
+
+        // Lazy-loaded Audio elements sequence
+        let audioAssets = {};
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+                try {
+                    audioAssets.correct = new Audio('assets/correct.mp3');
+                    audioAssets.wrong = new Audio('assets/wrong.mp3');
+                    audioAssets.clapping = new Audio('assets/clapping.mp3');
+                    
+                    for (const key in audioAssets) {
+                        audioAssets[key].load();
+                    }
+                } catch(e) {
+                    console.log("Audio deferred initialization.");
+                }
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (type === 'correct') {
+                if (audioAssets.correct) {
+                    audioAssets.correct.play().catch(() => playSynthFallback('correct'));
+                } else {
+                    playSynthFallback('correct');
+                }
+            } else if (type === 'wrong') {
+                if (audioAssets.wrong) {
+                    audioAssets.wrong.play().catch(() => playSynthFallback('wrong'));
+                } else {
+                    playSynthFallback('wrong');
+                }
+            } else if (type === 'win') {
+                if (audioAssets.clapping) {
+                    audioAssets.clapping.play().catch(() => {
+                        if (audioAssets.correct) {
+                            audioAssets.correct.play().catch(() => playSynthFallback('win'));
+                        } else {
+                            playSynthFallback('win');
+                        }
+                    });
+                } else {
+                    playSynthFallback('win');
+                }
+            }
+        }
+
+        // Web Audio Synthesizer fallback if folder path structures are missing/slow
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(90, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'win') {
+                    const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+                        noteGain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.08);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.08 + 0.3);
+                        noteOsc.start(audioCtx.currentTime + idx * 0.08);
+                        noteOsc.stop(audioCtx.currentTime + idx * 0.08 + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        // 20 Simple Grade 1 Question Words ELA Sentences
+        const allQuestions = [
+            { question: "___ is baking the cookies? (The chef)", answer: "who", choices: ["who", "what", "where"] },
+            { question: "___ is inside your big coffee mug? (Hot tea)", answer: "what", choices: ["who", "what", "why"] },
+            { question: "___ is the cozy cafe? (Down the street)", answer: "where", choices: ["where", "when", "why"] },
+            { question: "___ does the cafe open? (At 8 o'clock)", answer: "when", choices: ["when", "which", "where"] },
+            { question: "___ is that boy crying? (Because his milk fell)", answer: "why", choices: ["why", "what", "who"] },
+            { question: "___ sweet cookie do you want? (The red one)", answer: "which", choices: ["which", "who", "when"] },
+            { question: "___ is making the hot cocoa? (The barista)", answer: "who", choices: ["who", "what", "where"] },
+            { question: "___ is on the brown plate? (A warm donut)", answer: "what", choices: ["what", "why", "where"] },
+            { question: "___ did you put the milk? (In the fridge)", answer: "where", choices: ["where", "who", "when"] },
+            { question: "___ do we eat sweet cake? (After lunch)", answer: "when", choices: ["when", "which", "why"] },
+            { question: "___ are you so happy? (Because of my cookie)", answer: "why", choices: ["why", "what", "who"] },
+            { question: "___ drink is yours? (The orange juice)", answer: "which", choices: ["which", "when", "where"] },
+            { question: "___ is sitting on the high stool? (My dad)", answer: "who", choices: ["who", "what", "where"] },
+            { question: "___ are we having for breakfast? (Pancakes)", answer: "what", choices: ["what", "why", "who"] },
+            { question: "___ is the cozy spoon? (Next to the mug)", answer: "where", choices: ["where", "who", "when"] },
+            { question: "___ do you go to sleep? (At bedtime)", answer: "when", choices: ["when", "which", "why"] },
+            { question: "___ is she laughing? (Because the joke was funny)", answer: "why", choices: ["why", "what", "where"] },
+            { question: "___ cupcake do you like? (The pink one)", answer: "which", choices: ["which", "who", "when"] },
+            { question: "___ is holding the silver tray? (The server)", answer: "who", choices: ["who", "what", "where"] },
+            { question: "___ is that cute noise? (It is the kitten)", answer: "what", choices: ["what", "why", "who"] }
+        ];
+
+        let sessionQuestions = [];
+        let currentQuestionIndex = 0;
+
+        // Core Game state machine
+        let score = 0;
+        let streak = 0;
+        let correctAnswers = 0;
+        let activeCorrectAnswer = "";
+        let scaleFactor = 1;
+
+        // Global DOM Elements
+        let canvas, ctx;
+        let logoScreen, startScreen, startBtn, gameplayArea, gameHeader, gameoverScreen, dragHint;
+        let scoreEl, streakEl, questionIndexEl, finalScoreEl, finalAccuracyEl, performanceMessageEl, questionTextEl;
+
+        // Interactive Drag variables
+        let draggableCups = []; // Placed cups waiting to be dragged
+        let draggingCup = null;
+        let dragOffset = { x: 0, y: 0 };
+        let trayTarget = { x: 0, y: 0, r: 0 }; // serving tray coordinates inside canvas
+
+        // Setup DOM Elements safely
+        function initDOMElements() {
+            canvas = document.getElementById("gameCanvas");
+            ctx = canvas ? canvas.getContext("2d") : null;
+
+            logoScreen = document.getElementById("logo-screen");
+            startScreen = document.getElementById("start-screen");
+            startBtn = document.getElementById("start-btn");
+            gameplayArea = document.getElementById("gameplay-area");
+            gameHeader = document.getElementById("game-header");
+            gameoverScreen = document.getElementById("gameover-screen");
+            dragHint = document.getElementById("drag-hint");
+
+            scoreEl = document.getElementById("score");
+            streakEl = document.getElementById("streak");
+            questionIndexEl = document.getElementById("question-index");
+            finalScoreEl = document.getElementById("final-score");
+            finalAccuracyEl = document.getElementById("final-accuracy");
+            performanceMessageEl = document.getElementById("performance-message");
+            questionTextEl = document.getElementById("question-text");
+
+            // Event bindings with safety checks
+            if (startBtn) startBtn.addEventListener('click', onStartGame);
+            
+            const restartBtn = document.getElementById("restart-btn");
+            if (restartBtn) restartBtn.addEventListener('click', onRestartGame);
+
+            if (canvas) {
+                canvas.addEventListener('mousedown', handlePointerDown);
+                canvas.addEventListener('mousemove', handlePointerMove);
+                window.addEventListener('mouseup', handlePointerUp);
+
+                canvas.addEventListener('touchstart', (e) => { handlePointerDown(e); e.preventDefault(); }, {passive: false});
+                canvas.addEventListener('touchmove', (e) => { handlePointerMove(e); e.preventDefault(); }, {passive: false});
+                canvas.addEventListener('touchend', handlePointerUp);
+            }
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const parent = canvas.parentElement;
+            if (!parent) return;
+
+            let w = parent.clientWidth;
+            let h = parent.clientHeight;
+
+            // Safe bounding fallback coordinates if layout engine hasn't computed css yet
+            if (w === 0 || h === 0) {
+                const container = document.querySelector('.relative.w-full');
+                if (container) {
+                    w = container.clientWidth * 0.6;
+                    h = container.clientHeight;
+                }
+            }
+
+            canvas.width = w || 400;
+            canvas.height = h || 400;
+            scaleFactor = Math.min(1, canvas.width / 500);
+
+            // Update Serving Tray target bounds inside Coffee counter vector
+            trayTarget = {
+                x: canvas.width * 0.5,
+                y: canvas.height * 0.76,
+                r: 55 * scaleFactor
+            };
+
+            // Recalculate options coordinates
+            repositionSelectionCups();
+        }
+
+        function prepareSession() {
+            // Shuffle and slice exactly 15 questions
+            const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+            sessionQuestions = shuffled.slice(0, 15);
+            currentQuestionIndex = 0;
+        }
+
+        function initGame() {
+            score = 0;
+            streak = 0;
+            correctAnswers = 0;
+            draggingCup = null;
+
+            if (scoreEl) scoreEl.textContent = score;
+            if (streakEl) streakEl.textContent = "🔥 " + streak;
+
+            prepareSession();
+            loadQuestion();
+            resizeCanvas();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= 15) {
+                endGameSession();
+                return;
+            }
+
+            if (questionIndexEl) questionIndexEl.textContent = `${currentQuestionIndex + 1}/15`;
+            const currentQ = sessionQuestions[currentQuestionIndex];
+            activeCorrectAnswer = currentQ.answer;
+
+            // Load ELA sentence banner
+            if (questionTextEl) {
+                questionTextEl.innerHTML = currentQ.question.replace("___", "<span class='text-amber-500 underline font-black decoration-3 decoration-wavy px-1'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+            }
+
+            // Populate the three selection question word cups
+            for (let i = 0; i < 3; i++) {
+                const word = currentQ.choices[i];
+                const labelEl = document.getElementById(`opt-word-${i}`);
+                if (nameEl = labelEl) {
+                    nameEl.textContent = word.toUpperCase();
+                }
+                const emojiEl = document.getElementById(`opt-emoji-${i}`);
+                if (emojiEl) {
+                    // Map cute icons matching ELA Question word cups
+                    if (word === "who") emojiEl.textContent = "👦";
+                    else if (word === "what") emojiEl.textContent = "🧁";
+                    else if (word === "where") emojiEl.textContent = "🗺️";
+                    else if (word === "when") emojiEl.textContent = "⏰";
+                    else if (word === "why") emojiEl.textContent = "❓";
+                    else if (word === "which") emojiEl.textContent = "🍦";
+                }
+            }
+
+            repositionSelectionCups();
+        }
+
+        // Position options dynamically inside canvas workspace for the Drag experience
+        function repositionSelectionCups() {
+            if (!canvas) return;
+            const currentQ = sessionQuestions[currentQuestionIndex];
+            if (!currentQ) return;
+
+            draggableCups = [];
+            const spacing = canvas.width / 4;
+            const spawnY = canvas.height * 0.42;
+
+            for (let i = 0; i < 3; i++) {
+                const word = currentQ.choices[i];
+                let emoji = "☕";
+                if (word === "who") emoji = "👦";
+                else if (word === "what") emoji = "🧁";
+                else if (word === "where") emoji = "🗺️";
+                else if (word === "when") emoji = "⏰";
+                else if (word === "why") emoji = "❓";
+                else if (word === "which") emoji = "🍦";
+
+                draggableCups.push({
+                    id: i,
+                    word: word,
+                    emoji: emoji,
+                    x: spacing * (i + 1),
+                    y: spawnY,
+                    origX: spacing * (i + 1),
+                    origY: spawnY,
+                    w: 75 * scaleFactor,
+                    h: 70 * scaleFactor,
+                    color: i === 0 ? '#3b82f6' : (i === 1 ? '#fb923c' : '#a855f7') // Cozy Blue, Orange, Purple
+                });
+            }
+        }
+
+        // Pointer Down: Check cup grab
+        function handlePointerDown(e) {
+            initAudio();
+            const coords = getCoordinates(e);
+
+            for (let i = draggableCups.length - 1; i >= 0; i--) {
+                const cup = draggableCups[i];
+                if (coords.x >= cup.x - cup.w/2 && coords.x <= cup.x + cup.w/2 &&
+                    coords.y >= cup.y - cup.h/2 && coords.y <= cup.y + cup.h/2) {
+                    
+                    draggingCup = cup;
+                    dragOffset.x = coords.x - cup.x;
+                    dragOffset.y = coords.y - cup.y;
+                    break;
+                }
+            }
+        }
+
+        function handlePointerMove(e) {
+            if (!draggingCup) return;
+            const coords = getCoordinates(e);
+
+            let newX = coords.x - dragOffset.x;
+            let newY = coords.y - dragOffset.y;
+
+            // Contain boundaries inside Canvas borders
+            draggingCup.x = Math.max(draggingCup.w/2, Math.min(canvas.width - draggingCup.w/2, newX));
+            draggingCup.y = Math.max(draggingCup.h/2, Math.min(canvas.height - draggingCup.h/2, newY));
+        }
+
+        function handlePointerUp() {
+            if (!draggingCup) return;
+
+            // Check if dropped onto the serving tray target zone
+            const dx = draggingCup.x - trayTarget.x;
+            const dy = draggingCup.y - trayTarget.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < trayTarget.r + 20) {
+                // Check if correct word
+                const isCorrect = (draggingCup.word === activeCorrectAnswer);
+                handleAnswerResult(isCorrect);
+            } else {
+                // Snap back to origin immediately
+                draggingCup.x = draggingCup.origX;
+                draggingCup.y = draggingCup.origY;
+            }
+
+            draggingCup = null;
+        }
+
+        function handleAnswerResult(isCorrect) {
+            if (isCorrect) {
+                score += 10 + Math.floor(streak / 3) * 5;
+                streak++;
+                correctAnswers++;
+                playSound('correct');
+                triggerHUDNotification("YUMMY ORDER!", true);
+                
+                currentQuestionIndex++;
+                setTimeout(loadQuestion, 1200);
+            } else {
+                streak = 0;
+                playSound('wrong');
+                triggerHUDNotification("TRY AGAIN!", false);
+                
+                // Snap all back
+                repositionSelectionCups();
+            }
+
+            if (scoreEl) scoreEl.textContent = score;
+            if (streakEl) streakEl.textContent = "🔥 " + streak;
+        }
+
+        function triggerHUDNotification(text, isCorrect) {
+            const hitNotification = document.getElementById("hit-notification");
+            const hudText = document.getElementById("hud-text");
+            if (!hitNotification || !hudText) return;
+
+            hudText.textContent = text;
+            if (isCorrect) {
+                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-emerald-600 drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] text-center playful-font";
+            } else {
+                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-rose-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.1)] text-center playful-font";
+            }
+
+            hitNotification.style.opacity = "1";
+            hitNotification.style.transform = "translate(-50%, -50%) scale(1.1)";
+            
+            setTimeout(() => {
+                hitNotification.style.opacity = "0";
+                hitNotification.style.transform = "translate(-50%, -50%) scale(0.75)";
+            }, 1200);
+        }
+
+        function endGameSession() {
+            if (gameHeader) gameHeader.classList.add("hidden");
+            if (gameplayArea) gameplayArea.classList.add("hidden");
+            if (gameoverScreen) gameoverScreen.classList.remove("hidden");
+            playSound('win');
+
+            if (finalScoreEl) finalScoreEl.textContent = score;
+            const accuracy = Math.round((correctAnswers / 15) * 100);
+            if (finalAccuracyEl) finalAccuracyEl.textContent = accuracy + "%";
+
+            let msg = "";
+            if (accuracy >= 85) {
+                msg = "🏆 Question Master! Your ELA skills are absolutely outstanding!";
+            } else if (accuracy >= 65) {
+                msg = "🥈 Excellent Barista! You completed our coffee service wonderfully!";
+            } else {
+                msg = "☕ Keep learning! Try serving another round of questions to practice!";
+            }
+            if (performanceMessageEl) performanceMessageEl.textContent = msg;
+        }
+
+        function onStartGame() {
+            initAudio();
+            if (startScreen) startScreen.classList.add("hidden");
+            if (gameHeader) gameHeader.classList.remove("hidden");
+            if (gameplayArea) gameplayArea.classList.remove("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        }
+
+        function onRestartGame() {
+            if (gameoverScreen) gameoverScreen.classList.add("hidden");
+            if (gameHeader) gameHeader.classList.remove("hidden");
+            if (gameplayArea) gameplayArea.classList.remove("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        }
+
+        // --- Vector-based Coffee Shop Rendering engine ---
+        function drawCafeBackground() {
+            // Warm cozy wall gradient
+            const wallGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            wallGrad.addColorStop(0, '#fef3c7'); // Warm amber wall
+            wallGrad.addColorStop(0.6, '#fde68a'); // Richer golden wall
+            wallGrad.addColorStop(1, '#fed7aa'); // Orange horizon floor line
+            ctx.fillStyle = wallGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Coffee shelves on back wall
+            ctx.fillStyle = '#b45309'; // Warm brown wood
+            ctx.fillRect(20 * scaleFactor, canvas.height * 0.15, canvas.width - 40 * scaleFactor, 10 * scaleFactor);
+
+            // Cute small decor on shelves
+            ctx.font = `${Math.floor(22 * scaleFactor)}px serif`;
+            ctx.fillText("☕", 60 * scaleFactor, canvas.height * 0.13);
+            ctx.fillText("🌱", 120 * scaleFactor, canvas.height * 0.13);
+            ctx.fillText("🧁", 180 * scaleFactor, canvas.height * 0.13);
+            ctx.fillText("🍯", canvas.width - 80 * scaleFactor, canvas.height * 0.13);
+
+            // Countertop block
+            const counterY = canvas.height * 0.65;
+            const counterH = canvas.height - counterY;
+            ctx.fillStyle = '#78350f'; // Solid dark mahogany counter
+            ctx.fillRect(0, counterY, canvas.width, counterH);
+
+            // Counter laminate highlight trim
+            ctx.fillStyle = '#ea580c';
+            ctx.fillRect(0, counterY, canvas.width, 10 * scaleFactor);
+
+            // Serving tray Target Drop Zone (Pulses smoothly)
+            const pulse = 1 + Math.sin(Date.now() * 0.006) * 0.06;
+            ctx.save();
+            ctx.translate(trayTarget.x, trayTarget.y);
+            
+            // Outer glow pedestal ring
+            ctx.fillStyle = 'rgba(251, 191, 36, 0.15)';
+            ctx.beginPath();
+            ctx.ellipse(0, 5 * scaleFactor, trayTarget.r * pulse, (trayTarget.r * 0.45) * pulse, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Tray plate
+            ctx.fillStyle = '#cbd5e1'; // Silver tray
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 4 * scaleFactor;
+            ctx.beginPath();
+            ctx.ellipse(0, 5 * scaleFactor, trayTarget.r, trayTarget.r * 0.45, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Inner tray rim
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2 * scaleFactor;
+            ctx.beginPath();
+            ctx.ellipse(0, 5 * scaleFactor, trayTarget.r * 0.8, trayTarget.r * 0.35, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Label tag on tray
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+            ctx.beginPath();
+            drawRoundRect(ctx, -40 * scaleFactor, 12 * scaleFactor, 80 * scaleFactor, 18 * scaleFactor, 4 * scaleFactor);
+            ctx.fill();
+            
+            ctx.fillStyle = '#fef08a';
+            ctx.font = `bold ${Math.floor(9 * scaleFactor)}px "Outfit"`;
+            ctx.textAlign = 'center';
+            ctx.fillText("SERVE HERE", 0, 24 * scaleFactor);
+
+            ctx.restore();
+        }
+
+        function drawCharacters() {
+            // Friendly Barista on Left behind counter
+            const baristaX = canvas.width * 0.22;
+            const baristaY = canvas.height * 0.46;
+
+            ctx.save();
+            ctx.translate(baristaX, baristaY);
+
+            // Green apron chest block
+            ctx.fillStyle = '#047857'; 
+            ctx.beginPath();
+            ctx.moveTo(-20 * scaleFactor, 70 * scaleFactor);
+            ctx.lineTo(-12 * scaleFactor, 25 * scaleFactor);
+            ctx.lineTo(12 * scaleFactor, 25 * scaleFactor);
+            ctx.lineTo(20 * scaleFactor, 70 * scaleFactor);
+            ctx.closePath();
+            ctx.fill();
+
+            // Face Skin
+            ctx.fillStyle = '#ffedd5';
+            ctx.beginPath();
+            ctx.arc(0, 0, 20 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hair/Cap
+            ctx.fillStyle = '#1e293b'; // Black cap
+            ctx.beginPath();
+            ctx.arc(-2 * scaleFactor, -8 * scaleFactor, 21 * scaleFactor, Math.PI, 0);
+            ctx.fill();
+            ctx.fillRect(-22 * scaleFactor, -8 * scaleFactor, 44 * scaleFactor, 6 * scaleFactor);
+
+            // Face Smile
+            ctx.strokeStyle = '#9d174d';
+            ctx.lineWidth = 2.5 * scaleFactor;
+            ctx.beginPath();
+            ctx.arc(0, 4 * scaleFactor, 6 * scaleFactor, 0, Math.PI);
+            ctx.stroke();
+
+            // Big friendly eyes
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(-7 * scaleFactor, -3 * scaleFactor, 3 * scaleFactor, 0, Math.PI * 2);
+            ctx.arc(7 * scaleFactor, -3 * scaleFactor, 3 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+
+            // Cozy Customer on Right waiting
+            const customerX = canvas.width * 0.78;
+            const customerY = canvas.height * 0.44;
+
+            ctx.save();
+            ctx.translate(customerX, customerY);
+
+            // Cozy yellow collar sweater
+            ctx.fillStyle = '#f97316'; 
+            ctx.beginPath();
+            ctx.moveTo(-18 * scaleFactor, 75 * scaleFactor);
+            ctx.lineTo(-10 * scaleFactor, 25 * scaleFactor);
+            ctx.lineTo(10 * scaleFactor, 25 * scaleFactor);
+            ctx.lineTo(18 * scaleFactor, 75 * scaleFactor);
+            ctx.closePath();
+            ctx.fill();
+
+            // Face
+            ctx.fillStyle = '#fed7aa';
+            ctx.beginPath();
+            ctx.arc(0, 0, 21 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Soft brown wavy hair
+            ctx.fillStyle = '#78350f';
+            ctx.beginPath();
+            ctx.arc(0, -10 * scaleFactor, 23 * scaleFactor, Math.PI, 0);
+            ctx.fill();
+
+            // Happy smile
+            ctx.strokeStyle = '#ea580c';
+            ctx.lineWidth = 3 * scaleFactor;
+            ctx.beginPath();
+            ctx.arc(0, 3 * scaleFactor, 8 * scaleFactor, 0, Math.PI);
+            ctx.stroke();
+
+            // Big curious ELA eyes
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(-7 * scaleFactor, -4 * scaleFactor, 3.5 * scaleFactor, 0, Math.PI * 2);
+            ctx.arc(7 * scaleFactor, -4 * scaleFactor, 3.5 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Draw Coffee Cup selections
+        function drawCupOptions() {
+            draggableCups.forEach(cup => {
+                ctx.save();
+                ctx.translate(cup.x, cup.y);
+
+                // Add nice selection glow
+                ctx.shadowColor = 'rgba(15, 23, 42, 0.15)';
+                ctx.shadowBlur = 8;
+
+                // Cup Mug Body (Handled vector style)
+                ctx.fillStyle = cup.color;
+                ctx.beginPath();
+                drawRoundRect(ctx, -cup.w/2, -cup.h/3, cup.w, cup.h * 0.8, 12 * scaleFactor);
+                ctx.fill();
+
+                // Cup Side Handle
+                ctx.strokeStyle = cup.color;
+                ctx.lineWidth = 7 * scaleFactor;
+                ctx.beginPath();
+                ctx.arc(cup.w/2, 0, cup.h/5, -Math.PI/2, Math.PI/2);
+                ctx.stroke();
+
+                // White paper badge front on cup for text
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                drawRoundRect(ctx, -cup.w/2.4, -cup.h/6, cup.w/1.2, cup.h * 0.45, 6 * scaleFactor);
+                ctx.fill();
+
+                // Question word label inside white badge
+                ctx.shadowColor = 'transparent';
+                ctx.fillStyle = '#374151';
+                ctx.font = `bold ${Math.floor(14 * scaleFactor)}px "Fredoka One"`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(cup.word.toUpperCase(), 0, 0);
+
+                // Draw floating tiny food/drink emoji above cup
+                ctx.font = `${Math.floor(21 * scaleFactor)}px Arial`;
+                ctx.fillText(cup.emoji, 0, -cup.h * 0.65);
+
+                ctx.restore();
+            });
+        }
+
+        function draw() {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawCafeBackground();
+            drawCharacters();
+
+            if (gameState === 'PLAYING') {
+                drawCupOptions();
+            }
+        }
+
+        // Core animation runner ticks
+        function gameLoop() {
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Safe initializations sequencing 
+        let logoTimerStarted = false;
+        function startLogoTimer() {
+            if (logoTimerStarted) return;
+            logoTimerStarted = true;
+
+            initDOMElements(); // Run safe selector bindings
+            resizeCanvas();
+            requestAnimationFrame(gameLoop);
+
+            // Fade and hide intro splash panel exactly at 5 seconds
+            setTimeout(() => {
+                const logoScreenEl = document.getElementById("logo-screen");
+                const startScreenEl = document.getElementById("start-screen");
+                if (logoScreenEl) {
+                    logoScreenEl.classList.add("opacity-0");
+                    setTimeout(() => {
+                        logoScreenEl.classList.add("hidden");
+                        if (startScreenEl) {
+                            startScreenEl.classList.remove("hidden");
+                        }
+                        gameState = 'START';
+                    }, 1000);
+                }
+            }, 5000);
+        }
+
+        // Safeguard DOM states on boot
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            startLogoTimer();
+        } else {
+            document.addEventListener('DOMContentLoaded', startLogoTimer);
+        }
+    </script>
+</body>
+</html>
