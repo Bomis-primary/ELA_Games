@@ -43,8 +43,8 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-6 text-slate-800">
 
-    <!-- Main Game Container -->
-    <div class="relative w-full max-w-5xl bg-amber-50 rounded-3xl border-4 border-amber-400 shadow-2xl shadow-amber-900/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
+    <!-- Main Game Container with stable responsive height to prevent collapse -->
+    <div class="relative w-full max-w-5xl bg-amber-50 rounded-3xl border-4 border-amber-400 shadow-2xl shadow-amber-900/10 overflow-hidden flex flex-col h-[92vh] md:h-[650px]">
         
         <!-- Header / Stats Dashboard HUD (Visible during gameplay) -->
         <header id="game-header" class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 px-4 py-3 border-b-2 border-amber-400 flex flex-wrap justify-between items-center gap-2 z-10 hidden">
@@ -103,7 +103,7 @@
         </div>
 
         <!-- Main Gameplay Split-Screen Area (Canvas Left/Top, Question Right/Bottom) -->
-        <div id="gameplay-area" class="flex-grow flex flex-col lg:flex-row h-[70vh] md:h-[550px] relative hidden">
+        <div id="gameplay-area" class="flex-grow flex flex-col lg:flex-row h-full relative hidden animate-fade-in">
             
             <!-- Left Side: Cozy Room Canvas (Preserves drag coordinate scaling) -->
             <div class="w-full lg:w-3/5 h-1/2 lg:h-full relative bg-sky-50 border-r-0 lg:border-r-2 lg:border-b-0 border-b-2 border-amber-200 flex items-center justify-center">
@@ -491,7 +491,7 @@
         // UI HTML Selectors
         const logoScreen = document.getElementById("logo-screen");
         const startScreen = document.getElementById("start-screen");
-        const startBtn = document.getElementById("start-btn"); // Declared missing selector variable
+        const startBtn = document.getElementById("start-btn"); // Selector variable declared safely
         const gameplayArea = document.getElementById("gameplay-area");
         const gameHeader = document.getElementById("game-header");
         const gameoverScreen = document.getElementById("gameover-screen");
