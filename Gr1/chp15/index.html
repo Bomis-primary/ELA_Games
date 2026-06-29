@@ -138,17 +138,9 @@
 
   <!-- ==========================================
        SCREEN 2: START / TITLE SCREEN
+       The logo has been removed from this screen to focus on the game instructions.
        ========================================== -->
   <div id="screen-start" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full relative z-10">
-    <div class="mb-6 drop-shadow-xl">
-      <img 
-        src="assets/innovine-logo.png" 
-        class="w-40 h-40 md:w-48 md:h-48 object-contain" 
-        alt="Innovine Logo"
-        onerror="handleLogoError(this)"
-      />
-    </div>
-
     <div class="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 shadow-2xl border-4 border-[#00bcd4] text-center w-full max-w-xl">
       <h1 class="text-3xl md:text-5xl font-fun font-black text-[#006064] tracking-wide mb-3 leading-tight drop-shadow-md">
         🫧 Bubble Burst Phonics
@@ -371,6 +363,7 @@
         <path d="M47,54 L53,54 L50,60 Z" fill="#ffb300" />
         <path d="M35,53 C30,55 30,65 35,65 Z" fill="#ffe082" />
         <path d="M65,53 C70,55 70,65 65,65 Z" fill="#ffe082" />
+        <!-- Red wattle -->
         <path d="M49,60 C47,65 53,65 51,60 Z" fill="#e53935" />
       </svg>`,
       "cat": `<svg viewBox="0 0 100 100" class="w-16 h-16">
@@ -378,10 +371,13 @@
         <circle cx="50" cy="50" r="32" fill="#b0bec5" />
         <path d="M22,28 L35,42 L18,45 Z" fill="#90a4ae" />
         <path d="M78,28 L65,42 L82,45 Z" fill="#90a4ae" />
+        <!-- Inner Ears -->
         <path d="M24,32 L31,41 L21,43 Z" fill="#ff8a80" />
         <path d="M76,32 L69,41 L79,43 Z" fill="#ff8a80" />
+        <!-- Eyes -->
         <circle cx="38" cy="46" r="4.5" fill="#263238" />
         <circle cx="62" cy="46" r="4.5" fill="#263238" />
+        <!-- Nose -->
         <polygon points="46,55 54,55 50,60" fill="#ff8a80" />
         <line x1="26" y1="56" x2="12" y2="54" stroke="#37474f" stroke-width="2" />
         <line x1="26" y1="60" x2="10" y2="60" stroke="#37474f" stroke-width="2" />
@@ -389,28 +385,39 @@
         <line x1="74" y1="60" x2="90" y2="60" stroke="#37474f" stroke-width="2" />
       </svg>`,
       "dog": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <!-- Friendly brown dog with floppy ears -->
         <circle cx="50" cy="50" r="30" fill="#ffb74d" />
+        <!-- Ears -->
         <ellipse cx="18" cy="48" rx="8" ry="18" fill="#a1887f" transform="rotate(15 18 48)" />
         <ellipse cx="82" cy="48" rx="8" ry="18" fill="#a1887f" transform="rotate(-15 82 48)" />
+        <!-- Eyes -->
         <circle cx="39" cy="44" r="3.5" fill="#3e2723" />
         <circle cx="61" cy="44" r="3.5" fill="#3e2723" />
+        <!-- Snout -->
         <ellipse cx="50" cy="58" rx="14" ry="10" fill="#fff" />
         <ellipse cx="50" cy="54" rx="6" ry="4" fill="#3e2723" />
+        <!-- Tongue -->
         <path d="M46,63 Q50,75 54,63 Z" fill="#ff5252" />
       </svg>`,
       "pig": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <!-- Cute Pink Pig -->
         <circle cx="50" cy="50" r="32" fill="#f8bbd0" />
+        <!-- Snout -->
         <ellipse cx="50" cy="56" rx="14" ry="10" fill="#f48fb1" />
         <circle cx="45" cy="56" r="2.5" fill="#880e4f" />
         <circle cx="55" cy="56" r="2.5" fill="#880e4f" />
+        <!-- Eyes -->
         <circle cx="36" cy="42" r="3" fill="#880e4f" />
         <circle cx="64" cy="42" r="3" fill="#880e4f" />
+        <!-- Ears -->
         <polygon points="20,32 32,18 36,36" fill="#f48fb1" />
         <polygon points="80,32 68,18 64,36" fill="#f48fb1" />
       </svg>`,
       "bus": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <!-- Bright Yellow School Bus -->
         <rect x="15" y="32" width="70" height="34" rx="6" fill="#fdd835" />
         <rect x="70" y="32" width="15" height="34" rx="4" fill="#fbc02d" />
+        <!-- Windows -->
         <rect x="22" y="38" width="12" height="12" rx="2" fill="#e0f7fa" />
         <rect x="38" y="38" width="12" height="12" rx="2" fill="#e0f7fa" />
         <rect x="54" y="38" width="12" height="12" rx="2" fill="#e0f7fa" />
@@ -420,19 +427,25 @@
         <circle cx="70" cy="68" r="4" fill="#cfd8dc" />
       </svg>`,
       "wet": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <!-- Rain cloud spilling raindrops (Wet) -->
         <path d="M30,55 C20,55 15,45 22,35 C20,25 35,15 45,22 C55,15 70,22 68,32 C78,32 80,45 72,55 Z" fill="#cfd8dc" />
+        <!-- Raindrops -->
         <path d="M32,64 L34,74 C34,75 32,77 32,74 Z" stroke="#29b6f6" stroke-width="3" stroke-linecap="round" />
         <path d="M50,68 L52,78 C52,79 50,81 50,78 Z" stroke="#29b6f6" stroke-width="3" stroke-linecap="round" />
         <ellipse cx="50" cy="85" rx="25" ry="4" fill="#29b6f6" opacity="0.5" />
       </svg>`,
       "sun": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <!-- Smiling orange-yellow sun -->
         <circle cx="50" cy="50" r="22" fill="#ffb74d" />
+        <!-- Sunbeams -->
         <path d="M50,12 L50,22 M50,78 L50,88 M12,50 L22,50 M78,50 L88,50" stroke="#ffa726" stroke-width="5" stroke-linecap="round" />
         <circle cx="43" cy="46" r="2.5" fill="#37474f" />
         <circle cx="57" cy="46" r="2.5" fill="#37474f" />
         <path d="M44,54 Q50,60 56,54" stroke="#37474f" stroke-width="2.5" stroke-linecap="round" fill="none" />
       </svg>`,
       "cob": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <!-- Yellow Corn Cob with green husks -->
+        <!-- Corn Core -->
         <rect x="42" y="24" width="16" height="46" rx="8" fill="#fbc02d" />
         <circle cx="46" cy="32" r="2" fill="#fff59d" />
         <circle cx="54" cy="32" r="2" fill="#fff59d" />
@@ -442,11 +455,13 @@
         <path d="M66,42 Q60,65 56,72 L58,76" stroke="#4caf50" stroke-width="3" fill="none" stroke-linecap="round" />
       </svg>`,
       "red": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <!-- Bright glossy red Apple -->
         <path d="M50,30 C30,26 22,46 22,60 C22,76 40,86 50,78 Q50,30 50,30 Z" fill="#e53935" />
         <path d="M50,30 Q54,18 60,18" stroke="#8d6e63" stroke-width="4" stroke-linecap="round" fill="none" />
         <path d="M50,28 Q42,18 42,26 Z" fill="#4caf50" />
       </svg>`,
       "pen": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <!-- Friendly blue writing Pen -->
         <rect x="46" y="24" width="8" height="48" rx="2" fill="#29b6f6" />
         <rect x="44" y="20" width="12" height="16" rx="1" fill="#0288d1" />
         <polygon points="46,72 54,72 50,82" fill="#cfd8dc" />
