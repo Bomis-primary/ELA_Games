@@ -46,6 +46,7 @@
 
   <!-- ==========================================
        SCREEN 1: 5-SECOND SPLASH SCREEN
+       Contains strictly ONLY the logo as requested
        ========================================== -->
   <div id="screen-splash" class="flex-1 flex flex-col items-center justify-center bg-[#FAF5F0]">
     <div class="transition-all duration-1000 scale-125 p-4 animate-pulse">
@@ -56,9 +57,6 @@
         alt="Innovine Logo"
         onerror="handleLogoError(this)"
       />
-    </div>
-    <div class="mt-8 text-sm tracking-widest text-[#B5835A] uppercase font-black animate-bounce">
-      Loading Learning Journey...
     </div>
   </div>
 
@@ -384,7 +382,7 @@
     const QUESTIONS_POOL = [
       { id: 1, character: 'barista_female', questionWord: 'Who', questionText: '... is wiping down the sticky counter?', options: [{ id: 'a', label: 'The Barista', svgType: 'barista_helper', isCorrect: true }, { id: 'b', label: 'Coffee Cup', svgType: 'coffee_cup', isCorrect: false }, { id: 'c', label: 'Evening Star', svgType: 'moon', isCorrect: false }] },
       { id: 2, character: 'customer_boy', questionWord: 'Where', questionText: '... do we sit to enjoy our sweet treats?', options: [{ id: 'a', label: 'A Cookie', svgType: 'cookie', isCorrect: false }, { id: 'b', label: 'Cozy Table', svgType: 'table', isCorrect: true }, { id: 'c', label: 'Tomorrow', svgType: 'clock_day', isCorrect: false }] },
-      { id: 3, character: 'barista_male', questionWord: 'What', questionText: '... is hot, sweet, and inside this mug?', options: [{ id: 'a', label: 'A Spoon', svgType: 'spoon', isCorrect: false }, { id: 'b', label: 'The Baker', svgType: 'baker', isCorrect: false }, { id: 'c', label: 'Hot Cocoa', svgType: 'hot_cocoa', isCorrect: true }] },
+      { id: 3, character: 'barista_male', questionWord: 'What', questionText: '... is hot, sweet, and inside this mug?', options: [{ id: 'a', label: 'A Spoon', svgType: 'spoon', isCorrect: false }, { id: 'b', label: 'The Baker', svgType: 'baker', isCorrect: false }, { id: 'c', fill: '#000', label: 'Hot Cocoa', svgType: 'hot_cocoa', isCorrect: true }] },
       { id: 4, character: 'customer_girl', questionWord: 'When', questionText: '... does the cozy shop open for breakfast?', options: [{ id: 'a', label: 'Sunny Morning', svgType: 'clock_day', isCorrect: true }, { id: 'b', label: 'Pink Donut', svgType: 'donut_pink', isCorrect: false }, { id: 'c', label: 'Happy Customer', svgType: 'customer_boy_opt', isCorrect: false }] },
       { id: 5, character: 'barista_female', questionWord: 'Why', questionText: '... are you smiling so big today?', options: [{ id: 'a', label: '"Yummy cake!"', svgType: 'yummy_cake_reason', isCorrect: true }, { id: 'b', label: 'Under Table', svgType: 'table_under', isCorrect: false }, { id: 'c', label: 'Sugar Jar', svgType: 'sugar_jar', isCorrect: false }] },
       { id: 6, character: 'customer_boy', questionWord: 'Which', questionText: '... sweet donut has pink frosting?', options: [{ id: 'a', label: 'Choco Donut', svgType: 'donut_brown', isCorrect: false }, { id: 'b', label: 'Lemon Donut', svgType: 'donut_yellow', isCorrect: false }, { id: 'c', label: 'Pink Donut', svgType: 'donut_pink', isCorrect: true }] },
