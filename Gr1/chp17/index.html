@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Hungry Phonics Worm</title>
+  <!-- Tailwind CSS CDN for modern grid, text, and flexible box layout utilities -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for friendly, playful preschool typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    .font-fun {
+      font-family: 'Fredoka One', cursive;
+    }
+
+    /* Vibrant, sunny orchard field background */
+    .bg-orchard {
+      background: linear-gradient(180deg, #7ec0ee 0%, #b3e5fc 40%, #81c784 75%, #4caf50 100%);
+      background-size: 400% 400%;
+      animation: windBlow 15s ease infinite;
+    }
+
+    @keyframes windBlow {
+      0%, 100% { background-position: 50% 0%; }
+      50% { background-position: 50% 100%; }
+    }
+
+    /* Bobbing elements for arcade screens */
+    @keyframes bob {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(0.5deg); }
+    }
+    .animate-bob {
+      animation: bob 4s ease-in-out infinite;
+    }
+
+    /* Wiggle/Shake feedback on wrong apples */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.3s ease-in-out;
+    }
+
+    /* Game canvas scaling wrapper style */
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      aspect-ratio: 3 / 2;
+      background: #c8e6c9;
+      border: 6px solid #2e7d32;
+      border-radius: 1.5rem;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15), inset 0 0 20px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-orchard text-[#1b5e20] min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+
+  <!-- Background rising bubbles / leaves decoration -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-15">
+    <div class="absolute bg-white rounded-full w-24 h-6 top-10 left-10"></div>
+    <div class="absolute bg-white rounded-full w-40 h-10 top-20 right-16"></div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 1: 5-SECOND SPLASH SCREEN
+       Contains strictly ONLY the logo as requested
+       ========================================== -->
+  <div id="screen-splash" class="flex-1 flex flex-col items-center justify-center relative z-10 bg-white">
+    <div class="scale-110 animate-pulse">
+      <img 
+        id="splash-logo" 
+        src="assets/innovine-logo.png" 
+        class="w-72 h-72 md:w-80 md:h-80 object-contain" 
+        alt="Innovine Logo"
+        onerror="handleLogoError(this)"
+      />
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 2: START / TITLE SCREEN
+       No Logo on this slide as requested
+       ========================================== -->
+  <div id="screen-start" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full relative z-10">
+    <div class="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 shadow-2xl border-4 border-[#388e3c] text-center w-full max-w-xl">
+      <h1 class="text-3xl md:text-5xl font-fun font-black text-[#1b5e20] tracking-wide mb-3 leading-tight drop-shadow-md">
+        🚂 Train Express: Double Consonants
+      </h1>
+      <p class="text-sm md:text-base font-extrabold text-[#388e3c] uppercase tracking-widest mb-8">
+        Phonics Sorting Mission
+      </p>
+
+      <div class="bg-[#e8f5e9] rounded-3xl p-6 border border-[#81c784]/40 text-left space-y-4 mb-8 shadow-inner font-semibold">
+        <h2 class="font-fun font-black text-[#1b5e20] text-lg md:text-xl">Mission Briefing:</h2>
+        <ul class="text-sm md:text-base space-y-3 text-[#2e7d32] list-disc list-inside">
+          <li>Help the cute little worm slither around and eat juicy apples! 🍎</li>
+          <li>Look at the spelling puzzle and picture card at the top.</li>
+          <li>Find the apple that holds the correct <strong>vowel combination</strong>!</li>
+          <li><strong>Controls:</strong> Use Arrow Keys, click the on-screen buttons, or simply <strong>tap inside the field</strong> to guide the worm!</li>
+          <li>You have <strong>2 tries</strong> per word. Happy eating! 🐛</li>
+        </ul>
+      </div>
+
+      <button
+        onclick="startGame()"
+        class="w-full bg-[#ffb74d] hover:bg-[#ffa726] text-white font-fun font-black text-xl md:text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-[#fb8c00] uppercase tracking-wider animate-bounce"
+      >
+        Start Arcade 🕹️
+      </button>
+    </div>
+
+    <div class="mt-8 text-xs text-[#2e7d32] font-bold">
+      Compatible with Phones, Tablets, & Laptops • Optimized for Low Bandwidth
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 3: GAMEPLAY SCREEN
+       ========================================== -->
+  <div id="screen-game" class="hidden flex-1 flex flex-col w-full max-w-5xl mx-auto p-3 md:p-6 justify-between relative z-10">
+    
+    <!-- Top Progress, Score, and Target Task Bar -->
+    <div class="flex items-center justify-between bg-white/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-[#81c784]/30 mb-4">
+      <div class="flex flex-col">
+        <span id="level-indicator" class="text-xs md:text-sm font-black uppercase text-[#2e7d32] tracking-widest">LEVEL 1: IDENTIFICATION</span>
+        <span id="game-progress-text" class="text-lg md:text-xl font-black text-[#1b5e20]">Question 1 / 15</span>
+      </div>
+
+      <!-- Grass Track Progress Bar -->
+      <div class="flex-1 mx-6 h-3 bg-[#c8e6c9] rounded-full overflow-hidden hidden md:block relative border border-[#81c784]/20">
+        <div id="game-progress-bar" class="h-full bg-gradient-to-r from-[#81c784] to-[#2e7d32] transition-all duration-500 rounded-full" style="width: 0%"></div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <!-- Tries indicator -->
+        <div id="tries-box" class="flex items-center space-x-1 bg-white px-3 py-1.5 rounded-full border border-orange-400/30">
+          <span class="text-xs font-bold text-orange-500">TRIES LEFT:</span>
+          <span id="tries-count" class="font-black text-orange-500 text-sm">2</span>
+        </div>
+
+        <!-- Score Counter -->
+        <div class="flex items-center space-x-2 bg-[#e8f5e9] px-4 py-1.5 rounded-full border border-[#81c784]">
+          <span class="text-lg">⭐</span>
+          <span id="game-score-text" class="font-black text-[#1b5e20]">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Arcade Cabinet Frame with Wooden Border -->
+    <div id="game-cabinet" class="flex-1 bg-white/60 backdrop-blur-md rounded-[2.5rem] p-4 md:p-6 shadow-2xl border-4 border-[#2e7d32] flex flex-col justify-between relative mb-4">
+      
+      <!-- Top Section: Spelling Board & SVG Picture Hint -->
+      <div class="flex items-center justify-between bg-[#3e2723] text-white rounded-2xl p-3 border-2 border-[#8d6e63] mb-4">
+        
+        <!-- Interactive Letter Puzzle Blank -->
+        <div class="flex-1 pl-4">
+          <p id="task-level-title" class="text-[10px] md:text-xs font-black uppercase text-yellow-400 tracking-wider">Level 1: Spelling Help</p>
+          <h2 id="task-spelling-puzzle" class="text-3xl md:text-4xl font-fun font-black tracking-widest mt-1">
+            R _ _ N
+          </h2>
+        </div>
+
+        <!-- Custom high quality SVG Picture card for assisting Grade 1 kids -->
+        <div id="task-image-box" class="w-16 h-16 md:w-20 md:h-20 bg-white rounded-xl p-1 flex items-center justify-center border-2 border-yellow-400 flex-shrink-0">
+          <!-- Loaded dynamically -->
+        </div>
+
+      </div>
+
+      <!-- Live interactive prompt / tries alert info bubble -->
+      <div class="text-center min-h-[22px] mb-2">
+        <p id="hint-feedback" class="text-sm font-bold text-orange-600 animate-pulse">
+          Guide the worm to eat the right apple!
+        </p>
+      </div>
+
+      <!-- Arcade Active Steering Arena -->
+      <div class="flex justify-center items-center w-full relative">
+        <div class="canvas-container w-full" id="canvas-wrapper">
+          <canvas id="gameCanvas" class="w-full h-full block bg-[#dcedc8]"></canvas>
+        </div>
+      </div>
+
+      <!-- Bottom Dashboard Controls (Keyboard arrows helper & mobile d-pad) -->
+      <div class="w-full flex flex-col items-center justify-center pt-4 border-t border-[#81c784]/20 mt-4">
+        
+        <!-- On-Screen Steer Helper for small touch screens -->
+        <div class="flex items-center justify-between w-full max-w-sm px-2">
+          
+          <div class="text-[10px] md:text-xs font-black uppercase text-emerald-800 tracking-widest hidden sm:block">
+            Use arrows, tap screen, or press buttons:
+          </div>
+
+          <!-- Mobile Virtual D-pad arrows -->
+          <div class="flex items-center gap-1 mx-auto">
+            <button onclick="steerWorm('left')" class="w-12 h-12 bg-amber-500 hover:bg-amber-400 text-white font-black text-2xl rounded-full shadow border-b-4 border-amber-700 active:translate-y-1">◀</button>
+            <div class="flex flex-col gap-1">
+              <button onclick="steerWorm('up')" class="w-12 h-12 bg-amber-500 hover:bg-amber-400 text-white font-black text-2xl rounded-full shadow border-b-4 border-amber-700 active:translate-y-1">▲</button>
+              <button onclick="steerWorm('down')" class="w-12 h-12 bg-amber-500 hover:bg-amber-400 text-white font-black text-2xl rounded-full shadow border-b-4 border-amber-700 active:translate-y-1">▼</button>
+            </div>
+            <button onclick="steerWorm('right')" class="w-12 h-12 bg-amber-500 hover:bg-amber-400 text-white font-black text-2xl rounded-full shadow border-b-4 border-amber-700 active:translate-y-1">▶</button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       SCREEN 4: END / SUMMARY SCREEN
+       ========================================== -->
+  <div id="screen-summary" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-lg mx-auto w-full relative z-10">
+    <div class="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-[#4caf50] text-center w-full animate-bob">
+      <span id="trophy-emoji" class="text-7xl block mb-4">🏆</span>
+      
+      <h1 id="trophy-title" class="text-3xl md:text-4xl font-fun font-black text-[#1b5e20] mb-1">Stellar Splaster!</h1>
+      <p id="trophy-msg" class="text-sm md:text-base font-extrabold text-[#2e7d32] uppercase tracking-widest mb-8">
+        Phonics Mission Complete!
+      </p>
+
+      <!-- Scoreboard Container -->
+      <div class="bg-[#e8f5e9] rounded-3xl p-6 border-2 border-[#81c784]/30 space-y-4 mb-8 shadow-inner font-bold text-[#2e7d32]">
+        <div class="flex justify-between items-center text-lg md:text-xl font-black text-[#1b5e20]">
+          <span>Total Score:</span>
+          <span id="final-score" class="text-3xl font-black text-[#ff9800]">0 / 15</span>
+        </div>
+        <p id="summary-feedback" class="text-xs md:text-sm text-left leading-relaxed border-t border-[#81c784]/20 pt-3 font-semibold">
+          Excellent job! You correctly navigated standalone double consonant letter recognition and application inside spelling bubbles.
+        </p>
+      </div>
+
+      <button
+        onclick="location.reload()"
+        class="w-full bg-[#ffb74d] hover:bg-[#ffa726] text-white font-fun font-black text-2xl py-5 px-8 rounded-2xl shadow-lg transition-all transform active:scale-95 border-b-4 border-[#fb8c00] uppercase tracking-wider"
+      >
+        PLAY AGAIN
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       AUDIO ELEMENTS
+       ========================================== -->
+  <audio id="correctSound" src="assets/correct.mp3" preload="auto"></audio>
+  <audio id="wrongSound" src="assets/wrong.mp3" preload="auto"></audio>
+  <audio id="clapSound" src="assets/clapping.mp3" preload="auto"></audio>
+
+  <!-- ==========================================
+       GAME ENGINE & INTERACTIVITY
+       ========================================== -->
+  <script>
+    // System fallback branding logo error handler
+    // Native SVG backups are used in case relative file pathways are restricted
+    function handleLogoError(img) {
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"><circle cx="50" cy="50" r="45" fill="%231b5e20" stroke="%2381c784" stroke-width="4"/><text x="50" y="62" fill="%23FFF" font-size="34" font-weight="bold" text-anchor="middle">?</text></svg>';
+    }
+
+    // 20 BACKEND QUESTION POOL WITH STANDALONE VOWEL COMBINATIONS AND CVC PUZZLES
+    const ALL_GAMES_POOL = [
+      { id: 1, word: "RAIN", text: "R _ _ N", correct: "ai", imageKey: "rain", distractors: ["oa", "ee"] },
+      { id: 2, word: "BOAT", text: "B _ _ T", correct: "oa", imageKey: "boat", distractors: ["ai", "oo"] },
+      { id: 3, word: "TREE", text: "T R _ _", correct: "ee", imageKey: "tree", distractors: ["ea", "ay"] },
+      { id: 4, word: "LEAF", text: "L _ _ F", correct: "ea", imageKey: "leaf", distractors: ["ee", "oo"] },
+      { id: 5, word: "GOAT", text: "G _ _ T", correct: "oa", imageKey: "goat", distractors: ["ou", "ai"] },
+      { id: 6, word: "BOOK", text: "B _ _ K", correct: "oo", imageKey: "book", distractors: ["ee", "ea"] },
+      { id: 7, word: "HOUSE", text: "H _ _ S E", correct: "ou", imageKey: "house", distractors: ["oi", "oo"] },
+      { id: 8, word: "TRAIN", text: "T R _ _ N", correct: "ai", imageKey: "train", distractors: ["ay", "ee"] },
+      { id: 9, word: "PLAY", text: "P L _ _", correct: "ay", imageKey: "play", distractors: ["ai", "ea"] },
+      { id: 10, word: "SEED", text: "S _ _ D", correct: "ee", imageKey: "seed", distractors: ["oa", "oo"] },
+      { id: 11, word: "COAT", text: "C _ _ T", correct: "oa", imageKey: "coat", distractors: ["ai", "ou"] },
+      { id: 12, word: "FOOT", text: "F _ _ T", correct: "oo", imageKey: "foot", distractors: ["ee", "ea"] },
+      { id: 13, word: "MOUSE", text: "M _ _ S E", correct: "ou", imageKey: "mouse", distractors: ["oo", "oi"] },
+      { id: 14, word: "MAIL", text: "M _ _ L", correct: "ai", imageKey: "mail", distractors: ["ay", "ee"] },
+      { id: 15, word: "DAY", text: "D _ _", correct: "ay", imageKey: "day", distractors: ["ai", "ea"] },
+      { id: 16, word: "JEEP", text: "J _ _ P", correct: "ee", imageKey: "jeep", distractors: ["ea", "oo"] },
+      { id: 17, word: "MEAT", text: "M _ _ T", correct: "ea", imageKey: "meat", distractors: ["ee", "ai"] },
+      { id: 18, word: "ROAD", text: "R _ _ D", correct: "oa", imageKey: "road", distractors: ["oo", "ou"] },
+      { id: 19, word: "SPOON", text: "S P _ _ N", correct: "oo", imageKey: "spoon", distractors: ["ee", "oa"] },
+      { id: 20, word: "CLOUD", text: "C L _ _ D", correct: "ou", imageKey: "cloud", distractors: ["oo", "oi"] }
+    ];
+
+    // High quality vector SVGs specifically crafted to be easily recognized by Grade 1 students
+    const VISUAL_HINTS = {
+      "rain": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M25,50 C25,40 35,35 45,38 C48,28 62,25 70,34 C78,34 82,42 80,50 Z" fill="#b3e5fc" stroke="#81d4fa" stroke-width="2"/>
+        <line x1="35" y1="58" x2="30" y2="72" stroke="#29b6f6" stroke-width="3" stroke-linecap="round"/>
+        <line x1="50" y1="62" x2="45" y2="76" stroke="#29b6f6" stroke-width="3" stroke-linecap="round"/>
+        <line x1="65" y1="58" x2="60" y2="72" stroke="#29b6f6" stroke-width="3" stroke-linecap="round"/>
+      </svg>`,
+      "boat": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M20,55 L80,55 L70,72 L30,72 Z" fill="#ff7043" stroke="#e64a19" stroke-width="2"/>
+        <line x1="50" y1="55" x2="50" y2="20" stroke="#5d4037" stroke-width="3"/>
+        <polygon points="50,20 75,38 50,42" fill="#fff" stroke="#cfd8dc" stroke-width="1.5"/>
+        <path d="M10,72 Q50,78 90,72" stroke="#29b6f6" stroke-width="3" fill="none"/>
+      </svg>`,
+      "tree": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <rect x="46" y="55" width="8" height="30" fill="#8d6e63"/>
+        <path d="M50,15 C30,15 25,35 35,45 C25,55 45,65 50,58 C55,65 75,55 65,45 C75,35 70,15 50,15 Z" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
+      </svg>`,
+      "leaf": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M50,85 C25,65 20,40 50,15 C80,40 75,65 50,85 Z" fill="#81c784" stroke="#2e7d32" stroke-width="2"/>
+        <path d="M50,85 L50,15" stroke="#2e7d32" stroke-width="2" stroke-linecap="round"/>
+        <path d="M50,65 Q38,55 34,58 M50,50 Q36,40 32,44 M50,65 Q62,55 66,58 M50,50 Q64,40 68,44" stroke="#2e7d32" stroke-width="2"/>
+      </svg>`,
+      "goat": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <circle cx="50" cy="50" r="30" fill="#eceff1" stroke="#b0bec5" stroke-width="2"/>
+        <circle cx="38" cy="46" r="3" fill="#000"/>
+        <circle cx="62" cy="46" r="3" fill="#000"/>
+        <polygon points="46,55 54,55 50,61" fill="#ffab91"/>
+        <path d="M30,28 Q26,10 38,18" fill="none" stroke="#78909c" stroke-width="4" stroke-linecap="round"/>
+        <path d="M70,28 Q74,10 62,18" fill="none" stroke="#78909c" stroke-width="4" stroke-linecap="round"/>
+        <!-- beard -->
+        <path d="M47,75 L53,75 L50,85 Z" fill="#cfd8dc"/>
+      </svg>`,
+      "book": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M15,25 Q50,15 50,80 Q50,15 85,25 Z" fill="none" stroke="#29b6f6" stroke-width="3" />
+        <path d="M33,50 L35,80 Q50,83 65,80 L67,50 Z" fill="#b3e5fc" opacity="0.6"/>
+        <ellipse cx="50" cy="50" rx="17" ry="3" fill="#81d4fa" opacity="0.8"/>
+      </svg>`,
+      "house": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <rect x="25" y="45" width="50" height="40" rx="4" fill="#a1887f" stroke="#5d4037" stroke-width="2"/>
+        <polygon points="20,45 80,45 50,20" fill="#ff7043" stroke="#e64a19" stroke-width="2"/>
+        <rect x="42" y="60" width="16" height="25" fill="#3e2723"/>
+      </svg>`,
+      "train": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <rect x="15" y="40" width="60" height="30" rx="3" fill="#37474f"/>
+        <circle cx="28" cy="74" r="8" fill="#212121"/>
+        <circle cx="62" cy="74" r="8" fill="#212121"/>
+        <rect x="58" y="25" width="12" height="15" fill="#f44336"/>
+      </svg>`,
+      "play": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <circle cx="50" cy="50" r="35" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
+        <polygon points="40,30 72,50 40,70" fill="#fff"/>
+      </svg>`,
+      "seed": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <ellipse cx="50" cy="75" rx="14" ry="10" fill="#8d6e63" stroke="#5d4037" stroke-width="2" />
+        <path d="M50,70 Q45,50 35,42 Q45,35 50,45" fill="#81c784" stroke="#2e7d32" stroke-width="2"/>
+        <path d="M50,70 Q55,42 65,34 Q58,26 50,38" fill="#81c784" stroke="#2e7d32" stroke-width="2"/>
+        <line x1="15" y1="78" x2="85" y2="78" stroke="#5d4037" stroke-width="4" stroke-linecap="round"/>
+      </svg>`,
+      "coat": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M30,25 L70,25 L80,75 L20,75 Z" fill="#1565c0" stroke="#0d47a1" stroke-width="2"/>
+        <path d="M35,12 C40,8 60,8 65,12 L50,25 Z" fill="#ffb74d"/>
+        <circle cx="50" cy="38" r="3" fill="#ffb74d"/>
+        <circle cx="50" cy="50" r="3" fill="#ffb74d"/>
+        <circle cx="50" cy="62" r="3" fill="#ffb74d"/>
+      </svg>`,
+      "foot": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <ellipse cx="50" cy="55" rx="16" ry="26" fill="#a1887f" transform="rotate(-10 50 55)"/>
+        <circle cx="36" cy="24" r="5.5" fill="#a1887f"/>
+        <circle cx="46" cy="21" r="4.5" fill="#a1887f"/>
+        <circle cx="56" cy="21" r="3.5" fill="#a1887f"/>
+        <circle cx="64" cy="24" r="3" fill="#a1887f"/>
+        <circle cx="70" cy="30" r="2.5" fill="#a1887f"/>
+      </svg>`,
+      "mouse": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <ellipse cx="50" cy="55" rx="24" ry="16" fill="#90a4ae"/>
+        <circle cx="32" cy="40" r="10" fill="#90a4ae"/>
+        <circle cx="32" cy="40" r="5" fill="#ff8a80"/>
+        <circle cx="68" cy="40" r="10" fill="#90a4ae"/>
+        <circle cx="68" cy="40" r="5" fill="#ff8a80"/>
+        <circle cx="43" cy="50" r="2.5" fill="#000"/>
+        <circle cx="57" cy="50" r="2.5" fill="#000"/>
+        <polygon points="47,56 53,56 50,61" fill="#ff8a80"/>
+        <path d="M50,71 Q50,85 70,82" stroke="#90a4ae" stroke-width="2" fill="none"/>
+      </svg>`,
+      "mail": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <rect x="15" y="25" width="70" height="50" rx="4" fill="#eceff1" stroke="#37474f" stroke-width="3"/>
+        <polygon points="15,25 50,55 85,25" fill="#cfd8dc" stroke="#37474f" stroke-width="3"/>
+        <line x1="15" y1="75" x2="42" y2="48" stroke="#37474f" stroke-width="3"/>
+        <line x1="85" y1="75" x2="58" y2="48" stroke="#37474f" stroke-width="3"/>
+      </svg>`,
+      "day": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <circle cx="50" cy="50" r="22" fill="#ffb74d" stroke="#f57f17" stroke-width="2"/>
+        <path d="M50,12 L50,22 M50,78 L50,88 M12,50 L22,50 M78,50 L88,50 M24,24 L32,32 M68,68 L76,76 M24,68 L32,60 M68,24 L76,32" stroke="#ffa726" stroke-width="5" stroke-linecap="round"/>
+      </svg>`,
+      "jeep": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <rect x="15" y="45" width="70" height="30" fill="#1565c0" rx="4"/>
+        <rect x="25" y="24" width="45" height="22" fill="#e0f7fa" stroke="#1565c0" stroke-width="2"/>
+        <circle cx="32" cy="75" r="9" fill="#37474f"/>
+        <circle cx="32" cy="75" r="3.5" fill="#cfd8dc"/>
+        <circle cx="68" cy="75" r="9" fill="#37474f"/>
+        <circle cx="68" cy="75" r="3.5" fill="#cfd8dc"/>
+      </svg>`,
+      "meat": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M25,50 C25,25 65,25 75,45 C85,65 55,85 35,75 C20,65 25,55 25,50 Z" fill="#ef5350" stroke="#b71c1c" stroke-width="2"/>
+        <circle cx="65" cy="45" r="8" fill="#fff" stroke="#cfd8dc" stroke-width="2"/>
+        <path d="M32,44 Q42,50 52,42 M35,56 Q45,62 55,54" stroke="#ffeb3b" stroke-width="2" fill="none"/>
+      </svg>`,
+      "road": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <polygon points="35,15 65,15 85,85 15,85" fill="#455a64" />
+        <line x1="50" y1="15" x2="50" y2="85" stroke="#ffeb3b" stroke-width="3" stroke-dasharray="10 10"/>
+      </svg>`,
+      "spoon": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <ellipse cx="32" cy="38" rx="14" ry="10" fill="#b0bec5" stroke="#78909c" stroke-width="2" transform="rotate(-30 32 38)"/>
+        <rect x="42" y="44" width="40" height="5" rx="2.5" fill="#cfd8dc" stroke="#78909c" stroke-width="2" transform="rotate(-30 42 44)"/>
+      </svg>`,
+      "cloud": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M25,60 C25,48 35,42 45,45 C48,32 65,28 72,40 C82,40 85,50 80,60 Z" fill="#eceff1" stroke="#b0bec5" stroke-width="2"/>
+      </svg>`
+    };
+
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let triesLeft = 2;
+    let isFeedbackRunning = false;
+
+    // Worm physics variables
+    let worm = [];
+    const segmentRadius = 8;
+    let wormDir = "right";
+    let scoreValue = 0;
+    let apples = [];
+    const canvasWidth = 600;
+    const canvasHeight = 400;
+    let canvas, ctx;
+    let gameLoopInterval = null;
+    let isGameActive = false;
+
+    // Sparkle Particle arrays for eating effect
+    let sparkles = [];
+
+    // Splash screen router with safe document readyState checks
+    function initSplashTimer() {
+      setTimeout(() => {
+        switchScreen('screen-start');
+      }, 5000);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSplashTimer);
+    } else {
+      initSplashTimer();
+    }
+
+    function switchScreen(screenId) {
+      document.getElementById('screen-splash').classList.add('hidden');
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.add('hidden');
+      
+      document.getElementById(screenId).classList.remove('hidden');
+
+      if (screenId === 'screen-game') {
+        initGameCanvas();
+      } else {
+        stopGameLoop();
+      }
+    }
+
+    // Shuffles questions, shuffles pool, sets up 15 distinct questions
+    function startGame() {
+      // Warm up audio interface contexts
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume();
+      } catch (e) {}
+
+      // Preload MP3 files
+      document.getElementById('correctSound').load();
+      document.getElementById('wrongSound').load();
+      document.getElementById('clapSound').load();
+
+      // Take 15 randomized questions from backend pool
+      currentQuestions = [...ALL_GAMES_POOL]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 15);
+
+      currentQuestionIndex = 0;
+      score = 0;
+      triesLeft = 2;
+      isFeedbackRunning = false;
+
+      switchScreen('screen-game');
+    }
+
+    // Initialize Game Canvas
+    function initGameCanvas() {
+      canvas = document.getElementById('gameCanvas');
+      ctx = canvas.getContext('2d');
+
+      // Coordinate Canvas sizing (Fixed logic for scaling on mobile devices)
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+
+      // Handle direct canvas tap-to-steer logic
+      canvas.addEventListener('pointerdown', handleCanvasTap);
+
+      // Listen for Arrow Keys steering
+      window.removeEventListener('keydown', handleArrowKeys);
+      window.addEventListener('keydown', handleArrowKeys);
+
+      isGameActive = true;
+      resetWorm();
+      renderQuestion();
+      startGameLoop();
+    }
+
+    // Start running canvas cycle loop
+    function startGameLoop() {
+      stopGameLoop();
+      gameLoopInterval = setInterval(() => {
+        if (!isGameActive) return;
+        updateWormPhysics();
+        drawGameFrame();
+      }, 220); // Slithering speed suitable for Grade 1 children (slower speed of 220ms instead of 130ms)
+    }
+
+    function stopGameLoop() {
+      if (gameLoopInterval) {
+        clearInterval(gameLoopInterval);
+        gameLoopInterval = null;
+      }
+    }
+
+    function resetWorm() {
+      wormDir = "right";
+      worm = [];
+      const initX = 120;
+      const initY = 200;
+      // Start with 5 links
+      for (let i = 0; i < 5; i++) {
+        worm.push({ x: initX - i * (segmentRadius * 2 - 2), y: initY });
+      }
+    }
+
+    // Spawns 3 apples randomly inside safe arena coordinates
+    function spawnApples(q) {
+      apples = [];
+      const optionLabels = [q.correct, ...q.distractors];
+      const positions = [];
+
+      optionLabels.forEach((label, idx) => {
+        let attempts = 0;
+        let x, y, tooClose;
+
+        // Ensure apples don't overlap too much or spawn right on top of the worm
+        do {
+          tooClose = false;
+          x = Math.random() * (canvasWidth - 100) + 50;
+          y = Math.random() * (canvasHeight - 100) + 50;
+
+          // Avoid overlaps with other spawned apples
+          for (let pos of positions) {
+            const dist = Math.hypot(x - pos.x, y - pos.y);
+            if (dist < 90) tooClose = true;
+          }
+
+          // Avoid spawning right in front of worm head
+          const distHead = Math.hypot(x - worm[0].x, y - worm[0].y);
+          if (distHead < 90) tooClose = true;
+
+          attempts++;
+        } while (tooClose && attempts < 100);
+
+        positions.push({ x, y });
+        apples.push({
+          x, y,
+          label,
+          isCorrect: label === q.correct,
+          isRotten: false, // Rotten applies if wrong and popped
+          radius: 34 // Increased size of apples to 34px for better targetability
+        });
+      });
+    }
+
+    function renderQuestion() {
+      if (currentQuestionIndex >= 15) {
+        endGame();
+        return;
+      }
+
+      isFeedbackRunning = false;
+      triesLeft = 2;
+      updateTriesUI();
+
+      const q = currentQuestions[currentQuestionIndex];
+
+      // Update Header level indicators and progress texts
+      document.getElementById('task-level-title').innerText = `Question ${currentQuestionIndex + 1} / 15`;
+      document.getElementById('task-spelling-puzzle').innerText = q.text;
+      
+      document.getElementById('game-progress-text').innerText = `Question ${currentQuestionIndex + 1} / 15`;
+      document.getElementById('game-progress-bar').style.width = `${(currentQuestionIndex / 15) * 100}%`;
+      document.getElementById('game-score-text').innerText = score;
+      document.getElementById('hint-feedback').innerHTML = "Steer the worm to eat the <span class='text-red-500 font-extrabold'>Correct Vowel Apple</span>!";
+
+      // Load Visual Card
+      document.getElementById('task-image-box').innerHTML = VISUAL_HINTS[q.imageKey] || '';
+
+      // Spawn new apples in arena
+      spawnApples(q);
+      sparkles = [];
+    }
+
+    // Tap/Click to steer logic - worm will turn toward clicked coordinate
+    function handleCanvasTap(e) {
+      if (!isGameActive || isFeedbackRunning) return;
+      const rect = canvas.getBoundingClientRect();
+      const clickX = ((e.clientX - rect.left) / rect.width) * canvasWidth;
+      const clickY = ((e.clientY - rect.top) / rect.height) * canvasHeight;
+
+      const head = worm[0];
+      const dx = clickX - head.x;
+      const dy = clickY - head.y;
+
+      // Decide whether to steer horizontally or vertically
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0 && wormDir !== "left") wormDir = "right";
+        else if (dx < 0 && wormDir !== "right") wormDir = "left";
+      } else {
+        if (dy > 0 && wormDir !== "up") wormDir = "down";
+        else if (dy < 0 && wormDir !== "down") wormDir = "up";
+      }
+      triggerAudio('click');
+    }
+
+    // Keyboard controls
+    function handleArrowKeys(e) {
+      if (!isGameActive || isFeedbackRunning) return;
+      
+      if (e.key === "ArrowUp" && wormDir !== "down") {
+        wormDir = "up";
+        e.preventDefault();
+      } else if (e.key === "ArrowDown" && wormDir !== "up") {
+        wormDir = "down";
+        e.preventDefault();
+      } else if (e.key === "ArrowLeft" && wormDir !== "right") {
+        wormDir = "left";
+        e.preventDefault();
+      } else if (e.key === "ArrowRight" && wormDir !== "left") {
+        wormDir = "right";
+        e.preventDefault();
+      }
+    }
+
+    // Steer worm through HUD buttons
+    function steerWorm(dir) {
+      if (!isGameActive || isFeedbackRunning) return;
+      if (dir === 'up' && wormDir !== "down") wormDir = "up";
+      if (dir === 'down' && wormDir !== "up") wormDir = "down";
+      if (dir === 'left' && wormDir !== "right") wormDir = "left";
+      if (dir === 'right' && wormDir !== "left") wormDir = "right";
+      triggerAudio('click');
+    }
+
+    // Main Worm Slither physics calculations
+    function updateWormPhysics() {
+      if (isFeedbackRunning) {
+        updateSparkles();
+        return;
+      }
+
+      // Read current head
+      const head = { ...worm[0] };
+      const speed = segmentRadius * 2 - 2;
+
+      if (wormDir === "right") head.x += speed;
+      else if (wormDir === "left") head.x -= speed;
+      else if (wormDir === "up") head.y -= speed;
+      else if (wormDir === "down") head.y += speed;
+
+      // Arena wrap-around boundaries logic
+      if (head.x < 0) head.x = canvasWidth;
+      else if (head.x > canvasWidth) head.x = 0;
+      if (head.y < 0) head.y = canvasHeight;
+      else if (head.y > canvasHeight) head.y = 0;
+
+      // Add new head segment
+      worm.unshift(head);
+
+      // Check collision with any apples
+      let ateApple = false;
+      for (let i = 0; i < apples.length; i++) {
+        const apple = apples[i];
+        if (apple.isRotten) continue;
+
+        const dist = Math.hypot(head.x - apple.x, head.y - apple.y);
+        if (dist < (segmentRadius + apple.radius)) {
+          ateApple = true;
+          evaluateAppleEating(apple, i);
+          break;
+        }
+      }
+
+      // If no apple was eaten, remove tail segment to maintain correct slithering size
+      if (!ateApple) {
+        worm.pop();
+      }
+
+      // Keep sparkles update active
+      updateSparkles();
+    }
+
+    // Evaluate Apple Eating
+    function evaluateAppleEating(apple, appleIndex) {
+      const q = currentQuestions[currentQuestionIndex];
+
+      if (apple.isCorrect) {
+        isFeedbackRunning = true;
+        triggerAudio('correct');
+
+        // Grow worm segments
+        for (let idx = 0; idx < 3; idx++) {
+          worm.push({ ...worm[worm.length - 1] });
+        }
+
+        // Particle sparks
+        createSparks(apple.x, apple.y);
+
+        // Fill letter puzzle blank instantly
+        document.getElementById('task-spelling-puzzle').innerHTML = q.word;
+
+        if (triesLeft === 2) {
+          score++;
+        }
+
+        document.getElementById('hint-feedback').innerHTML = "<span class='text-green-600 font-black text-base'>🍎 GULP! CORRECT COMBINATION!</span>";
+
+        // Deactivate apple choice
+        apples = [];
+
+        setTimeout(() => {
+          currentQuestionIndex++;
+          renderQuestion();
+        }, 1500);
+
+      } else {
+        triesLeft--;
+        updateTriesUI();
+        triggerAudio('wrong');
+
+        // Apple turns rotten grey
+        apple.isRotten = true;
+
+        if (triesLeft > 0) {
+          document.getElementById('hint-feedback').innerHTML = "⚠️ Wrong combination! <span class='text-red-500 font-black'>1 Try Left</span>. Seek another apple!";
+        } else {
+          isFeedbackRunning = true;
+          document.getElementById('hint-feedback').innerHTML = "❌ Out of tries! Loading next spelling...";
+
+          // Highlight correct word spelling
+          document.getElementById('task-spelling-puzzle').innerHTML = q.word;
+
+          // Reveal correct apple
+          apples.forEach(a => {
+            if (a.isCorrect) a.radius = 42; // Make correct apple grow larger for highlight
+          });
+
+          setTimeout(() => {
+            currentQuestionIndex++;
+            renderQuestion();
+          }, 2000);
+        }
+      }
+    }
+
+    // Particle Sparks helpers
+    function createSparks(x, y) {
+      for (let i = 0; i < 20; i++) {
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = Math.random() * 6 + 4;
+        sparkles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          color: `hsl(${Math.random() * 360}, 100%, 60%)`,
+          alpha: 1,
+          size: Math.random() * 5 + 3
+        });
+      }
+    }
+
+    // Update sparkle array states
+    function updateSparkles() {
+      for (let i = sparkles.length - 1; i >= 0; i--) {
+        const p = sparkles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.04;
+        if (p.alpha <= 0) {
+          sparkles.splice(i, 1);
+        }
+      }
+    }
+
+    function updateTriesUI() {
+      document.getElementById('tries-count').innerText = triesLeft;
+    }
+
+    // Main Canvas Draw Loop Frame
+    function drawGameFrame() {
+      if (!ctx) return;
+
+      // 1. Clear Frame
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // 2. Draw Sunny background grass grid details
+      ctx.fillStyle = "#dcedc8";
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      // Subtle grass textures
+      ctx.strokeStyle = "#c5e1a5";
+      ctx.lineWidth = 1;
+      for (let i = 25; i < canvasWidth; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvasHeight);
+        ctx.stroke();
+      }
+      for (let j = 25; j < canvasHeight; j += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, j);
+        ctx.lineTo(canvasWidth, j);
+        ctx.stroke();
+      }
+
+      // 3. Draw Apples inside Arena
+      apples.forEach(apple => {
+        if (apple.isRotten) {
+          // Draw rotten brown apple
+          drawAppleEntity(apple.x, apple.y, apple.radius, "#8d6e63", "#5d4037", apple.label);
+        } else {
+          // Draw juicy healthy red apple
+          drawAppleEntity(apple.x, apple.y, apple.radius, "#ff3d00", "#d50000", apple.label);
+        }
+      });
+
+      // 4. Draw Cute Wormslither
+      drawWormEntity();
+
+      // 5. Draw success sparkles
+      drawSparkleParticles();
+    }
+
+    // Dynamic Apple Canvas Graphic drawer
+    function drawAppleEntity(x, y, radius, primaryColor, shadowColor, label) {
+      ctx.save();
+
+      // Apple shadow
+      ctx.beginPath();
+      ctx.ellipse(x, y + radius - 4, radius * 0.9, radius * 0.3, 0, 0, 2 * Math.PI);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+      ctx.fill();
+
+      // Stem (Brown)
+      ctx.beginPath();
+      ctx.moveTo(x, y - radius * 0.3);
+      ctx.quadraticCurveTo(x + 5, y - radius * 1.1, x + 12, y - radius * 1.2);
+      ctx.strokeStyle = "#5d4037";
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.stroke();
+
+      // Leaf (Green)
+      ctx.beginPath();
+      ctx.ellipse(x + 10, y - radius * 1.0, radius * 0.3, radius * 0.15, Math.PI / 6, 0, 2 * Math.PI);
+      ctx.fillStyle = "#4caf50";
+      ctx.fill();
+
+      // Apple Body (Left & Right curves)
+      ctx.beginPath();
+      ctx.arc(x - radius * 0.35, y, radius * 0.75, 0.15 * Math.PI, 1.85 * Math.PI);
+      ctx.arc(x + radius * 0.35, y, radius * 0.75, 1.15 * Math.PI, 0.85 * Math.PI);
+      ctx.closePath();
+      
+      const grad = ctx.createRadialGradient(x - radius * 0.3, y - radius * 0.3, 2, x, y, radius);
+      grad.addColorStop(0, "#ff8a80");
+      grad.addColorStop(0.4, primaryColor);
+      grad.addColorStop(1, shadowColor);
+
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Gloss highlight
+      ctx.beginPath();
+      ctx.ellipse(x - radius * 0.3, y - radius * 0.3, radius * 0.25, radius * 0.1, -Math.PI / 4, 0, 2 * Math.PI);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      ctx.fill();
+
+      // Vowel team text label - increased size and made font settings valid so text rendering doesn't break
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 " + Math.floor(radius * 0.85) + "px 'Fredoka One', 'Nunito', sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.shadowColor = "rgba(0,0,0,0.5)";
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 2;
+      ctx.fillText(label, x, y + 2);
+
+      ctx.restore();
+    }
+
+    // Dynamic Worm Slither Graphic Drawer
+    function drawWormEntity() {
+      if (worm.length === 0) return;
+
+      // Draw body segments back to front
+      for (let i = worm.length - 1; i > 0; i--) {
+        const seg = worm[i];
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(seg.x, seg.y, segmentRadius, 0, 2 * Math.PI);
+        
+        // Alternating green striping pattern
+        ctx.fillStyle = i % 2 === 0 ? "#81c784" : "#4caf50";
+        ctx.fill();
+
+        // Soft internal segment shadow
+        ctx.strokeStyle = "#2e7d32";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // Draw Head Segment
+      const head = worm[0];
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(head.x, head.y, segmentRadius + 1.5, 0, 2 * Math.PI);
+      ctx.fillStyle = "#81c784";
+      ctx.fill();
+      ctx.strokeStyle = "#1b5e20";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Add cute googly eyes facing the travel direction
+      let eyeX1, eyeY1, eyeX2, eyeY2, smileX, smileY;
+      const offset = 4;
+
+      if (wormDir === "right") {
+        eyeX1 = head.x + offset; eyeY1 = head.y - offset;
+        eyeX2 = head.x + offset; eyeY2 = head.y + offset;
+        smileX = head.x + offset + 2; smileY = head.y;
+      } else if (wormDir === "left") {
+        eyeX1 = head.x - offset; eyeY1 = head.y - offset;
+        eyeX2 = head.x - offset; eyeY2 = head.y + offset;
+        smileX = head.x - offset - 2; smileY = head.y;
+      } else if (wormDir === "up") {
+        eyeX1 = head.x - offset; eyeY1 = head.y - offset;
+        eyeX2 = head.x + offset; eyeY2 = head.y - offset;
+        smileX = head.x; smileY = head.y - offset - 1;
+      } else if (wormDir === "down") {
+        eyeX1 = head.x - offset; eyeY1 = head.y + offset;
+        eyeX2 = head.x + offset; eyeY2 = head.y + offset;
+        smileX = head.x; smileY = head.y + offset + 1;
+      }
+
+      // Outer White Eye
+      ctx.beginPath();
+      ctx.arc(eyeX1, eyeY1, 3, 0, 2 * Math.PI);
+      ctx.arc(eyeX2, eyeY2, 3, 0, 2 * Math.PI);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.stroke();
+
+      // Inner Pupil
+      ctx.beginPath();
+      ctx.arc(eyeX1, eyeY1, 1.2, 0, 2 * Math.PI);
+      ctx.arc(eyeX2, eyeY2, 1.2, 0, 2 * Math.PI);
+      ctx.fillStyle = "#000000";
+      ctx.fill();
+
+      // Cute smile path
+      ctx.beginPath();
+      ctx.arc(head.x, head.y, 4, 0, Math.PI);
+      ctx.strokeStyle = "#ff4081";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawSparkleParticles() {
+      sparkles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    // Core Native MP3 player with web-synthesizer backup logic
+    function triggerAudio(type) {
+      try {
+        const correctSnd = document.getElementById('correctSound');
+        const wrongSnd = document.getElementById('wrongSound');
+        const clapSnd = document.getElementById('clapSound');
+
+        if (type === 'correct') {
+          correctSnd.currentTime = 0;
+          correctSnd.play().catch(() => playSynthFallback('correct'));
+        } else if (type === 'wrong') {
+          wrongSnd.currentTime = 0;
+          wrongSnd.play().catch(() => playSynthFallback('wrong'));
+        } else if (type === 'clap') {
+          clapSnd.currentTime = 0;
+          clapSnd.play().catch(() => playSynthFallback('correct'));
+        } else if (type === 'click') {
+          playSynthFallback('click');
+        }
+      } catch (e) {
+        playSynthFallback(type);
+      }
+    }
+
+    // Direct Web Audio API fallback
+    function playSynthFallback(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        if (type === 'correct') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.12, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(130, ctx.currentTime);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        } else if (type === 'click') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, ctx.currentTime);
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.06);
+        }
+      } catch (e) {
+        console.log("Synth bypassed");
+      }
+    }
+
+    // Summary screen builder
+    function endGame() {
+      isGameActive = false;
+      stopGameLoop();
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.remove('hidden');
+
+      document.getElementById('final-score').innerText = `${score} / 15`;
+
+      let trophy = "🏆 Gold";
+      let emoji = "🏆";
+      let msg = "Stellar Phonics Worm!";
+      let feedbackText = "Excellent job! You correctly identified Vowel Combinations and helped the hungry worm eat all delicious apples!";
+
+      if (score >= 12) {
+        trophy = "🏆 Gold";
+        emoji = "🐛";
+        msg = "Stellar Phonics Worm!";
+        feedbackText = "Outstanding! You have masterfully steered the hungry worm to match vowel teams with super speed!";
+      } else if (score >= 8) {
+        trophy = "🥈 Silver";
+        emoji = "🍎";
+        msg = "Good Phonics Pilot!";
+        feedbackText = "Well done! You have a great grasp of Grade 1 vowel combination sounds.";
+      } else {
+        trophy = "🥉 Bronze";
+        emoji = "⭐";
+        msg = "Keep Crawling!";
+        feedbackText = "Let's practice the vowel combinations (like ee, ea, ai, oa, oo) and try again!";
+      }
+
+      document.getElementById("trophy-emoji").textContent = emoji;
+      document.getElementById("trophy-title").textContent = `${trophy} Rank`;
+      document.getElementById("trophy-msg").textContent = msg;
+      document.getElementById("summary-feedback").textContent = feedbackText;
+
+      triggerAudio('clap');
+    }
+  </script>
+</body>
+</html>
