@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Phonics Bowling: Nine Pins Arcade</title>
+  <!-- Tailwind CSS CDN for premium layout and utilities -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Friendly, playful typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    .font-fun {
+      font-family: 'Fredoka One', cursive;
+    }
+
+    /* Vibrant arcade background gradient with pulsing neon lights */
+    .bg-arcade-lanes {
+      background: linear-gradient(180deg, #120c1f 0%, #1a103c 45%, #2a1b5c 80%, #351a66 100%);
+      background-size: 400% 400%;
+      animation: neonFlow 15s ease infinite;
+    }
+
+    @keyframes neonFlow {
+      0%, 100% { background-position: 50% 0%; }
+      50% { background-position: 50% 100%; }
+    }
+
+    /* Soft floating bobbing effect for the start screen */
+    @keyframes bob {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(0.5deg); }
+    }
+    .animate-bob {
+      animation: bob 3.5s ease-in-out infinite;
+    }
+
+    /* Screen shake for incorrect pin crash */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.3s ease-in-out;
+    }
+
+    /* Custom bowling lane canvas styling */
+    .lane-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      aspect-ratio: 4 / 3;
+      background: #4a3420;
+      border: 6px solid #e65100;
+      border-radius: 1.5rem;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.35), inset 0 0 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-arcade-lanes text-[#e0f7fa] min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+
+  <!-- Floating neon light particles decor -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-10">
+    <div class="absolute bg-cyan-400 rounded-full w-24 h-24 top-10 left-10 blur-xl"></div>
+    <div class="absolute bg-pink-500 rounded-full w-40 h-40 bottom-20 right-16 blur-2xl"></div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 1: 5-SECOND SPLASH SCREEN
+       Contains strictly ONLY the logo as requested
+       ========================================== -->
+  <div id="screen-splash" class="flex-1 flex flex-col items-center justify-center relative z-10 bg-white">
+    <div class="scale-110 animate-pulse">
+      <img 
+        id="splash-logo" 
+        src="assets/innovine-logo.png" 
+        class="w-72 h-72 md:w-80 md:h-80 object-contain" 
+        alt="Innovine Logo"
+        onerror="handleLogoError(this)"
+      />
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 2: START / TITLE SCREEN
+       No Logo on this slide as requested
+       ========================================== -->
+  <div id="screen-start" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full relative z-10">
+    <div class="bg-slate-900/95 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 shadow-2xl border-4 border-cyan-400 text-center w-full max-w-xl">
+      <h1 class="text-3xl md:text-5xl font-fun font-black text-cyan-400 tracking-wide mb-3 leading-tight drop-shadow-md">
+        🎳 Nine Pins Phonics
+      </h1>
+      <p class="text-sm md:text-base font-extrabold text-pink-400 uppercase tracking-widest mb-8">
+        Consonant Blends Challenge
+      </p>
+
+      <div class="bg-slate-950/80 rounded-3xl p-6 border border-cyan-500/30 text-left space-y-4 mb-8 shadow-inner font-semibold text-cyan-100">
+        <h2 class="font-fun font-black text-cyan-300 text-lg md:text-xl">Mission Briefing:</h2>
+        <ul class="text-sm md:text-base space-y-3 text-pink-100 list-disc list-inside">
+          <li><strong>Step 1: Answer Phonics Quiz!</strong> 🖼️ Look at the CVC picture and click the correct starting blend.</li>
+          <li><strong>Step 2: Correct Answer Reward!</strong> 🎳 If you get it right, YOU get to roll the ball to score a spectacular strike!</li>
+          <li><strong>Step 3: Oops, Missed Turn!</strong> 🤖 If you run out of tries, the Opponent Robot bowls to steal points!</li>
+          <li>Beat the computer over 15 rounds of neon arcade action!</li>
+        </ul>
+      </div>
+
+      <button
+        onclick="startGame()"
+        class="w-full bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-xl md:text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-pink-700 uppercase tracking-wider animate-bob"
+      >
+        START ARCADE 🎳
+      </button>
+    </div>
+
+    <div class="mt-8 text-xs text-cyan-400 font-bold">
+      Compatible with Phones, Tablets, & Laptops • Optimized for Low Bandwidth
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 3: GAMEPLAY SCREEN
+       ========================================== -->
+  <div id="screen-game" class="hidden flex-1 flex flex-col w-full max-w-5xl mx-auto p-3 md:p-6 justify-between relative z-10">
+    
+    <!-- Top Progress & Scoreboard tallies (Player vs Computer) -->
+    <div class="grid grid-cols-3 bg-slate-950/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-cyan-500/30 mb-4 items-center">
+      <div class="flex flex-col text-left">
+        <span class="text-xs font-black uppercase text-cyan-400 tracking-wider">Player</span>
+        <span id="player-score-text" class="text-xl md:text-2xl font-black text-white">⭐ 0</span>
+      </div>
+
+      <div class="flex flex-col text-center">
+        <span id="level-indicator" class="text-[10px] md:text-xs font-black uppercase text-pink-400 tracking-widest">LEVEL 1: L-BLENDS</span>
+        <span id="game-progress-text" class="text-sm font-bold text-slate-300">Round 1 / 15</span>
+      </div>
+
+      <div class="flex flex-col text-right">
+        <span class="text-xs font-black uppercase text-red-400 tracking-wider">Opponent Robot</span>
+        <span id="computer-score-text" class="text-xl md:text-2xl font-black text-white">🤖 0</span>
+      </div>
+    </div>
+
+    <!-- Main Arcade Console Frame -->
+    <div id="game-cabinet" class="flex-1 bg-slate-950/80 backdrop-blur-md rounded-[2.5rem] p-4 md:p-6 shadow-2xl border-4 border-cyan-500 flex flex-col justify-between min-h-[460px] relative mb-4">
+      
+      <!-- Top Section: Spelling Board & SVG Picture Hint -->
+      <div class="flex items-center justify-between bg-slate-900/90 text-white rounded-2xl p-3 border-2 border-cyan-500/40 mb-4 shadow-lg">
+        
+        <!-- Interactive Letter Puzzle Blank -->
+        <div class="flex-1 pl-4">
+          <p id="task-level-title" class="text-xs font-black uppercase text-pink-400 tracking-wider">PHONICS PHASE</p>
+          <h2 id="task-bold-header" class="text-3xl md:text-4xl font-fun font-black tracking-widest mt-1 text-cyan-300">
+            _ _ o g
+          </h2>
+        </div>
+
+        <!-- Custom high quality SVG Picture card for assisting Grade 1 kids -->
+        <div id="task-image-box" class="w-20 h-20 md:w-24 md:h-24 bg-slate-950 rounded-xl p-1 flex items-center justify-center border-2 border-cyan-500/30 flex-shrink-0">
+          <!-- Loaded dynamically -->
+        </div>
+
+      </div>
+
+      <!-- Live interactive prompt / tries alert info bubble -->
+      <div class="text-center min-h-[22px] mb-2 font-fun text-sm tracking-wide text-orange-400">
+        <p id="hint-feedback" class="animate-pulse">
+          Choose the correct blend button below!
+        </p>
+      </div>
+
+      <!-- ==========================================
+           PHASE A: QUIZ SELECTION PANEL
+           Big, clear, high contrast, non-blurry button options
+           ========================================== -->
+      <div id="quiz-options-panel" class="flex-1 flex flex-col justify-center items-center gap-4 py-4">
+        <!-- Injected dynamically with 3 giant clean blend cards -->
+      </div>
+
+      <!-- ==========================================
+           PHASE B: REWARD BOWLING ALLEY
+           Visible only during ball rolling transitions
+           ========================================== -->
+      <div id="bowling-alley-panel" class="hidden flex-1 flex flex-col items-center justify-center relative w-full overflow-hidden py-1">
+        
+        <div class="lane-container w-full">
+          <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+        </div>
+
+        <!-- Controls Dashboard (Aim Slider and Roll Button) -->
+        <div class="w-full flex items-center justify-between gap-4 mt-4 pt-3 border-t border-purple-500/20">
+          
+          <!-- Touch-Friendly Ball Position Slider -->
+          <div class="flex-1 flex flex-col">
+            <span class="text-[10px] md:text-xs font-black uppercase text-cyan-400 tracking-widest mb-1">Position Ball:</span>
+            <input 
+              type="range" 
+              id="ball-slider" 
+              min="100" 
+              max="500" 
+              value="300"
+              class="w-full h-3 bg-purple-950 rounded-lg appearance-none cursor-pointer accent-pink-500 focus:outline-none"
+              oninput="handleSliderMove(this.value)"
+            >
+          </div>
+
+          <!-- Big Launch Button -->
+          <button
+            onclick="launchBowlingBall()"
+            id="roll-btn"
+            class="bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-lg md:text-xl py-3 px-8 rounded-xl shadow-lg active:scale-95 transition-transform uppercase tracking-wider"
+          >
+            ROLL 🎳
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       SCREEN 4: END / SUMMARY SCREEN
+       ========================================== -->
+  <div id="screen-summary" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-lg mx-auto w-full relative z-10">
+    <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-cyan-400 text-center w-full animate-bob">
+      <span id="trophy-emoji" class="text-7xl block mb-4">🏆</span>
+      
+      <h1 id="trophy-title" class="text-3xl md:text-4xl font-fun font-black text-cyan-300 mb-1">Stellar Splaster!</h1>
+      <p id="trophy-msg" class="text-sm md:text-base font-extrabold text-pink-400 uppercase tracking-widest mb-8">
+        Phonics Mission Complete!
+      </p>
+
+      <!-- Scoreboard Container -->
+      <div class="bg-slate-950 rounded-3xl p-6 border-2 border-cyan-500/30 space-y-4 mb-8 shadow-inner font-bold text-cyan-100">
+        <div class="flex justify-between items-center text-lg md:text-xl font-black text-cyan-400">
+          <span>Your Final Score:</span>
+          <span id="final-player-score" class="text-3xl font-black text-yellow-300">0</span>
+        </div>
+        <div class="flex justify-between items-center text-lg md:text-xl font-black text-red-400">
+          <span>Robot Final Score:</span>
+          <span id="final-computer-score" class="text-3xl font-black">0</span>
+        </div>
+        <p id="summary-feedback" class="text-xs md:text-sm text-left leading-relaxed border-t border-cyan-500/20 pt-3 font-semibold font-sans">
+          Excellent job! You correctly navigated Consonant Blends and knocked down all nine pins targets!
+        </p>
+      </div>
+
+      <button
+        onclick="location.reload()"
+        class="w-full bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-2xl py-5 px-8 rounded-2xl shadow-lg transition-all transform active:scale-95 border-b-4 border-pink-700 uppercase tracking-wider"
+      >
+        PLAY AGAIN
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       AUDIO ELEMENTS
+       ========================================== -->
+  <audio id="correctSound" src="assets/correct.mp3" preload="auto"></audio>
+  <audio id="wrongSound" src="assets/wrong.mp3" preload="auto"></audio>
+  <audio id="clapSound" src="assets/clapping.mp3" preload="auto"></audio>
+
+  <!-- ==========================================
+       GAME ENGINE & INTERACTIVITY
+       ========================================== -->
+  <script>
+    // 20 BACKEND QUESTION POOL (Consonant Blends specifically tailored to Grade 1)
+    const ALL_GAMES_POOL = [
+      // Level 1: L-Blends
+      { id: 1, word: "FROG", text: "_ _ o g", correct: "fr", imageKey: "frog", distractors: ["cl", "st"] },
+      { id: 2, word: "CRAB", text: "_ _ a b", correct: "cr", imageKey: "crab", distractors: ["fl", "sp"] },
+      { id: 3, word: "DRUM", text: "_ _ u m", correct: "dr", imageKey: "drum", distractors: ["gl", "sn"] },
+      { id: 4, word: "STAR", text: "_ _ a r", correct: "st", imageKey: "star", distractors: ["bl", "pr"] },
+      { id: 5, word: "FLAG", text: "_ _ a g", correct: "fl", imageKey: "flag", distractors: ["br", "sw"] },
+      { id: 6, word: "PLUM", text: "_ _ u m", correct: "pl", imageKey: "plum", distractors: ["gr", "sm"] },
+      { id: 7, word: "SWAN", text: "_ _ a n", correct: "sw", imageKey: "swan", distractors: ["cl", "dr"] },
+      // Level 2: R-Blends
+      { id: 8, word: "TREE", text: "_ _ e e", correct: "tr", imageKey: "tree", distractors: ["sl", "gl"] },
+      { id: 9, word: "SPOON", text: "_ _ o o n", correct: "sp", imageKey: "spoon", distractors: ["cr", "fl"] },
+      { id: 10, word: "SNAIL", text: "_ _ a i l", correct: "sn", imageKey: "snail", distractors: ["tr", "bl"] },
+      { id: 11, word: "CLOCK", text: "_ _ o c k", correct: "cl", imageKey: "clock", distractors: ["gr", "sw"] },
+      { id: 12, word: "BRUSH", text: "_ _ u s h", correct: "br", imageKey: "brush", distractors: ["gl", "st"] },
+      { id: 13, word: "GLASS", text: "_ _ a s s", correct: "gl", imageKey: "glass", distractors: ["pr", "sn"] },
+      // Level 3: S-Blends
+      { id: 14, word: "SLED", text: "_ _ e d", correct: "sl", imageKey: "sled", distractors: ["cr", "ft"] },
+      { id: 15, word: "GRAPE", text: "_ _ a p e", correct: "gr", imageKey: "grape", distractors: ["pl", "sc"] },
+      { id: 16, word: "SLIDE", text: "_ _ i d e", correct: "sl", imageKey: "slide", distractors: ["br", "sm"] },
+      { id: 17, word: "TRUCK", text: "_ _ u c k", correct: "tr", imageKey: "truck", distractors: ["fl", "sp"] },
+      { id: 18, word: "BLOCK", text: "_ _ o c k", correct: "bl", imageKey: "block", distractors: ["dr", "sn"] },
+      { id: 19, word: "CROWN", text: "_ _ o w n", correct: "cr", imageKey: "crown", distractors: ["gl", "st"] },
+      { id: 20, word: "SMILE", text: "_ _ i l e", correct: "sm", imageKey: "smile", distractors: ["tr", "pl"] }
+    ];
+
+    // High quality vector SVGs specifically crafted to be easily recognized by Grade 1 students
+    const VISUAL_HINTS = {
+      "frog": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <circle cx="50" cy="55" r="28" fill="#4caf50" stroke="#1b5e20" stroke-width="2"/>
+        <circle cx="36" cy="30" r="10" fill="#4caf50" stroke="#1b5e20" stroke-width="2"/>
+        <circle cx="36" cy="30" r="4" fill="#fff"/>
+        <circle cx="36" cy="30" r="1.5" fill="#000"/>
+        <circle cx="64" cy="30" r="10" fill="#4caf50" stroke="#1b5e20" stroke-width="2"/>
+        <circle cx="64" cy="30" r="4" fill="#fff"/>
+        <circle cx="64" cy="30" r="1.5" fill="#000"/>
+        <ellipse cx="50" cy="62" rx="14" ry="6" fill="#81c784"/>
+        <path d="M34,60 Q50,70 66,60" stroke="#1b5e20" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>`,
+      "crab": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <ellipse cx="50" cy="55" rx="26" ry="18" fill="#e53935" stroke="#b71c1c" stroke-width="2"/>
+        <circle cx="35" cy="45" r="3" fill="#000"/>
+        <circle cx="65" cy="45" r="3" fill="#000"/>
+        <path d="M42,62 Q50,68 58,62" stroke="#b71c1c" stroke-width="2.5" fill="none"/>
+        <path d="M22,38 C15,30 20,18 28,26 Z" fill="#ef5350" />
+        <path d="M78,38 C85,30 80,18 72,26 Z" fill="#ef5350" />
+      </svg>`,
+      "drum": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <rect x="25" y="30" width="50" height="38" fill="#1e88e5" stroke="#1565c0" stroke-width="2"/>
+        <ellipse cx="50" cy="30" rx="25" ry="8" fill="#cfd8dc" stroke="#90a4ae" stroke-width="2"/>
+        <ellipse cx="50" cy="68" rx="25" ry="8" fill="#90a4ae" stroke="#1565c0" stroke-width="2"/>
+        <path d="M25,30 L37,68 L50,30 L62,68 L75,30" stroke="#ffe082" stroke-width="2.5" fill="none"/>
+      </svg>`,
+      "star": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <polygon points="50,15 62,38 88,40 68,58 74,85 50,72 26,85 32,58 12,40 38,38" fill="#ffd54f" stroke="#f57f17" stroke-width="3.5" stroke-linejoin="round"/>
+      </svg>`,
+      "flag": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <line x1="28" y1="15" x2="28" y2="85" stroke="#5d4037" stroke-width="4" stroke-linecap="round"/>
+        <path d="M28,20 C42,12 50,28 75,20 L75,48 C50,56 42,40 28,48 Z" fill="#ec407a" stroke="#c2185b" stroke-width="2"/>
+      </svg>`,
+      "plum": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <ellipse cx="50" cy="55" rx="24" ry="26" fill="#7b1fa2" stroke="#4a148c" stroke-width="2"/>
+        <path d="M50,29 Q54,16 62,18" stroke="#5d4037" stroke-width="3" fill="none"/>
+        <path d="M50,32 Q42,22 42,28 Z" fill="#4caf50"/>
+      </svg>`,
+      "swan": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M25,64 C42,64 45,45 52,28 C56,18 64,12 66,22 C64,32 58,48 65,58 L78,58 C85,62 82,72 65,72 L25,72 Z" fill="#fafafa" stroke="#cfd8dc" stroke-width="2"/>
+        <polygon points="66,22 72,25 66,28" fill="#ff7043"/>
+        <circle cx="61" cy="24" r="1.5" fill="#000"/>
+      </svg>`,
+      "tree": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <rect x="46" y="55" width="8" height="30" fill="#8d6e63"/>
+        <path d="M50,15 C30,15 25,35 35,45 C25,55 45,65 50,58 C55,65 75,55 65,45 C75,35 70,15 50,15 Z" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
+      </svg>`,
+      "spoon": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <ellipse cx="32" cy="38" rx="14" ry="10" fill="#b0bec5" stroke="#78909c" stroke-width="2" transform="rotate(-30 32 38)"/>
+        <rect x="42" y="44" width="40" height="5" rx="2.5" fill="#cfd8dc" stroke="#78909c" stroke-width="2" transform="rotate(-30 42 44)"/>
+      </svg>`,
+      "snail": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M20,68 C35,68 42,50 68,54 L85,68 Z" fill="#fff9c4" stroke="#fbc02d" stroke-width="1.5"/>
+        <circle cx="45" cy="50" r="18" fill="#ffb74d" stroke="#f57f17" stroke-width="2"/>
+        <path d="M45,50 A8,8 0 1,0 45,42 A4,4 0 1,0 45,46" stroke="#f57f17" stroke-width="2" fill="none"/>
+        <line x1="24" y1="52" x2="16" y2="40" stroke="#fbc02d" stroke-width="2"/>
+      </svg>`,
+      "clock": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <circle cx="50" cy="50" r="32" fill="#e0f7fa" stroke="#0097a7" stroke-width="3"/>
+        <line x1="50" y1="50" x2="50" y2="28" stroke="#006064" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="50" y1="50" x2="68" y2="50" stroke="#006064" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="50" cy="50" r="3.5" fill="#006064"/>
+      </svg>`,
+      "brush": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <rect x="42" y="55" width="16" height="32" fill="#8d6e63" rx="2"/>
+        <rect x="34" y="20" width="32" height="35" fill="#cfd8dc" stroke="#90a4ae" stroke-width="2" rx="3"/>
+        <rect x="34" y="20" width="32" height="15" fill="#ef5350"/>
+      </svg>`,
+      "glass": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M30,20 L36,80 Q50,83 64,80 L70,20 Z" fill="none" stroke="#29b6f6" stroke-width="3" />
+        <ellipse cx="50" cy="50" rx="17" ry="3" fill="#81d4fa" opacity="0.8"/>
+      </svg>`,
+      "sled": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M15,68 L80,68 C88,68 90,56 86,52" stroke="#78909c" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M22,54 L72,54" stroke="#8d6e63" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <line x1="32" y1="54" x2="32" y2="68" stroke="#5d4037" stroke-width="3"/>
+        <line x1="62" y1="54" x2="62" y2="68" stroke="#5d4037" stroke-width="3"/>
+      </svg>`,
+      "grape": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <circle cx="50" cy="40" r="8" fill="#7e57c2" />
+        <circle cx="40" cy="50" r="8" fill="#7e57c2" />
+        <circle cx="60" cy="50" r="8" fill="#7e57c2" />
+        <circle cx="50" cy="60" r="8" fill="#7e57c2" />
+        <circle cx="44" cy="70" r="8" fill="#7e57c2" />
+        <circle cx="56" cy="70" r="8" fill="#7e57c2" />
+        <path d="M50,32 Q54,16 62,18" stroke="#5d4037" stroke-width="3" fill="none" />
+      </svg>`,
+      "slide": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <line x1="22" y1="20" x2="22" y2="80" stroke="#78909c" stroke-width="4" stroke-linecap="round"/>
+        <line x1="22" y1="40" x2="14" y2="80" stroke="#cfd8dc" stroke-width="3"/>
+        <line x1="16" y1="60" x2="21" y2="60" stroke="#78909c" stroke-width="2"/>
+        <path d="M22,25 Q50,25 78,80" fill="none" stroke="#e53935" stroke-width="5" stroke-linecap="round"/>
+      </svg>`,
+      "truck": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <rect x="15" y="45" width="55" height="28" fill="#1565c0" rx="3"/>
+        <rect x="70" y="32" width="18" height="41" fill="#d84315" rx="2"/>
+        <circle cx="32" cy="73" r="8" fill="#37474f"/>
+        <circle cx="32" cy="73" r="3" fill="#cfd8dc"/>
+        <circle cx="68" cy="73" r="8" fill="#37474f"/>
+        <circle cx="68" cy="73" r="3" fill="#cfd8dc"/>
+      </svg>`,
+      "block": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <rect x="20" y="45" width="30" height="30" fill="#f44336" stroke="#b71c1c" stroke-width="2" rx="3" />
+        <rect x="45" y="25" width="30" height="30" fill="#ffeb3b" stroke="#f57f17" stroke-width="2" rx="3" />
+        <text x="35" y="65" font-family="sans-serif" font-size="14" font-weight="900" fill="#fff">A</text>
+        <text x="60" y="45" font-family="sans-serif" font-size="14" font-weight="900" fill="#263238">B</text>
+      </svg>`,
+      "crown": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <path d="M15,70 L20,32 L40,48 L50,20 L60,48 L80,32 L85,70 Z" fill="#ffd54f" stroke="#ffb300" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="50" cy="20" r="3.5" fill="#ad1457"/>
+        <circle cx="20" cy="32" r="3.5" fill="#1565c0"/>
+        <circle cx="80" cy="32" r="3.5" fill="#1565c0"/>
+        <circle cx="50" cy="62" r="5" fill="#2e7d32"/>
+      </svg>`,
+      "smile": `<svg viewBox="0 0 100 100" class="w-16 h-16">
+        <circle cx="50" cy="50" r="32" fill="#ffeb3b" stroke="#f57f17" stroke-width="2" />
+        <circle cx="38" cy="42" r="4.5" fill="#212121" />
+        <circle cx="62" cy="42" r="4.5" fill="#212121" />
+        <path d="M35,58 Q50,70 65,58" stroke="#d84315" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      </svg>`
+    };
+
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    
+    // Scores
+    let playerScore = 0;
+    let computerScore = 0;
+
+    let triesLeft = 2;
+    let isFeedbackRunning = false;
+    let currentWhoseTurn = "player"; // 'player' | 'computer'
+
+    // Canvas settings
+    const canvasWidth = 600;
+    const canvasHeight = 450;
+    let canvas, ctx;
+    let gameLoopInterval = null;
+    let isGameActive = false;
+
+    // Physical ball & Pin entities
+    let ball = {
+      x: 300,
+      y: 380,
+      vx: 0,
+      vy: 0,
+      radius: 20,
+      isRolling: false
+    };
+
+    let pins = [];
+    let sparkles = [];
+
+    // Splash screen router with safe document readyState checks
+    function initSplashTimer() {
+      setTimeout(() => {
+        switchScreen('screen-start');
+      }, 5000);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSplashTimer);
+    } else {
+      initSplashTimer();
+    }
+
+    function switchScreen(screenId) {
+      document.getElementById('screen-splash').classList.add('hidden');
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.add('hidden');
+      
+      document.getElementById(screenId).classList.remove('hidden');
+
+      if (screenId === 'screen-game') {
+        initGameCanvas();
+      } else {
+        stopGameLoop();
+      }
+    }
+
+    // Shuffles questions, shuffles pool, sets up 15 distinct questions
+    function startGame() {
+      // Warm up audio interface contexts
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume();
+      } catch (e) {}
+
+      // Preload MP3 files
+      document.getElementById('correctSound').load();
+      document.getElementById('wrongSound').load();
+      document.getElementById('clapSound').load();
+
+      // Take 15 randomized questions from backend pool
+      currentQuestions = [...ALL_GAMES_POOL]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 15);
+
+      currentQuestionIndex = 0;
+      playerScore = 0;
+      computerScore = 0;
+      triesLeft = 2;
+      isFeedbackRunning = false;
+
+      switchScreen('screen-game');
+    }
+
+    // Initialize Game Canvas
+    function initGameCanvas() {
+      canvas = document.getElementById('gameCanvas');
+      ctx = canvas.getContext('2d');
+
+      // Coordinate Canvas sizing
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+
+      // Handle direct canvas interaction for positioning ball
+      canvas.removeEventListener('pointerdown', handleCanvasPointerDown);
+      canvas.addEventListener('pointerdown', handleCanvasPointerDown);
+      
+      canvas.removeEventListener('pointermove', handleCanvasPointerMove);
+      canvas.addEventListener('pointermove', handleCanvasPointerMove);
+
+      isGameActive = true;
+      resetBall();
+      renderQuestion();
+      startGameLoop();
+    }
+
+    function startGameLoop() {
+      stopGameLoop();
+      gameLoopInterval = setInterval(() => {
+        if (!isGameActive) return;
+        updateArcadePhysics();
+        drawGameFrame();
+      }, 30);
+    }
+
+    function stopGameLoop() {
+      if (gameLoopInterval) {
+        clearInterval(gameLoopInterval);
+        gameLoopInterval = null;
+      }
+    }
+
+    function resetBall() {
+      ball.x = 300;
+      ball.y = 380;
+      ball.vx = 0;
+      ball.vy = 0;
+      ball.isRolling = false;
+      document.getElementById('ball-slider').value = 300;
+    }
+
+    // Set up standard 9 pins arranged in a diamond
+    function setupNinePins() {
+      pins = [];
+      const pinCoords = [
+        { x: 300, y: 100 },
+        { x: 250, y: 130 },
+        { x: 350, y: 130 },
+        { x: 200, y: 160 },
+        { x: 300, y: 160 },
+        { x: 400, y: 160 },
+        { x: 250, y: 190 },
+        { x: 350, y: 190 },
+        { x: 300, y: 130 }
+      ];
+
+      pinCoords.forEach(pos => {
+        pins.push({
+          x: pos.x,
+          y: pos.y,
+          radius: 18,
+          isKnocked: false,
+          vx: 0,
+          vy: 0,
+          rotation: 0,
+          rotVel: 0
+        });
+      });
+    }
+
+    function renderQuestion() {
+      if (currentQuestionIndex >= 15) {
+        endGame();
+        return;
+      }
+
+      // Restore layout states back to Phonics mode
+      document.getElementById('quiz-options-panel').classList.remove('hidden');
+      document.getElementById('bowling-alley-panel').classList.add('hidden');
+
+      isFeedbackRunning = false;
+      triesLeft = 2;
+      updateTriesUI();
+
+      const q = currentQuestions[currentQuestionIndex];
+
+      // Update Header level indicators and progress texts
+      let isLevel1 = currentQuestionIndex < 5;
+      let isLevel2 = currentQuestionIndex >= 5 && currentQuestionIndex < 10;
+
+      const levelIndicator = document.getElementById('level-indicator');
+      if (isLevel1) {
+        levelIndicator.innerText = "LEVEL 1: L-BLENDS";
+        levelIndicator.className = "text-xs md:text-sm font-black uppercase text-pink-400 tracking-widest";
+      } else if (isLevel2) {
+        levelIndicator.innerText = "LEVEL 2: R-BLENDS";
+        levelIndicator.className = "text-xs md:text-sm font-black uppercase text-cyan-400 tracking-widest";
+      } else {
+        levelIndicator.innerText = "LEVEL 3: S-BLENDS";
+        levelIndicator.className = "text-xs md:text-sm font-black uppercase text-yellow-400 tracking-widest";
+      }
+
+      document.getElementById('task-bold-header').innerText = q.text;
+      document.getElementById('game-progress-text').innerText = `Round ${currentQuestionIndex + 1} / 15`;
+      document.getElementById('game-progress-bar').style.width = `${(currentQuestionIndex / 15) * 100}%`;
+      
+      // Live Scoreboard
+      document.getElementById('player-score-text').innerText = `⭐ ${playerScore}`;
+      document.getElementById('computer-score-text').innerText = `🤖 ${computerScore}`;
+      
+      document.getElementById('hint-feedback').innerHTML = "Choose the correct blend button below!";
+
+      // Load Visual Card
+      document.getElementById('task-image-box').innerHTML = VISUAL_HINTS[q.imageKey] || '';
+
+      // Set up options in the HTML quiz panel
+      const optionsPanel = document.getElementById('quiz-options-panel');
+      optionsPanel.innerHTML = '';
+
+      const optionLabels = [q.correct, ...q.distractors].sort(() => Math.random() - 0.5);
+
+      optionLabels.forEach((label) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full max-w-sm py-4 px-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 border-4 border-cyan-500 text-cyan-300 font-fun font-black text-2xl uppercase tracking-wider transform transition-transform duration-100 hover:scale-[1.02] active:scale-95 shadow-lg border-b-8 active:border-b-4 border-cyan-700";
+        btn.innerHTML = `<span class="drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">${label}</span>`;
+        btn.onclick = () => validatePhonicsChoice(btn, label, q);
+        optionsPanel.appendChild(btn);
+      });
+    }
+
+    // Direct, legible button validation on click
+    function validatePhonicsChoice(btnElement, selectedLabel, question) {
+      if (isFeedbackRunning) return;
+
+      const isCorrect = selectedLabel === question.correct;
+
+      if (isCorrect) {
+        isFeedbackRunning = true;
+        triggerAudio('correct');
+
+        // Flash green
+        btnElement.className = "w-full max-w-sm py-4 px-6 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 border-4 border-green-400 text-white font-fun font-black text-2xl uppercase tracking-wider scale-105 transition-all shadow-inner";
+        
+        // Fill letter puzzle blank instantly
+        document.getElementById('task-bold-header').innerHTML = `<span class="text-green-400 font-fun font-black tracking-widest">${question.word}</span>`;
+        document.getElementById('hint-feedback').innerHTML = "<span class='text-green-400 font-fun text-base'>🍎 CORRECT! YOU UNLOCKED BOWLING REWARD!</span>";
+
+        // Transition to Player Bowling reward lane after 1s
+        currentWhoseTurn = "player";
+        setTimeout(() => {
+          transitionToBowlingReward();
+        }, 1100);
+
+      } else {
+        triesLeft--;
+        updateTriesUI();
+        triggerAudio('wrong');
+
+        // Shake and flash red
+        btnElement.className = "w-full max-w-sm py-4 px-6 rounded-2xl bg-red-600/70 border-4 border-red-500 text-white font-fun font-black text-2xl uppercase tracking-wider opacity-60 cursor-not-allowed animate-shake";
+        btnElement.onclick = null; // deactivate
+
+        if (triesLeft > 0) {
+          document.getElementById('hint-feedback').innerHTML = "⚠️ Missed! <span class='text-red-400 font-black'>1 Try Left</span>. Check the picture and try again!";
+        } else {
+          isFeedbackRunning = true;
+          document.getElementById('hint-feedback').innerHTML = "❌ Out of tries! It's the Robot's turn to bowl!";
+
+          // Auto-reveal the correct button in green
+          const optionsPanel = document.getElementById('quiz-options-panel');
+          const buttons = optionsPanel.children;
+          for (let btn of buttons) {
+            if (btn.innerText.trim().toLowerCase() === question.correct.toLowerCase()) {
+              btn.className = "w-full max-w-sm py-4 px-6 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 border-4 border-green-400 text-white font-fun font-black text-2xl uppercase tracking-wider scale-105 animate-pulse";
+            }
+          }
+
+          // Transition to Robot Auto Bowling after 1.5s
+          currentWhoseTurn = "computer";
+          setTimeout(() => {
+            transitionToBowlingReward();
+          }, 1800);
+        }
+      }
+    }
+
+    // Switches UI panel to Bowling mode
+    function transitionToBowlingReward() {
+      document.getElementById('quiz-options-panel').classList.add('hidden');
+      document.getElementById('bowling-alley-panel').classList.remove('hidden');
+
+      // Initialize Lane entities
+      setupNinePins();
+      resetBall();
+      sparkles = [];
+
+      if (currentWhoseTurn === "player") {
+        document.getElementById('hint-feedback').innerHTML = "🎳 Your Turn! Slide the ball to aim, then launch!";
+        document.getElementById('roll-btn').classList.remove('hidden');
+        document.getElementById('ball-slider').disabled = false;
+      } else {
+        document.getElementById('hint-feedback').innerHTML = "🤖 Opponent Robot is preparing to roll...";
+        document.getElementById('roll-btn').classList.add('hidden');
+        document.getElementById('ball-slider').disabled = true;
+
+        // Trigger automated computer roll sequence after 1s
+        setTimeout(triggerComputerAutoRoll, 1200);
+      }
+    }
+
+    // Automated computer roller sequence
+    function triggerComputerAutoRoll() {
+      ball.isRolling = true;
+      triggerAudio('click');
+
+      // Randomize starting computer coordinate positions and velocities
+      ball.x = Math.random() * (400) + 100;
+      document.getElementById('ball-slider').value = ball.x;
+
+      const dx = (300 + (Math.random() * 80 - 40)) - ball.x;
+      ball.vx = dx * 0.045;
+      ball.vy = -12; // move up
+    }
+
+    // Position slider link
+    function handleSliderMove(val) {
+      if (ball.isRolling || isFeedbackRunning || currentWhoseTurn !== 'player') return;
+      ball.x = parseFloat(val);
+    }
+
+    // Drag-position ball directly on canvas
+    function handleCanvasPointerDown(e) {
+      if (ball.isRolling || isFeedbackRunning || currentWhoseTurn !== 'player') return;
+      const rect = canvas.getBoundingClientRect();
+      const clickX = ((e.clientX - rect.left) / rect.width) * canvasWidth;
+      const clickY = ((e.clientY - rect.top) / rect.height) * canvasHeight;
+
+      if (clickY > 320) {
+        ball.x = Math.max(100, Math.min(500, clickX));
+        document.getElementById('ball-slider').value = ball.x;
+      }
+    }
+
+    function handleCanvasPointerMove(e) {
+      if (ball.isRolling || isFeedbackRunning || currentWhoseTurn !== 'player') return;
+      if (e.buttons !== 1) return; // Only track while holding press
+      const rect = canvas.getBoundingClientRect();
+      const clickX = ((e.clientX - rect.left) / rect.width) * canvasWidth;
+      const clickY = ((e.clientY - rect.top) / rect.height) * canvasHeight;
+
+      if (clickY > 320) {
+        ball.x = Math.max(100, Math.min(500, clickX));
+        document.getElementById('ball-slider').value = ball.x;
+      }
+    }
+
+    // Launch bowling ball down the perspective lane
+    function launchBowlingBall() {
+      if (ball.isRolling || isFeedbackRunning || currentWhoseTurn !== 'player') return;
+
+      triggerAudio('click');
+      ball.isRolling = true;
+      
+      // Calculate simple aiming trajectory - slight bias towards pins
+      const dx = 300 - ball.x;
+      ball.vx = dx * 0.045; // smooth homing towards center pin
+      ball.vy = -12; // vertical thrust speed
+    }
+
+    // Physics calculations cycle
+    function updateArcadePhysics() {
+      // 1. Update ball movement
+      if (ball.isRolling) {
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+
+        // Check pins collisions
+        for (let i = 0; i < pins.length; i++) {
+          const pin = pins[i];
+          if (pin.isKnocked) continue;
+
+          const dist = Math.hypot(ball.x - pin.x, ball.y - pin.y);
+          if (dist < (ball.radius + pin.radius)) {
+            handlePinImpact();
+            break;
+          }
+        }
+
+        // Out of bounds / gutter check
+        if (ball.y < 40) {
+          handleGutterMiss();
+        }
+      }
+
+      // 2. Update knocked pin velocities
+      pins.forEach(pin => {
+        if (pin.isKnocked) {
+          pin.x += pin.vx;
+          pin.y += pin.vy;
+          pin.rotation += pin.rotVel;
+          // Apply friction
+          pin.vx *= 0.95;
+          pin.vy *= 0.95;
+        }
+      });
+
+      // 3. Update sparkles particles
+      for (let i = sparkles.length - 1; i >= 0; i--) {
+        const p = sparkles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.03;
+        if (p.alpha <= 0) {
+          sparkles.splice(i, 1);
+        }
+      }
+    }
+
+    // Handle pin collision logic (Strike on reward hit!)
+    function handlePinImpact() {
+      ball.isRolling = false;
+      isFeedbackRunning = true;
+      
+      triggerAudio('correct');
+      createStrikeExplosion();
+
+      if (currentWhoseTurn === 'player') {
+        playerScore++;
+        document.getElementById('player-score-text').innerText = `⭐ ${playerScore}`;
+        document.getElementById('hint-feedback').innerHTML = "<span class='text-green-400 font-fun text-base uppercase animate-bounce'>🎳 STRIKE! PLAYER SCORES A POINT!</span>";
+      } else {
+        // Computer bowls and scores
+        computerScore++;
+        document.getElementById('computer-score-text').innerText = `🤖 ${computerScore}`;
+        document.getElementById('hint-feedback').innerHTML = "<span class='text-red-400 font-fun text-base uppercase animate-bounce'>🤖 STRIKE! ROBOT STEALS A POINT!</span>";
+      }
+
+      setTimeout(() => {
+        currentQuestionIndex++;
+        renderQuestion();
+      }, 2000);
+    }
+
+    function handleGutterMiss() {
+      ball.isRolling = false;
+      isFeedbackRunning = true;
+      triggerAudio('wrong');
+
+      document.getElementById('hint-feedback').innerHTML = "<span class='text-red-400 font-fun text-base uppercase'>❌ GUTTER BALL! NO POINTS SCORED!</span>";
+
+      setTimeout(() => {
+        currentQuestionIndex++;
+        renderQuestion();
+      }, 2000);
+    }
+
+    // Spectacular strike physics explosion covering 9 pins
+    function createStrikeExplosion() {
+      pins.forEach((pin, idx) => {
+        pin.isKnocked = true;
+        // Explode outward radially from center
+        const angle = Math.atan2(pin.y - 130, pin.x - 300) + (Math.random() * 0.4 - 0.2);
+        const speed = Math.random() * 12 + 8;
+        pin.vx = Math.cos(angle) * speed;
+        pin.vy = Math.sin(angle) * speed - Math.random() * 4; // lift up
+        pin.rotVel = Math.random() * 0.4 - 0.2;
+      });
+
+      // Sparkles particles
+      for (let i = 0; i < 30; i++) {
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = Math.random() * 10 + 5;
+        sparkles.push({
+          x: 300,
+          y: 130,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          color: `hsl(${Math.random() * 360}, 100%, 60%)`,
+          alpha: 1,
+          size: Math.random() * 6 + 3
+        });
+      }
+    }
+
+    function updateTriesUI() {
+      document.getElementById('tries-count').innerText = triesLeft;
+    }
+
+    // Main Draw Frame Cycle
+    function drawGameFrame() {
+      if (!ctx) return;
+
+      // 1. Clear frame
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // 2. Draw Bowling Lane Perspective lines
+      ctx.fillStyle = "#3e2723"; // Gutter sides
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      // Polished Lane boards
+      ctx.beginPath();
+      ctx.moveTo(100, 0);
+      ctx.lineTo(500, 0);
+      ctx.lineTo(600, canvasHeight);
+      ctx.lineTo(0, canvasHeight);
+      ctx.closePath();
+
+      // Wooden lane grading gradient
+      let laneGrad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+      laneGrad.addColorStop(0, "#ffb74d");
+      laneGrad.addColorStop(0.5, "#ffa726");
+      laneGrad.addColorStop(1, "#fb8c00");
+      ctx.fillStyle = laneGrad;
+      ctx.fill();
+
+      // Draw traditional lane guide marks / pin targets
+      ctx.fillStyle = "#d84315";
+      for (let i = 120; i <= 480; i += 60) {
+        ctx.beginPath();
+        ctx.arc(i, 280, 4, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // Draw Dotted aiming line helper
+      if (!ball.isRolling && !isFeedbackRunning && currentWhoseTurn === 'player') {
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([5, 8]);
+        ctx.moveTo(ball.x, ball.y);
+        ctx.lineTo(300, 100);
+        ctx.strokeStyle = "rgba(34, 211, 238, 0.6)";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 3. Draw Pins
+      pins.forEach(pin => {
+        ctx.save();
+        ctx.translate(pin.x, pin.y);
+        ctx.rotate(pin.rotation);
+        drawStandardFillerPin();
+        ctx.restore();
+      });
+
+      // 4. Draw Rolling Bowling Ball (grows smaller in perspective)
+      if (ball.y > 0) {
+        ctx.save();
+        // Scale down size slightly as it approaches top pins
+        const currentScale = Math.max(0.65, (ball.y / 380));
+        ctx.translate(ball.x, ball.y);
+        ctx.scale(currentScale, currentScale);
+        
+        drawGlowingBowlingBall();
+        ctx.restore();
+      }
+
+      // 5. Draw sparkles
+      sparkles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    // Standard White/Red filler bowling pin drawer
+    function drawStandardFillerPin() {
+      // Pin Silhouette
+      ctx.beginPath();
+      ctx.moveTo(-4, -20);
+      ctx.quadraticCurveTo(-4, -28, -6, -28);
+      ctx.lineTo(6, -28);
+      ctx.quadraticCurveTo(4, -28, 4, -20);
+      ctx.lineTo(5, -12);
+      ctx.quadraticCurveTo(12, 4, 12, 12);
+      ctx.quadraticCurveTo(12, 20, 0, 20);
+      ctx.quadraticCurveTo(-12, 20, -12, 12);
+      ctx.quadraticCurveTo(-12, 4, -5, -12);
+      ctx.closePath();
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.strokeStyle = "#455a64";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Red Stripe across neck
+      ctx.fillStyle = "#f44336";
+      ctx.fillRect(-4.5, -22, 9, 4);
+    }
+
+    // Premium heavy neon bowling ball drawer
+    function drawGlowingBowlingBall() {
+      // Color based on whose turn it is
+      const primaryColor = currentWhoseTurn === 'player' ? "#22d3ee" : "#f472b6";
+      const secondaryColor = currentWhoseTurn === 'player' ? "#0097a7" : "#c2185b";
+
+      // Glow ring
+      ctx.beginPath();
+      ctx.arc(0, 0, ball.radius + 6, 0, 2 * Math.PI);
+      ctx.fillStyle = currentWhoseTurn === 'player' ? "rgba(34, 211, 238, 0.15)" : "rgba(244, 114, 182, 0.15)";
+      ctx.fill();
+
+      // Sphere shading
+      let radialGrad = ctx.createRadialGradient(-6, -6, 2, 0, 0, ball.radius);
+      radialGrad.addColorStop(0, "#ffffff");
+      radialGrad.addColorStop(0.4, primaryColor);
+      radialGrad.addColorStop(1, secondaryColor);
+
+      ctx.beginPath();
+      ctx.arc(0, 0, ball.radius, 0, 2 * Math.PI);
+      ctx.fillStyle = radialGrad;
+      ctx.fill();
+
+      // Gloss highlight glint
+      ctx.beginPath();
+      ctx.ellipse(-7, -7, 6, 3, -Math.PI / 4, 0, 2 * Math.PI);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      ctx.fill();
+
+      // Traditional 3 bowling ball finger grip holes
+      ctx.fillStyle = "#212121";
+      ctx.beginPath();
+      ctx.arc(-2, 3, 2, 0, 2 * Math.PI);
+      ctx.arc(5, 1, 2, 0, 2 * Math.PI);
+      ctx.arc(1, -3, 2, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+    // Core Native MP3 player with web-synthesizer backup logic
+    function triggerAudio(type) {
+      try {
+        const correctSnd = document.getElementById('correctSound');
+        const wrongSnd = document.getElementById('wrongSound');
+        const clapSnd = document.getElementById('clapSound');
+
+        if (type === 'correct') {
+          correctSnd.currentTime = 0;
+          correctSnd.play().catch(() => playSynthFallback('correct'));
+        } else if (type === 'wrong') {
+          wrongSnd.currentTime = 0;
+          wrongSnd.play().catch(() => playSynthFallback('wrong'));
+        } else if (type === 'clap') {
+          clapSnd.currentTime = 0;
+          clapSnd.play().catch(() => playSynthFallback('correct'));
+        } else if (type === 'click') {
+          playSynthFallback('click');
+        }
+      } catch (e) {
+        playSynthFallback(type);
+      }
+    }
+
+    // Direct Web Audio API synthesizer fallback
+    function playSynthFallback(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        if (type === 'correct') {
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc1.type = 'sine'; osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc1.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          osc2.frequency.setValueAtTime(783.99, ctx.currentTime + 0.15);
+          osc2.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.25);
+          gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+          osc1.connect(gainNode); osc2.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc1.start(); osc2.start();
+          osc1.stop(ctx.currentTime + 0.4); osc2.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(140, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(90, ctx.currentTime + 0.25);
+          gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        } else if (type === 'click') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.06);
+        }
+      } catch (e) {
+        console.log("Synthesizer bypassed");
+      }
+    }
+
+    // Summary screen builder
+    function endGame() {
+      isGameActive = false;
+      stopGameLoop();
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.remove('hidden');
+
+      document.getElementById('final-player-score').innerText = playerScore;
+      document.getElementById('final-computer-score').innerText = computerScore;
+
+      let trophy = "🏆 Gold";
+      let emoji = "🏆";
+      let msg = "Stellar Phonics Bowler!";
+      let feedbackText = "Excellent job! You defeated the Opponent Robot and scored awesome strikes!";
+
+      if (playerScore > computerScore) {
+        trophy = "🏆 Gold Victory";
+        emoji = "🎳";
+        msg = "You Beat the Robot!";
+        feedbackText = `Outstanding! You scored ${playerScore} strikes and successfully defended the lane from the opponent. You are a true Consonant Blends Master!`;
+      } else if (playerScore === computerScore) {
+        trophy = "🥈 Silver Draw";
+        emoji = "⭐";
+        msg = "A Perfect Tie!";
+        feedbackText = `Close match! You and the Robot tied at ${playerScore} points. Try again to claim the gold crown!`;
+      } else {
+        trophy = "🥉 Bronze Participant";
+        emoji = "✨";
+        msg = "Robot Won this Time!";
+        feedbackText = "A good learning try! Let's practice beginning consonant blends a bit more and challenge the Robot again!";
+      }
+
+      document.getElementById("trophy-emoji").textContent = emoji;
+      document.getElementById("trophy-title").textContent = `${trophy}`;
+      document.getElementById("trophy-msg").textContent = msg;
+      document.getElementById("summary-feedback").textContent = feedbackText;
+
+      triggerAudio('clap');
+    }
+  </script>
+</body>
+</html>
