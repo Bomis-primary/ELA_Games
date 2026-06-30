@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Phonics Bowling: Nine Pins Arcade</title>
+  <title>Space Phonics Blaster</title>
   <!-- Tailwind CSS CDN for premium layout and utilities -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Friendly, playful typography -->
+  <!-- Playful Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
   
   <style>
@@ -21,19 +21,19 @@
       font-family: 'Fredoka One', cursive;
     }
 
-    /* Vibrant arcade background gradient with pulsing neon lights */
-    .bg-arcade-lanes {
-      background: linear-gradient(180deg, #120c1f 0%, #1a103c 45%, #2a1b5c 80%, #351a66 100%);
+    /* Cosmic Space Arcade Background with scrolling starfield simulation */
+    .bg-space {
+      background: linear-gradient(180deg, #050510 0%, #0d0c22 45%, #141135 80%, #1e1145 100%);
       background-size: 400% 400%;
-      animation: neonFlow 15s ease infinite;
+      animation: spaceFlow 20s ease infinite;
     }
 
-    @keyframes neonFlow {
+    @keyframes spaceFlow {
       0%, 100% { background-position: 50% 0%; }
       50% { background-position: 50% 100%; }
     }
 
-    /* Soft floating bobbing effect for the start screen */
+    /* Soft floating bobbing effect */
     @keyframes bob {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-8px) rotate(0.5deg); }
@@ -42,7 +42,7 @@
       animation: bob 3.5s ease-in-out infinite;
     }
 
-    /* Screen shake for incorrect pin crash */
+    /* Screen shake feedback */
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       20%, 60% { transform: translateX(-6px); }
@@ -52,30 +52,79 @@
       animation: shake 0.3s ease-in-out;
     }
 
-    /* Custom bowling lane canvas styling */
-    .lane-container {
-      position: relative;
-      width: 100%;
-      max-width: 600px;
-      aspect-ratio: 4 / 3;
-      background: #4a3420;
-      border: 6px solid #e65100;
-      border-radius: 1.5rem;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.35), inset 0 0 40px rgba(0,0,0,0.2);
-      overflow: hidden;
+    /* Asteroid Bobbing Animation */
+    @keyframes floatAsteroid {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(3deg); }
+    }
+    .animate-asteroid {
+      animation: floatAsteroid 3s ease-in-out infinite;
+    }
+
+    /* Laser beam shoot animation */
+    @keyframes shootLaser {
+      0% {
+        height: 0%;
+        opacity: 1;
+        bottom: 0px;
+      }
+      50% {
+        height: 100%;
+        opacity: 1;
+      }
+      100% {
+        height: 0%;
+        opacity: 0;
+        top: 0px;
+      }
+    }
+    .laser-beam {
+      position: absolute;
+      width: 4px;
+      background: linear-gradient(to top, #ff2a85, #22d3ee);
+      box-shadow: 0 0 12px #22d3ee, 0 0 20px #ff2a85;
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* Glowing custom borders */
+    .neon-cyan-border {
+      border: 3px solid #22d3ee;
+      box-shadow: 0 0 15px #22d3ee, inset 0 0 10px rgba(34, 211, 238, 0.3);
+    }
+    .neon-pink-border {
+      border: 3px solid #f472b6;
+      box-shadow: 0 0 15px #f472b6, inset 0 0 10px rgba(244, 114, 182, 0.3);
+    }
+
+    /* Sparkle particle style */
+    .spark-particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 50;
     }
   </style>
-</head>
-<body class="bg-arcade-lanes text-[#e0f7fa] min-h-screen flex flex-col justify-between overflow-x-hidden relative">
 
-  <!-- Floating neon light particles decor -->
-  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-10">
-    <div class="absolute bg-cyan-400 rounded-full w-24 h-24 top-10 left-10 blur-xl"></div>
-    <div class="absolute bg-pink-500 rounded-full w-40 h-40 bottom-20 right-16 blur-2xl"></div>
+  <!-- Critical early-load declarations to guarantee error-free logo fallbacks -->
+  <script>
+    function handleLogoError(img) {
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"><circle cx="50" cy="50" r="45" fill="%231b5e20" stroke="%2381c784" stroke-width="4"/><text x="50" y="62" fill="%23FFF" font-size="34" font-weight="bold" text-anchor="middle">?</text></svg>';
+    }
+  </script>
+</head>
+<body class="bg-space text-[#e0f7fa] min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+
+  <!-- Twinkling stars in space background -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+    <div class="absolute bg-white rounded-full w-1 h-1 top-10 left-10 animate-ping"></div>
+    <div class="absolute bg-white rounded-full w-1.5 h-1.5 top-32 right-24 animate-pulse"></div>
+    <div class="absolute bg-white rounded-full w-1 h-1 bottom-44 left-1/4 animate-pulse"></div>
   </div>
 
   <!-- ==========================================
-       SCREEN 1: 5-SECOND SPLASH SCREEN
+       SCREEN 1: 1.5-SECOND SPLASH SCREEN (SNAP-LOAD)
        Contains strictly ONLY the logo as requested
        ========================================== -->
   <div id="screen-splash" class="flex-1 flex flex-col items-center justify-center relative z-10 bg-white">
@@ -97,19 +146,20 @@
   <div id="screen-start" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full relative z-10">
     <div class="bg-slate-900/95 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 shadow-2xl border-4 border-cyan-400 text-center w-full max-w-xl">
       <h1 class="text-3xl md:text-5xl font-fun font-black text-cyan-400 tracking-wide mb-3 leading-tight drop-shadow-md">
-        🎳 Nine Pins Phonics
+        🚀 Space Phonics Blaster
       </h1>
       <p class="text-sm md:text-base font-extrabold text-pink-400 uppercase tracking-widest mb-8">
-        Consonant Blends Challenge
+        Consonant Blends Mission
       </p>
 
       <div class="bg-slate-950/80 rounded-3xl p-6 border border-cyan-500/30 text-left space-y-4 mb-8 shadow-inner font-semibold text-cyan-100">
-        <h2 class="font-fun font-black text-cyan-300 text-lg md:text-xl">Mission Briefing:</h2>
+        <h2 class="font-fun font-black text-cyan-300 text-lg md:text-xl">How to Play:</h2>
         <ul class="text-sm md:text-base space-y-3 text-pink-100 list-disc list-inside">
-          <li><strong>Step 1: Answer Phonics Quiz!</strong> 🖼️ Look at the CVC picture and click the correct starting blend.</li>
-          <li><strong>Step 2: Correct Answer Reward!</strong> 🎳 If you get it right, YOU get to roll the ball to score a spectacular strike!</li>
-          <li><strong>Step 3: Oops, Missed Turn!</strong> 🤖 If you run out of tries, the Opponent Robot bowls to steal points!</li>
-          <li>Beat the computer over 15 rounds of neon arcade action!</li>
+          <li>Help the spaceship find and fix consonant blends! 🛸</li>
+          <li><strong>Level 1: Letter Finding</strong> - Find the correct starting consonant letters!</li>
+          <li><strong>Level 2: Spelling help</strong> - Blast correct blends to complete the word! 🖼️</li>
+          <li><strong>Level 3: Fix the word</strong> - Find the wrong blend and blast the correct one to fix the word! 🧁</li>
+          <li>Tap an asteroid to target and fire your laser! You have <strong>2 tries</strong>.</li>
         </ul>
       </div>
 
@@ -117,7 +167,7 @@
         onclick="startGame()"
         class="w-full bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-xl md:text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-pink-700 uppercase tracking-wider animate-bob"
       >
-        START ARCADE 🎳
+        START GAME 🚀
       </button>
     </div>
 
@@ -131,40 +181,49 @@
        ========================================== -->
   <div id="screen-game" class="hidden flex-1 flex flex-col w-full max-w-5xl mx-auto p-3 md:p-6 justify-between relative z-10">
     
-    <!-- Top Progress & Scoreboard tallies (Player vs Computer) -->
-    <div class="grid grid-cols-3 bg-slate-950/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-cyan-500/30 mb-4 items-center">
-      <div class="flex flex-col text-left">
-        <span class="text-xs font-black uppercase text-cyan-400 tracking-wider">Player</span>
-        <span id="player-score-text" class="text-xl md:text-2xl font-black text-white">⭐ 0</span>
+    <!-- Top Progress, Score, and Target Task Bar -->
+    <div class="flex items-center justify-between bg-slate-950/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-cyan-500/30 mb-4">
+      <div class="flex flex-col">
+        <span id="level-indicator" class="text-xs md:text-sm font-black uppercase text-cyan-400 tracking-widest">LEVEL 1: IDENTIFICATION</span>
+        <span id="game-progress-text" class="text-lg md:text-xl font-black text-white">Question 1 / 15</span>
       </div>
 
-      <div class="flex flex-col text-center">
-        <span id="level-indicator" class="text-[10px] md:text-xs font-black uppercase text-pink-400 tracking-widest">LEVEL 1: L-BLENDS</span>
-        <span id="game-progress-text" class="text-sm font-bold text-slate-300">Round 1 / 15</span>
+      <!-- Playful Arcade Progress Bar -->
+      <div class="flex-1 mx-6 h-3 bg-purple-950 rounded-full overflow-hidden hidden md:block relative border border-cyan-500/20">
+        <div id="game-progress-bar" class="h-full bg-gradient-to-r from-pink-500 to-cyan-400 transition-all duration-500 rounded-full" style="width: 0%"></div>
       </div>
 
-      <div class="flex flex-col text-right">
-        <span class="text-xs font-black uppercase text-red-400 tracking-wider">Opponent Robot</span>
-        <span id="computer-score-text" class="text-xl md:text-2xl font-black text-white">🤖 0</span>
+      <div class="flex items-center space-x-4">
+        <!-- Tries indicator -->
+        <div id="tries-box" class="flex items-center space-x-1 bg-slate-900 px-3 py-1.5 rounded-full border border-orange-400/30">
+          <span class="text-xs font-bold text-orange-400">TRIES LEFT:</span>
+          <span id="tries-count" class="font-black text-orange-400 text-sm">2</span>
+        </div>
+
+        <!-- Score Counter -->
+        <div class="flex items-center space-x-2 bg-slate-900 px-4 py-1.5 rounded-full border border-cyan-500/30">
+          <span class="text-lg">⭐</span>
+          <span id="game-score-text" class="font-black text-yellow-300">0</span>
+        </div>
       </div>
     </div>
 
-    <!-- Main Arcade Console Frame -->
-    <div id="game-cabinet" class="flex-1 bg-slate-950/80 backdrop-blur-md rounded-[2.5rem] p-4 md:p-6 shadow-2xl border-4 border-cyan-500 flex flex-col justify-between min-h-[460px] relative mb-4">
+    <!-- Main Space Arcade Cabinet Console -->
+    <div id="game-cabinet" class="flex-1 bg-slate-900/90 rounded-[2.5rem] p-5 md:p-6 shadow-2xl border-8 border-purple-700/80 flex flex-col justify-between min-h-[460px] relative mb-4">
       
       <!-- Top Section: Spelling Board & SVG Picture Hint -->
-      <div class="flex items-center justify-between bg-slate-900/90 text-white rounded-2xl p-3 border-2 border-cyan-500/40 mb-4 shadow-lg">
+      <div class="flex items-center justify-between bg-slate-950/95 text-white rounded-2xl p-3 border-2 border-cyan-500/40 mb-4 shadow-lg">
         
         <!-- Interactive Letter Puzzle Blank -->
         <div class="flex-1 pl-4">
-          <p id="task-level-title" class="text-xs font-black uppercase text-pink-400 tracking-wider">PHONICS PHASE</p>
-          <h2 id="task-bold-header" class="text-3xl md:text-4xl font-fun font-black tracking-widest mt-1 text-cyan-300">
+          <p id="task-level-title" class="text-xs font-black uppercase text-pink-400 tracking-wider">LEVEL 1: BEGINNING BLENDS</p>
+          <h2 id="task-bold-header" class="text-2xl md:text-3xl font-fun font-black tracking-wide mt-1 text-cyan-300 leading-tight">
             _ _ o g
           </h2>
         </div>
 
-        <!-- Custom high quality SVG Picture card for assisting Grade 1 kids -->
-        <div id="task-image-box" class="w-20 h-20 md:w-24 md:h-24 bg-slate-950 rounded-xl p-1 flex items-center justify-center border-2 border-cyan-500/30 flex-shrink-0">
+        <!-- Custom high quality SVG Picture card (Hidden in L1, visible in L2/L3) -->
+        <div id="task-image-box" class="w-20 h-20 md:w-24 md:h-24 bg-slate-900 rounded-xl p-1 flex items-center justify-center border-2 border-cyan-500/30 flex-shrink-0">
           <!-- Loaded dynamically -->
         </div>
 
@@ -173,55 +232,45 @@
       <!-- Live interactive prompt / tries alert info bubble -->
       <div class="text-center min-h-[22px] mb-2 font-fun text-sm tracking-wide text-orange-400">
         <p id="hint-feedback" class="animate-pulse">
-          Choose the correct blend button below!
+          Blast the correct blend asteroid with your laser!
         </p>
       </div>
 
-      <!-- ==========================================
-           PHASE A: QUIZ SELECTION PANEL
-           Big, clear, high contrast, non-blurry button options
-           ========================================== -->
-      <div id="quiz-options-panel" class="flex-1 flex flex-col justify-center items-center gap-4 py-4">
-        <!-- Injected dynamically with 3 giant clean blend cards -->
+      <!-- Laser Beam container layer -->
+      <div id="laser-layer" class="absolute inset-x-0 top-0 bottom-40 overflow-hidden pointer-events-none"></div>
+
+      <!-- Center Space Asteroids Pit Area -->
+      <div id="asteroids-pit" class="flex-1 flex justify-around items-center gap-4 py-4 min-h-[160px] relative">
+        <!-- Asteroids generated dynamically as absolute DOM nodes -->
       </div>
 
-      <!-- ==========================================
-           PHASE B: REWARD BOWLING ALLEY
-           Visible only during ball rolling transitions
-           ========================================== -->
-      <div id="bowling-alley-panel" class="hidden flex-1 flex flex-col items-center justify-center relative w-full overflow-hidden py-1">
+      <!-- Bottom Interactive Space Blaster Deck -->
+      <div class="w-full flex flex-col items-center justify-center relative pt-4 pb-2 border-t border-purple-500/20">
         
-        <div class="lane-container w-full">
-          <canvas id="gameCanvas" class="w-full h-full block"></canvas>
-        </div>
-
-        <!-- Controls Dashboard (Aim Slider and Roll Button) -->
-        <div class="w-full flex items-center justify-between gap-4 mt-4 pt-3 border-t border-purple-500/20">
-          
-          <!-- Touch-Friendly Ball Position Slider -->
-          <div class="flex-1 flex flex-col">
-            <span class="text-[10px] md:text-xs font-black uppercase text-cyan-400 tracking-widest mb-1">Position Ball:</span>
-            <input 
-              type="range" 
-              id="ball-slider" 
-              min="100" 
-              max="500" 
-              value="300"
-              class="w-full h-3 bg-purple-950 rounded-lg appearance-none cursor-pointer accent-pink-500 focus:outline-none"
-              oninput="handleSliderMove(this.value)"
-            >
+        <!-- Animated Space Laser Gun Cannon (locks on and fires at selected target) -->
+        <div id="laser-cannon-mount" class="relative w-28 h-28 flex items-center justify-center transition-transform duration-300 origin-center" style="transform: rotate(-90deg);">
+          <div id="laser-cannon-body" class="w-full h-full">
+            <svg class="w-full h-full drop-shadow-lg" viewBox="0 0 100 100">
+              <!-- Futuristic Laser Defense Cannon -->
+              <!-- Base platform -->
+              <path d="M25,80 Q50,70 75,80 L65,95 L35,95 Z" fill="#37474f" stroke="#455a64" stroke-width="2"/>
+              <!-- Swiveling generator -->
+              <circle cx="50" cy="50" r="22" fill="#263238" stroke="#37474f" stroke-width="2"/>
+              <!-- Glowing plasma core inside gun -->
+              <circle cx="50" cy="50" r="12" fill="#22d3ee" class="animate-pulse"/>
+              <!-- Firing barrel nozzle -->
+              <rect x="42" y="10" width="16" height="30" rx="3" fill="#455a64" stroke="#546e7a" stroke-width="2"/>
+              <rect x="46" y="5" width="8" height="10" fill="#22d3ee" rx="1"/>
+            </svg>
           </div>
-
-          <!-- Big Launch Button -->
-          <button
-            onclick="launchBowlingBall()"
-            id="roll-btn"
-            class="bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-lg md:text-xl py-3 px-8 rounded-xl shadow-lg active:scale-95 transition-transform uppercase tracking-wider"
-          >
-            ROLL 🎳
-          </button>
-
+          
+          <!-- Invisible coordinate node representing nozzle tip -->
+          <div id="nozzle-point" class="absolute top-[5%] left-[45%] w-2 h-2 rounded-full opacity-0"></div>
         </div>
+
+        <p class="text-[10px] md:text-xs font-black uppercase text-cyan-400 tracking-widest mt-2">
+          Laser Ready!
+        </p>
 
       </div>
 
@@ -236,7 +285,7 @@
     <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-cyan-400 text-center w-full animate-bob">
       <span id="trophy-emoji" class="text-7xl block mb-4">🏆</span>
       
-      <h1 id="trophy-title" class="text-3xl md:text-4xl font-fun font-black text-cyan-300 mb-1">Stellar Splaster!</h1>
+      <h1 id="trophy-title" class="text-3xl md:text-4xl font-fun font-black text-cyan-300 mb-1">Great Job!</h1>
       <p id="trophy-msg" class="text-sm md:text-base font-extrabold text-pink-400 uppercase tracking-widest mb-8">
         Phonics Mission Complete!
       </p>
@@ -244,15 +293,11 @@
       <!-- Scoreboard Container -->
       <div class="bg-slate-950 rounded-3xl p-6 border-2 border-cyan-500/30 space-y-4 mb-8 shadow-inner font-bold text-cyan-100">
         <div class="flex justify-between items-center text-lg md:text-xl font-black text-cyan-400">
-          <span>Your Final Score:</span>
-          <span id="final-player-score" class="text-3xl font-black text-yellow-300">0</span>
-        </div>
-        <div class="flex justify-between items-center text-lg md:text-xl font-black text-red-400">
-          <span>Robot Final Score:</span>
-          <span id="final-computer-score" class="text-3xl font-black">0</span>
+          <span>Final Score:</span>
+          <span id="final-score" class="text-3xl font-black text-yellow-300">0 / 15</span>
         </div>
         <p id="summary-feedback" class="text-xs md:text-sm text-left leading-relaxed border-t border-cyan-500/20 pt-3 font-semibold font-sans">
-          Excellent job! You correctly navigated Consonant Blends and knocked down all nine pins targets!
+          Excellent job! You correctly navigated Consonant Blends and blasted all incoming asteroids!
         </p>
       </div>
 
@@ -276,34 +321,42 @@
        GAME ENGINE & INTERACTIVITY
        ========================================== -->
   <script>
-    // 20 BACKEND QUESTION POOL (Consonant Blends specifically tailored to Grade 1)
-    const ALL_GAMES_POOL = [
-      // Level 1: L-Blends
-      { id: 1, word: "FROG", text: "_ _ o g", correct: "fr", imageKey: "frog", distractors: ["cl", "st"] },
-      { id: 2, word: "CRAB", text: "_ _ a b", correct: "cr", imageKey: "crab", distractors: ["fl", "sp"] },
-      { id: 3, word: "DRUM", text: "_ _ u m", correct: "dr", imageKey: "drum", distractors: ["gl", "sn"] },
-      { id: 4, word: "STAR", text: "_ _ a r", correct: "st", imageKey: "star", distractors: ["bl", "pr"] },
-      { id: 5, word: "FLAG", text: "_ _ a g", correct: "fl", imageKey: "flag", distractors: ["br", "sw"] },
-      { id: 6, word: "PLUM", text: "_ _ u m", correct: "pl", imageKey: "plum", distractors: ["gr", "sm"] },
-      { id: 7, word: "SWAN", text: "_ _ a n", correct: "sw", imageKey: "swan", distractors: ["cl", "dr"] },
-      // Level 2: R-Blends
-      { id: 8, word: "TREE", text: "_ _ e e", correct: "tr", imageKey: "tree", distractors: ["sl", "gl"] },
-      { id: 9, word: "SPOON", text: "_ _ o o n", correct: "sp", imageKey: "spoon", distractors: ["cr", "fl"] },
-      { id: 10, word: "SNAIL", text: "_ _ a i l", correct: "sn", imageKey: "snail", distractors: ["tr", "bl"] },
-      { id: 11, word: "CLOCK", text: "_ _ o c k", correct: "cl", imageKey: "clock", distractors: ["gr", "sw"] },
-      { id: 12, word: "BRUSH", text: "_ _ u s h", correct: "br", imageKey: "brush", distractors: ["gl", "st"] },
-      { id: 13, word: "GLASS", text: "_ _ a s s", correct: "gl", imageKey: "glass", distractors: ["pr", "sn"] },
-      // Level 3: S-Blends
-      { id: 14, word: "SLED", text: "_ _ e d", correct: "sl", imageKey: "sled", distractors: ["cr", "ft"] },
-      { id: 15, word: "GRAPE", text: "_ _ a p e", correct: "gr", imageKey: "grape", distractors: ["pl", "sc"] },
-      { id: 16, word: "SLIDE", text: "_ _ i d e", correct: "sl", imageKey: "slide", distractors: ["br", "sm"] },
-      { id: 17, word: "TRUCK", text: "_ _ u c k", correct: "tr", imageKey: "truck", distractors: ["fl", "sp"] },
-      { id: 18, word: "BLOCK", text: "_ _ o c k", correct: "bl", imageKey: "block", distractors: ["dr", "sn"] },
-      { id: 19, word: "CROWN", text: "_ _ o w n", correct: "cr", imageKey: "crown", distractors: ["gl", "st"] },
-      { id: 20, word: "SMILE", text: "_ _ i l e", correct: "sm", imageKey: "smile", distractors: ["tr", "pl"] }
+    // LEVEL 1: Standalone Identification Questions (8 total in pool)
+    // Distractors changed from consonants/digraphs to clear long vowel teams / vowel combinations (ee, oa, ai, oo, ea, oi, ay, ou)
+    const LEVEL_1_POOL = [
+      { type: "double", text: "Find the starting blend!", word: "bl", options: [{char:"bl", isCorrect:true}, {char:"ee", isCorrect:false}, {char:"ai", isCorrect:false}] },
+      { type: "double", text: "Find the starting blend!", word: "cl", options: [{char:"cl", isCorrect:true}, {char:"oa", isCorrect:false}, {char:"oo", isCorrect:false}] },
+      { type: "double", text: "Find the starting blend!", word: "fl", options: [{char:"fl", isCorrect:true}, {char:"ea", isCorrect:false}, {char:"ou", isCorrect:false}] },
+      { type: "double", text: "Find the starting blend!", word: "gl", options: [{char:"gl", isCorrect:true}, {char:"ay", isCorrect:false}, {char:"ee", isCorrect:false}] },
+      { type: "double", text: "Find the starting blend!", word: "pr", options: [{char:"pr", isCorrect:true}, {char:"oi", isCorrect:false}, {char:"oo", isCorrect:false}] },
+      { type: "double", text: "Find the starting blend!", word: "tr", options: [{char:"tr", isCorrect:true}, {char:"oa", isCorrect:false}, {char:"ea", isCorrect:false}] },
+      { type: "double", text: "Find the starting blend!", word: "br", options: [{char:"br", isCorrect:true}, {char:"ai", isCorrect:false}, {char:"ay", isCorrect:false}] },
+      { type: "double", text: "Find the starting blend!", word: "st", options: [{char:"st", isCorrect:true}, {char:"oo", isCorrect:false}, {char:"ee", isCorrect:false}] }
     ];
 
-    // High quality vector SVGs specifically crafted to be easily recognized by Grade 1 students
+    // LEVEL 2: Simple Application Words (6 total in pool)
+    // Displays blanks and illustration cards cleanly, without bracket text giveaways.
+    const LEVEL_2_POOL = [
+      { type: "application", text: "Spell the word: _ _ o g", word: "FROG", imageKey: "frog", options: [{char:"fr", isCorrect:true}, {char:"cl", isCorrect:false}, {char:"st", isCorrect:false}] },
+      { type: "application", text: "Spell the word: _ _ a b", word: "CRAB", imageKey: "crab", options: [{char:"cr", isCorrect:true}, {char:"fl", isCorrect:false}, {char:"sp", isCorrect:false}] },
+      { type: "application", text: "Spell the word: _ _ u m", word: "DRUM", imageKey: "drum", options: [{char:"dr", isCorrect:true}, {char:"gl", isCorrect:false}, {char:"sn", isCorrect:false}] },
+      { type: "application", text: "Spell the word: _ _ a g", word: "FLAG", imageKey: "flag", options: [{char:"fl", isCorrect:true}, {char:"br", isCorrect:false}, {char:"sw", isCorrect:false}] },
+      { type: "application", text: "Spell the word: _ _ a r", word: "STAR", imageKey: "star", options: [{char:"st", isCorrect:true}, {char:"bl", isCorrect:false}, {char:"pr", isCorrect:false}] },
+      { type: "application", text: "Spell the word: _ _ u m", word: "PLUM", imageKey: "plum", options: [{char:"pl", isCorrect:true}, {char:"gr", isCorrect:false}, {char:"sm", isCorrect:false}] }
+    ];
+
+    // LEVEL 3: Error Correction Words (6 total in pool)
+    // Misspelled word prompts that kids fix by blasting correct asteroid blends.
+    const LEVEL_3_POOL = [
+      { type: "correction", text: "Fix the word: s l o c k", word: "CLOCK", imageKey: "clock", options: [{char:"cl", isCorrect:true}, {char:"gr", isCorrect:false}, {char:"sw", isCorrect:false}] },
+      { type: "correction", text: "Fix the word: c l u s h", word: "BRUSH", imageKey: "brush", options: [{char:"br", isCorrect:true}, {char:"gl", isCorrect:false}, {char:"st", isCorrect:false}] },
+      { type: "correction", text: "Fix the word: c r a s s", word: "GLASS", imageKey: "glass", options: [{char:"gl", isCorrect:true}, {char:"pr", isCorrect:false}, {char:"sn", isCorrect:false}] },
+      { type: "correction", text: "Fix the word: s t i d e", word: "SLIDE", imageKey: "slide", options: [{char:"sl", isCorrect:true}, {char:"br", isCorrect:false}, {char:"sm", isCorrect:false}] },
+      { type: "correction", text: "Fix the word: f l u c k", word: "TRUCK", imageKey: "truck", options: [{char:"tr", isCorrect:true}, {char:"fl", isCorrect:false}, {char:"sp", isCorrect:false}] },
+      { type: "correction", text: "Fix the word: t r i l e", word: "SMILE", imageKey: "smile", options: [{char:"sm", isCorrect:true}, {char:"tr", isCorrect:false}, {char:"pl", isCorrect:false}] }
+    ];
+
+    // Ultra-clear child-friendly vector SVGs designed for high visibility and immediate comprehension
     const VISUAL_HINTS = {
       "frog": `<svg viewBox="0 0 100 100" class="w-16 h-16">
         <circle cx="50" cy="55" r="28" fill="#4caf50" stroke="#1b5e20" stroke-width="2"/>
@@ -342,24 +395,9 @@
         <path d="M50,29 Q54,16 62,18" stroke="#5d4037" stroke-width="3" fill="none"/>
         <path d="M50,32 Q42,22 42,28 Z" fill="#4caf50"/>
       </svg>`,
-      "swan": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <path d="M25,64 C42,64 45,45 52,28 C56,18 64,12 66,22 C64,32 58,48 65,58 L78,58 C85,62 82,72 65,72 L25,72 Z" fill="#fafafa" stroke="#cfd8dc" stroke-width="2"/>
-        <polygon points="66,22 72,25 66,28" fill="#ff7043"/>
-        <circle cx="61" cy="24" r="1.5" fill="#000"/>
-      </svg>`,
       "tree": `<svg viewBox="0 0 100 100" class="w-16 h-16">
         <rect x="46" y="55" width="8" height="30" fill="#8d6e63"/>
         <path d="M50,15 C30,15 25,35 35,45 C25,55 45,65 50,58 C55,65 75,55 65,45 C75,35 70,15 50,15 Z" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
-      </svg>`,
-      "spoon": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <ellipse cx="32" cy="38" rx="14" ry="10" fill="#b0bec5" stroke="#78909c" stroke-width="2" transform="rotate(-30 32 38)"/>
-        <rect x="42" y="44" width="40" height="5" rx="2.5" fill="#cfd8dc" stroke="#78909c" stroke-width="2" transform="rotate(-30 42 44)"/>
-      </svg>`,
-      "snail": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <path d="M20,68 C35,68 42,50 68,54 L85,68 Z" fill="#fff9c4" stroke="#fbc02d" stroke-width="1.5"/>
-        <circle cx="45" cy="50" r="18" fill="#ffb74d" stroke="#f57f17" stroke-width="2"/>
-        <path d="M45,50 A8,8 0 1,0 45,42 A4,4 0 1,0 45,46" stroke="#f57f17" stroke-width="2" fill="none"/>
-        <line x1="24" y1="52" x2="16" y2="40" stroke="#fbc02d" stroke-width="2"/>
       </svg>`,
       "clock": `<svg viewBox="0 0 100 100" class="w-16 h-16">
         <circle cx="50" cy="50" r="32" fill="#e0f7fa" stroke="#0097a7" stroke-width="3"/>
@@ -376,21 +414,6 @@
         <path d="M30,20 L36,80 Q50,83 64,80 L70,20 Z" fill="none" stroke="#29b6f6" stroke-width="3" />
         <ellipse cx="50" cy="50" rx="17" ry="3" fill="#81d4fa" opacity="0.8"/>
       </svg>`,
-      "sled": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <path d="M15,68 L80,68 C88,68 90,56 86,52" stroke="#78909c" stroke-width="4" fill="none" stroke-linecap="round"/>
-        <path d="M22,54 L72,54" stroke="#8d6e63" stroke-width="5" fill="none" stroke-linecap="round"/>
-        <line x1="32" y1="54" x2="32" y2="68" stroke="#5d4037" stroke-width="3"/>
-        <line x1="62" y1="54" x2="62" y2="68" stroke="#5d4037" stroke-width="3"/>
-      </svg>`,
-      "grape": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <circle cx="50" cy="40" r="8" fill="#7e57c2" />
-        <circle cx="40" cy="50" r="8" fill="#7e57c2" />
-        <circle cx="60" cy="50" r="8" fill="#7e57c2" />
-        <circle cx="50" cy="60" r="8" fill="#7e57c2" />
-        <circle cx="44" cy="70" r="8" fill="#7e57c2" />
-        <circle cx="56" cy="70" r="8" fill="#7e57c2" />
-        <path d="M50,32 Q54,16 62,18" stroke="#5d4037" stroke-width="3" fill="none" />
-      </svg>`,
       "slide": `<svg viewBox="0 0 100 100" class="w-16 h-16">
         <line x1="22" y1="20" x2="22" y2="80" stroke="#78909c" stroke-width="4" stroke-linecap="round"/>
         <line x1="22" y1="40" x2="14" y2="80" stroke="#cfd8dc" stroke-width="3"/>
@@ -405,63 +428,28 @@
         <circle cx="68" cy="73" r="8" fill="#37474f"/>
         <circle cx="68" cy="73" r="3" fill="#cfd8dc"/>
       </svg>`,
-      "block": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <rect x="20" y="45" width="30" height="30" fill="#f44336" stroke="#b71c1c" stroke-width="2" rx="3" />
-        <rect x="45" y="25" width="30" height="30" fill="#ffeb3b" stroke="#f57f17" stroke-width="2" rx="3" />
-        <text x="35" y="65" font-family="sans-serif" font-size="14" font-weight="900" fill="#fff">A</text>
-        <text x="60" y="45" font-family="sans-serif" font-size="14" font-weight="900" fill="#263238">B</text>
-      </svg>`,
-      "crown": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <path d="M15,70 L20,32 L40,48 L50,20 L60,48 L80,32 L85,70 Z" fill="#ffd54f" stroke="#ffb300" stroke-width="2.5" stroke-linejoin="round"/>
-        <circle cx="50" cy="20" r="3.5" fill="#ad1457"/>
-        <circle cx="20" cy="32" r="3.5" fill="#1565c0"/>
-        <circle cx="80" cy="32" r="3.5" fill="#1565c0"/>
-        <circle cx="50" cy="62" r="5" fill="#2e7d32"/>
-      </svg>`,
       "smile": `<svg viewBox="0 0 100 100" class="w-16 h-16">
         <circle cx="50" cy="50" r="32" fill="#ffeb3b" stroke="#f57f17" stroke-width="2" />
         <circle cx="38" cy="42" r="4.5" fill="#212121" />
         <circle cx="62" cy="42" r="4.5" fill="#212121" />
-        <path d="M35,58 Q50,70 65,58" stroke="#d84315" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path d="M35,58 Q50,70 65,58" stroke="#d84315" stroke-linecap="round" stroke-width="3.5" fill="none"/>
       </svg>`
     };
 
     let currentQuestions = [];
     let currentQuestionIndex = 0;
-    
-    // Scores
-    let playerScore = 0;
-    let computerScore = 0;
-
+    let score = 0;
     let triesLeft = 2;
     let isFeedbackRunning = false;
-    let currentWhoseTurn = "player"; // 'player' | 'computer'
-
-    // Canvas settings
-    const canvasWidth = 600;
-    const canvasHeight = 450;
-    let canvas, ctx;
-    let gameLoopInterval = null;
-    let isGameActive = false;
-
-    // Physical ball & Pin entities
-    let ball = {
-      x: 300,
-      y: 380,
-      vx: 0,
-      vy: 0,
-      radius: 20,
-      isRolling: false
-    };
-
-    let pins = [];
-    let sparkles = [];
+    
+    // Laser Blaster state
+    let activeAsteroids = [];
 
     // Splash screen router with safe document readyState checks
     function initSplashTimer() {
       setTimeout(() => {
         switchScreen('screen-start');
-      }, 5000);
+      }, 1500); // Fast snap-load transition
     }
 
     if (document.readyState === 'loading') {
@@ -477,15 +465,10 @@
       document.getElementById('screen-summary').classList.add('hidden');
       
       document.getElementById(screenId).classList.remove('hidden');
-
-      if (screenId === 'screen-game') {
-        initGameCanvas();
-      } else {
-        stopGameLoop();
-      }
     }
 
-    // Shuffles questions, shuffles pool, sets up 15 distinct questions
+    // Set up 15 randomized questions dynamically
+    // 5 Standalone (L1), 5 Basic Application (L2), 5 Advanced Application (L3)
     function startGame() {
       // Warm up audio interface contexts
       try {
@@ -498,94 +481,19 @@
       document.getElementById('wrongSound').load();
       document.getElementById('clapSound').load();
 
-      // Take 15 randomized questions from backend pool
-      currentQuestions = [...ALL_GAMES_POOL]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 15);
+      // Take 5 randomized Level 1 questions
+      const selectedL1 = [...LEVEL_1_POOL].sort(() => Math.random() - 0.5).slice(0, 5);
+      const selectedL2 = [...LEVEL_2_POOL].sort(() => Math.random() - 0.5).slice(0, 5);
+      const selectedL3 = [...LEVEL_3_POOL].sort(() => Math.random() - 0.5).slice(0, 5);
 
+      currentQuestions = [...selectedL1, ...selectedL2, ...selectedL3];
       currentQuestionIndex = 0;
-      playerScore = 0;
-      computerScore = 0;
+      score = 0;
       triesLeft = 2;
       isFeedbackRunning = false;
 
       switchScreen('screen-game');
-    }
-
-    // Initialize Game Canvas
-    function initGameCanvas() {
-      canvas = document.getElementById('gameCanvas');
-      ctx = canvas.getContext('2d');
-
-      // Coordinate Canvas sizing
-      canvas.width = canvasWidth;
-      canvas.height = canvasHeight;
-
-      // Handle direct canvas interaction for positioning ball
-      canvas.removeEventListener('pointerdown', handleCanvasPointerDown);
-      canvas.addEventListener('pointerdown', handleCanvasPointerDown);
-      
-      canvas.removeEventListener('pointermove', handleCanvasPointerMove);
-      canvas.addEventListener('pointermove', handleCanvasPointerMove);
-
-      isGameActive = true;
-      resetBall();
       renderQuestion();
-      startGameLoop();
-    }
-
-    function startGameLoop() {
-      stopGameLoop();
-      gameLoopInterval = setInterval(() => {
-        if (!isGameActive) return;
-        updateArcadePhysics();
-        drawGameFrame();
-      }, 30);
-    }
-
-    function stopGameLoop() {
-      if (gameLoopInterval) {
-        clearInterval(gameLoopInterval);
-        gameLoopInterval = null;
-      }
-    }
-
-    function resetBall() {
-      ball.x = 300;
-      ball.y = 380;
-      ball.vx = 0;
-      ball.vy = 0;
-      ball.isRolling = false;
-      document.getElementById('ball-slider').value = 300;
-    }
-
-    // Set up standard 9 pins arranged in a diamond
-    function setupNinePins() {
-      pins = [];
-      const pinCoords = [
-        { x: 300, y: 100 },
-        { x: 250, y: 130 },
-        { x: 350, y: 130 },
-        { x: 200, y: 160 },
-        { x: 300, y: 160 },
-        { x: 400, y: 160 },
-        { x: 250, y: 190 },
-        { x: 350, y: 190 },
-        { x: 300, y: 130 }
-      ];
-
-      pinCoords.forEach(pos => {
-        pins.push({
-          x: pos.x,
-          y: pos.y,
-          radius: 18,
-          isKnocked: false,
-          vx: 0,
-          vy: 0,
-          rotation: 0,
-          rotVel: 0
-        });
-      });
     }
 
     function renderQuestion() {
@@ -594,462 +502,296 @@
         return;
       }
 
-      // Restore layout states back to Phonics mode
-      document.getElementById('quiz-options-panel').classList.remove('hidden');
-      document.getElementById('bowling-alley-panel').classList.add('hidden');
-
       isFeedbackRunning = false;
       triesLeft = 2;
       updateTriesUI();
 
       const q = currentQuestions[currentQuestionIndex];
+      const isLevel1 = currentQuestionIndex < 5;
+      const isLevel2 = currentQuestionIndex >= 5 && currentQuestionIndex < 10;
+      const isLevel3 = currentQuestionIndex >= 10;
 
-      // Update Header level indicators and progress texts
-      let isLevel1 = currentQuestionIndex < 5;
-      let isLevel2 = currentQuestionIndex >= 5 && currentQuestionIndex < 10;
-
+      // Update Header level indicator and progress texts
       const levelIndicator = document.getElementById('level-indicator');
+      const levelTitle = document.getElementById('task-level-title');
       if (isLevel1) {
-        levelIndicator.innerText = "LEVEL 1: L-BLENDS";
+        levelIndicator.innerText = "LEVEL 1: IDENTIFICATION";
+        levelTitle.innerText = "LEVEL 1: BLENDS DISCOVERY";
         levelIndicator.className = "text-xs md:text-sm font-black uppercase text-pink-400 tracking-widest";
+        document.getElementById('hint-feedback').innerText = "Find the correct asteroid and blast it!";
       } else if (isLevel2) {
-        levelIndicator.innerText = "LEVEL 2: R-BLENDS";
+        levelIndicator.innerText = "LEVEL 2: BASIC MATCHING";
+        levelTitle.innerText = "LEVEL 2: BASIC SPELLING";
         levelIndicator.className = "text-xs md:text-sm font-black uppercase text-cyan-400 tracking-widest";
+        document.getElementById('hint-feedback').innerText = "Spell the word! Blast the correct starting blend asteroid!";
       } else {
-        levelIndicator.innerText = "LEVEL 3: S-BLENDS";
-        levelIndicator.className = "text-xs md:text-sm font-black uppercase text-yellow-400 tracking-widest";
+        levelIndicator.innerText = "LEVEL 3: ERROR CORRECTION";
+        levelTitle.innerText = "LEVEL 3: FIX THE SPELLING";
+        levelIndicator.className = "text-xs md:text-sm font-black uppercase text-purple-400 tracking-widest";
+        document.getElementById('hint-feedback').innerText = "Fix the misspelled word! Blast the correct replacement asteroid!";
       }
 
       document.getElementById('task-bold-header').innerText = q.text;
-      document.getElementById('game-progress-text').innerText = `Round ${currentQuestionIndex + 1} / 15`;
+      document.getElementById('game-progress-text').innerText = `Question ${currentQuestionIndex + 1} / 15`;
       document.getElementById('game-progress-bar').style.width = `${(currentQuestionIndex / 15) * 100}%`;
-      
-      // Live Scoreboard
-      document.getElementById('player-score-text').innerText = `⭐ ${playerScore}`;
-      document.getElementById('computer-score-text').innerText = `🤖 ${computerScore}`;
-      
-      document.getElementById('hint-feedback').innerHTML = "Choose the correct blend button below!";
+      document.getElementById('game-score-text').innerText = score;
 
-      // Load Visual Card
-      document.getElementById('task-image-box').innerHTML = VISUAL_HINTS[q.imageKey] || '';
+      // Set Up the dynamic beautiful Vector Hint (Only visible in Levels 2 & 3)
+      const imageBox = document.getElementById('task-image-box');
+      if (isLevel1) {
+        imageBox.classList.add('hidden');
+      } else {
+        imageBox.classList.remove('hidden');
+        imageBox.innerHTML = VISUAL_HINTS[q.imageKey] || '';
+      }
 
-      // Set up options in the HTML quiz panel
-      const optionsPanel = document.getElementById('quiz-options-panel');
-      optionsPanel.innerHTML = '';
+      // Generate the 3 Bobbing Space Asteroids - Unified options loader
+      const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+      const asteroidsContainer = document.getElementById('asteroids-pit');
+      asteroidsContainer.innerHTML = '';
 
-      const optionLabels = [q.correct, ...q.distractors].sort(() => Math.random() - 0.5);
+      activeAsteroids = [];
 
-      optionLabels.forEach((label) => {
-        const btn = document.createElement('button');
-        btn.className = "w-full max-w-sm py-4 px-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 border-4 border-cyan-500 text-cyan-300 font-fun font-black text-2xl uppercase tracking-wider transform transition-transform duration-100 hover:scale-[1.02] active:scale-95 shadow-lg border-b-8 active:border-b-4 border-cyan-700";
-        btn.innerHTML = `<span class="drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">${label}</span>`;
-        btn.onclick = () => validatePhonicsChoice(btn, label, q);
-        optionsPanel.appendChild(btn);
+      shuffledOptions.forEach((opt, idx) => {
+        const isCorrect = opt.isCorrect;
+        const label = opt.char;
+
+        // Build absolute asteroid container
+        const asteroid = document.createElement('button');
+        asteroid.id = `asteroid-${idx}`;
+        asteroid.className = "relative animate-asteroid w-20 h-20 md:w-24 md:h-24 rounded-full flex flex-col items-center justify-center border-4 transform transition-all duration-300 hover:scale-105 select-none focus:outline-none";
+        asteroid.style.animationDelay = `${idx * 0.4}s`;
+
+        const colors = [
+          'from-pink-500/90 via-pink-400/90 to-purple-800/80 border-pink-400 neon-pink-glow',
+          'from-cyan-500/90 via-cyan-400/90 to-blue-800/80 border-cyan-400 neon-cyan-glow',
+          'from-yellow-500/90 via-yellow-400/90 to-orange-800/80 border-yellow-400 shadow-[0_0_15px_rgba(253,224,71,0.5)]'
+        ];
+        const activeColor = colors[idx % colors.length];
+        asteroid.className += ` bg-gradient-to-tr ${activeColor}`;
+
+        asteroid.innerHTML = `
+          <!-- Crater details on asteroid -->
+          <span class="absolute w-3 h-3 rounded-full bg-black/20 top-2 left-4"></span>
+          <span class="absolute w-4 h-4 rounded-full bg-black/20 bottom-3 right-4"></span>
+          <!-- Bold Phonics Label -->
+          <span class="text-3xl md:text-4xl font-fun font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">${label}</span>
+        `;
+
+        // Metadata trigger down
+        activeAsteroids.push({
+          id: `asteroid-${idx}`,
+          label: label,
+          isCorrect: isCorrect,
+          isBlasted: false
+        });
+
+        // Trigger blast sequencing
+        asteroid.onclick = () => {
+          fireLaserBlaster(asteroid, activeAsteroids[idx]);
+        };
+
+        asteroidsContainer.appendChild(asteroid);
       });
+
+      // Clear the laser cannon's alignment
+      resetLaserCannon();
     }
 
-    // Direct, legible button validation on click
-    function validatePhonicsChoice(btnElement, selectedLabel, question) {
-      if (isFeedbackRunning) return;
+    // Direct pivot calculations to align gun nozzle to tapped asteroid, followed by laser flash
+    function fireLaserBlaster(targetElement, asteroidData) {
+      if (isFeedbackRunning || asteroidData.isBlasted) return;
+      isFeedbackRunning = true;
 
-      const isCorrect = selectedLabel === question.correct;
+      const cannonMount = document.getElementById('laser-cannon-mount');
+      const cannonBody = document.getElementById('laser-cannon-body');
+      const laserLayer = document.getElementById('laser-layer');
 
-      if (isCorrect) {
-        isFeedbackRunning = true;
+      const cannonRect = cannonMount.getBoundingClientRect();
+      const targetRect = targetElement.getBoundingClientRect();
+      const parentRect = laserLayer.getBoundingClientRect();
+
+      // Cannon core coordinates
+      const cannonX = cannonRect.left + (cannonRect.width / 2);
+      const cannonY = cannonRect.top + (cannonRect.height / 2);
+
+      // Target core coordinates
+      const targetX = targetRect.left + (targetRect.width / 2);
+      const targetY = targetRect.top + (targetRect.height / 2);
+
+      // Angle math
+      const dy = targetY - cannonY; 
+      const dx = targetX - cannonX;
+      let angleDegrees = Math.atan2(dy, dx) * (180 / Math.PI) - 90; // offset pointing top-down
+
+      // Rotate gun to locked coordinate
+      cannonMount.style.transform = `rotate(${angleDegrees}deg)`;
+
+      // Apply recoil visual bounce
+      cannonBody.className = "w-full h-full transform scale-90 transition-transform duration-75";
+      setTimeout(() => {
+        cannonBody.className = "w-full h-full transform scale-100 transition-transform duration-150";
+      }, 80);
+
+      // Create a physical vector neon line representing the laser beam
+      const laser = document.createElement('div');
+      laser.className = 'laser-beam';
+      
+      // Calculate coordinates relative to parent viewport
+      const startX = cannonRect.left - parentRect.left + (cannonRect.width / 2);
+      const startY = cannonRect.top - parentRect.top;
+      const endX = targetRect.left - parentRect.left + (targetRect.width / 2);
+      const endY = targetRect.top - parentRect.top + (targetRect.height / 2);
+
+      // Set laser metrics
+      const distance = Math.hypot(endX - startX, endY - startY);
+      laser.style.height = `${distance}px`;
+      laser.style.left = `${startX}px`;
+      laser.style.bottom = `${parentRect.height - startY}px`; // baseline anchored
+      
+      // Apply correct rotation along shooting vector
+      const laserAngle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI) - 90;
+      laser.style.transformOrigin = "bottom center";
+      laser.style.transform = `rotate(${laserAngle}deg)`;
+      
+      // Fire visual lasers
+      laser.style.animation = 'shootLaser 0.35s ease-out forwards';
+      laserLayer.appendChild(laser);
+
+      triggerAudio('click');
+
+      // Process collision impact at completion of shot beam
+      setTimeout(() => {
+        laser.remove();
+        evaluateAsteroidImpact(targetElement, asteroidData);
+      }, 300);
+    }
+
+    // Handles zapping validations, scoring, and level progression
+    function evaluateAsteroidImpact(targetElement, asteroidData) {
+      const q = currentQuestions[currentQuestionIndex];
+
+      if (asteroidData.isCorrect) {
         triggerAudio('correct');
+        createExplosiveStars(targetElement);
 
-        // Flash green
-        btnElement.className = "w-full max-w-sm py-4 px-6 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 border-4 border-green-400 text-white font-fun font-black text-2xl uppercase tracking-wider scale-105 transition-all shadow-inner";
-        
-        // Fill letter puzzle blank instantly
-        document.getElementById('task-bold-header').innerHTML = `<span class="text-green-400 font-fun font-black tracking-widest">${question.word}</span>`;
-        document.getElementById('hint-feedback').innerHTML = "<span class='text-green-400 font-fun text-base'>🍎 CORRECT! YOU UNLOCKED BOWLING REWARD!</span>";
+        // Turn option asteroid fully green and fade out
+        targetElement.className = "relative w-20 h-20 md:w-24 md:h-24 rounded-full flex flex-col items-center justify-center border-4 border-green-400 bg-gradient-to-tr from-green-500 to-green-600 scale-0 opacity-0 transition-all duration-300 pointer-events-none";
 
-        // Transition to Player Bowling reward lane after 1s
-        currentWhoseTurn = "player";
+        if (triesLeft === 2) {
+          score++;
+        }
+
+        // Complete spelling card - resolved "undefined" bug dynamically across all levels
+        document.getElementById('task-bold-header').innerHTML = `<span class="text-green-400 font-fun font-black tracking-widest">${q.word}</span>`;
+        document.getElementById('hint-feedback').innerHTML = "<span class='text-green-400 font-fun text-base'>🚀 BOOM! CORRECT!</span>";
+
         setTimeout(() => {
-          transitionToBowlingReward();
-        }, 1100);
+          currentQuestionIndex++;
+          renderQuestion();
+        }, 1500);
 
       } else {
         triesLeft--;
         updateTriesUI();
         triggerAudio('wrong');
 
-        // Shake and flash red
-        btnElement.className = "w-full max-w-sm py-4 px-6 rounded-2xl bg-red-600/70 border-4 border-red-500 text-white font-fun font-black text-2xl uppercase tracking-wider opacity-60 cursor-not-allowed animate-shake";
-        btnElement.onclick = null; // deactivate
+        // Turn option red to lock out
+        asteroidData.isBlasted = true;
+        targetElement.className = "relative w-20 h-20 md:w-24 md:h-24 rounded-full flex flex-col items-center justify-center border-4 border-red-500 bg-red-950/80 opacity-50 cursor-not-allowed animate-shake scale-90";
+        targetElement.onclick = null;
 
         if (triesLeft > 0) {
-          document.getElementById('hint-feedback').innerHTML = "⚠️ Missed! <span class='text-red-400 font-black'>1 Try Left</span>. Check the picture and try again!";
+          document.getElementById('hint-feedback').innerHTML = "⚠️ Try again! <span class='text-red-400 font-black'>1 Try Left</span>.";
+          isFeedbackRunning = false;
         } else {
-          isFeedbackRunning = true;
-          document.getElementById('hint-feedback').innerHTML = "❌ Out of tries! It's the Robot's turn to bowl!";
+          // Out of tries, show correct choice
+          document.getElementById('hint-feedback').innerHTML = "❌ Out of tries! Loading next spelling...";
 
-          // Auto-reveal the correct button in green
-          const optionsPanel = document.getElementById('quiz-options-panel');
-          const buttons = optionsPanel.children;
-          for (let btn of buttons) {
-            if (btn.innerText.trim().toLowerCase() === question.correct.toLowerCase()) {
-              btn.className = "w-full max-w-sm py-4 px-6 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 border-4 border-green-400 text-white font-fun font-black text-2xl uppercase tracking-wider scale-105 animate-pulse";
+          // Highlight correct spelling
+          document.getElementById('task-bold-header').innerHTML = `<span class="text-cyan-300 font-fun font-black tracking-widest">${q.word}</span>`;
+
+          // Flash the correct answer asteroid with glowing neon ring
+          activeAsteroids.forEach(ast => {
+            if (ast.isCorrect) {
+              const correctAstEl = document.getElementById(ast.id);
+              if (correctAstEl) {
+                correctAstEl.className = "relative animate-asteroid w-20 h-20 md:w-24 md:h-24 rounded-full flex flex-col items-center justify-center border-4 border-green-400 bg-gradient-to-tr from-green-500 to-green-600 shadow-[0_0_20px_#22d3ee] scale-105";
+              }
             }
-          }
+          });
 
-          // Transition to Robot Auto Bowling after 1.5s
-          currentWhoseTurn = "computer";
           setTimeout(() => {
-            transitionToBowlingReward();
-          }, 1800);
+            currentQuestionIndex++;
+            renderQuestion();
+          }, 2000);
         }
       }
     }
 
-    // Switches UI panel to Bowling mode
-    function transitionToBowlingReward() {
-      document.getElementById('quiz-options-panel').classList.add('hidden');
-      document.getElementById('bowling-alley-panel').classList.remove('hidden');
+    // Sparkles particle generator for physical asteroid popping
+    function createExplosiveStars(targetElement) {
+      const rect = targetElement.getBoundingClientRect();
+      const parent = document.getElementById('game-cabinet');
+      const parentRect = parent.getBoundingClientRect();
 
-      // Initialize Lane entities
-      setupNinePins();
-      resetBall();
-      sparkles = [];
+      const startX = rect.left - parentRect.left + (rect.width / 2);
+      const startY = rect.top - parentRect.top + (rect.height / 2);
 
-      if (currentWhoseTurn === "player") {
-        document.getElementById('hint-feedback').innerHTML = "🎳 Your Turn! Slide the ball to aim, then launch!";
-        document.getElementById('roll-btn').classList.remove('hidden');
-        document.getElementById('ball-slider').disabled = false;
-      } else {
-        document.getElementById('hint-feedback').innerHTML = "🤖 Opponent Robot is preparing to roll...";
-        document.getElementById('roll-btn').classList.add('hidden');
-        document.getElementById('ball-slider').disabled = true;
+      for (let i = 0; i < 20; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark-particle';
+        
+        const size = Math.random() * 8 + 4;
+        spark.style.width = `${size}px`;
+        spark.style.height = `${size}px`;
+        spark.style.left = `${startX}px`;
+        spark.style.top = `${startY}px`;
 
-        // Trigger automated computer roll sequence after 1s
-        setTimeout(triggerComputerAutoRoll, 1200);
-      }
-    }
+        const colors = ['#22d3ee', '#f472b6', '#a78bfa', '#34d399', '#facc15', '#ffffff'];
+        spark.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        spark.style.boxShadow = `0 0 10px ${spark.style.backgroundColor}`;
 
-    // Automated computer roller sequence
-    function triggerComputerAutoRoll() {
-      ball.isRolling = true;
-      triggerAudio('click');
+        parent.appendChild(spark);
 
-      // Randomize starting computer coordinate positions and velocities
-      ball.x = Math.random() * (400) + 100;
-      document.getElementById('ball-slider').value = ball.x;
+        const angle = Math.random() * 2 * Math.PI;
+        const velocity = Math.random() * 8 + 4;
+        const vx = Math.cos(angle) * velocity;
+        const vy = Math.sin(angle) * velocity - 2; // slight upward drift
 
-      const dx = (300 + (Math.random() * 80 - 40)) - ball.x;
-      ball.vx = dx * 0.045;
-      ball.vy = -12; // move up
-    }
+        let curX = startX;
+        let curY = startY;
+        let pOpacity = 1;
 
-    // Position slider link
-    function handleSliderMove(val) {
-      if (ball.isRolling || isFeedbackRunning || currentWhoseTurn !== 'player') return;
-      ball.x = parseFloat(val);
-    }
+        function anim() {
+          curX += vx;
+          curY += vy + 0.15; // soft gravity
+          pOpacity -= 0.04;
 
-    // Drag-position ball directly on canvas
-    function handleCanvasPointerDown(e) {
-      if (ball.isRolling || isFeedbackRunning || currentWhoseTurn !== 'player') return;
-      const rect = canvas.getBoundingClientRect();
-      const clickX = ((e.clientX - rect.left) / rect.width) * canvasWidth;
-      const clickY = ((e.clientY - rect.top) / rect.height) * canvasHeight;
+          spark.style.left = `${curX}px`;
+          spark.style.top = `${curY}px`;
+          spark.style.opacity = pOpacity;
 
-      if (clickY > 320) {
-        ball.x = Math.max(100, Math.min(500, clickX));
-        document.getElementById('ball-slider').value = ball.x;
-      }
-    }
-
-    function handleCanvasPointerMove(e) {
-      if (ball.isRolling || isFeedbackRunning || currentWhoseTurn !== 'player') return;
-      if (e.buttons !== 1) return; // Only track while holding press
-      const rect = canvas.getBoundingClientRect();
-      const clickX = ((e.clientX - rect.left) / rect.width) * canvasWidth;
-      const clickY = ((e.clientY - rect.top) / rect.height) * canvasHeight;
-
-      if (clickY > 320) {
-        ball.x = Math.max(100, Math.min(500, clickX));
-        document.getElementById('ball-slider').value = ball.x;
-      }
-    }
-
-    // Launch bowling ball down the perspective lane
-    function launchBowlingBall() {
-      if (ball.isRolling || isFeedbackRunning || currentWhoseTurn !== 'player') return;
-
-      triggerAudio('click');
-      ball.isRolling = true;
-      
-      // Calculate simple aiming trajectory - slight bias towards pins
-      const dx = 300 - ball.x;
-      ball.vx = dx * 0.045; // smooth homing towards center pin
-      ball.vy = -12; // vertical thrust speed
-    }
-
-    // Physics calculations cycle
-    function updateArcadePhysics() {
-      // 1. Update ball movement
-      if (ball.isRolling) {
-        ball.x += ball.vx;
-        ball.y += ball.vy;
-
-        // Check pins collisions
-        for (let i = 0; i < pins.length; i++) {
-          const pin = pins[i];
-          if (pin.isKnocked) continue;
-
-          const dist = Math.hypot(ball.x - pin.x, ball.y - pin.y);
-          if (dist < (ball.radius + pin.radius)) {
-            handlePinImpact();
-            break;
+          if (pOpacity > 0) {
+            requestAnimationFrame(anim);
+          } else {
+            spark.remove();
           }
         }
-
-        // Out of bounds / gutter check
-        if (ball.y < 40) {
-          handleGutterMiss();
-        }
-      }
-
-      // 2. Update knocked pin velocities
-      pins.forEach(pin => {
-        if (pin.isKnocked) {
-          pin.x += pin.vx;
-          pin.y += pin.vy;
-          pin.rotation += pin.rotVel;
-          // Apply friction
-          pin.vx *= 0.95;
-          pin.vy *= 0.95;
-        }
-      });
-
-      // 3. Update sparkles particles
-      for (let i = sparkles.length - 1; i >= 0; i--) {
-        const p = sparkles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.alpha -= 0.03;
-        if (p.alpha <= 0) {
-          sparkles.splice(i, 1);
-        }
+        requestAnimationFrame(anim);
       }
     }
 
-    // Handle pin collision logic (Strike on reward hit!)
-    function handlePinImpact() {
-      ball.isRolling = false;
-      isFeedbackRunning = true;
-      
-      triggerAudio('correct');
-      createStrikeExplosion();
-
-      if (currentWhoseTurn === 'player') {
-        playerScore++;
-        document.getElementById('player-score-text').innerText = `⭐ ${playerScore}`;
-        document.getElementById('hint-feedback').innerHTML = "<span class='text-green-400 font-fun text-base uppercase animate-bounce'>🎳 STRIKE! PLAYER SCORES A POINT!</span>";
-      } else {
-        // Computer bowls and scores
-        computerScore++;
-        document.getElementById('computer-score-text').innerText = `🤖 ${computerScore}`;
-        document.getElementById('hint-feedback').innerHTML = "<span class='text-red-400 font-fun text-base uppercase animate-bounce'>🤖 STRIKE! ROBOT STEALS A POINT!</span>";
-      }
-
-      setTimeout(() => {
-        currentQuestionIndex++;
-        renderQuestion();
-      }, 2000);
-    }
-
-    function handleGutterMiss() {
-      ball.isRolling = false;
-      isFeedbackRunning = true;
-      triggerAudio('wrong');
-
-      document.getElementById('hint-feedback').innerHTML = "<span class='text-red-400 font-fun text-base uppercase'>❌ GUTTER BALL! NO POINTS SCORED!</span>";
-
-      setTimeout(() => {
-        currentQuestionIndex++;
-        renderQuestion();
-      }, 2000);
-    }
-
-    // Spectacular strike physics explosion covering 9 pins
-    function createStrikeExplosion() {
-      pins.forEach((pin, idx) => {
-        pin.isKnocked = true;
-        // Explode outward radially from center
-        const angle = Math.atan2(pin.y - 130, pin.x - 300) + (Math.random() * 0.4 - 0.2);
-        const speed = Math.random() * 12 + 8;
-        pin.vx = Math.cos(angle) * speed;
-        pin.vy = Math.sin(angle) * speed - Math.random() * 4; // lift up
-        pin.rotVel = Math.random() * 0.4 - 0.2;
-      });
-
-      // Sparkles particles
-      for (let i = 0; i < 30; i++) {
-        const angle = Math.random() * 2 * Math.PI;
-        const speed = Math.random() * 10 + 5;
-        sparkles.push({
-          x: 300,
-          y: 130,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          color: `hsl(${Math.random() * 360}, 100%, 60%)`,
-          alpha: 1,
-          size: Math.random() * 6 + 3
-        });
-      }
-    }
-
+    // Update tries HUD
     function updateTriesUI() {
       document.getElementById('tries-count').innerText = triesLeft;
     }
 
-    // Main Draw Frame Cycle
-    function drawGameFrame() {
-      if (!ctx) return;
-
-      // 1. Clear frame
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-      // 2. Draw Bowling Lane Perspective lines
-      ctx.fillStyle = "#3e2723"; // Gutter sides
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-      // Polished Lane boards
-      ctx.beginPath();
-      ctx.moveTo(100, 0);
-      ctx.lineTo(500, 0);
-      ctx.lineTo(600, canvasHeight);
-      ctx.lineTo(0, canvasHeight);
-      ctx.closePath();
-
-      // Wooden lane grading gradient
-      let laneGrad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
-      laneGrad.addColorStop(0, "#ffb74d");
-      laneGrad.addColorStop(0.5, "#ffa726");
-      laneGrad.addColorStop(1, "#fb8c00");
-      ctx.fillStyle = laneGrad;
-      ctx.fill();
-
-      // Draw traditional lane guide marks / pin targets
-      ctx.fillStyle = "#d84315";
-      for (let i = 120; i <= 480; i += 60) {
-        ctx.beginPath();
-        ctx.arc(i, 280, 4, 0, 2 * Math.PI);
-        ctx.fill();
-      }
-
-      // Draw Dotted aiming line helper
-      if (!ball.isRolling && !isFeedbackRunning && currentWhoseTurn === 'player') {
-        ctx.save();
-        ctx.beginPath();
-        ctx.setLineDash([5, 8]);
-        ctx.moveTo(ball.x, ball.y);
-        ctx.lineTo(300, 100);
-        ctx.strokeStyle = "rgba(34, 211, 238, 0.6)";
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      // 3. Draw Pins
-      pins.forEach(pin => {
-        ctx.save();
-        ctx.translate(pin.x, pin.y);
-        ctx.rotate(pin.rotation);
-        drawStandardFillerPin();
-        ctx.restore();
-      });
-
-      // 4. Draw Rolling Bowling Ball (grows smaller in perspective)
-      if (ball.y > 0) {
-        ctx.save();
-        // Scale down size slightly as it approaches top pins
-        const currentScale = Math.max(0.65, (ball.y / 380));
-        ctx.translate(ball.x, ball.y);
-        ctx.scale(currentScale, currentScale);
-        
-        drawGlowingBowlingBall();
-        ctx.restore();
-      }
-
-      // 5. Draw sparkles
-      sparkles.forEach(p => {
-        ctx.save();
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 8;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.restore();
-      });
-    }
-
-    // Standard White/Red filler bowling pin drawer
-    function drawStandardFillerPin() {
-      // Pin Silhouette
-      ctx.beginPath();
-      ctx.moveTo(-4, -20);
-      ctx.quadraticCurveTo(-4, -28, -6, -28);
-      ctx.lineTo(6, -28);
-      ctx.quadraticCurveTo(4, -28, 4, -20);
-      ctx.lineTo(5, -12);
-      ctx.quadraticCurveTo(12, 4, 12, 12);
-      ctx.quadraticCurveTo(12, 20, 0, 20);
-      ctx.quadraticCurveTo(-12, 20, -12, 12);
-      ctx.quadraticCurveTo(-12, 4, -5, -12);
-      ctx.closePath();
-      ctx.fillStyle = "#ffffff";
-      ctx.fill();
-      ctx.strokeStyle = "#455a64";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // Red Stripe across neck
-      ctx.fillStyle = "#f44336";
-      ctx.fillRect(-4.5, -22, 9, 4);
-    }
-
-    // Premium heavy neon bowling ball drawer
-    function drawGlowingBowlingBall() {
-      // Color based on whose turn it is
-      const primaryColor = currentWhoseTurn === 'player' ? "#22d3ee" : "#f472b6";
-      const secondaryColor = currentWhoseTurn === 'player' ? "#0097a7" : "#c2185b";
-
-      // Glow ring
-      ctx.beginPath();
-      ctx.arc(0, 0, ball.radius + 6, 0, 2 * Math.PI);
-      ctx.fillStyle = currentWhoseTurn === 'player' ? "rgba(34, 211, 238, 0.15)" : "rgba(244, 114, 182, 0.15)";
-      ctx.fill();
-
-      // Sphere shading
-      let radialGrad = ctx.createRadialGradient(-6, -6, 2, 0, 0, ball.radius);
-      radialGrad.addColorStop(0, "#ffffff");
-      radialGrad.addColorStop(0.4, primaryColor);
-      radialGrad.addColorStop(1, secondaryColor);
-
-      ctx.beginPath();
-      ctx.arc(0, 0, ball.radius, 0, 2 * Math.PI);
-      ctx.fillStyle = radialGrad;
-      ctx.fill();
-
-      // Gloss highlight glint
-      ctx.beginPath();
-      ctx.ellipse(-7, -7, 6, 3, -Math.PI / 4, 0, 2 * Math.PI);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-      ctx.fill();
-
-      // Traditional 3 bowling ball finger grip holes
-      ctx.fillStyle = "#212121";
-      ctx.beginPath();
-      ctx.arc(-2, 3, 2, 0, 2 * Math.PI);
-      ctx.arc(5, 1, 2, 0, 2 * Math.PI);
-      ctx.arc(1, -3, 2, 0, 2 * Math.PI);
-      ctx.fill();
+    // Reset Laser Cannon
+    function resetLaserCannon() {
+      const cannonMount = document.getElementById('laser-cannon-mount');
+      // Reset rotation back to top-down vertically (-90deg)
+      cannonMount.style.transform = `rotate(-90deg)`;
     }
 
     // Core Native MP3 player with web-synthesizer backup logic
@@ -1129,34 +871,31 @@
 
     // Summary screen builder
     function endGame() {
-      isGameActive = false;
-      stopGameLoop();
       document.getElementById('screen-game').classList.add('hidden');
       document.getElementById('screen-summary').classList.remove('hidden');
 
-      document.getElementById('final-player-score').innerText = playerScore;
-      document.getElementById('final-computer-score').innerText = computerScore;
+      document.getElementById('final-score').innerText = `${score} / 15`;
 
       let trophy = "🏆 Gold";
       let emoji = "🏆";
-      let msg = "Stellar Phonics Bowler!";
-      let feedbackText = "Excellent job! You defeated the Opponent Robot and scored awesome strikes!";
+      let msg = "Stellar Phonics Blaster!";
+      let feedbackText = "Excellent job! You correctly identified Consonant Blends and blasted all incoming asteroids!";
 
-      if (playerScore > computerScore) {
+      if (score >= 12) {
         trophy = "🏆 Gold Victory";
-        emoji = "🎳";
-        msg = "You Beat the Robot!";
-        feedbackText = `Outstanding! You scored ${playerScore} strikes and successfully defended the lane from the opponent. You are a true Consonant Blends Master!`;
-      } else if (playerScore === computerScore) {
+        emoji = "🛸";
+        msg = "Stellar Space Officer!";
+        feedbackText = `Outstanding! You successfully blasted ${score}/15 consonant blend asteroids and saved the galaxy! Enjoy your shiny gold rank! 🪐`;
+      } else if (score >= 8) {
         trophy = "🥈 Silver Draw";
         emoji = "⭐";
-        msg = "A Perfect Tie!";
-        feedbackText = `Close match! You and the Robot tied at ${playerScore} points. Try again to claim the gold crown!`;
+        msg = "A Great Effort!";
+        feedbackText = `Close match! You got a solid score of ${score}/15. Try again to claim the legendary golden crown!`;
       } else {
         trophy = "🥉 Bronze Participant";
         emoji = "✨";
-        msg = "Robot Won this Time!";
-        feedbackText = "A good learning try! Let's practice beginning consonant blends a bit more and challenge the Robot again!";
+        msg = "Keep Practicing!";
+        feedbackText = "A good learning try! Let's practice beginning consonant blends (like cl, br, st) a bit more and challenge the arcade again!";
       }
 
       document.getElementById("trophy-emoji").textContent = emoji;
