@@ -1,0 +1,482 @@
+import React, { useState, useEffect } from 'react';
+
+// ==========================================
+// AUDIO SYSTEM (PLAYING CUSTOM MP3 FILES)
+// ==========================================
+const playSound = (type) => {
+  try {
+    if (type === 'correct') {
+      const audio = new Audio('assets/correct.mp3');
+      audio.play().catch(err => console.log('Audio play failed, playing synth fallback:', err));
+    } else if (type === 'wrong') {
+      const audio = new Audio('assets/wrong.mp3');
+      audio.play().catch(err => console.log('Audio play failed, playing synth fallback:', err));
+    } else if (type === 'clapping' || type === 'clap') {
+      const audio = new Audio('assets/clapping.mp3');
+      audio.play().catch(err => console.log('Audio play failed, playing synth fallback:', err));
+    } else if (type === 'click') {
+      // Synthesized soft click for touch feedback
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(500, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.05);
+      gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.06);
+    }
+  } catch (e) {
+    console.log('Audio error:', e);
+  }
+};
+
+// ==========================================
+// GAME LEVEL CARDS DATA
+// ==========================================
+const LEVEL_1_DATA = [
+  { id: "dog-img", type: "img", matchId: "dog", contentKey: "dog" },
+  { id: "dog-sound", type: "sound", matchId: "dog", label: "Bow-Bow!" },
+  
+  { id: "window-img", type: "img", matchId: "window", contentKey: "window" },
+  { id: "window-sound", type: "sound", matchId: "window", label: "Creak!" },
+  
+  { id: "injury-img", type: "img", matchId: "injury", contentKey: "injury" },
+  { id: "injury-sound", type: "sound", matchId: "injury", label: "Ouch!" },
+  
+  { id: "cat-img", type: "img", matchId: "cat", contentKey: "cat" },
+  { id: "cat-sound", type: "sound", matchId: "cat", label: "Meow!" }
+];
+
+const LEVEL_2_DATA = [
+  { id: "car-action", type: "action", matchId: "car", text: "A racing car!" },
+  { id: "car-sound", type: "sound", matchId: "car", label: "Vroom!" },
+  
+  { id: "water-action", type: "action", matchId: "water", text: "Drinking juice!" },
+  { id: "water-sound", type: "sound", matchId: "water", label: "Gulp!" },
+  
+  { id: "balloon-action", type: "action", matchId: "balloon", text: "Balloon pops!" },
+  { id: "balloon-sound", type: "sound", matchId: "balloon", label: "Pop!" },
+  
+  { id: "book-action", type: "action", matchId: "book", text: "A heavy drop!" },
+  { id: "book-sound", type: "sound", matchId: "book", label: "Thud!" }
+];
+
+// Interactive SVGs designed for Grade 1 children
+const VISUAL_SVGS = {
+  "dog": (
+    <svg className="w-14 h-14 md:w-16 md:h-16" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="30" fill="#ffb74d" stroke="#f57f17" strokeWidth="2"/>
+      <ellipse cx="18" cy="48" rx="8" ry="18" fill="#a1887f" transform="rotate(15 18 48)"/>
+      <ellipse cx="82" cy="48" rx="8" ry="18" fill="#a1887f" transform="rotate(-15 82 48)"/>
+      <circle cx="39" cy="44" r="3.5" fill="#3e2723"/>
+      <circle cx="61" cy="44" r="3.5" fill="#3e2723"/>
+      <ellipse cx="50" cy="58" rx="14" ry="10" fill="#fff"/>
+      <ellipse cx="50" cy="54" rx="6" ry="4" fill="#3e2723"/>
+      <path d="M46,63 Q50,75 54,63 Z" fill="#ff5252"/>
+    </svg>
+  ),
+  "window": (
+    <svg className="w-14 h-14 md:w-16 md:h-16" viewBox="0 0 100 100">
+      <rect x="25" y="25" width="50" height="50" fill="#e0f7fa" stroke="#0097a7" strokeWidth="3" rx="4"/>
+      <line x1="50" y1="25" x2="50" y2="75" stroke="#0097a7" strokeWidth="3"/>
+      <line x1="25" y1="50" x2="75" y2="50" stroke="#0097a7" strokeWidth="3"/>
+      <circle cx="21" cy="35" r="3" fill="#ff8f00"/>
+      <line x1="16" y1="31" x2="20" y2="40" stroke="#ff8f00" strokeWidth="2"/>
+      <line x1="79" y1="31" x2="83" y2="40" stroke="#ff8f00" strokeWidth="2"/>
+    </svg>
+  ),
+  "injury": (
+    <svg className="w-14 h-14 md:w-16 md:h-16" viewBox="0 0 100 100">
+      <rect x="42" y="35" width="16" height="55" fill="#ffcc80" rx="8" stroke="#f57f17" strokeWidth="2"/>
+      <path d="M42,42 C42,32 58,32 58,42" fill="#ffcc80" stroke="#f57f17" strokeWidth="2"/>
+      <path d="M46,35 C46,38 54,38 54,35 Z" fill="#ff8a80"/>
+      <rect x="36" y="55" width="28" height="15" fill="#ffd54f" rx="3" stroke="#ffb300" strokeWidth="1.5" transform="rotate(-10 50 62)"/>
+      <circle cx="46" cy="62" r="1.5" fill="#ffb300" transform="rotate(-10 50 62)"/>
+      <circle cx="54" cy="62" r="1.5" fill="#ffb300" transform="rotate(-10 50 62)"/>
+    </svg>
+  ),
+  "cat": (
+    <svg className="w-14 h-14 md:w-16 md:h-16" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="30" fill="#b0bec5" stroke="#78909c" strokeWidth="2"/>
+      <polygon points="22,28 35,42 18,45" fill="#78909c"/>
+      <polygon points="78,28 65,42 82,45" fill="#78909c"/>
+      <polygon points="24,32 31,41 21,43" fill="#ff8a80"/>
+      <polygon points="76,32 69,41 79,43" fill="#ff8a80"/>
+      <circle cx="38" cy="46" r="4" fill="#263238"/>
+      <circle cx="62" cy="46" r="4" fill="#263238"/>
+      <polygon points="46,55 54,55 50,60" fill="#ff8a80"/>
+      <line x1="26" y1="56" x2="12" y2="54" stroke="#37474f" stroke-width="2" />
+      <line x1="74" y1="56" x2="88" y2="54" stroke="#37474f" stroke-width="2" />
+    </svg>
+  )
+};
+
+export default function App() {
+  const [gameState, setGameState] = useState('splash'); // 'splash' | 'start' | 'game' | 'summary'
+  const [level, setLevel] = useState(1);
+  const [deck, setDeck] = useState([]);
+  const [flipped, setFlipped] = useState([]); // holds index of flipped cards
+  const [cleared, setCleared] = useState([]); // holds matchId of cleared pairs
+  const [flips, setFlips] = useState(0);
+  const [feedback, setFeedback] = useState("Let's find the matching pairs!");
+  const [shakingCards, setShakingCards] = useState([]); // holds indices of cards to shake
+  const [sparkles, setSparkles] = useState([]);
+
+  // Splash Screen timer (exactly 1.5 seconds)
+  useEffect(() => {
+    if (gameState === 'splash') {
+      const timer = setTimeout(() => {
+        setGameState('start');
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState]);
+
+  // Handle building and shuffling of level decks
+  const loadLevel = (levelNum) => {
+    const rawData = levelNum === 1 ? LEVEL_1_DATA : LEVEL_2_DATA;
+    const shuffled = [...rawData].sort(() => Math.random() - 0.5);
+    setDeck(shuffled);
+    setFlipped([]);
+    setCleared([]);
+    setShakingCards([]);
+    setLevel(levelNum);
+    setFeedback(levelNum === 1 ? "Level 1: Match the pictures with their sounds!" : "Level 2: Match the action with their sounds!");
+  };
+
+  const startGame = () => {
+    playSound('click');
+    setFlips(0);
+    loadLevel(1);
+    setGameState('game');
+  };
+
+  const handleCardClick = (index) => {
+    if (flipped.length >= 2 || cleared.includes(deck[index].matchId) || flipped.includes(index)) return;
+
+    playSound('click');
+    const newFlipped = [...flipped, index];
+    setFlipped(newFlipped);
+
+    if (newFlipped.length === 2) {
+      setFlips(prev => prev + 1);
+      const firstCard = deck[newFlipped[0]];
+      const secondCard = deck[newFlipped[1]];
+
+      if (firstCard.matchId === secondCard.matchId) {
+        // MATCH DETECTED
+        setTimeout(() => {
+          playSound('correct');
+          setCleared(prev => [...prev, firstCard.matchId]);
+          setFeedback(`Matched: ${firstCard.matchId.toUpperCase()}! 🎉`);
+          triggerParticles(newFlipped[0], newFlipped[1]);
+          setFlipped([]);
+          
+          // Check if Board Cleared
+          if (cleared.length + 1 === 4) {
+            handleLevelComplete();
+          }
+        }, 500);
+      } else {
+        // MISMATCH DETECTED
+        setTimeout(() => {
+          playSound('wrong');
+          setShakingCards(newFlipped);
+          setFeedback("Try again!");
+          
+          setTimeout(() => {
+            setFlipped([]);
+            setShakingCards([]);
+          }, 800);
+        }, 500);
+      }
+    }
+  };
+
+  const handleLevelComplete = () => {
+    setTimeout(() => {
+      playSound('clap');
+      if (level === 1) {
+        setFeedback("🎉 Level 1 Clear! Preparing Level 2...");
+        setTimeout(() => {
+          loadLevel(2);
+        }, 2000);
+      } else {
+        setGameState('summary');
+      }
+    }, 600);
+  };
+
+  // Sparkles particle generator
+  const triggerParticles = (idx1, idx2) => {
+    const card1 = document.getElementById(`card-box-${idx1}`);
+    const card2 = document.getElementById(`card-box-${idx2}`);
+    if (!card1 || !card2) return;
+
+    const r1 = card1.getBoundingClientRect();
+    const r2 = card2.getBoundingClientRect();
+
+    const newSparkles = [];
+    const makeSparks = (rect) => {
+      for (let i = 0; i < 10; i++) {
+        newSparkles.push({
+          id: Math.random(),
+          x: rect.left + rect.width / 2 + (Math.random() * 40 - 20),
+          y: rect.top + rect.height / 2 + (Math.random() * 40 - 20),
+          color: ['#22d3ee', '#f472b6', '#facc15', '#a78bfa', '#34d399'][Math.floor(Math.random() * 5)]
+        });
+      }
+    };
+    makeSparks(r1);
+    makeSparks(r2);
+    setSparkles(newSparkles);
+
+    // Clean up particles
+    setTimeout(() => setSparkles([]), 1000);
+  };
+
+  // Gracefully handles image load errors for low internet fallback rendering
+  const handleLogoError = (e) => {
+    e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"><circle cx="50" cy="50" r="45" fill="%231e1b4b" stroke="%2322d3ee" stroke-width="4"/><text x="50" y="62" fill="%23FFF" font-size="34" font-weight="bold" text-anchor="middle">?</text></svg>';
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-slate-950 text-[#e0f7fa] font-sans flex flex-col justify-between overflow-x-hidden relative">
+      
+      {/* ==========================================
+          SCREEN 1: 1.5-SECOND SPLASH SCREEN
+          ========================================== */}
+      {gameState === 'splash' && (
+        <div className="flex-1 flex flex-col items-center justify-center bg-white z-50">
+          <div className="scale-110 animate-pulse">
+            <img 
+              src="assets/innovine-logo.png" 
+              className="w-72 h-72 md:w-80 md:h-80 object-contain" 
+              alt="Innovine Logo"
+              onError={handleLogoError}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ==========================================
+          SCREEN 2: START / TITLE SCREEN
+          ========================================== */}
+      {gameState === 'start' && (
+        <div className="flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full relative z-10">
+          <div className="bg-slate-900/95 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 shadow-2xl border-4 border-cyan-400 text-center w-full max-w-xl animate-bob">
+            <h1 className="text-3xl md:text-5xl font-fun font-black text-cyan-400 tracking-wide mb-3 leading-tight drop-shadow-md">
+              🔊 Sound Matcher Arcade
+            </h1>
+            <p className="text-sm md:text-base font-extrabold text-pink-400 uppercase tracking-widest mb-8">
+              Action Sound Words Game
+            </p>
+
+            <div className="bg-slate-950/80 rounded-3xl p-6 border border-cyan-500/30 text-left space-y-4 mb-8 shadow-inner font-semibold text-cyan-100">
+              <h2 className="font-fun font-black text-cyan-300 text-lg md:text-xl">How to Play:</h2>
+              <ul className="text-sm md:text-base space-y-3 text-pink-100 list-disc list-inside">
+                <li><strong>Step 1: Flip & Find!</strong> 🎴 Tap a card to flip it over.</li>
+                <li><strong>Step 2: Match the Sound!</strong> 🐶 Find the correct action sound word (e.g. matching <strong>Dog</strong> to <strong>Bow-Bow</strong>!).</li>
+                <li><strong>Level 1: Sound Matching</strong> - Match cute pictures with their sounds!</li>
+                <li><strong>Level 2: Action Scenes</strong> - Match bigger action descriptions to their sounds! 🏎️</li>
+              </ul>
+            </div>
+
+            <button
+              onClick={startGame}
+              className="w-full bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-xl md:text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-pink-700 uppercase tracking-wider"
+            >
+              START ARCADE 🎮
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ==========================================
+          SCREEN 3: GAMEPLAY SCREEN
+          ========================================== */}
+      {gameState === 'game' && (
+        <div className="flex-1 flex flex-col w-full max-w-5xl mx-auto p-3 md:p-6 justify-between relative z-10">
+          
+          {/* Top Progress Block */}
+          <div className="flex items-center justify-between bg-slate-950/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-cyan-500/30 mb-4">
+            <div className="flex flex-col">
+              <span className="text-xs font-black uppercase text-pink-400 tracking-widest">{level === 1 ? "Level 1" : "Level 2"}</span>
+              <span className="text-lg font-black text-white">Pairs Cleared: {cleared.length} / 4</span>
+            </div>
+
+            <div className="flex-1 mx-6 h-3 bg-purple-950 rounded-full overflow-hidden hidden md:block relative border border-cyan-500/20">
+              <div 
+                className="h-full bg-gradient-to-r from-pink-500 to-cyan-400 transition-all duration-500 rounded-full" 
+                style={{ width: `${(cleared.length / 4) * 100}%` }}
+              ></div>
+            </div>
+
+            <div className="flex items-center space-x-1 bg-slate-900 px-4 py-1.5 rounded-full border border-cyan-500/30">
+              <span className="text-xs font-bold text-cyan-400">FLIPS:</span>
+              <span className="font-black text-white text-sm">{flips}</span>
+            </div>
+          </div>
+
+          {/* Main Board Cabinet */}
+          <div className="flex-1 bg-slate-900/90 rounded-[2.5rem] p-5 md:p-6 shadow-2xl border-8 border-purple-700/80 flex flex-col justify-between min-h-[460px] relative mb-4">
+            
+            <div className="text-center min-h-[22px] mb-4 font-fun text-sm md:text-base tracking-wide text-orange-400">
+              <p className="animate-pulse">{feedback}</p>
+            </div>
+
+            {/* Sparkles Particle Layer */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-40">
+              {sparkles.map(sp => (
+                <div 
+                  key={sp.id} 
+                  className="spark-particle animate-ping"
+                  style={{
+                    left: `${sp.x}px`,
+                    top: `${sp.y}px`,
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: sp.color,
+                    boxShadow: `0 0 10px ${sp.color}`
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Centering wrapper to solve Safari/Chrome flex-1 collapses */}
+            <div className="flex-1 flex items-center justify-center w-full my-auto">
+              {/* 3D Match Grid - Fixed heights with relative constraints */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-3xl w-full p-2">
+                {deck.map((card, idx) => {
+                  const isFlipped = flipped.includes(idx) || cleared.includes(card.matchId);
+                  const isCleared = cleared.includes(card.matchId);
+                  const isShaking = shakingCards.includes(idx);
+
+                  return (
+                    <div 
+                      key={card.id}
+                      id={`card-box-${idx}`}
+                      onClick={() => handleCardClick(idx)}
+                      className={`card-container w-full aspect-[4/3] relative z-10 cursor-pointer ${isShaking ? 'animate-shake' : ''}`}
+                      style={{ opacity: isCleared ? 0.35 : 1, transition: 'opacity 0.5s ease' }}
+                    >
+                      {/* Added "relative w-full h-full" explicitly to contain absolute card faces */}
+                      <div className={`card-inner relative w-full h-full ${isFlipped ? 'card-flipped' : ''}`}>
+                        
+                        {/* Card Cover (Front) */}
+                        <div className="card-front w-full h-full bg-gradient-to-b from-purple-800 to-indigo-950 border-4 border-purple-500 flex flex-col items-center justify-center shadow-lg hover:border-cyan-400 transition-all rounded-2xl">
+                          <span className="text-4xl md:text-5xl font-fun font-black text-purple-300 drop-shadow">?</span>
+                        </div>
+
+                        {/* Card Face (Back) */}
+                        <div className="card-back w-full h-full rounded-2xl overflow-hidden">
+                          {card.type === 'img' && (
+                            <div className="w-full h-full bg-slate-800 rounded-2xl flex items-center justify-center border-4 border-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.2)]">
+                              {VISUAL_SVGS[card.contentKey]}
+                            </div>
+                          )}
+                          {card.type === 'sound' && (
+                            <div className="w-full h-full bg-gradient-to-tr from-pink-500 to-purple-600 rounded-2xl flex flex-col items-center justify-center p-1 border-4 border-pink-400 shadow-[0_0_12px_rgba(244,114,182,0.2)]">
+                              <span className="text-xl md:text-2xl font-fun font-black text-white drop-shadow-md leading-none text-center">{card.label}</span>
+                            </div>
+                          )}
+                          {card.type === 'action' && (
+                            <div className="w-full h-full bg-slate-800 rounded-2xl flex flex-col items-center justify-center p-2 border-4 border-cyan-400 text-center shadow-[0_0_12px_rgba(34,211,238,0.2)]">
+                              <span className="text-xs md:text-sm font-extrabold text-cyan-200 leading-tight uppercase tracking-wider">{card.text}</span>
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="w-full text-center pt-3 border-t border-purple-500/20 mt-4">
+              <p className="text-[10px] md:text-xs font-black uppercase text-cyan-400 tracking-widest">
+                Match them all to advance!
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ==========================================
+          SCREEN 4: SUMMARY & RESULTS SCREEN
+          ========================================== */}
+      {gameState === 'summary' && (
+        <div className="flex-1 flex flex-col items-center justify-center p-4 max-w-lg mx-auto w-full relative z-10">
+          <div className="bg-slate-900 rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-cyan-400 text-center w-full animate-bob">
+            <span className="text-7xl block mb-4">🏆</span>
+            
+            <h1 className="text-3xl font-black text-cyan-300 mb-1">Excellent Matcher!</h1>
+            <p className="text-sm md:text-base font-extrabold text-pink-400 uppercase tracking-widest mb-8">
+              Onomatopoeia Mission Complete!
+            </p>
+
+            <div className="bg-slate-950 rounded-3xl p-6 border-2 border-cyan-500/30 space-y-4 mb-8 shadow-inner font-bold text-cyan-100">
+              <div className="flex justify-between items-center text-lg md:text-xl font-black text-cyan-400">
+                <span>Total Flips:</span>
+                <span className="text-3xl font-black text-yellow-300">{flips}</span>
+              </div>
+              <p className="text-xs md:text-sm text-left leading-relaxed border-t border-cyan-500/20 pt-3 font-semibold font-sans">
+                Outstanding! You matched all picture clues and action events to their correct sound words seamlessly.
+              </p>
+            </div>
+
+            <button
+              onClick={startGame}
+              className="w-full bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-2xl py-5 px-8 rounded-2xl shadow-lg transition-all transform active:scale-95 border-b-4 border-pink-700 uppercase tracking-wider animate-pulse"
+            >
+              PLAY AGAIN
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Static styles for 3D flip card dynamics */}
+      <style>{`
+        .card-container {
+          perspective: 1000px;
+        }
+        .card-inner {
+          transform-style: preserve-3d;
+          transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-flipped {
+          transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          border-radius: 1rem;
+        }
+        .card-back {
+          transform: rotateY(180deg);
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20%, 60% { transform: translateX(-6px); }
+          40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+          animation: shake 0.3s ease-in-out;
+        }
+      `}</style>
+
+    </div>
+  );
+}
