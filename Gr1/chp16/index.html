@@ -72,6 +72,17 @@
       animation: shake 0.3s ease-in-out;
     }
 
+    /* Train chassis dynamic impact bounce */
+    @keyframes wagonJolt {
+      0%, 100% { transform: translateY(0); }
+      25% { transform: translateY(12px) scaleY(0.92); }
+      60% { transform: translateY(-6px) scaleY(1.05); }
+      80% { transform: translateY(2px); }
+    }
+    .animate-jolt {
+      animation: wagonJolt 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
     /* Confetti cargo splat particles */
     .cargo-particle {
       position: absolute;
@@ -134,14 +145,15 @@
         <ul class="text-sm md:text-base space-y-3 text-[#2e7d32] list-disc list-inside">
           <li>Help load the train cargo using our station crane! 🏗️</li>
           <li><strong>Level 1: Cargo Sorting</strong> - Find standalone Double Consonants!</li>
-          <li><strong>Level 2: Cargo Matching</strong> - Fill spelling blanks using cute picture clues! 🖼️</li>
+          <li><strong>Level 2: Basic Match</strong> - Spell words using cute picture clues! 🖼️</li>
+          <li><strong>Level 3: Advanced Match</strong> - Master tricky double letters in larger words! 🧁</li>
           <li>You have <strong>2 tries</strong> per round to find the correct cargo crate.</li>
         </ul>
       </div>
 
       <button
         onclick="startGame()"
-        class="w-full bg-[#ffb74d] hover:bg-[#ffa726] text-white font-fun font-black text-xl md:text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-[#fb8c00] uppercase tracking-wider animate-bob"
+        class="w-full bg-[#ffb74d] hover:bg-[#ffa726] text-white font-fun font-black text-xl md:text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-[#fb8c00] uppercase tracking-wider animate-glow"
       >
         Start Mission 🚂
       </button>
@@ -198,67 +210,73 @@
       </div>
 
       <!-- Interactive Playfield containing Crane, Train Tracks & Cargo wagon -->
-      <div class="flex-1 flex flex-col lg:flex-row items-center justify-around gap-6 relative z-10 my-2">
+      <div class="flex-1 flex flex-col lg:flex-row items-center justify-around gap-6 relative z-10 my-2 w-full">
         
-        <!-- Highly Visual SVG Illustration Card (Hidden in L1, visible in L2) -->
-        <div id="task-image-box" class="w-28 h-28 md:w-36 md:h-36 flex items-center justify-center bg-white rounded-3xl border-4 border-[#81c784]/20 shadow-xl transition-all duration-300 transform hover:scale-105">
+        <!-- Highly Visual SVG Illustration Card (Hidden in L1, visible in L2/L3) -->
+        <div id="task-image-box" class="w-32 h-32 md:w-40 md:h-46 flex items-center justify-center bg-white rounded-3xl border-4 border-[#81c784]/20 shadow-xl transition-all duration-300 transform hover:scale-105">
           <!-- Loaded dynamically -->
         </div>
 
         <!-- Train tracks layout & Animated Steam Engine Wagon -->
-        <div class="flex flex-col items-center relative w-full max-w-lg">
-          <!-- Station tracks -->
-          <div class="w-full h-4 bg-slate-400 rounded-full shadow relative flex items-center overflow-hidden">
-            <div class="absolute inset-x-0 h-1 bg-slate-600 top-1"></div>
-            <!-- Dynamic wooden ties -->
-            <div class="w-full flex justify-between px-2">
-              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1.5 h-3 bg-amber-900"></span>
-              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1.5 h-3 bg-amber-900"></span>
-              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1.5 h-3 bg-amber-900"></span>
-              <span class="w-1 h-3 bg-amber-800"></span><span class="w-1.5 h-3 bg-amber-900"></span>
-            </div>
-          </div>
-
-          <!-- Active Steam Train Wagon and Pipe stack -->
-          <div id="station-wagon" class="relative mt-2 w-72 h-24 flex items-end justify-center">
+        <div class="flex flex-col items-center relative w-full max-w-lg overflow-hidden py-4">
+          
+          <!-- Active Steam Train Wagon, cabin and Pipe stack (Always visually stacked above the track) -->
+          <!-- Facing Right, starts from left end and moves ahead step-by-step -->
+          <div id="station-wagon" class="relative w-72 h-24 flex items-end justify-center z-10 transition-transform duration-700 ease-out">
             
             <!-- Steam Chimney smoke emitter coordinate help -->
-            <div id="steam-pipe" class="absolute left-6 top-1 w-3 h-4 bg-slate-800 rounded-t"></div>
+            <div id="steam-pipe" class="absolute right-[40px] top-1 w-3 h-4 bg-slate-800 rounded-t"></div>
 
             <svg class="w-full h-full drop-shadow-md" viewBox="0 0 200 80">
-              <!-- Engine Locomotive Front -->
-              <rect x="10" y="25" width="45" height="35" rx="4" fill="#37474f"/>
-              <rect x="20" y="10" width="12" height="15" fill="#263238"/> <!-- stack -->
-              <polygon points="10,60 5,68 15,68" fill="#d84315"/> <!-- plow -->
+              <!-- Engine Locomotive Front (Flipped Facing Right) -->
+              <rect x="145" y="25" width="45" height="35" rx="4" fill="#37474f"/>
+              <rect x="168" y="10" width="12" height="15" fill="#263238"/> <!-- stack -->
+              <polygon points="190,60 195,68 185,68" fill="#d84315"/> <!-- plow -->
               
               <!-- Cabin -->
-              <rect x="55" y="12" width="35" height="48" rx="3" fill="#2e7d32"/>
-              <rect x="62" y="18" width="20" height="18" rx="2" fill="#e0f7fa"/> <!-- window -->
+              <rect x="110" y="12" width="35" height="48" rx="3" fill="#2e7d32"/>
+              <rect x="118" y="18" width="20" height="18" rx="2" fill="#e0f7fa"/> <!-- window -->
 
-              <!-- Cargo Carriage Bed -->
-              <rect x="95" y="32" width="95" height="28" rx="4" fill="#a1887f"/>
-              <line x1="95" y1="42" x2="190" y2="42" stroke="#5d4037" stroke-width="2"/>
+              <!-- Cargo Carriage Bed (Flipped to Left side of wagon) -->
+              <rect x="10" y="32" width="95" height="28" rx="4" fill="#a1887f"/>
+              <line x1="10" y1="42" x2="105" y2="42" stroke="#5d4037" stroke-width="2"/>
               
               <!-- Coupling links -->
-              <rect x="90" y="48" width="6" height="4" fill="#cfd8dc"/>
+              <rect x="104" y="48" width="6" height="4" fill="#cfd8dc"/>
 
-              <!-- Wheels -->
-              <circle cx="28" cy="65" r="11" fill="#37474f"/>
-              <circle cx="28" cy="65" r="4" fill="#cfd8dc"/>
-              <circle cx="72" cy="65" r="11" fill="#37474f"/>
-              <circle cx="72" cy="65" r="4" fill="#cfd8dc"/>
+              <!-- Wheels (Sits perfectly on the rails) -->
+              <circle cx="35" cy="65" r="11" fill="#37474f"/>
+              <circle cx="35" cy="65" r="4" fill="#cfd8dc"/>
+              <circle cx="80" cy="65" r="11" fill="#37474f"/>
+              <circle cx="80" cy="65" r="4" fill="#cfd8dc"/>
               
-              <circle cx="120" cy="65" r="11" fill="#37474f"/>
-              <circle cx="120" cy="65" r="4" fill="#cfd8dc"/>
-              <circle cx="165" cy="65" r="11" fill="#37474f"/>
-              <circle cx="165" cy="65" r="4" fill="#cfd8dc"/>
+              <circle cx="128" cy="65" r="11" fill="#37474f"/>
+              <circle cx="128" cy="65" r="4" fill="#cfd8dc"/>
+              <circle cx="172" cy="65" r="11" fill="#37474f"/>
+              <circle cx="172" cy="65" r="4" fill="#cfd8dc"/>
             </svg>
 
             <!-- Drop target crate container representing active loading spot inside carriage -->
-            <div id="wagon-cargo-target" class="absolute right-6 bottom-7 w-16 h-12 border-2 border-dashed border-slate-900/40 rounded flex items-center justify-center bg-white/20">
+            <!-- Adjusted leftwards onto the left carriage bed -->
+            <div id="wagon-cargo-target" class="absolute left-[40px] bottom-[26px] w-16 h-12 border-2 border-dashed border-slate-900/40 rounded flex items-center justify-center bg-white/40">
               <span id="wagon-cargo-text" class="text-xl font-black text-slate-800 opacity-0 transition-opacity">ll</span>
             </div>
           </div>
+
+          <!-- Station tracks - Kept strictly under the train wheels -->
+          <div class="w-full h-5 bg-slate-400 rounded-full shadow-md relative flex items-center overflow-hidden z-0 mt-[-8px]">
+            <div class="absolute inset-x-0 h-1.5 bg-slate-600 top-1.5"></div>
+            <!-- Dynamic wooden ties -->
+            <div class="w-full flex justify-between px-2">
+              <span class="w-1.5 h-4 bg-amber-800"></span><span class="w-1.5 h-4 bg-amber-900"></span>
+              <span class="w-1.5 h-4 bg-amber-800"></span><span class="w-1.5 h-4 bg-amber-900"></span>
+              <span class="w-1.5 h-4 bg-amber-800"></span><span class="w-1.5 h-4 bg-amber-900"></span>
+              <span class="w-1.5 h-4 bg-amber-800"></span><span class="w-1.5 h-4 bg-amber-900"></span>
+              <span class="w-1.5 h-4 bg-amber-800"></span><span class="w-1.5 h-4 bg-amber-900"></span>
+              <span class="w-1.5 h-4 bg-amber-800"></span><span class="w-1.5 h-4 bg-amber-900"></span>
+            </div>
+          </div>
+
         </div>
 
       </div>
@@ -330,11 +348,12 @@
        ========================================== -->
   <script>
     // System fallback branding logo error handler
+    // Native SVG backups are used in case relative file pathways are restricted
     function handleLogoError(img) {
       img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"><circle cx="50" cy="50" r="45" fill="%231b5e20" stroke="%2381c784" stroke-width="4"/><text x="50" y="62" fill="%23FFF" font-size="34" font-weight="bold" text-anchor="middle">?</text></svg>';
     }
 
-    // Level 1 Identification Questions (10 total) - Standalone double consonant discovery
+    // LEVEL 1: Standalone Identification Questions (8 total in pool)
     const LEVEL_1_POOL = [
       { type: "double", text: "Choose the Double Consonant!", options: [{char:"ll", isCorrect:true}, {char:"st", isCorrect:false}, {char:"ng", isCorrect:false}] },
       { type: "double", text: "Choose the Double Consonant!", options: [{char:"ss", isCorrect:true}, {char:"sh", isCorrect:false}, {char:"ch", isCorrect:false}] },
@@ -343,94 +362,220 @@
       { type: "double", text: "Choose the Double Consonant!", options: [{char:"gg", isCorrect:true}, {char:"nd", isCorrect:false}, {char:"tr", isCorrect:false}] },
       { type: "double", text: "Choose the Double Consonant!", options: [{char:"tt", isCorrect:true}, {char:"nt", isCorrect:false}, {char:"cr", isCorrect:false}] },
       { type: "double", text: "Choose the Double Consonant!", options: [{char:"dd", isCorrect:true}, {char:"mp", isCorrect:false}, {char:"cl", isCorrect:false}] },
-      { type: "double", text: "Choose the Double Consonant!", options: [{char:"pp", isCorrect:true}, {char:"ld", isCorrect:false}, {char:"gr", isCorrect:false}] },
-      { type: "double", text: "Choose the Double Consonant!", options: [{char:"cc", isCorrect:true}, {char:"ft", isCorrect:false}, {char:"bl", isCorrect:false}] },
-      { type: "double", text: "Choose the Double Consonant!", options: [{char:"bb", isCorrect:true}, {char:"rk", isCorrect:false}, {char:"fl", isCorrect:false}] }
+      { type: "double", text: "Choose the Double Consonant!", options: [{char:"pp", isCorrect:true}, {char:"ld", isCorrect:false}, {char:"gr", isCorrect:false}] }
     ];
 
-    // Level 2 Application-based Questions (10 total) - Target missing double consonants in words
+    // LEVEL 2: Simple Application Words (6 total in pool)
     const LEVEL_2_POOL = [
       { type: "application", text: "Fill the blank: be_ _", imageKey: "bell", options: [{char:"ll", isCorrect:true}, {char:"ss", isCorrect:false}, {char:"ff", isCorrect:false}] },
       { type: "application", text: "Fill the blank: gla_ _", imageKey: "glass", options: [{char:"ss", isCorrect:true}, {char:"ll", isCorrect:false}, {char:"zz", isCorrect:false}] },
-      { type: "application", text: "Fill the blank: cli_ _", imageKey: "cliff", options: [{char:"ff", isCorrect:true}, {char:"ss", isCorrect:false}, {char:"ll", isCorrect:false}] },
+      { type: "application", text: "Fill the blank: cu_ _", imageKey: "cuff", options: [{char:"ff", isCorrect:true}, {char:"ss", isCorrect:false}, {char:"ll", isCorrect:false}] },
       { type: "application", text: "Fill the blank: bu_ _", imageKey: "buzz", options: [{char:"zz", isCorrect:true}, {char:"ff", isCorrect:false}, {char:"ss", isCorrect:false}] },
       { type: "application", text: "Fill the blank: do_ _", imageKey: "doll", options: [{char:"ll", isCorrect:true}, {char:"gg", isCorrect:false}, {char:"tt", isCorrect:false}] },
-      { type: "application", text: "Fill the blank: dre_ _", imageKey: "dress", options: [{char:"ss", isCorrect:true}, {char:"ff", isCorrect:false}, {char:"ll", isCorrect:false}] },
-      { type: "application", text: "Fill the blank: e_ _", imageKey: "egg", options: [{char:"gg", isCorrect:true}, {char:"ll", isCorrect:false}, {char:"ss", isCorrect:false}] },
-      { type: "application", text: "Fill the blank: hi_ _", imageKey: "hill", options: [{char:"ll", isCorrect:true}, {char:"ff", isCorrect:false}, {char:"zz", isCorrect:false}] },
-      { type: "application", text: "Fill the blank: ki_ _en", imageKey: "kitten", options: [{char:"tt", isCorrect:true}, {char:"dd", isCorrect:false}, {char:"pp", isCorrect:false}] },
-      { type: "application", text: "Fill the blank: mu_ _in", imageKey: "muffin", options: [{char:"ff", isCorrect:true}, {char:"ss", isCorrect:false}, {char:"ll", isCorrect:false}] }
+      { type: "application", text: "Fill the blank: e_ _", imageKey: "egg", options: [{char:"gg", isCorrect:true}, {char:"ll", isCorrect:false}, {char:"ss", isCorrect:false}] }
     ];
 
-    // High quality vector SVGs specifically crafted to be easily recognized by Grade 1 students
+    // LEVEL 3: Multi-syllable & Complex Application Words (6 total in pool)
+    const LEVEL_3_POOL = [
+      { type: "application", text: "Fill the blank: dre_ _", imageKey: "dress", options: [{char:"ss", isCorrect:true}, {char:"ff", isCorrect:false}, {char:"ll", isCorrect:false}] },
+      { type: "application", text: "Fill the blank: hi_ _", imageKey: "hill", options: [{char:"ll", isCorrect:true}, {char:"ff", isCorrect:false}, {char:"zz", isCorrect:false}] },
+      { type: "application", text: "Fill the blank: ki_ _en", imageKey: "kitten", options: [{char:"tt", isCorrect:true}, {char:"dd", isCorrect:false}, {char:"pp", isCorrect:false}] },
+      { type: "application", text: "Fill the blank: mu_ _in", imageKey: "muffin", options: [{char:"ff", isCorrect:true}, {char:"ss", isCorrect:false}, {char:"ll", isCorrect:false}] },
+      { type: "application", text: "Fill the blank: ra_ _it", imageKey: "rabbit", options: [{char:"bb", isCorrect:true}, {char:"pp", isCorrect:false}, {char:"tt", isCorrect:false}] },
+      { type: "application", text: "Fill the blank: a_ _le", imageKey: "apple", options: [{char:"pp", isCorrect:true}, {char:"bb", isCorrect:false}, {char:"ll", isCorrect:false}] }
+    ];
+
+    // Ultra-clear child-friendly vector SVGs designed for high visibility and immediate comprehension
     const VISUAL_HINTS = {
-      "bell": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <path d="M50,15 C35,15 32,45 30,65 L70,65 C68,45 65,15 50,15 Z" fill="#ffd54f" stroke="#ffb300" stroke-width="2"/>
-        <rect x="25" y="65" width="50" height="6" rx="3" fill="#ffca28"/>
-        <circle cx="50" cy="76" r="7" fill="#ff8f00" />
-        <circle cx="50" cy="11" r="7" fill="none" stroke="#ffb300" stroke-width="4" />
+      "bell": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Giant Glossy Golden Bell with Red Ribbon Bow -->
+        <circle cx="50" cy="16" r="6" fill="none" stroke="#fbc02d" stroke-width="3" />
+        <path d="M50,16 C32,16 28,42 25,62 L75,62 C72,42 68,16 50,16 Z" fill="#ffd54f" stroke="#ffb300" stroke-width="2"/>
+        <rect x="21" y="62" width="58" height="6" rx="3" fill="#ffca28" stroke="#ffb300" stroke-width="1.5"/>
+        <!-- Big swinging Clapper -->
+        <circle cx="50" cy="74" r="6.5" fill="#ff8f00" />
+        <!-- Red Ribbon Bow -->
+        <path d="M50,14 Q44,4 36,12 Q44,14 50,22 Q56,14 64,12 Q56,4 50,14" fill="#e53935" />
+        <!-- Shine highlights -->
+        <ellipse cx="40" cy="32" rx="3" ry="10" fill="#fff" opacity="0.6" transform="rotate(-15 40 32)" />
       </svg>`,
-      "glass": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <path d="M30,20 L36,80 Q50,83 64,80 L70,20 Z" fill="none" stroke="#29b6f6" stroke-width="3" />
-        <path d="M33,50 L35,80 Q50,83 65,80 L67,50 Z" fill="#b3e5fc" opacity="0.6"/>
-        <ellipse cx="50" cy="50" rx="17" ry="3" fill="#81d4fa" opacity="0.8"/>
+      "glass": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Highly distinct Tumbler Glass filled with Orange Juice -->
+        <!-- Glass Silhouette -->
+        <path d="M28,15 L36,82 Q50,85 64,82 L72,15 Z" fill="none" stroke="#00b0ff" stroke-width="4" stroke-linejoin="round" />
+        <!-- Bright orange juice fill -->
+        <path d="M31,45 L35,82 Q50,85 65,82 L69,45 Z" fill="#ff9100" />
+        <ellipse cx="50" cy="45" rx="18" ry="4" fill="#ffb300" />
+        <!-- High Contrast Striped Straw -->
+        <path d="M45,8 L45,55" stroke="#ff3d00" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(-18 45 40)" />
+        <path d="M45,8 L45,55" stroke="#fff" stroke-width="6" stroke-dasharray="6 6" stroke-linecap="round" fill="none" transform="rotate(-18 45 40)" />
       </svg>`,
-      "cliff": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <path d="M15,85 L45,85 L55,45 L70,35 L85,15 L15,15 Z" fill="#cfd8dc" transform="rotate(180 50 50)" />
-        <path d="M45,85 L55,45 L70,35 L50,15 L35,15 Z" fill="#90a4ae" transform="rotate(180 50 50)" opacity="0.8" />
-        <rect x="15" y="80" width="70" height="10" fill="#4caf50" rx="2" />
+      "cuff": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Sleek folded blue shirt sleeve cuff with a shiny gold button -->
+        <!-- Hand Peeking Out -->
+        <path d="M40,74 C36,78 36,92 50,92 C64,92 64,78 60,74 Z" fill="#ffe082" stroke="#e0a800" stroke-width="2" />
+        <!-- Shirt Sleeve Arm -->
+        <rect x="28" y="10" width="44" height="42" fill="#e3f2fd" stroke="#90caf9" stroke-width="2" />
+        <!-- Folded Cuff fabric -->
+        <rect x="22" y="46" width="56" height="26" rx="5" fill="#90caf9" stroke="#1565c0" stroke-width="3" />
+        <!-- Gold Cufflink Button -->
+        <circle cx="50" cy="59" r="6" fill="#fbc02d" stroke="#f57f17" stroke-width="2" />
+        <circle cx="50" cy="59" r="2.5" fill="#fff" />
+        <!-- Stitch lines -->
+        <line x1="26" y1="52" x2="74" y2="52" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="3 3" />
+        <line x1="26" y1="66" x2="74" y2="66" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="3 3" />
       </svg>`,
-      "buzz": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <ellipse cx="50" cy="50" r="22" fill="#ffeb3b" />
-        <path d="M42,29 Q46,50 42,71" stroke="#37474f" stroke-width="6" fill="none"/>
-        <path d="M58,29 Q54,50 58,71" stroke="#37474f" stroke-width="6" fill="none"/>
-        <ellipse cx="44" cy="22" rx="8" ry="18" fill="#e0f7fa" opacity="0.7" transform="rotate(-30 44 22)" />
-        <ellipse cx="56" cy="22" rx="8" ry="18" fill="#e0f7fa" opacity="0.7" transform="rotate(30 56 22)" />
-        <circle cx="64" cy="45" r="2" fill="#000" />
-        <path d="M30,50 Q24,50 20,44" stroke="#37474f" stroke-width="2" fill="none"/>
+      "buzz": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Energetic Happy Bee with big eyes and movement streaks -->
+        <!-- Wings -->
+        <ellipse cx="40" cy="25" rx="10" ry="22" fill="#b2ebf2" stroke="#00b0ff" stroke-width="2" opacity="0.8" transform="rotate(-25 40 25)" />
+        <ellipse cx="60" cy="25" rx="10" ry="22" fill="#b2ebf2" stroke="#00b0ff" stroke-width="2" opacity="0.8" transform="rotate(25 60 25)" />
+        <!-- Body -->
+        <ellipse cx="50" cy="52" rx="22" ry="26" fill="#ffeb3b" stroke="#f57f17" stroke-width="2" transform="rotate(90 50 52)" />
+        <!-- Sharp Black Stripes -->
+        <path d="M38,36 C42,42 42,62 38,68" stroke="#212121" stroke-width="8" stroke-linecap="round" fill="none" />
+        <path d="M50,30 C54,38 54,66 50,74" stroke="#212121" stroke-width="8" stroke-linecap="round" fill="none" />
+        <path d="M62,36 C66,42 66,62 62,68" stroke="#212121" stroke-width="8" stroke-linecap="round" fill="none" />
+        <!-- Big Cute Googly Eyes -->
+        <circle cx="68" cy="42" r="7" fill="#fff" stroke="#212121" stroke-width="2" />
+        <circle cx="69" cy="42" r="3" fill="#000" />
+        <circle cx="56" cy="40" r="5" fill="#fff" stroke="#212121" stroke-width="2" />
+        <circle cx="56" cy="40" r="2" fill="#000" />
+        <!-- Smile and cheeks -->
+        <path d="M60,52 Q65,58 70,51" stroke="#212121" stroke-width="3" stroke-linecap="round" fill="none" />
+        <!-- Motion Buzz Lines -->
+        <path d="M12,40 Q6,48 10,54" stroke="#29b6f6" stroke-width="3" stroke-linecap="round" fill="none" />
+        <path d="M18,50 Q12,58 16,64" stroke="#29b6f6" stroke-width="2.5" stroke-linecap="round" fill="none" />
       </svg>`,
-      "doll": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <circle cx="50" cy="35" r="18" fill="#ffecb3" />
-        <path d="M32,53 C32,45 68,45 68,53 L62,80 L38,80 Z" fill="#f48fb1" />
-        <path d="M32,32 C35,20 65,20 68,32" stroke="#8d6e63" stroke-width="8" fill="none" stroke-linecap="round" />
-        <circle cx="44" cy="35" r="2" fill="#000" />
-        <circle cx="56" cy="35" r="2" fill="#000" />
-        <path d="M46,42 Q50,46 54,42" stroke="#e91e63" stroke-width="2" fill="none" />
+      "doll": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Friendly Brown Teddy Bear Doll -->
+        <!-- Round Ears -->
+        <circle cx="28" cy="28" r="12" fill="#8d6e63" stroke="#5d4037" stroke-width="2" />
+        <circle cx="28" cy="28" r="6" fill="#ff8a80" />
+        <circle cx="72" cy="28" r="12" fill="#8d6e63" stroke="#5d4037" stroke-width="2" />
+        <circle cx="72" cy="28" r="6" fill="#ff8a80" />
+        <!-- Head -->
+        <circle cx="50" cy="44" r="26" fill="#a1887f" stroke="#5d4037" stroke-width="2" />
+        <!-- Glossy Eyes -->
+        <circle cx="40" cy="38" r="4.5" fill="#212121" />
+        <circle cx="41" cy="36" r="1.5" fill="#fff" />
+        <circle cx="60" cy="38" r="4.5" fill="#212121" />
+        <circle cx="61" cy="36" r="1.5" fill="#fff" />
+        <!-- Friendly snout -->
+        <ellipse cx="50" cy="48" rx="10" ry="7" fill="#fff" />
+        <ellipse cx="50" cy="45" rx="5" ry="3.5" fill="#3e2723" />
+        <path d="M46,50 Q50,54 54,50" stroke="#3e2723" stroke-width="2" stroke-linecap="round" fill="none" />
+        <!-- Bow Tie -->
+        <polygon points="38,72 50,65 38,58" fill="#e53935" />
+        <polygon points="62,72 50,65 62,58" fill="#e53935" />
+        <circle cx="50" cy="65" r="4" fill="#c62828" />
       </svg>`,
-      "dress": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <path d="M42,20 L58,20 L62,35 L75,80 L25,80 L38,35 Z" fill="#f48fb1" stroke="#ad1457" stroke-width="2" />
-        <rect x="36" y="38" width="28" height="6" fill="#00bcd4" rx="2" />
-        <circle cx="50" cy="41" r="5" fill="#0097a7" />
+      "dress": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Vibrant Pink Princess Dress on a wooden Hanger -->
+        <!-- Hanger -->
+        <path d="M50,14 L50,22 M50,22 L34,30 L66,32 Z" stroke="#8d6e63" stroke-width="3" stroke-linecap="round" fill="none" />
+        <path d="M50,14 Q53,8 48,6" stroke="#8d6e63" stroke-width="3" stroke-linecap="round" fill="none" />
+        <!-- Fancy Dress bodice and flared frilly skirt -->
+        <path d="M40,28 L60,28 L64,44 L80,84 L20,84 L36,44 Z" fill="#ec407a" stroke="#ad1457" stroke-width="2.5" />
+        <!-- Decorative yellow shiny star icons -->
+        <polygon points="50,48 52,53 58,53 53,56 55,62 50,58 45,62 47,56 42,53 48,53" fill="#ffeb3b" />
+        <polygon points="36,66 38,70 43,70 39,72 40,77 36,74 32,77 33,72 29,70 34,70" fill="#ffeb3b" />
+        <polygon points="64,66 66,70 71,70 67,72 68,77 64,74 60,77 61,72 57,70 62,70" fill="#ffeb3b" />
+        <!-- Cyan waistband -->
+        <rect x="37" y="42" width="26" height="5" fill="#00bcd4" rx="1.5" />
       </svg>`,
-      "egg": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <ellipse cx="50" cy="54" rx="24" ry="32" fill="#fafafa" stroke="#cfd8dc" stroke-width="2" />
-        <path d="M20,74 Q50,90 80,74" stroke="#ffb74d" stroke-width="6" fill="none" stroke-linecap="round" />
-        <path d="M25,82 Q50,94 75,82" stroke="#ffa726" stroke-width="4" fill="none" stroke-linecap="round" />
+      "egg": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Direct visual cues: 2 whole eggs in nest + 1 cracked open next to them showing yolk -->
+        <!-- Cozy straw nest -->
+        <path d="M12,65 Q50,85 88,65" stroke="#ffb74d" stroke-width="8" fill="none" stroke-linecap="round" />
+        <path d="M18,74 Q50,92 82,74" stroke="#ffa726" stroke-width="6" fill="none" stroke-linecap="round" />
+        <!-- Standing eggs -->
+        <ellipse cx="38" cy="46" rx="14" ry="20" fill="#fafafa" stroke="#cfd8dc" stroke-width="2" />
+        <ellipse cx="62" cy="46" rx="14" ry="20" fill="#f5f5f5" stroke="#cfd8dc" stroke-width="2" />
+        <!-- Sunny-Side-Up cracked egg on the side -->
+        <path d="M40,78 Q60,74 74,76 T82,85 T55,88 Z" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5" />
+        <circle cx="62" cy="81" r="7" fill="#ffb300" />
       </svg>`,
-      "hill": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <path d="M10,80 Q35,45 60,65 Q80,55 90,80 Z" fill="#81c784" />
-        <path d="M40,80 Q65,35 90,65 L90,80 Z" fill="#4caf50" opacity="0.8" />
-        <circle cx="30" cy="42" r="12" fill="#fff176" />
+      "hill": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Tall Green Mountain/Hill with a flag on top and sun -->
+        <!-- Sun -->
+        <circle cx="32" cy="38" r="14" fill="#ffeb3b" />
+        <!-- Back hill -->
+        <path d="M30,82 Q60,32 90,82 Z" fill="#81c784" />
+        <!-- Front main hill -->
+        <path d="M10,82 Q42,28 74,82 Z" fill="#4caf50" stroke="#2e7d32" stroke-width="1.5" />
+        <!-- Summit Winding path -->
+        <path d="M42,28 Q44,48 38,62 Q45,74 36,82" fill="none" stroke="#ffe082" stroke-width="3" stroke-linecap="round" />
+        <!-- Red Flag on peak -->
+        <line x1="42" y1="28" x2="42" y2="12" stroke="#3e2723" stroke-width="2" />
+        <polygon points="42,12 56,16 42,20" fill="#e53935" />
       </svg>`,
-      "kitten": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <circle cx="50" cy="52" r="28" fill="#cfd8dc" />
-        <polygon points="26,34 38,16 42,32" fill="#cfd8dc" />
-        <polygon points="74,34 62,16 58,32" fill="#cfd8dc" />
-        <polygon points="29,32 35,21 38,30" fill="#f48fb1" />
-        <polygon points="71,32 65,21 62,30" fill="#f48fb1" />
-        <circle cx="40" cy="48" r="3.5" fill="#37474f" />
-        <circle cx="60" cy="48" r="3.5" fill="#37474f" />
-        <polygon points="46,55 54,55 50,59" fill="#f48fb1" />
+      "kitten": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Cute orange kitty with big glossy eyes and stripes -->
+        <!-- Floppy cat ears -->
+        <polygon points="24,32 38,12 44,28" fill="#ffb74d" stroke="#f57f17" stroke-width="2" />
+        <polygon points="76,32 62,12 56,28" fill="#ffb74d" stroke="#f57f17" stroke-width="2" />
+        <polygon points="28,29 35,17 38,26" fill="#f48fb1" />
+        <polygon points="72,29 65,17 62,26" fill="#f48fb1" />
+        <!-- Chubby Head -->
+        <circle cx="50" cy="50" r="28" fill="#ffb74d" stroke="#f57f17" stroke-width="2" />
+        <!-- Tabby stripes -->
+        <path d="M44,24 L46,32 M50,22 L50,31 M56,24 L54,32" stroke="#d84315" stroke-width="3" stroke-linecap="round" />
+        <!-- Huge adorable eyes -->
+        <circle cx="38" cy="46" r="6" fill="#212121" />
+        <circle cx="39" cy="44" r="2.2" fill="#fff" />
+        <circle cx="62" cy="46" r="6" fill="#212121" />
+        <circle cx="63" cy="44" r="2.5" fill="#fff" />
+        <!-- Muzzle snout -->
+        <ellipse cx="50" cy="55" rx="7" ry="5" fill="#fff" />
+        <polygon points="47,53 53,53 50,56" fill="#f48fb1" />
+        <path d="M46,57 Q50,60 54,57" stroke="#d84315" stroke-width="2" stroke-linecap="round" fill="none" />
       </svg>`,
-      "muffin": `<svg viewBox="0 0 100 100" class="w-16 h-16">
-        <path d="M30,50 L70,50 L64,82 L36,82 Z" fill="#d7ccc8" stroke="#8d6e63" stroke-width="2" />
-        <line x1="40" y1="50" x2="42" y2="82" stroke="#8d6e63" stroke-width="1.5" />
-        <line x1="50" y1="50" x2="50" y2="82" stroke="#8d6e63" stroke-width="1.5" />
-        <line x1="60" y1="50" x2="58" y2="82" stroke="#8d6e63" stroke-width="1.5" />
-        <path d="M24,50 C20,32 80,32 76,50 Z" fill="#ffe082" />
-        <circle cx="38" cy="42" r="3.5" fill="#3f51b5" />
-        <circle cx="58" cy="44" r="3" fill="#3f51b5" />
-        <circle cx="48" cy="38" r="4" fill="#3f51b5" />
+      "muffin": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Delicious puffy muffin in a red-and-white cup with giant blueberries -->
+        <!-- Puffy cake top -->
+        <path d="M22,46 C16,34 84,34 78,46 C84,54 74,62 50,60 C26,62 16,54 22,46 Z" fill="#ffe082" stroke="#ffb300" stroke-width="1.5" />
+        <!-- Juicy Blueberries -->
+        <circle cx="36" cy="38" r="5" fill="#3f51b5" />
+        <circle cx="37" cy="37" r="1.5" fill="#fff" />
+        <circle cx="64" cy="40" r="4.5" fill="#3f51b5" />
+        <circle cx="65" cy="39" r="1.2" fill="#fff" />
+        <circle cx="50" cy="34" r="5.5" fill="#3f51b5" />
+        <circle cx="51" cy="33" r="1.5" fill="#fff" />
+        <!-- Ribbed Cupcake Baking Liner -->
+        <path d="M30,58 L70,58 L64,88 L36,88 Z" fill="#ffffff" stroke="#e53935" stroke-width="2" />
+        <!-- Red Stripes on Liner -->
+        <line x1="38" y1="58" x2="41" y2="88" stroke="#e53935" stroke-width="2.5" />
+        <line x1="46" y1="58" x2="47" y2="88" stroke="#e53935" stroke-width="2.5" />
+        <line x1="54" y1="58" x2="53" y2="88" stroke="#e53935" stroke-width="2.5" />
+        <line x1="62" y1="58" x2="59" y2="88" stroke="#e53935" stroke-width="2.5" />
+      </svg>`,
+      "rabbit": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Friendly white bunny holding a giant orange carrot -->
+        <!-- Long floppy ears -->
+        <ellipse cx="38" cy="24" rx="7" ry="24" fill="#f5f5f5" stroke="#cfd8dc" stroke-width="2" transform="rotate(-12 38 24)" />
+        <ellipse cx="62" cy="24" rx="7" ry="24" fill="#f5f5f5" stroke="#cfd8dc" stroke-width="2" transform="rotate(12 62 24)" />
+        <ellipse cx="38" cy="24" rx="4" ry="18" fill="#f48fb1" transform="rotate(-12 38 24)" />
+        <ellipse cx="62" cy="24" rx="4" ry="18" fill="#f48fb1" transform="rotate(12 62 24)" />
+        <!-- Head -->
+        <circle cx="50" cy="54" r="24" fill="#ffffff" stroke="#cfd8dc" stroke-width="2" />
+        <circle cx="42" cy="48" r="3.5" fill="#212121" />
+        <circle cx="58" cy="48" r="3.5" fill="#212121" />
+        <!-- Nose -->
+        <polygon points="47,55 53,55 50,59" fill="#f48fb1" />
+        <!-- Giant carrot in paw -->
+        <path d="M45,68 L55,68 L50,88 Z" fill="#ff7043" />
+        <path d="M44,68 Q50,60 56,68" stroke="#4caf50" stroke-width="3" fill="none" />
+      </svg>`,
+      "apple": `<svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28">
+        <!-- Giant Glossy Red Apple with brown stem and green leaf -->
+        <path d="M50,32 C30,28 20,48 20,64 C20,80 38,88 50,80 C62,88 80,80 80,64 C80,48 70,28 50,32 Z" fill="#ff1744" stroke="#d50000" stroke-width="3" />
+        <!-- Leaf -->
+        <path d="M50,30 Q42,16 42,24 Z" fill="#4caf50" stroke="#2e7d32" stroke-width="1.5" />
+        <!-- Stem -->
+        <path d="M50,32 Q54,16 62,16" stroke="#8d6e63" stroke-width="4" stroke-linecap="round" fill="none" />
+        <!-- Shine highlight -->
+        <ellipse cx="34" cy="48" rx="4" ry="10" fill="#fff" opacity="0.6" transform="rotate(-20 34 48)" />
       </svg>`
     };
 
@@ -469,7 +614,8 @@
       }
     }
 
-    // Set up 15 randomized questions for active play session (8 from L1, 7 from L2)
+    // Set up 15 randomized questions dynamically
+    // 5 Standalone (L1), 5 Basic Application (L2), 5 Advanced Application (L3)
     function startGame() {
       // Warm up audio interface contexts
       try {
@@ -482,18 +628,23 @@
       document.getElementById('wrongSound').load();
       document.getElementById('clapSound').load();
 
-      // Take 8 randomized Level 1 questions
+      // Take 5 randomized Level 1 questions
       const selectedL1 = [...LEVEL_1_POOL]
         .sort(() => Math.random() - 0.5)
-        .slice(0, 8);
+        .slice(0, 5);
 
-      // Take 7 randomized Level 2 questions
+      // Take 5 randomized Level 2 questions
       const selectedL2 = [...LEVEL_2_POOL]
         .sort(() => Math.random() - 0.5)
-        .slice(0, 7);
+        .slice(0, 5);
 
-      // Concatenate L1 and L2 so Level 1 always plays first
-      currentQuestions = [...selectedL1, ...selectedL2];
+      // Take 5 randomized Level 3 questions
+      const selectedL3 = [...LEVEL_3_POOL]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 5);
+
+      // Concatenate L1, L2, and L3 so progression is clear
+      currentQuestions = [...selectedL1, ...selectedL2, ...selectedL3];
 
       currentQuestionIndex = 0;
       score = 0;
@@ -515,19 +666,31 @@
       updateTriesUI();
 
       const q = currentQuestions[currentQuestionIndex];
-      const isLevel1 = currentQuestionIndex < 8;
+      
+      // Determine active level status
+      let activeLevelName = "LEVEL 1: CARGO SORTING";
+      let isLevel1 = currentQuestionIndex < 5;
+      let isLevel2 = currentQuestionIndex >= 5 && currentQuestionIndex < 10;
+      let isLevel3 = currentQuestionIndex >= 10;
 
-      // Update Header level indicator and progress texts
       const levelIndicator = document.getElementById('level-indicator');
       if (isLevel1) {
+        activeLevelName = "LEVEL 1: CARGO SORTING";
         levelIndicator.innerText = "LEVEL 1: IDENTIFICATION";
         levelIndicator.className = "text-xs md:text-sm font-black uppercase text-[#2e7d32] tracking-widest";
-      } else {
-        levelIndicator.innerText = "LEVEL 2: APPLICATION";
+      } else if (isLevel2) {
+        activeLevelName = "LEVEL 2: BASIC MATCHING";
+        levelIndicator.innerText = "LEVEL 2: BASIC SPELLING";
         levelIndicator.className = "text-xs md:text-sm font-black uppercase text-orange-500 tracking-widest";
+      } else {
+        activeLevelName = "LEVEL 3: EXPERT CHALLENGE";
+        levelIndicator.innerText = "LEVEL 3: ADVANCED SPELLING";
+        levelIndicator.className = "text-xs md:text-sm font-black uppercase text-purple-600 tracking-widest";
       }
 
-      document.getElementById('task-bold-header').innerText = q.text;
+      // Render bold headings to distinguish types of questions
+      document.getElementById('task-bold-header').innerHTML = `<span class="block text-xs font-black tracking-widest opacity-80 mb-1">${activeLevelName}</span> ${q.text}`;
+      
       document.getElementById('game-progress-text').innerText = `Question ${currentQuestionIndex + 1} / 15`;
       document.getElementById('game-progress-bar').style.width = `${(currentQuestionIndex / 15) * 100}%`;
       document.getElementById('game-score-text').innerText = score;
@@ -536,10 +699,10 @@
       // Reset the drop carriage spot visibility
       const carriageSpot = document.getElementById('wagon-cargo-target');
       const carriageText = document.getElementById('wagon-cargo-text');
-      carriageSpot.className = "absolute right-6 bottom-7 w-16 h-12 border-2 border-dashed border-slate-900/40 rounded flex items-center justify-center bg-white/20";
+      carriageSpot.className = "absolute left-[40px] bottom-[26px] w-16 h-12 border-2 border-dashed border-slate-900/40 rounded flex items-center justify-center bg-white/20";
       carriageText.classList.add('opacity-0');
 
-      // Set Up the dynamic beautiful Vector Hint to aid Grade 1 comprehension (Only visible in Level 2)
+      // Set Up the dynamic beautiful Vector Hint to aid Grade 1 comprehension (Only visible in Levels 2 & 3)
       const imageBox = document.getElementById('task-image-box');
       if (isLevel1) {
         imageBox.classList.add('hidden');
@@ -576,6 +739,16 @@
         crateWrap.onclick = () => loadCrateWithCrane(crateWrap, opt);
         optionsPanel.appendChild(crateWrap);
       });
+
+      // Update train horizontal tracking offset to make it crawl step-by-step
+      updateTrainPosition();
+    }
+
+    // Incremental train positioning: Starts from the left end and stays stationed there
+    function updateTrainPosition() {
+      const train = document.getElementById('station-wagon');
+      // Set to stationary position on the left end (-110px) throughout the game
+      train.style.transform = `translateX(-110px)`;
     }
 
     // Swivel crane towards crate, shoot water trail as a loading cable, then drop into wagon
@@ -717,6 +890,7 @@
       }, 4000);
     }
 
+    // Stop idle drips
     function stopIdleDrips() {
       if (waterDripTimer) {
         clearInterval(waterDripTimer);
@@ -740,21 +914,40 @@
         const carriageSpot = document.getElementById('wagon-cargo-target');
         carriageText.innerText = optionData.char;
         carriageText.classList.remove('opacity-0');
-        carriageSpot.className = "absolute right-6 bottom-7 w-16 h-12 border-4 border-solid border-green-500 rounded flex items-center justify-center bg-green-100 animate-pulse";
+        carriageSpot.className = "absolute left-[40px] bottom-[26px] w-16 h-12 border-4 border-solid border-green-500 rounded flex items-center justify-center bg-green-100";
+
+        // Dynamic visual chassis bounce/jolt animation on correct cargo touchdown
+        const trainWagonObj = document.getElementById('station-wagon');
+        trainWagonObj.classList.remove('animate-jolt');
+        void trainWagonObj.offsetWidth; // Force layout recalculation
+        trainWagonObj.classList.add('animate-jolt');
 
         if (triesLeft === 2) {
           score++;
         }
 
-        document.getElementById('hint-feedback').innerHTML = "<span class='text-green-600 font-black text-lg'>🚂 CHUG-CHUG! CARGO LOADED!</span>";
+        // On the final 15th question, trigger the cinematic exit chug off-screen!
+        if (currentQuestionIndex === 14) {
+          document.getElementById('hint-feedback').innerHTML = "<span class='text-green-600 font-black text-lg'>🚂 ALL CARGO LOADED! TRAIN ZOOMING AWAY!</span>";
+          emitSteamWhistlePuffs();
+          
+          setTimeout(() => {
+            zoomTrainAway();
+          }, 1000);
 
-        // Emit happy train stack steam smoke puffs
-        emitSteamWhistlePuffs();
+          setTimeout(() => {
+            currentQuestionIndex++;
+            renderQuestion(); // This will trigger the game summary card
+          }, 2600);
+        } else {
+          document.getElementById('hint-feedback').innerHTML = "<span class='text-green-600 font-black text-lg'>🚂 CHUG-CHUG! CARGO LOADED!</span>";
+          emitSteamWhistlePuffs();
 
-        setTimeout(() => {
-          currentQuestionIndex++;
-          renderQuestion();
-        }, 1800);
+          setTimeout(() => {
+            currentQuestionIndex++;
+            renderQuestion();
+          }, 1800);
+        }
 
       } else {
         triesLeft--;
@@ -779,20 +972,49 @@
           const optionsPanel = document.getElementById('options-panel');
           const crates = optionsPanel.children;
           const q = currentQuestions[currentQuestionIndex];
-          const correctLabel = q.options.find(o => o.isCorrect).char;
+          const correctLetter = q.options.find(o => o.isCorrect).char;
 
           for (let c of crates) {
-            if (c.innerText.trim().toLowerCase() === correctLabel.toLowerCase()) {
+            if (c.innerText.trim().toLowerCase() === correctLetter.toLowerCase()) {
               c.className = "flex-1 py-4 px-2 rounded-xl border-4 border-green-600 bg-gradient-to-b from-green-400 to-green-600 text-white font-black text-xl md:text-3xl uppercase tracking-wider scale-105 animate-glow";
             }
           }
 
-          setTimeout(() => {
-            currentQuestionIndex++;
-            renderQuestion();
-          }, 2200);
+          // On the final 15th question, zoom away even if the last answer was skipped
+          if (currentQuestionIndex === 14) {
+            setTimeout(() => {
+              zoomTrainAway();
+            }, 1200);
+
+            setTimeout(() => {
+              currentQuestionIndex++;
+              renderQuestion();
+            }, 2800);
+          } else {
+            setTimeout(() => {
+              currentQuestionIndex++;
+              renderQuestion();
+            }, 2200);
+          }
         }
       }
+    }
+
+    // Accelerate the train with multiple steam puffs and exit through the right side of the screen
+    function zoomTrainAway() {
+      const train = document.getElementById('station-wagon');
+      // Apply linear acceleration curve for clean arcade launch feel
+      train.style.transition = 'transform 1.4s cubic-bezier(0.42, 0, 1, 1)';
+      
+      // Emit a continuous rapid trail of steam puffs as it chugs away
+      for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+          emitSteamWhistlePuffs();
+        }, i * 85);
+      }
+      
+      // Zoom out past the right boundary
+      train.style.transform = 'translateX(550px)';
     }
 
     // Emits physical bubble-like steam clouds from train stack
@@ -806,7 +1028,7 @@
       const startX = rect.left - cabin.left + (rect.width / 2);
       const startY = rect.top - cabin.top;
 
-      // Spawn 5 sequential steam clouds rising up
+      // Spawn 6 sequential steam clouds rising up
       for (let i = 0; i < 6; i++) {
         setTimeout(() => {
           const puff = document.createElement('div');
@@ -992,12 +1214,6 @@
       document.getElementById("summary-feedback").textContent = feedbackText;
 
       triggerAudio('clap');
-    }
-
-    // Colors
-    function randomColor() {
-      const colors = ["#e91e63", "#9c27b0", "#3f51b5", "#009688", "#ff9800"];
-      return colors[Math.floor(Math.random() * colors.length)];
     }
   </script>
 </body>
