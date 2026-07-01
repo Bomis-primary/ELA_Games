@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Compound Word Labs: The Fusion Reactor</title>
+  <!-- Tailwind CSS CDN for premium layout and utilities -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Playful Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    .font-fun {
+      font-family: 'Fredoka One', cursive;
+    }
+
+    /* Pulsing Sci-Fi Laboratory Reactor Background - Adjusted to Pink & Purple */
+    .bg-reactor {
+      background: linear-gradient(180deg, #0f051d 0%, #2e1065 45%, #4c0519 80%, #701a75 100%);
+      background-size: 400% 400%;
+      animation: neonFlow 15s ease infinite;
+    }
+
+    @keyframes neonFlow {
+      0%, 100 { background-position: 50% 0%; }
+      50% { background-position: 50% 100%; }
+    }
+
+    /* Soft floating bobbing effect for laboratory screens */
+    @keyframes bob {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(0.5deg); }
+    }
+    .animate-bob {
+      animation: bob 3.5s ease-in-out infinite;
+    }
+
+    /* Bubble Floating Animation */
+    @keyframes floatBubble {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-12px) scale(1.02); }
+    }
+    .animate-bubble {
+      animation: floatBubble 4s ease-in-out infinite;
+    }
+
+    /* Screen shake feedback on error */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.3s ease-in-out;
+    }
+
+    /* Laser beam shoot animation - Themed to Pink & Purple */
+    @keyframes shootLaser {
+      0% {
+        height: 0%;
+        opacity: 1;
+        bottom: 0px;
+      }
+      50% {
+        height: 100%;
+        opacity: 1;
+      }
+      100% {
+        height: 0%;
+        opacity: 0;
+        top: 0px;
+      }
+    }
+    .laser-beam {
+      position: absolute;
+      width: 4px;
+      background: linear-gradient(to top, #db2777, #a855f7);
+      box-shadow: 0 0 12px #a855f7, 0 0 20px #db2777;
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* Glowing Custom Borders - Pink & Purple */
+    .neon-purple-glow {
+      box-shadow: 0 0 15px #a855f7, inset 0 0 10px rgba(168, 85, 247, 0.3);
+    }
+    .neon-pink-glow {
+      box-shadow: 0 0 15px #db2777, inset 0 0 10px rgba(219, 39, 119, 0.3);
+    }
+
+    /* Sparkle particle style */
+    .spark-particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 50;
+    }
+  </style>
+
+  <!-- Critical early-load declarations to guarantee error-free logo fallbacks -->
+  <script>
+    function handleLogoError(img) {
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"><circle cx="50" cy="50" r="45" fill="%233b0764" stroke="%23ec4899" stroke-width="4"/><text x="50" y="62" fill="%23FFF" font-size="34" font-weight="bold" text-anchor="middle">?</text></svg>';
+    }
+  </script>
+</head>
+<body class="bg-reactor text-[#fdf2f8] min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+
+  <!-- Twinkling laboratory star lights -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+    <div class="absolute bg-white rounded-full w-1 h-1 top-10 left-10 animate-ping"></div>
+    <div class="absolute bg-white rounded-full w-1.5 h-1.5 top-32 right-24 animate-pulse"></div>
+    <div class="absolute bg-white rounded-full w-1 h-1 bottom-44 left-1/4 animate-pulse"></div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 1: 1.5-SECOND SPLASH SCREEN (SNAP-LOAD)
+       Contains strictly ONLY the logo as requested
+       ========================================== -->
+  <div id="screen-splash" class="flex-1 flex flex-col items-center justify-center relative z-10 bg-white">
+    <div class="scale-110 animate-pulse">
+      <img 
+        id="splash-logo" 
+        src="assets/innovine-logo.png" 
+        class="w-72 h-72 md:w-80 md:h-80 object-contain" 
+        alt="Innovine Logo"
+        onerror="handleLogoError(this)"
+      />
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 2: START / TITLE SCREEN
+       No Logo on this slide as requested
+       ========================================== -->
+  <div id="screen-start" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full relative z-10">
+    <div class="bg-slate-950/95 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 shadow-2xl border-4 border-fuchsia-500 text-center w-full max-w-xl animate-bob">
+      <h1 class="text-3xl md:text-5xl font-fun font-black text-fuchsia-400 tracking-wide mb-3 leading-tight drop-shadow-md">
+        🧪 Compound Word Labs
+      </h1>
+      <p class="text-sm md:text-base font-extrabold text-pink-400 uppercase tracking-widest mb-8">
+        The Fusion Reactor Challenge
+      </p>
+
+      <div class="bg-purple-950/80 rounded-3xl p-6 border border-pink-500/30 text-left space-y-4 mb-8 shadow-inner font-semibold text-pink-100">
+        <h2 class="font-fun font-black text-pink-300 text-lg md:text-xl">How to Play:</h2>
+        <ul class="text-sm md:text-base space-y-3 text-pink-100 list-disc list-inside">
+          <li>Help load the Fusion Reactor by creating compound words! ⚡</li>
+          <li><strong>Level 1: Compound Equations</strong> - Solve the word puzzles to build closed compound words!</li>
+          <li><strong>Level 2: Compound Riddles</strong> - Read the clues carefully and infer the correct compound word! 🖼️</li>
+          <li>Tap a floating capsule to fire your laser cannon! You have <strong>2 tries</strong>.</li>
+        </ul>
+      </div>
+
+      <button
+        onclick="startGame()"
+        class="w-full bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-xl md:text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-pink-700 uppercase tracking-wider"
+      >
+        START MISSION 🧪
+      </button>
+    </div>
+
+    <div class="mt-8 text-xs text-fuchsia-400 font-bold">
+      Compatible with Phones, Tablets, & Laptops • Optimized for Low Bandwidth
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 3: GAMEPLAY SCREEN
+       ========================================== -->
+  <div id="screen-game" class="hidden flex-1 flex flex-col w-full max-w-5xl mx-auto p-3 md:p-6 justify-between relative z-10">
+    
+    <!-- Top Progress, Score, and Target Task Bar -->
+    <div class="flex items-center justify-between bg-slate-950/95 backdrop-blur rounded-2xl p-4 shadow-lg border border-fuchsia-500/30 mb-4">
+      <div class="flex flex-col">
+        <span id="level-indicator" class="text-xs md:text-sm font-black uppercase text-fuchsia-400 tracking-widest">LEVEL 1: COMPOUND EQUATIONS</span>
+        <span id="game-progress-text" class="text-lg md:text-xl font-black text-white">Question 1 / 20</span>
+      </div>
+
+      <!-- Playful Arcade Progress Bar -->
+      <div class="flex-1 mx-6 h-3 bg-purple-950 rounded-full overflow-hidden hidden md:block relative border border-fuchsia-500/20">
+        <div id="game-progress-bar" class="h-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <!-- Tries indicator -->
+        <div id="tries-box" class="flex items-center space-x-1 bg-slate-900 px-3 py-1.5 rounded-full border border-orange-400/30">
+          <span class="text-xs font-bold text-orange-400">TRIES LEFT:</span>
+          <span id="tries-count" class="font-black text-orange-400 text-sm">2</span>
+        </div>
+
+        <!-- Score Counter -->
+        <div class="flex items-center space-x-2 bg-slate-900 px-4 py-1.5 rounded-full border border-fuchsia-500/30">
+          <span class="text-lg">⭐</span>
+          <span id="game-score-text" class="font-black text-yellow-300">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Space Arcade Cabinet Console -->
+    <div id="game-cabinet" class="flex-1 bg-slate-950/70 rounded-[2.5rem] p-5 md:p-6 shadow-2xl border-8 border-purple-800/80 flex flex-col justify-between min-h-[460px] relative mb-4">
+      
+      <!-- Top Section: Spelling Board & SVG Picture Hint -->
+      <div class="flex items-center justify-between bg-slate-950/95 text-white rounded-2xl p-4 border-2 border-fuchsia-500/40 mb-4 shadow-lg">
+        
+        <!-- Interactive Letter Puzzle Blank -->
+        <div class="flex-1 pr-4">
+          <p id="task-level-title" class="text-xs font-black uppercase text-pink-400 tracking-wider">LEVEL 1: EQUATIONS</p>
+          <h2 id="task-bold-header" class="text-xl md:text-2xl font-semibold tracking-wide mt-1 text-fuchsia-200 leading-relaxed">
+            Sentence loading...
+          </h2>
+        </div>
+
+        <!-- Custom high quality SVG Picture card -->
+        <div id="task-image-box" class="w-28 h-28 md:w-32 md:h-32 bg-slate-900 rounded-xl p-2 flex items-center justify-center border-2 border-fuchsia-500/30 flex-shrink-0">
+          <!-- Loaded dynamically -->
+        </div>
+
+      </div>
+
+      <!-- Live interactive prompt / tries alert info bubble -->
+      <div class="text-center min-h-[22px] mb-2 font-fun text-sm tracking-wide text-orange-400">
+        <p id="hint-feedback" class="animate-pulse">
+          Blast the correct compound word capsule with your laser!
+        </p>
+      </div>
+
+      <!-- Laser Beam container layer -->
+      <div id="laser-layer" class="absolute inset-x-0 top-0 bottom-40 overflow-hidden pointer-events-none"></div>
+
+      <!-- Center Space Sound Bubbles Area -->
+      <div id="asteroids-pit" class="flex-1 flex justify-around items-center gap-4 py-4 min-h-[160px] relative">
+        <!-- Capsules generated dynamically as absolute DOM nodes -->
+      </div>
+
+      <!-- Bottom Interactive Space Blaster Deck -->
+      <div class="w-full flex flex-col items-center justify-center relative pt-4 pb-2 border-t border-purple-500/20">
+        
+        <!-- Animated Space Laser Gun Cannon (locks on and fires at selected target) -->
+        <div id="laser-cannon-mount" class="relative w-28 h-28 flex items-center justify-center transition-transform duration-300 origin-center" style="transform: rotate(-90deg);">
+          <div id="laser-cannon-body" class="w-full h-full">
+            <svg class="w-full h-full drop-shadow-lg" viewBox="0 0 100 100">
+              <!-- Futuristic Laser Defense Cannon - Pink & Purple themed -->
+              <!-- Base platform -->
+              <path d="M25,80 Q50,70 75,80 L65,95 L35,95 Z" fill="#4a044e" stroke="#db2777" stroke-width="2"/>
+              <!-- Swiveling generator -->
+              <circle cx="50" cy="50" r="22" fill="#3b0764" stroke="#db2777" stroke-width="2"/>
+              <!-- Glowing plasma core inside gun -->
+              <circle cx="50" cy="50" r="12" fill="#d946ef" class="animate-pulse"/>
+              <!-- Firing barrel nozzle -->
+              <rect x="42" y="10" width="16" height="30" rx="3" fill="#581c87" stroke="#db2777" stroke-width="2"/>
+              <rect x="46" y="5" width="8" height="10" fill="#f472b6" rx="1"/>
+            </svg>
+          </div>
+          
+          <!-- Invisible coordinate node representing nozzle tip -->
+          <div id="nozzle-point" class="absolute top-[5%] left-[45%] w-2 h-2 rounded-full opacity-0"></div>
+        </div>
+
+        <p class="text-[10px] md:text-xs font-black uppercase text-fuchsia-400 tracking-widest mt-2">
+          FUSION REACTOR CORES SYNCHRONIZED
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       SCREEN 4: END / SUMMARY SCREEN
+       ========================================== -->
+  <div id="screen-summary" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-lg mx-auto w-full relative z-10">
+    <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-fuchsia-400 text-center w-full animate-bob">
+      <span id="trophy-emoji" class="text-7xl block mb-4">🏆</span>
+      
+      <h1 id="trophy-title" class="text-3xl md:text-4xl font-fun font-black text-fuchsia-300 mb-1">Great Job!</h1>
+      <p id="trophy-msg" class="text-sm md:text-base font-extrabold text-pink-400 uppercase tracking-widest mb-8">
+        Reactor Mission Complete!
+      </p>
+
+      <!-- Scoreboard Container -->
+      <div class="bg-slate-950 rounded-3xl p-6 border-2 border-fuchsia-500/30 space-y-4 mb-8 shadow-inner font-bold text-pink-100">
+        <div class="flex justify-between items-center text-lg md:text-xl font-black text-fuchsia-400">
+          <span>Final Score:</span>
+          <span id="final-score" class="text-3xl font-black text-yellow-300">0 / 20</span>
+        </div>
+        <p id="summary-feedback" class="text-xs md:text-sm text-left leading-relaxed border-t border-fuchsia-500/20 pt-3 font-semibold font-sans">
+          Outstanding work! You mastered Grade 2 Compound Words, solved matching formulas, and correctly deduced contextual riddles!
+        </p>
+      </div>
+
+      <button
+        onclick="location.reload()"
+        class="w-full bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-2xl py-5 px-8 rounded-2xl shadow-lg transition-all transform active:scale-95 border-b-4 border-pink-700 uppercase tracking-wider"
+      >
+        PLAY AGAIN
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       AUDIO ELEMENTS
+       ========================================== -->
+  <audio id="correctSound" src="assets/correct.mp3" preload="auto"></audio>
+  <audio id="wrongSound" src="assets/wrong.mp3" preload="auto"></audio>
+  <audio id="clapSound" src="assets/clapping.mp3" preload="auto"></audio>
+
+  <!-- ==========================================
+       GAME ENGINE & INTERACTIVITY
+       ========================================== -->
+  <script>
+    // LEVEL 1: Compound Fusion Equations (10 questions on closed compound word construction)
+    const LEVEL_1_POOL = [
+      { id: 1, text: "During the storm, water fell from the clouds in tiny drops.", equationText: "Rain + _____ = ?", word: "Raindrop", imageKey: "raindrop", options: [{char:"Raindrop", isCorrect:true}, {char:"Raincoat", isCorrect:false}, {char:"Rainbow", isCorrect:false}] },
+      { id: 2, text: "In the summer garden, we saw a bright yellow flower turning toward the sun.", equationText: "Sun + _____ = ?", word: "Sunflower", imageKey: "sunflower", options: [{char:"Sunflower", isCorrect:true}, {char:"Sunlight", isCorrect:false}, {char:"Sunset", isCorrect:false}] },
+      { id: 3, text: "He loves to bounce an orange ball and shoot it through a high metal hoop.", equationText: "Basket + _____ = ?", word: "Basketball", imageKey: "basketball", options: [{char:"Basketball", isCorrect:true}, {char:"Baseball", isCorrect:false}, {char:"Footprint", isCorrect:false}] },
+      { id: 4, text: "We built a giant round ball out of soft white winter snow.", equationText: "Snow + _____ = ?", word: "Snowball", imageKey: "snowball", options: [{char:"Snowball", isCorrect:true}, {char:"Snowman", isCorrect:false}, {char:"Snowflake", isCorrect:false}] },
+      { id: 5, text: "He put his heavy school books inside a canvas bag to carry on his back.", equationText: "Back + _____ = ?", word: "Backpack", imageKey: "backpack", options: [{char:"Backpack", isCorrect:true}, {char:"Backbone", isCorrect:false}, {char:"Background", isCorrect:false}] },
+      { id: 6, text: "Every morning, I use a plastic brush with minty paste to clean my teeth.", equationText: "Tooth + _____ = ?", word: "Toothbrush", imageKey: "toothbrush", options: [{char:"Toothbrush", isCorrect:true}, {char:"Toothpaste", isCorrect:false}, {char:"Toothache", isCorrect:false}] },
+      { id: 7, text: "She wore a waterproof jacket to stay dry in the pouring rain.", equationText: "Rain + _____ = ?", word: "Raincoat", imageKey: "raincoat", options: [{char:"Raincoat", isCorrect:true}, {char:"Rainbow", isCorrect:false}, {char:"Rainstorm", isCorrect:false}] },
+      { id: 8, text: "She baked a small cake in a tiny paper cup for my birthday party.", equationText: "Cup + _____ = ?", word: "Cupcake", imageKey: "cupcake", options: [{char:"Cupcake", isCorrect:true}, {char:"Cupboard", isCorrect:false}, {char:"Cuppa", isCorrect:false}] },
+      { id: 9, text: "The pirate found a treasure chest on the deep seabed. He saw a little orange...", equationText: "Gold + _____ = ?", word: "Goldfish", imageKey: "goldfish", options: [{char:"Goldfish", isCorrect:true}, {char:"Goldmine", isCorrect:false}, {char:"Golden", isCorrect:false}] },
+      { id: 10, text: "The ocean is filled with unique life, including a five-armed glowing...", equationText: "Star + _____ = ?", word: "Starfish", imageKey: "starfish", options: [{char:"Starfish", isCorrect:true}, {char:"Starlight", isCorrect:false}, {char:"Starship", isCorrect:false}] }
+    ];
+
+    // LEVEL 2: Contextual Compound Riddles (Thinking & Inference based - 10 questions)
+    const LEVEL_2_POOL = [
+      { id: 11, text: "I can light up your garden path at night, but I am actually a flying insect with glowing wings, not a bulb! What am I?", word: "FIREFLY", imageKey: "firefly", options: [{char:"Firefly", isCorrect:true}, {char:"Fireplace", isCorrect:false}, {char:"Fireman", isCorrect:false}] },
+      { id: 12, text: "I have keys but no locks, and keyholes but no doors. You use me to type stories and play games on a computer. What am I?", word: "KEYBOARD", imageKey: "keyboard", options: [{char:"Keyboard", isCorrect:true}, {char:"Keychain", isCorrect:false}, {char:"Keyhole", isCorrect:false}] },
+      { id: 13, text: "I am a cozy little wooden house built in the garden specifically for our feathered flying friends to live in. What am I?", word: "BIRDHOUSE", imageKey: "birdhouse", options: [{char:"Birdhouse", isCorrect:true}, {char:"Doghouse", isCorrect:false}, {char:"Treehouse", isCorrect:false}] },
+      { id: 14, text: "I show up in the sky only after it rains, forming a giant colorful arch of light. What am I?", word: "RAINBOW", imageKey: "rainbow", options: [{char:"Rainbow", isCorrect:true}, {char:"Raincoat", isCorrect:false}, {char:"Raindrop", isCorrect:false}] },
+      { id: 15, text: "I am a flat, round cake cooked in a pan on the stove, usually eaten with sweet syrup for breakfast. What am I?", word: "PANCAKE", imageKey: "pancake", options: [{char:"Pancake", isCorrect:true}, {char:"Cupcake", isCorrect:false}, {char:"Panpipe", isCorrect:false}] },
+      { id: 16, text: "I am a tiny red insect with black spots on my wings that crawls on green leaves in the garden. What am I?", word: "LADYBUG", imageKey: "ladybug", options: [{char:"Ladybug", isCorrect:true}, {char:"Butterbug", isCorrect:false}, {char:"Bedbug", isCorrect:false}] },
+      { id: 17, text: "I am a quiet, cozy room where you sleep in your comfortable bed at night after a busy day of play. What am I?", word: "BEDROOM", imageKey: "bedroom", options: [{char:"Bedroom", isCorrect:true}, {char:"Bathroom", isCorrect:false}, {char:"Playroom", isCorrect:false}] },
+      { id: 18, text: "I am a funny man made of soft white winter snow, with coal for eyes and a carrot for a nose! What am I?", word: "SNOWMAN", imageKey: "snowman", options: [{char:"Snowman", isCorrect:true}, {char:"Snowball", isCorrect:false}, {char:"Snowflake", isCorrect:false}] },
+      { id: 19, text: "I am a wooden play area filled with sand at the park where children love to dig with shovels and build castles. What am I?", word: "SANDBOX", imageKey: "sandbox", options: [{char:"Sandbox", isCorrect:true}, {char:"Sandcastle", isCorrect:false}, {char:"Sandstorm", isCorrect:false}] },
+      { id: 20, text: "I am a large ocean creature that has teeth and swimming fins, but I am actually a massive mammal that breathes air. What am I?", word: "BLUEWHALE", imageKey: "whale", options: [{char:"Blue whale", isCorrect:true}, {char:"Goldfish", isCorrect:false}, {char:"Seahorse", isCorrect:false}] }
+    ];
+
+    // High quality vector SVGs specifically designed for Grade 2 children
+    const VISUAL_HINTS = {
+      "raindrop": `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M50,15 C50,15 25,50 25,65 C25,78 36,85 50,85 C64,85 75,78 75,65 C75,50 50,15 50,15 Z" fill="#db2777" stroke="#9d174d" stroke-width="2"/><ellipse cx="42" cy="62" rx="6" ry="12" fill="rgba(255,255,255,0.4)" transform="rotate(-15 42 62)"/></svg>`,
+      "sunflower": `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="46" y="55" width="8" height="35" fill="#a21caf"/><circle cx="50" cy="40" r="16" fill="#4c0519" stroke="#db2777" stroke-width="6"/><path d="M50,15 L50,22 M50,58 L50,65 M25,40 L32,40 M68,40 L75,40" stroke="#db2777" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="40" r="12" fill="#701a75"/></svg>`,
+      "basketball": `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="35" fill="#d946ef" stroke="#c084fc" stroke-width="3"/><path d="M17,40 Q50,75 83,40 M22,62 Q50,30 78,62" fill="none" stroke="#212121" stroke-width="2"/><line x1="50" y1="15" x2="50" y2="85" stroke="#212121" stroke-width="2"/></svg>`,
+      "snowball": `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="34" fill="#fdf2f8" stroke="#f472b6" stroke-width="3"/><ellipse cx="38" cy="38" rx="8" ry="4" fill="rgba(255,255,255,0.8)" transform="rotate(-20 38 38)"/><path d="M22,65 Q50,85 78,65" fill="none" stroke="#fbcfe8" stroke-width="2"/></svg>`,
+      "backpack": `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="25" y="35" width="50" height="48" rx="10" fill="#a21caf" stroke="#86198f" stroke-width="3"/><rect x="35" y="45" width="30" height="25" rx="4" fill="#86198f"/><circle cx="50" cy="30" r="8" fill="none" stroke="#86198f" stroke-width="3"/></svg>`,
+      "toothbrush": `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="44" y="20" width="12" height="60" fill="#ec4899" rx="2" transform="rotate(-45 50 50)"/><rect x="18" y="20" width="22" height="15" fill="#fcfcfc" stroke="#fbcfe8" stroke-width="1.5" transform="rotate(-45 29 27)"/></svg>`,
+      "raincoat": `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M30,35 L70,35 L80,85 L20,85 Z" fill="#df0894" stroke="#c026d3" stroke-width="2"/><path d="M35,15 C40,10 60,15 65,15 L50,35 Z" fill="#f0abfc"/><circle cx="50" cy="45" r="3" fill="#37474f"/><circle cx="50" cy="60" r="3" fill="#37474f"/></svg>`,
+      "cupcake": `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M30,55 L70,55 L64,85 L36,85 Z" fill="#581c87" stroke="#3b0764" stroke-width="2"/><path d="M24,55 C20,35 80,35 76,55 Z" fill="#df0894"/><circle cx="50" cy="35" r="5" fill="#ec4899"/></svg>`,
+      "goldfish": `<svg viewBox="0 0 100 100" class="w-full h-full"><ellipse cx="45" cy="50" rx="25" ry="16" fill="#f472b6" stroke="#db2777" stroke-width="2"/><polygon points="70,50 85,35 80,50 85,65" fill="#f472b6"/><circle cx="32" cy="44" r="3.5" fill="#fff"/><circle cx="32" cy="44" r="1.5" fill="#000"/></svg>`,
+      "starfish": `<svg viewBox="0 0 100 100" class="w-full h-full"><polygon points="50,15 62,38 88,40 68,58 74,85 50,72 26,85 32,58 12,40 38,38" fill="#e879f9" stroke="#c084fc" stroke-width="3" stroke-linejoin="round"/></svg>`,
+      "firefly": `<svg viewBox="0 0 100 100" class="w-full h-full"><ellipse cx="50" cy="45" rx="14" ry="20" fill="#581c87"/><ellipse cx="50" cy="70" rx="10" ry="12" fill="#f472b6" stroke="#db2777" stroke-width="2" class="animate-pulse"/><ellipse cx="36" cy="40" rx="8" ry="15" fill="#fdf2f8"/><ellipse cx="64" cy="40" rx="8" ry="15" fill="#fdf2f8"/></svg>`,
+      "keyboard": `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="15" y="35" width="70" height="35" fill="#c084fc" rx="4" stroke="#581c87" stroke-width="3"/><rect x="22" y="42" width="10" height="6" fill="#fdf2f8"/><rect x="36" y="42" width="10" height="6" fill="#fdf2f8"/><rect x="50" y="42" width="10" height="6" fill="#fdf2f8"/><rect x="64" y="42" width="10" height="6" fill="#fdf2f8"/><rect x="30" y="54" width="40" height="6" fill="#fdf2f8"/></svg>`,
+      "birdhouse": `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="30" y="45" width="40" height="40" fill="#701a75" stroke="#4a044e" stroke-width="2"/><polygon points="25,45 50,20 75,45" fill="#df0894" stroke="#9d174d" stroke-width="2"/><circle cx="50" cy="60" r="8" fill="#fdf2f8"/></svg>`,
+      "rainbow": `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M20,75 A30,30 0 0,1 80,75" fill="none" stroke="#db2777" stroke-width="6"/><path d="M25,75 A25,25 0 0,1 75,75" fill="none" stroke="#a21caf" stroke-width="6"/><path d="M30,75 A20,20 0 0,1 70,75" fill="none" stroke="#c084fc" stroke-width="6"/></svg>`,
+      "pancake": `<svg viewBox="0 0 100 100" class="w-full h-full"><ellipse cx="50" cy="65" rx="35" ry="12" fill="#e879f9" stroke="#c084fc" stroke-width="3"/><ellipse cx="50" cy="56" rx="32" ry="10" fill="#f3e8ff" stroke="#c084fc" stroke-width="2"/><rect x="42" y="46" width="16" height="8" fill="#fbcfe8" rx="1"/></svg>`,
+      "ladybug": `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="55" r="28" fill="#db2777" stroke="#9d174d" stroke-width="2"/><line x1="50" y1="27" x2="50" y2="83" stroke="#212121" stroke-width="3"/><circle cx="50" cy="30" r="8" fill="#212121"/><circle cx="36" cy="48" r="4" fill="#212121"/><circle cx="64" cy="48" r="4" fill="#212121"/><circle cx="40" cy="66" r="4" fill="#212121"/><circle cx="60" cy="66" r="4" fill="#212121"/></svg>`,
+      "bedroom": `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="20" y="55" width="60" height="25" fill="#581c87" rx="2"/><rect x="25" y="40" width="30" height="20" fill="#fdf2f8"/><rect x="20" y="35" width="6" height="45" fill="#3b0764"/></svg>`,
+      "snowman": `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="65" r="20" fill="#fdf2f8" stroke="#fbcfe8" stroke-width="2"/><circle cx="50" cy="42" r="14" fill="#fdf2f8" stroke="#fbcfe8" stroke-width="2"/><polygon points="46,42 60,45 46,48" fill="#db2777"/></svg>`,
+      "sandbox": `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="20" y="40" width="60" height="40" fill="#701a75" stroke="#4a044e" stroke-width="3"/><rect x="25" y="45" width="50" height="30" fill="#fdf2f8"/></svg>`,
+      "whale": `<svg viewBox="0 0 100 100" class="w-full h-full"><ellipse cx="45" cy="55" rx="30" ry="18" fill="#a21caf" stroke="#701a75" stroke-width="2"/><polygon points="70,55 85,45 80,55 85,65" fill="#a21caf"/><path d="M50,37 Q52,15 45,20" fill="none" stroke="#fdf2f8" stroke-width="3"/></svg>`
+    };
+
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let triesLeft = 2;
+    let isFeedbackRunning = false;
+    let activeBubbles = [];
+
+    // Splash screen router with safe document readyState checks
+    function initSplashTimer() {
+      setTimeout(() => {
+        switchScreen('screen-start');
+      }, 1500); // Snappy load time
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSplashTimer);
+    } else {
+      initSplashTimer();
+    }
+
+    function switchScreen(screenId) {
+      document.getElementById('screen-splash').classList.add('hidden');
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.add('hidden');
+      
+      document.getElementById(screenId).classList.remove('hidden');
+    }
+
+    // Set up 20 questions dynamically (10 L1, 10 L2)
+    function startGame() {
+      // Warm up audio contexts safely
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume();
+      } catch (e) {}
+
+      // Preload MP3 files
+      document.getElementById('correctSound').load();
+      document.getElementById('wrongSound').load();
+      document.getElementById('clapSound').load();
+
+      // Shuffle Level 1 & Level 2 Pools
+      const selectedL1 = [...LEVEL_1_POOL].sort(() => Math.random() - 0.5);
+      const selectedL2 = [...LEVEL_2_POOL].sort(() => Math.random() - 0.5);
+
+      currentQuestions = [...selectedL1, ...selectedL2];
+      currentQuestionIndex = 0;
+      score = 0;
+      triesLeft = 2;
+      isFeedbackRunning = false;
+
+      switchScreen('screen-game');
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      if (currentQuestionIndex >= 20) {
+        endGame();
+        return;
+      }
+
+      isFeedbackRunning = false;
+      triesLeft = 2;
+      updateTriesUI();
+
+      const q = currentQuestions[currentQuestionIndex];
+      const isLevel1 = currentQuestionIndex < 10;
+
+      // Update Header level indicator and progress texts
+      const levelIndicator = document.getElementById('level-indicator');
+      const levelTitle = document.getElementById('task-level-title');
+      if (isLevel1) {
+        levelIndicator.innerText = "LEVEL 1: COMPOUND EQUATIONS";
+        levelTitle.innerText = "LEVEL 1: FORMULAS";
+        levelIndicator.className = "text-xs md:text-sm font-black uppercase text-pink-400 tracking-widest font-fun";
+        document.getElementById('hint-feedback').innerText = "Solve the equation to build the compound word!";
+      } else {
+        levelIndicator.innerText = "LEVEL 2: COMPOUND RIDDLES";
+        levelTitle.innerText = "LEVEL 2: THINK & INFER";
+        levelIndicator.className = "text-xs md:text-sm font-black uppercase text-purple-400 tracking-widest font-fun";
+        document.getElementById('hint-feedback').innerText = "Read the clue! Find the correct compound word!";
+      }
+
+      // Display Context sentence
+      document.getElementById('task-bold-header').innerHTML = `${q.text} <br/> <span class="text-pink-300 font-fun text-lg md:text-xl tracking-wide mt-2 block">${isLevel1 ? q.equationText : "Who am I?"}</span>`;
+      
+      document.getElementById('game-progress-text').innerText = `Question ${currentQuestionIndex + 1} / 20`;
+      document.getElementById('game-progress-bar').style.width = `${((currentQuestionIndex) / 20) * 100}%`;
+      document.getElementById('game-score-text').innerText = score;
+
+      // Load Visual Card - Enlarged for great readability
+      const imageBox = document.getElementById('task-image-box');
+      imageBox.innerHTML = VISUAL_HINTS[q.imageKey] || '';
+
+      // Generate the 3 Bobbing Sound Bubbles with ENLARGED buttons
+      const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+      const asteroidsContainer = document.getElementById('asteroids-pit');
+      asteroidsContainer.innerHTML = '';
+
+      activeBubbles = [];
+
+      shuffledOptions.forEach((opt, idx) => {
+        const isCorrect = opt.isCorrect;
+        const label = opt.char;
+
+        // Build absolute bubble container - Scaled up significantly for perfect tap visibility
+        const bubble = document.createElement('button');
+        bubble.id = `bubble-${idx}`;
+        bubble.className = "relative animate-bubble w-32 h-24 md:w-36 md:h-28 rounded-full flex flex-col items-center justify-center border-4 transform transition-all duration-300 hover:scale-105 select-none focus:outline-none px-2";
+        bubble.style.animationDelay = `${idx * 0.4}s`;
+
+        // Strictly pink and purple themes
+        const colors = [
+          'from-pink-500/90 via-pink-400/90 to-purple-800/80 border-pink-400 neon-pink-glow',
+          'from-purple-500/90 via-fuchsia-500/90 to-pink-800/80 border-purple-400 neon-purple-glow',
+          'from-fuchsia-500/90 via-pink-400/90 to-purple-800/80 border-fuchsia-400 shadow-[0_0_15px_rgba(236,72,153,0.5)]'
+        ];
+        const activeColor = colors[idx % colors.length];
+        bubble.className += ` bg-gradient-to-tr ${activeColor}`;
+
+        bubble.innerHTML = `
+          <!-- Shine gloss on bubbles -->
+          <span class="absolute w-20 h-14 rounded-full bg-white/10 top-1 left-2 pointer-events-none"></span>
+          <!-- Bold Phonics Label -->
+          <div class="flex flex-col items-center justify-center pointer-events-none text-center w-full">
+            <span class="text-lg md:text-xl font-fun font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] leading-tight">${label}</span>
+          </div>
+        `;
+
+        // Metadata trigger down
+        activeBubbles.push({
+          id: `bubble-${idx}`,
+          label: label,
+          isCorrect: isCorrect,
+          isBlasted: false
+        });
+
+        // Trigger blast sequencing
+        bubble.onclick = () => {
+          fireCircusCannon(bubble, activeBubbles[idx]);
+        };
+
+        asteroidsContainer.appendChild(bubble);
+      });
+
+      // Clear the laser cannon's alignment
+      resetLaserCannon();
+    }
+
+    // Direct pivot calculations to align gun nozzle to tapped bubble, followed by projectile fire
+    function fireCircusCannon(targetElement, bubbleData) {
+      if (isFeedbackRunning || bubbleData.isBlasted) return;
+      isFeedbackRunning = true;
+
+      const cannonMount = document.getElementById('laser-cannon-mount');
+      const cannonBody = document.getElementById('laser-cannon-body');
+      const laserLayer = document.getElementById('laser-layer');
+
+      const cannonRect = cannonMount.getBoundingClientRect();
+      const targetRect = targetElement.getBoundingClientRect();
+      const parentRect = laserLayer.getBoundingClientRect();
+
+      // Cannon core coordinates
+      const cannonX = cannonRect.left + (cannonRect.width / 2);
+      const cannonY = cannonRect.top + (cannonRect.height / 2);
+
+      // Target core coordinates
+      const targetX = targetRect.left + (targetRect.width / 2);
+      const targetY = targetRect.top + (targetRect.height / 2);
+
+      // Angle math
+      const dy = targetY - cannonY; 
+      const dx = targetX - cannonX;
+      let angleDegrees = Math.atan2(dy, dx) * (180 / Math.PI) - 90; // offset pointing top-down
+
+      // Rotate gun to locked coordinate
+      cannonMount.style.transform = `rotate(${angleDegrees}deg)`;
+
+      // Apply recoil visual bounce
+      cannonBody.className = "w-full h-full transform scale-90 transition-transform duration-75";
+      setTimeout(() => {
+        cannonBody.className = "w-full h-full transform scale-100 transition-transform duration-150";
+      }, 80);
+
+      // Create a physical vector neon line representing the laser beam - pink/purple gradient
+      const laser = document.createElement('div');
+      laser.className = 'laser-beam';
+      
+      // Calculate coordinates relative to parent viewport
+      const startX = cannonRect.left - parentRect.left + (cannonRect.width / 2);
+      const startY = cannonRect.top - parentRect.top;
+      const endX = targetRect.left - parentRect.left + (targetRect.width / 2);
+      const endY = targetRect.top - parentRect.top + (targetRect.height / 2);
+
+      // Set laser metrics
+      const distance = Math.hypot(endX - startX, endY - startY);
+      laser.style.height = `${distance}px`;
+      laser.style.left = `${startX}px`;
+      laser.style.bottom = `${parentRect.height - startY}px`; // baseline anchored
+      
+      // Apply correct rotation along shooting vector
+      const laserAngle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI) - 90;
+      laser.style.transformOrigin = "bottom center";
+      laser.style.transform = `rotate(${laserAngle}deg)`;
+      
+      // Fire visual lasers
+      laser.style.animation = 'shootLaser 0.35s ease-out forwards';
+      laserLayer.appendChild(laser);
+
+      triggerAudio('click');
+
+      // Process collision impact at completion of shot beam
+      setTimeout(() => {
+        laser.remove();
+        evaluateBubbleImpact(targetElement, bubbleData);
+      }, 300);
+    }
+
+    // Handles zapping validations, scoring, and level progression
+    function evaluateBubbleImpact(targetElement, bubbleData) {
+      const q = currentQuestions[currentQuestionIndex];
+      const isLevel1 = currentQuestionIndex < 10;
+
+      if (bubbleData.isCorrect) {
+        triggerAudio('correct');
+        createExplosiveStars(targetElement);
+
+        // Turn option asteroid fully green and fade out
+        targetElement.className = "relative w-32 h-24 md:w-36 md:h-28 rounded-full flex flex-col items-center justify-center border-4 border-green-400 bg-gradient-to-tr from-green-500 to-green-600 scale-0 opacity-0 transition-all duration-300 pointer-events-none";
+
+        if (triesLeft === 2) {
+          score++;
+        }
+
+        // Update textual compound equation cleanly on success
+        let successText = "";
+        if (isLevel1) {
+          successText = `${q.text} <br/> <span class="text-green-400 font-fun font-black underline tracking-wide mt-2 block">${q.equationText.replace("_____", q.word.replace(q.equationText.split(" + ")[0], ""))} = ${q.word}</span>`;
+        } else {
+          successText = `${q.text} <br/> <span class="text-green-400 font-fun font-black tracking-wide mt-2 block">Correct: ${q.word}</span>`;
+        }
+        document.getElementById('task-bold-header').innerHTML = successText;
+        document.getElementById('hint-feedback').innerHTML = "<span class='text-green-400 font-fun text-base'>🚀 BOOM! FUSION COMPLETE!</span>";
+
+        setTimeout(() => {
+          currentQuestionIndex++;
+          renderQuestion();
+        }, 1500);
+
+      } else {
+        triesLeft--;
+        updateTriesUI();
+        triggerAudio('wrong');
+
+        // Turn option red to lock out
+        bubbleData.isBlasted = true;
+        targetElement.className = "relative w-32 h-24 md:w-36 md:h-28 rounded-full flex flex-col items-center justify-center border-4 border-red-500 bg-red-950/80 opacity-50 cursor-not-allowed animate-shake scale-90";
+        targetElement.onclick = null;
+
+        if (triesLeft > 0) {
+          document.getElementById('hint-feedback').innerHTML = "⚠️ Fusion failed! <span class='text-red-400 font-black'>1 Try Left</span>.";
+          isFeedbackRunning = false;
+        } else {
+          // Out of tries, show correct choice
+          document.getElementById('hint-feedback').innerHTML = "❌ Out of tries! Loading next equation...";
+
+          // Highlight correct spelling
+          let revealText = "";
+          if (isLevel1) {
+            revealText = `${q.text} <br/> <span class="text-pink-300 font-fun font-black underline tracking-wide mt-2 block">${q.equationText.replace("_____", q.word.replace(q.equationText.split(" + ")[0], ""))} = ${q.word}</span>`;
+          } else {
+            revealText = `${q.text} <br/> <span class="text-pink-300 font-fun font-black tracking-wide mt-2 block">Correct: ${q.word}</span>`;
+          }
+          document.getElementById('task-bold-header').innerHTML = revealText;
+
+          // Flash the correct answer bubble with glowing neon ring
+          activeBubbles.forEach(ast => {
+            if (ast.isCorrect) {
+              const correctAstEl = document.getElementById(ast.id);
+              if (correctAstEl) {
+                correctAstEl.className = "relative animate-asteroid w-32 h-24 md:w-36 md:h-28 rounded-full flex flex-col items-center justify-center border-4 border-green-400 bg-gradient-to-tr from-green-500 to-green-600 shadow-[0_0_20px_#22d3ee] scale-105";
+              }
+            }
+          });
+
+          setTimeout(() => {
+            currentQuestionIndex++;
+            renderQuestion();
+          }, 2000);
+        }
+      }
+    }
+
+    // Sparkles particle generator for physical bubble popping
+    function createExplosiveStars(targetElement) {
+      const rect = targetElement.getBoundingClientRect();
+      const parent = document.getElementById('game-cabinet');
+      const parentRect = parent.getBoundingClientRect();
+
+      const startX = rect.left - parentRect.left + (rect.width / 2);
+      const startY = rect.top - parentRect.top + (rect.height / 2);
+
+      for (let i = 0; i < 20; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark-particle';
+        
+        const size = Math.random() * 8 + 4;
+        spark.style.width = `${size}px`;
+        spark.style.height = `${size}px`;
+        spark.style.left = `${startX}px`;
+        spark.style.top = `${startY}px`;
+
+        const colors = ['#db2777', '#a21caf', '#c084fc', '#f472b6', '#facc15', '#ffffff'];
+        spark.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        spark.style.boxShadow = `0 0 10px ${spark.style.backgroundColor}`;
+
+        parent.appendChild(spark);
+
+        const angle = Math.random() * 2 * Math.PI;
+        const velocity = Math.random() * 8 + 4;
+        const vx = Math.cos(angle) * velocity;
+        const vy = Math.sin(angle) * velocity - 2; // slight upward drift
+
+        let curX = startX;
+        let curY = startY;
+        let pOpacity = 1;
+
+        function anim() {
+          curX += vx;
+          curY += vy + 0.15; // soft gravity
+          pOpacity -= 0.04;
+
+          spark.style.left = `${curX}px`;
+          spark.style.top = `${curY}px`;
+          spark.style.opacity = pOpacity;
+
+          if (pOpacity > 0) {
+            requestAnimationFrame(anim);
+          } else {
+            spark.remove();
+          }
+        }
+        requestAnimationFrame(anim);
+      }
+    }
+
+    function updateTriesUI() {
+      document.getElementById('tries-count').innerText = triesLeft;
+    }
+
+    // Reset cannon back to default straight angle
+    function resetLaserCannon() {
+      const cannonMount = document.getElementById('laser-cannon-mount');
+      cannonMount.style.transform = `rotate(-90deg)`;
+    }
+
+    // Core Native MP3 player with web-synthesizer backup logic
+    function triggerAudio(type) {
+      try {
+        const correctSnd = document.getElementById('correctSound');
+        const wrongSnd = document.getElementById('wrongSound');
+        const clapSnd = document.getElementById('clapSound');
+
+        if (type === 'correct') {
+          correctSnd.currentTime = 0;
+          correctSnd.play().catch(() => playSynthFallback('correct'));
+        } else if (type === 'wrong') {
+          wrongSnd.currentTime = 0;
+          wrongSnd.play().catch(() => playSynthFallback('wrong'));
+        } else if (type === 'clap') {
+          clapSnd.currentTime = 0;
+          clapSnd.play().catch(() => playSynthFallback('correct'));
+        } else if (type === 'click') {
+          playSynthFallback('click');
+        }
+      } catch (e) {
+        playSynthFallback(type);
+      }
+    }
+
+    // Direct Web Audio API synthesizer fallback
+    function playSynthFallback(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        if (type === 'correct') {
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc1.type = 'sine'; osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc1.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          osc2.frequency.setValueAtTime(783.99, ctx.currentTime + 0.15);
+          osc2.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.25);
+          gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+          osc1.connect(gainNode); osc2.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc1.start(); osc2.start();
+          osc1.stop(ctx.currentTime + 0.4); osc2.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(140, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(90, ctx.currentTime + 0.25);
+          gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        } else if (type === 'click') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.06);
+        }
+      } catch (e) {
+        console.log("Synthesizer bypassed");
+      }
+    }
+
+    // Summary screen builder
+    function endGame() {
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.remove('hidden');
+
+      document.getElementById('final-score').innerText = `${score} / 20`;
+
+      let trophy = "🏆 Gold";
+      let emoji = "🏆";
+      let msg = "Super Compound Word Alchemist!";
+      let feedbackText = "Excellent job! You correctly completed all word equations and solved the compound riddles!";
+
+      if (score >= 16) {
+        trophy = "🏆 Gold Rank";
+        emoji = "🧪";
+        msg = "Master Fusion Scientist!";
+        feedbackText = `Outstanding! You successfully solved ${score}/20 compound word puzzles and fully powered up the Reactor! Enjoy your shiny gold rank! 🌟`;
+      } else if (score >= 11) {
+        trophy = "🥈 Silver Rank";
+        emoji = "⭐";
+        msg = "Compound Word Expert!";
+        feedbackText = `Well done! You got a solid score of ${score}/20. Try again to reach a perfect score!`;
+      } else {
+        trophy = "🥉 Bronze Participant";
+        emoji = "✨";
+        msg = "Keep Practicing!";
+        feedbackText = "A good learning try! Let's practice connecting base words and riddles together and play again!";
+      }
+
+      document.getElementById("trophy-emoji").textContent = emoji;
+      document.getElementById("trophy-title").textContent = `${trophy}`;
+      document.getElementById("trophy-msg").textContent = msg;
+      document.getElementById("summary-feedback").textContent = feedbackText;
+
+      triggerAudio('clap');
+    }
+  </script>
+</body>
+</html>
