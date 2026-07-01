@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Silent Spell Alchemist: Grade 2 Silent Letters</title>
+  <!-- Tailwind CSS CDN for premium layout and utilities -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Playful Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    .font-fun {
+      font-family: 'Fredoka One', cursive;
+    }
+
+    /* Pulsing Magical Alchemist Chamber Background */
+    .bg-alchemist {
+      background: linear-gradient(180deg, #0b0518 0%, #1a0f30 45%, #25123e 80%, #3b135c 100%);
+      background-size: 400% 400%;
+      animation: magicFlow 15s ease infinite;
+    }
+
+    @keyframes magicFlow {
+      0%, 100% { background-position: 50% 0%; }
+      50% { background-position: 50% 100%; }
+    }
+
+    /* Soft floating bobbing effect for alchemist scrolls */
+    @keyframes bob {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(0.5deg); }
+    }
+    .animate-bob {
+      animation: bob 3.5s ease-in-out infinite;
+    }
+
+    /* Potion Bubble Floating Animation */
+    @keyframes floatBubble {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-12px) scale(1.02); }
+    }
+    .animate-bubble {
+      animation: floatBubble 4s ease-in-out infinite;
+    }
+
+    /* Screen shake feedback on error */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.3s ease-in-out;
+    }
+
+    /* Magic spell projectile shoot animation */
+    @keyframes shootSpell {
+      0% {
+        height: 0%;
+        opacity: 1;
+        bottom: 0px;
+      }
+      50% {
+        height: 100%;
+        opacity: 1;
+      }
+      100% {
+        height: 0%;
+        opacity: 0;
+        top: 0px;
+      }
+    }
+    .spell-beam {
+      position: absolute;
+      width: 4px;
+      background: linear-gradient(to top, #ec4899, #a855f7);
+      box-shadow: 0 0 12px #a855f7, 0 0 20px #ec4899;
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* Glowing Custom Borders */
+    .neon-purple-glow {
+      box-shadow: 0 0 15px #a855f7, inset 0 0 10px rgba(168, 85, 247, 0.3);
+    }
+    .neon-pink-glow {
+      box-shadow: 0 0 15px #ec4899, inset 0 0 10px rgba(236, 72, 153, 0.3);
+    }
+
+    /* Sparkle particle style */
+    .spark-particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 50;
+    }
+  </style>
+
+  <!-- Critical early-load declarations to guarantee error-free logo fallbacks -->
+  <script>
+    function handleLogoError(img) {
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="none"><circle cx="50" cy="50" r="45" fill="%231e1b4b" stroke="%2322d3ee" stroke-width="4"/><text x="50" y="62" fill="%23FFF" font-size="34" font-weight="bold" text-anchor="middle">?</text></svg>';
+    }
+  </script>
+</head>
+<body class="bg-alchemist text-[#e2e8f0] min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+
+  <!-- Twinkling magical sparkles in background -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+    <div class="absolute bg-white rounded-full w-1 h-1 top-10 left-10 animate-ping"></div>
+    <div class="absolute bg-white rounded-full w-1.5 h-1.5 top-32 right-24 animate-pulse"></div>
+    <div class="absolute bg-white rounded-full w-1 h-1 bottom-44 left-1/4 animate-pulse"></div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 1: 1.5-SECOND SPLASH SCREEN (SNAP-LOAD)
+       Contains strictly ONLY the logo as requested
+       ========================================== -->
+  <div id="screen-splash" class="flex-1 flex flex-col items-center justify-center relative z-10 bg-white">
+    <div class="scale-110 animate-pulse">
+      <img 
+        id="splash-logo" 
+        src="assets/innovine-logo.png" 
+        class="w-72 h-72 md:w-80 md:h-80 object-contain" 
+        alt="Innovine Logo"
+        onerror="handleLogoError(this)"
+      />
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 2: START / TITLE SCREEN
+       No Logo on this slide as requested
+       ========================================== -->
+  <div id="screen-start" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full relative z-10">
+    <div class="bg-slate-900/95 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 shadow-2xl border-4 border-purple-500 text-center w-full max-w-xl animate-bob">
+      <h1 class="text-3xl md:text-5xl font-fun font-black text-purple-400 tracking-wide mb-3 leading-tight drop-shadow-md">
+        🧪 Silent Spell Alchemist
+      </h1>
+      <p class="text-sm md:text-base font-extrabold text-pink-400 uppercase tracking-widest mb-8">
+        Grade 2 Silent Letters Challenge (k, w, b, e)
+      </p>
+
+      <div class="bg-slate-950/80 rounded-3xl p-6 border border-purple-500/30 text-left space-y-4 mb-8 shadow-inner font-semibold text-purple-100">
+        <h2 class="font-fun font-black text-purple-300 text-lg md:text-xl">How to Play:</h2>
+        <ul class="text-sm md:text-base space-y-3 text-pink-100 list-disc list-inside">
+          <li>Help the Alchemist brew magic spells using **Silent Letters**! 🧪</li>
+          <li><strong>Level 1: Missing Letters</strong> - Read the sentence and find which silent letter completes the blank!</li>
+          <li><strong>Level 2: Silent Riddles</strong> - Read the clues and use critical thinking to choose the correct silent word! 🖼️</li>
+          <li>Tap a floating ingredient bubble to aim and shoot your magic spell! You have <strong>2 tries</strong>.</li>
+        </ul>
+      </div>
+
+      <button
+        onclick="startGame()"
+        class="w-full bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-xl md:text-2xl py-5 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform active:scale-95 border-b-8 border-pink-700 uppercase tracking-wider animate-pulse"
+      >
+        START MISSION 🧪
+      </button>
+    </div>
+
+    <div class="mt-8 text-xs text-purple-400 font-bold">
+      Compatible with Phones, Tablets, & Laptops • Optimized for Low Bandwidth
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 3: GAMEPLAY SCREEN
+       ========================================== -->
+  <div id="screen-game" class="hidden flex-1 flex flex-col w-full max-w-5xl mx-auto p-3 md:p-6 justify-between relative z-10">
+    
+    <!-- Top Progress, Score, and Target Task Bar -->
+    <div class="flex items-center justify-between bg-slate-950/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-purple-500/30 mb-4">
+      <div class="flex flex-col">
+        <span id="level-indicator" class="text-xs md:text-sm font-black uppercase text-purple-400 tracking-widest font-fun">LEVEL 1: MISSING LETTERS</span>
+        <span id="game-progress-text" class="text-lg md:text-xl font-black text-white">Question 1 / 20</span>
+      </div>
+
+      <!-- Playful Progress Bar -->
+      <div class="flex-1 mx-6 h-3 bg-slate-950 rounded-full overflow-hidden hidden md:block relative border border-purple-500/20">
+        <div id="game-progress-bar" class="h-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <!-- Tries indicator -->
+        <div id="tries-box" class="flex items-center space-x-1 bg-slate-900 px-3 py-1.5 rounded-full border border-orange-500/30">
+          <span class="text-xs font-bold text-orange-400">TRIES LEFT:</span>
+          <span id="tries-count" class="font-black text-orange-400 text-sm">2</span>
+        </div>
+
+        <!-- Score Counter -->
+        <div class="flex items-center space-x-2 bg-slate-900 px-4 py-1.5 rounded-full border border-purple-500/30">
+          <span class="text-lg">⭐</span>
+          <span id="game-score-text" class="font-black text-yellow-300">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Space Arcade Cabinet Console -->
+    <div id="game-cabinet" class="flex-1 bg-slate-900/90 rounded-[2.5rem] p-5 md:p-6 shadow-2xl border-8 border-purple-700/80 flex flex-col justify-between min-h-[460px] relative mb-4">
+      
+      <!-- Top Section: Spelling Board & SVG Picture Hint -->
+      <div class="flex items-center justify-between bg-slate-950/95 text-white rounded-2xl p-4 border-2 border-purple-500/40 mb-4 shadow-lg">
+        
+        <!-- Interactive Letter Puzzle Blank -->
+        <div class="flex-1 pr-4">
+          <p id="task-level-title" class="text-xs font-black uppercase text-pink-400 tracking-wider font-fun">LEVEL 1: SPELLING DETECTION</p>
+          <h2 id="task-bold-header" class="text-lg md:text-xl font-semibold tracking-wide mt-1 text-purple-200 leading-relaxed">
+            The baby sheep is warm and soft. It is called a la_ _.
+          </h2>
+        </div>
+
+        <!-- Custom high quality SVG Picture card (visible on all levels to assist Grade 2 visual learners) -->
+        <div id="task-image-box" class="w-20 h-20 md:w-24 md:h-24 bg-slate-900 rounded-xl p-1 flex items-center justify-center border-2 border-purple-500/30 flex-shrink-0">
+          <!-- Loaded dynamically -->
+        </div>
+
+      </div>
+
+      <!-- Live interactive prompt / tries alert info bubble -->
+      <div class="text-center min-h-[22px] mb-2 font-fun text-sm tracking-wide text-orange-400">
+        <p id="hint-feedback" class="animate-pulse">
+          Blast the correct spell capsule with your magic wand!
+        </p>
+      </div>
+
+      <!-- Laser Beam container layer -->
+      <div id="laser-layer" class="absolute inset-x-0 top-0 bottom-40 overflow-hidden pointer-events-none"></div>
+
+      <!-- Center Space Sound Bubbles Area -->
+      <div id="asteroids-pit" class="flex-1 flex justify-around items-center gap-4 py-4 min-h-[160px] relative">
+        <!-- Capsules generated dynamically as absolute DOM nodes -->
+      </div>
+
+      <!-- Bottom Interactive Space Blaster Deck -->
+      <div class="w-full flex flex-col items-center justify-center relative pt-4 pb-2 border-t border-purple-500/20">
+        
+        <!-- Animated Space Laser Gun Cannon (locks on and fires at selected target) -->
+        <div id="laser-cannon-mount" class="relative w-28 h-28 flex items-center justify-center transition-transform duration-300 origin-center" style="transform: rotate(-90deg);">
+          <div id="laser-cannon-body" class="w-full h-full">
+            <svg class="w-full h-full drop-shadow-lg" viewBox="0 0 100 100">
+              <!-- Alchemist Magic Wand Cannon -->
+              <!-- Base platform -->
+              <path d="M25,80 Q50,70 75,80 L65,95 L35,95 Z" fill="#4a1d96" stroke="#c084fc" stroke-width="2"/>
+              <!-- Swiveling generator -->
+              <circle cx="50" cy="55" r="18" fill="#1e1b4b" stroke="#c084fc" stroke-width="2"/>
+              <!-- Firing barrel nozzle -->
+              <rect x="44" y="10" width="12" height="35" rx="3" fill="#6b21a8" stroke="#c084fc" stroke-width="2"/>
+              <!-- Glowing crystal core inside gun -->
+              <polygon points="50,2 57,15 50,25 43,15" fill="#f472b6" class="animate-pulse" stroke="#db2777" stroke-width="1.5"/>
+            </svg>
+          </div>
+          
+          <!-- Invisible coordinate node representing nozzle tip -->
+          <div id="nozzle-point" class="absolute top-[5%] left-[45%] w-2 h-2 rounded-full opacity-0"></div>
+        </div>
+
+        <p class="text-[10px] md:text-xs font-black uppercase text-purple-400 tracking-widest mt-2 font-fun">
+          WAND AUTOTARGET LOCKED
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       SCREEN 4: END / SUMMARY SCREEN
+       ========================================== -->
+  <div id="screen-summary" class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-lg mx-auto w-full relative z-10">
+    <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-purple-500 text-center w-full animate-bob">
+      <span id="trophy-emoji" class="text-7xl block mb-4">🏆</span>
+      
+      <h1 id="trophy-title" class="text-3xl md:text-4xl font-fun font-black text-purple-300 mb-1">Great Job!</h1>
+      <p id="trophy-msg" class="text-sm md:text-base font-extrabold text-pink-400 uppercase tracking-widest mb-8">
+        Spell Mission Complete!
+      </p>
+
+      <!-- Scoreboard Container -->
+      <div class="bg-slate-950 rounded-3xl p-6 border-2 border-purple-500/30 space-y-4 mb-8 shadow-inner font-bold text-purple-100">
+        <div class="flex justify-between items-center text-lg md:text-xl font-black text-purple-400">
+          <span>Final Score:</span>
+          <span id="final-score" class="text-3xl font-black text-yellow-300">0 / 20</span>
+        </div>
+        <p id="summary-feedback" class="text-xs md:text-sm text-left leading-relaxed border-t border-purple-500/20 pt-3 font-semibold font-sans">
+          Outstanding work! You mastered Grade 2 Silent Letters (k, w, b, e), solved spelling puzzles, and correctly deciphered contextual clues!
+        </p>
+      </div>
+
+      <button
+        onclick="location.reload()"
+        class="w-full bg-pink-500 hover:bg-pink-400 text-white font-fun font-black text-2xl py-5 px-8 rounded-2xl shadow-lg transition-all transform active:scale-95 border-b-4 border-pink-700 uppercase tracking-wider"
+      >
+        PLAY AGAIN
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       AUDIO ELEMENTS
+       ========================================== -->
+  <audio id="correctSound" src="assets/correct.mp3" preload="auto"></audio>
+  <audio id="wrongSound" src="assets/wrong.mp3" preload="auto"></audio>
+  <audio id="clapSound" src="assets/clapping.mp3" preload="auto"></audio>
+
+  <!-- ==========================================
+       GAME ENGINE & INTERACTIVITY
+       ========================================== -->
+  <script>
+    // LEVEL 1: Spelling & Letter Placement (10 questions on silent k, w, b, e)
+    // Prompts ask for the specific letter, distractors are ONLY other silent letters from the set!
+    const LEVEL_1_POOL = [
+      { id: 1, text: "The woolly baby sheep was jumping in the grass. It is a la_ _.", word: "LAMB", imageKey: "lamb", options: [{char:"b", isCorrect:true}, {char:"k", isCorrect:false}, {char:"w", isCorrect:false}] },
+      { id: 2, text: "She wants to _ _ i t e a happy letter to her grandmother.", word: "WRITE", imageKey: "pencil", options: [{char:"w", isCorrect:true}, {char:"k", isCorrect:false}, {char:"b", isCorrect:false}] },
+      { id: 3, text: "He fell on the playground and scraped his left _ _ e e.", word: "KNEE", imageKey: "knee", options: [{char:"k", isCorrect:true}, {char:"w", isCorrect:false}, {char:"e", isCorrect:false}] },
+      { id: 4, text: "There is a beautiful wooden fence and a locked red gat_.", word: "GATE", imageKey: "gate", options: [{char:"e", isCorrect:true}, {char:"b", isCorrect:false}, {char:"k", isCorrect:false}] },
+      { id: 5, text: "Please _ _ o c k on the door before you walk into the room.", word: "KNOCK", imageKey: "knock", options: [{char:"k", isCorrect:true}, {char:"w", isCorrect:false}, {char:"b", isCorrect:false}] },
+      { id: 6, text: "The crunchy bread left tiny cr_ _ _s all over the kitchen counter.", word: "CRUMBS", imageKey: "crumbs", options: [{char:"b", isCorrect:true}, {char:"e", isCorrect:false}, {char:"k", isCorrect:false}] },
+      { id: 7, text: "The brave _ _ i g h t saved the castle from the dragon.", word: "KNIGHT", imageKey: "knight", options: [{char:"k", isCorrect:true}, {char:"w", isCorrect:false}, {char:"e", isCorrect:false}] },
+      { id: 8, text: "She wore a shiny silver watch on her left _ _ i s t.", word: "WRIST", imageKey: "wrist", options: [{char:"w", isCorrect:true}, {char:"b", isCorrect:false}, {char:"k", isCorrect:false}] },
+      { id: 9, text: "The adventurous cat cli_ _ed up the tall wooden ladder.", word: "CLIMBED", imageKey: "climbed", options: [{char:"b", isCorrect:true}, {char:"w", isCorrect:false}, {char:"e", isCorrect:false}] },
+      { id: 10, text: "Mom loved to bak_ sweet blueberry muffins on Sunday morning.", word: "BAKE", imageKey: "bake", options: [{char:"e", isCorrect:true}, {char:"k", isCorrect:false}, {char:"b", isCorrect:false}] }
+    ];
+
+    // LEVEL 2: Contextual Silent Riddles (Thinking & Inference based - 10 questions)
+    // Prompts test homophones, meanings, and structural comparisons (Grade 2 Thinking level)
+    const LEVEL_2_POOL = [
+      { id: 11, text: "This item untangles your hair. It sounds like 'come' but has a silent B at the end!", word: "COMB", imageKey: "comb", options: [{char:"Comb", isCorrect:true}, {char:"Come", isCorrect:false}, {char:"Crumb", isCorrect:false}] },
+      { id: 12, text: "This word means incorrect. It sounds like 'rong' but has a silent W at the start!", word: "WRONG", imageKey: "wrong", options: [{char:"Wrong", isCorrect:true}, {char:"Rong", isCorrect:false}, {char:"Ring", isCorrect:false}] },
+      { id: 13, text: "This joint bends in the middle of your leg. It sounds like 'nee' but has a silent K!", word: "KNEE", imageKey: "knee", options: [{char:"Knee", isCorrect:true}, {char:"Nee", isCorrect:false}, {char:"Knock", isCorrect:false}] },
+      { id: 14, text: "This is a woolly baby sheep. It sounds like 'lam' but ends with a silent B!", word: "LAMB", imageKey: "lamb", options: [{char:"Lamb", isCorrect:true}, {char:"Lam", isCorrect:false}, {char:"Limp", isCorrect:false}] },
+      { id: 15, text: "This brave soldier wears armor. It sounds exactly like 'night' but has a silent K!", word: "KNIGHT", imageKey: "knight", options: [{char:"Knight", isCorrect:true}, {char:"Night", isCorrect:false}, {char:"Kite", isCorrect:false}] },
+      { id: 16, text: "This tool is used in the kitchen to cut fruit. It has a silent K and a silent E!", word: "KNIFE", imageKey: "knife", options: [{char:"Knife", isCorrect:true}, {char:"Nife", isCorrect:false}, {char:"Kite", isCorrect:false}] },
+      { id: 17, text: "This joint connects your hand to your arm. It sounds like 'rist' but has a silent W!", word: "WRIST", imageKey: "wrist", options: [{char:"Wrist", isCorrect:true}, {char:"Rist", isCorrect:false}, {char:"Ring", isCorrect:false}] },
+      { id: 18, text: "These are tiny pieces of bread on your plate. It sounds like 'crums' but has a silent B!", word: "CRUMBS", imageKey: "crumbs", options: [{char:"Crumbs", isCorrect:true}, {char:"Crums", isCorrect:false}, {char:"Climbs", isCorrect:false}] },
+      { id: 19, text: "This action means to weave yarn into a sweater. It sounds like 'nit' but has a silent K!", word: "KNIT", imageKey: "yarn", options: [{char:"Knit", isCorrect:true}, {char:"Nit", isCorrect:false}, {char:"Knot", isCorrect:false}] },
+      { id: 20, text: "This action means putting words on paper. It sounds exactly like 'right' but starts with silent W!", word: "WRITE", imageKey: "pencil", options: [{char:"Write", isCorrect:true}, {char:"Right", isCorrect:false}, {char:"White", isCorrect:false}] }
+    ];
+
+    // High quality vector SVGs specifically designed for Grade 2 children
+    const VISUAL_HINTS = {
+      "lamb": `<svg viewBox="0 0 100 100" class="w-16 h-16"><rect x="35" y="40" width="34" height="26" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/><ellipse cx="32" cy="36" rx="8" ry="12" fill="#cbd5e1"/><circle cx="50" cy="50" r="14" fill="#fafafa"/><rect x="40" y="66" width="4" height="14" fill="#cbd5e1"/><rect x="58" y="66" width="4" height="14" fill="#cbd5e1"/></svg>`,
+      "pencil": `<svg viewBox="0 0 100 100" class="w-16 h-16"><rect x="40" y="20" width="20" height="50" fill="#fbbf24" stroke="#d97706" stroke-width="2"/><polygon points="40,70 60,70 50,85" fill="#fde047" stroke="#d97706" stroke-width="2"/><polygon points="46,80 54,80 50,85" fill="#1e293b"/></svg>`,
+      "knee": `<svg viewBox="0 0 100 100" class="w-16 h-16"><ellipse cx="50" cy="50" rx="16" ry="32" fill="#fed7aa" transform="rotate(30 50 50)"/><circle cx="56" cy="42" r="6" fill="#f97316" opacity="0.3"/></svg>`,
+      "gate": `<svg viewBox="0 0 100 100" class="w-16 h-16"><rect x="20" y="30" width="60" height="40" fill="none" stroke="#a21caf" stroke-width="4"/><line x1="20" y1="30" x2="80" y2="70" stroke="#a21caf" stroke-width="3"/><line x1="20" y1="70" x2="80" y2="30" stroke="#a21caf" stroke-width="3"/><line x1="50" y1="30" x2="50" y2="70" stroke="#a21caf" stroke-width="4"/></svg>`,
+      "knock": `<svg viewBox="0 0 100 100" class="w-16 h-16"><rect x="30" y="20" width="40" height="60" fill="#78350f" rx="3" stroke="#451a03" stroke-width="3"/><circle cx="40" cy="50" r="4" fill="#f59e0b"/><path d="M48,45 Q56,40 54,34 Q48,36 48,45" stroke="#f59e0b" stroke-width="2" fill="none"/></svg>`,
+      "crumbs": `<svg viewBox="0 0 100 100" class="w-16 h-16"><ellipse cx="50" cy="65" rx="32" ry="10" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/><circle cx="40" cy="63" r="3.5" fill="#b45309"/><circle cx="58" cy="65" r="2" fill="#b45309"/><circle cx="48" cy="62" r="2.5" fill="#b45309"/></svg>`,
+      "knight": `<svg viewBox="0 0 100 100" class="w-16 h-16"><circle cx="50" cy="40" r="22" fill="#94a3b8" stroke="#475569" stroke-width="2"/><polygon points="40,25 60,25 50,10" fill="#ef4444"/><rect x="42" y="36" width="16" height="6" fill="#1e293b"/></svg>`,
+      "wrist": `<svg viewBox="0 0 100 100" class="w-16 h-16"><rect x="44" y="20" width="12" height="60" fill="#fbcfe8" rx="2"/><circle cx="50" cy="40" r="10" fill="#db2777"/><circle cx="50" cy="40" r="4" fill="#1e293b"/></svg>`,
+      "climbed": `<svg viewBox="0 0 100 100" class="w-16 h-16"><line x1="35" y1="15" x2="35" y2="85" stroke="#b45309" stroke-width="4"/><line x1="65" y1="15" x2="65" y2="85" stroke="#b45309" stroke-width="4"/><line x1="35" y1="30" x2="65" y2="30" stroke="#b45309" stroke-width="3"/><line x1="35" y1="50" x2="65" y2="50" stroke="#b45309" stroke-width="3"/><line x1="35" y1="70" x2="65" y2="70" stroke="#b45309" stroke-width="3"/></svg>`,
+      "bake": `<svg viewBox="0 0 100 100" class="w-16 h-16"><rect x="25" y="30" width="50" height="45" fill="#f43f5e" rx="4" stroke="#be123c" stroke-width="2"/><rect x="35" y="40" width="30" height="20" fill="#1e293b"/><circle cx="50" cy="50" r="4" fill="#fb7185"/></svg>`,
+      "comb": `<svg viewBox="0 0 100 100" class="w-16 h-16"><rect x="20" y="42" width="60" height="8" fill="#14b8a6" rx="2"/><line x1="25" y1="50" x2="25" y2="75" stroke="#14b8a6" stroke-width="3"/><line x1="35" y1="50" x2="35" y2="75" stroke="#14b8a6" stroke-width="3"/><line x1="45" y1="50" x2="45" y2="75" stroke="#14b8a6" stroke-width="3"/><line x1="55" y1="50" x2="55" y2="75" stroke="#14b8a6" stroke-width="3"/><line x1="65" y1="50" x2="65" y2="75" stroke="#14b8a6" stroke-width="3"/><line x1="75" y1="50" x2="75" y2="75" stroke="#14b8a6" stroke-width="3"/></svg>`,
+      "wrong": `<svg viewBox="0 0 100 100" class="w-16 h-16"><line x1="20" y1="20" x2="80" y2="80" stroke="#f43f5e" stroke-width="12" stroke-linecap="round"/><line x1="80" y1="20" x2="20" y2="80" stroke="#f43f5e" stroke-width="12" stroke-linecap="round"/></svg>`,
+      "knife": `<svg viewBox="0 0 100 100" class="w-16 h-16"><path d="M45,20 L55,20 L55,60 L48,60 Z" fill="#cbd5e1" stroke="#475569" stroke-width="2"/><rect x="46" y="60" width="8" height="22" fill="#78350f" rx="1"/></svg>`,
+      "yarn": `<svg viewBox="0 0 100 100" class="w-16 h-16"><circle cx="50" cy="50" r="28" fill="#ec4899" stroke="#db2777" stroke-width="2"/><path d="M30,35 Q50,75 70,35" stroke="#db2777" stroke-width="3" fill="none"/><path d="M25,50 Q50,25 75,50" stroke="#db2777" stroke-width="3" fill="none"/></svg>`
+    };
+
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let triesLeft = 2;
+    let isFeedbackRunning = false;
+    let activeBubbles = [];
+
+    // Splash screen router with safe document readyState checks
+    function initSplashTimer() {
+      setTimeout(() => {
+        switchScreen('screen-start');
+      }, 1500); // Snappy load time
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSplashTimer);
+    } else {
+      initSplashTimer();
+    }
+
+    function switchScreen(screenId) {
+      document.getElementById('screen-splash').classList.add('hidden');
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.add('hidden');
+      
+      document.getElementById(screenId).classList.remove('hidden');
+    }
+
+    // Set up 20 questions dynamically (10 L1, 10 L2)
+    function startGame() {
+      // Warm up audio contexts safely
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume();
+      } catch (e) {}
+
+      // Preload MP3 files
+      document.getElementById('correctSound').load();
+      document.getElementById('wrongSound').load();
+      document.getElementById('clapSound').load();
+
+      // Combine both levels for 20 questions total
+      const selectedL1 = [...LEVEL_1_POOL].sort(() => Math.random() - 0.5);
+      const selectedL2 = [...LEVEL_2_POOL].sort(() => Math.random() - 0.5);
+
+      currentQuestions = [...selectedL1, ...selectedL2];
+      currentQuestionIndex = 0;
+      score = 0;
+      triesLeft = 2;
+      isFeedbackRunning = false;
+
+      switchScreen('screen-game');
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      if (currentQuestionIndex >= 20) {
+        endGame();
+        return;
+      }
+
+      isFeedbackRunning = false;
+      triesLeft = 2;
+      updateTriesUI();
+
+      const q = currentQuestions[currentQuestionIndex];
+      const isLevel1 = currentQuestionIndex < 10;
+
+      // Update Header level indicator and progress texts
+      const levelIndicator = document.getElementById('level-indicator');
+      const levelTitle = document.getElementById('task-level-title');
+      if (isLevel1) {
+        levelIndicator.innerText = "LEVEL 1: MISSING LETTERS";
+        levelTitle.innerText = "LEVEL 1: SPELLING SEARCH";
+        levelIndicator.className = "text-xs md:text-sm font-black uppercase text-pink-400 tracking-widest font-fun";
+        document.getElementById('hint-feedback').innerText = "Find the missing silent letter and blast it!";
+      } else {
+        levelIndicator.innerText = "LEVEL 2: SILENT RIDDLES";
+        levelTitle.innerText = "LEVEL 2: THINK & INFER";
+        levelIndicator.className = "text-xs md:text-sm font-black uppercase text-cyan-400 tracking-widest font-fun";
+        document.getElementById('hint-feedback').innerText = "Read the clue! Find the correct silent word!";
+      }
+
+      document.getElementById('task-bold-header').innerText = q.text;
+      document.getElementById('game-progress-text').innerText = `Question ${currentQuestionIndex + 1} / 20`;
+      document.getElementById('game-progress-bar').style.width = `${((currentQuestionIndex) / 20) * 100}%`;
+      document.getElementById('game-score-text').innerText = score;
+
+      // Load Visual Card
+      const imageBox = document.getElementById('task-image-box');
+      imageBox.innerHTML = VISUAL_HINTS[q.imageKey] || '';
+
+      // Generate the 3 Bobbing Sound Bubbles
+      const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+      const asteroidsContainer = document.getElementById('asteroids-pit');
+      asteroidsContainer.innerHTML = '';
+
+      activeBubbles = [];
+
+      shuffledOptions.forEach((opt, idx) => {
+        const isCorrect = opt.isCorrect;
+        const label = opt.char;
+
+        // Build absolute bubble container
+        const bubble = document.createElement('button');
+        bubble.id = `bubble-${idx}`;
+        bubble.className = "relative animate-bubble w-28 h-20 md:w-32 md:h-24 rounded-full flex flex-col items-center justify-center border-4 transform transition-all duration-300 hover:scale-105 select-none focus:outline-none px-2";
+        bubble.style.animationDelay = `${idx * 0.4}s`;
+
+        const colors = [
+          'from-pink-500/90 via-pink-400/90 to-purple-800/80 border-pink-400 neon-pink-glow',
+          'from-cyan-500/90 via-cyan-400/90 to-blue-800/80 border-cyan-400 neon-cyan-glow',
+          'from-yellow-500/90 via-yellow-400/90 to-orange-800/80 border-yellow-400 shadow-[0_0_15px_rgba(253,224,71,0.5)]'
+        ];
+        const activeColor = colors[idx % colors.length];
+        bubble.className += ` bg-gradient-to-tr ${activeColor}`;
+
+        bubble.innerHTML = `
+          <!-- Shine gloss on bubbles -->
+          <span class="absolute w-16 h-12 rounded-full bg-white/10 top-1 left-2 pointer-events-none"></span>
+          <!-- Bold Phonics Label -->
+          <div class="flex flex-col items-center justify-center pointer-events-none text-center">
+            <span class="text-sm md:text-base font-fun font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] leading-tight">${label}</span>
+          </div>
+        `;
+
+        // Metadata trigger down
+        activeBubbles.push({
+          id: `bubble-${idx}`,
+          label: label,
+          isCorrect: isCorrect,
+          isBlasted: false
+        });
+
+        // Trigger blast sequencing
+        bubble.onclick = () => {
+          fireCircusCannon(bubble, activeBubbles[idx]);
+        };
+
+        asteroidsContainer.appendChild(bubble);
+      });
+
+      // Clear the laser cannon's alignment
+      resetLaserCannon();
+    }
+
+    // Direct pivot calculations to align gun nozzle to tapped bubble, followed by projectile fire
+    function fireCircusCannon(targetElement, bubbleData) {
+      if (isFeedbackRunning || bubbleData.isBlasted) return;
+      isFeedbackRunning = true;
+
+      const cannonMount = document.getElementById('laser-cannon-mount');
+      const cannonBody = document.getElementById('laser-cannon-body');
+      const laserLayer = document.getElementById('laser-layer');
+
+      const cannonRect = cannonMount.getBoundingClientRect();
+      const targetRect = targetElement.getBoundingClientRect();
+      const parentRect = laserLayer.getBoundingClientRect();
+
+      // Cannon core coordinates
+      const cannonX = cannonRect.left + (cannonRect.width / 2);
+      const cannonY = cannonRect.top + (cannonRect.height / 2);
+
+      // Target core coordinates
+      const targetX = targetRect.left + (targetRect.width / 2);
+      const targetY = targetRect.top + (targetRect.height / 2);
+
+      // Angle math
+      const dy = targetY - cannonY; 
+      const dx = targetX - cannonX;
+      let angleDegrees = Math.atan2(dy, dx) * (180 / Math.PI) - 90; // offset pointing top-down
+
+      // Rotate gun to locked coordinate
+      cannonMount.style.transform = `rotate(${angleDegrees}deg)`;
+
+      // Apply recoil visual bounce
+      cannonBody.className = "w-full h-full transform scale-90 transition-transform duration-75";
+      setTimeout(() => {
+        cannonBody.className = "w-full h-full transform scale-100 transition-transform duration-150";
+      }, 80);
+
+      // Create a physical vector neon line representing the laser beam
+      const laser = document.createElement('div');
+      laser.className = 'laser-beam';
+      
+      // Calculate coordinates relative to parent viewport
+      const startX = cannonRect.left - parentRect.left + (cannonRect.width / 2);
+      const startY = cannonRect.top - parentRect.top;
+      const endX = targetRect.left - parentRect.left + (targetRect.width / 2);
+      const endY = targetRect.top - parentRect.top + (targetRect.height / 2);
+
+      // Set laser metrics
+      const distance = Math.hypot(endX - startX, endY - startY);
+      laser.style.height = `${distance}px`;
+      laser.style.left = `${startX}px`;
+      laser.style.bottom = `${parentRect.height - startY}px`; // baseline anchored
+      
+      // Apply correct rotation along shooting vector
+      const laserAngle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI) - 90;
+      laser.style.transformOrigin = "bottom center";
+      laser.style.transform = `rotate(${laserAngle}deg)`;
+      
+      // Fire visual lasers
+      laser.style.animation = 'shootLaser 0.35s ease-out forwards';
+      laserLayer.appendChild(laser);
+
+      triggerAudio('click');
+
+      // Process collision impact at completion of shot beam
+      setTimeout(() => {
+        laser.remove();
+        evaluateBubbleImpact(targetElement, bubbleData);
+      }, 300);
+    }
+
+    // Handles zapping validations, scoring, and level progression
+    function evaluateBubbleImpact(targetElement, bubbleData) {
+      const q = currentQuestions[currentQuestionIndex];
+
+      if (bubbleData.isCorrect) {
+        triggerAudio('correct');
+        createExplosiveStars(targetElement);
+
+        // Turn option asteroid fully green and fade out
+        targetElement.className = "relative w-28 h-20 md:w-32 md:h-24 rounded-full flex flex-col items-center justify-center border-4 border-green-400 bg-gradient-to-tr from-green-500 to-green-600 scale-0 opacity-0 transition-all duration-300 pointer-events-none";
+
+        if (triesLeft === 2) {
+          score++;
+        }
+
+        // Update textual spelling block cleanly on success
+        let successText = "";
+        if (q.text.includes("_ _")) {
+          successText = q.text.replace("_ _", `<span class="text-green-400 font-fun font-black underline">${q.word.slice(0, q.word === "KNIGHT" || q.word === "KNEE" || q.word === "KNOCK" || q.word === "WRIST" || q.word === "WRITE" ? 2 : 1)}</span>`);
+        } else {
+          successText = `${q.text} <br/> <span class="text-green-400 font-fun font-black">Correct: ${q.word}</span>`;
+        }
+        document.getElementById('task-bold-header').innerHTML = successText;
+        document.getElementById('hint-feedback').innerHTML = "<span class='text-green-400 font-fun text-base'>🚀 BOOM! CORRECT WORD SPELL!</span>";
+
+        setTimeout(() => {
+          currentQuestionIndex++;
+          renderQuestion();
+        }, 1500);
+
+      } else {
+        triesLeft--;
+        updateTriesUI();
+        triggerAudio('wrong');
+
+        // Turn option red to lock out
+        bubbleData.isBlasted = true;
+        targetElement.className = "relative w-28 h-20 md:w-32 md:h-24 rounded-full flex flex-col items-center justify-center border-4 border-red-500 bg-red-950/80 opacity-50 cursor-not-allowed animate-shake scale-90";
+        targetElement.onclick = null;
+
+        if (triesLeft > 0) {
+          document.getElementById('hint-feedback').innerHTML = "⚠️ Incorrect spell! <span class='text-red-400 font-black'>1 Try Left</span>.";
+          isFeedbackRunning = false;
+        } else {
+          // Out of tries, show correct choice
+          document.getElementById('hint-feedback').innerHTML = "❌ Out of tries! Charging next spell...";
+
+          // Highlight correct spelling
+          let revealText = "";
+          if (q.text.includes("_ _")) {
+            revealText = q.text.replace("_ _", `<span class="text-cyan-300 font-fun font-black underline">${q.word.slice(0, q.word === "KNIGHT" || q.word === "KNEE" || q.word === "KNOCK" || q.word === "WRIST" || q.word === "WRITE" ? 2 : 1)}</span>`);
+          } else {
+            revealText = `${q.text} <br/> <span class="text-cyan-300 font-fun font-black">Correct: ${q.word}</span>`;
+          }
+          document.getElementById('task-bold-header').innerHTML = revealText;
+
+          // Flash the correct answer bubble with glowing neon ring
+          activeBubbles.forEach(ast => {
+            if (ast.isCorrect) {
+              const correctAstEl = document.getElementById(ast.id);
+              if (correctAstEl) {
+                correctAstEl.className = "relative animate-asteroid w-28 h-20 md:w-32 md:h-24 rounded-full flex flex-col items-center justify-center border-4 border-green-400 bg-gradient-to-tr from-green-500 to-green-600 shadow-[0_0_20px_#22d3ee] scale-105";
+              }
+            }
+          });
+
+          setTimeout(() => {
+            currentQuestionIndex++;
+            renderQuestion();
+          }, 2000);
+        }
+      }
+    }
+
+    // Sparkles particle generator for physical bubble popping
+    function createExplosiveStars(targetElement) {
+      const rect = targetElement.getBoundingClientRect();
+      const parent = document.getElementById('game-cabinet');
+      const parentRect = parent.getBoundingClientRect();
+
+      const startX = rect.left - parentRect.left + (rect.width / 2);
+      const startY = rect.top - parentRect.top + (rect.height / 2);
+
+      for (let i = 0; i < 20; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark-particle';
+        
+        const size = Math.random() * 8 + 4;
+        spark.style.width = `${size}px`;
+        spark.style.height = `${size}px`;
+        spark.style.left = `${startX}px`;
+        spark.style.top = `${startY}px`;
+
+        const colors = ['#22d3ee', '#f472b6', '#a78bfa', '#34d399', '#facc15', '#ffffff'];
+        spark.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        spark.style.boxShadow = `0 0 10px ${spark.style.backgroundColor}`;
+
+        parent.appendChild(spark);
+
+        const angle = Math.random() * 2 * Math.PI;
+        const velocity = Math.random() * 8 + 4;
+        const vx = Math.cos(angle) * velocity;
+        const vy = Math.sin(angle) * velocity - 2; // slight upward drift
+
+        let curX = startX;
+        let curY = startY;
+        let pOpacity = 1;
+
+        function anim() {
+          curX += vx;
+          curY += vy + 0.15; // soft gravity
+          pOpacity -= 0.04;
+
+          spark.style.left = `${curX}px`;
+          spark.style.top = `${curY}px`;
+          spark.style.opacity = pOpacity;
+
+          if (pOpacity > 0) {
+            requestAnimationFrame(anim);
+          } else {
+            spark.remove();
+          }
+        }
+        requestAnimationFrame(anim);
+      }
+    }
+
+    function updateTriesUI() {
+      document.getElementById('tries-count').innerText = triesLeft;
+    }
+
+    // Reset cannon to original angle
+    function resetLaserCannon() {
+      const cannonMount = document.getElementById('laser-cannon-mount');
+      cannonMount.style.transform = `rotate(-90deg)`;
+    }
+
+    // Core Native MP3 player with web-synthesizer backup logic
+    function triggerAudio(type) {
+      try {
+        const correctSnd = document.getElementById('correctSound');
+        const wrongSnd = document.getElementById('wrongSound');
+        const clapSnd = document.getElementById('clapSound');
+
+        if (type === 'correct') {
+          correctSnd.currentTime = 0;
+          correctSnd.play().catch(() => playSynthFallback('correct'));
+        } else if (type === 'wrong') {
+          wrongSnd.currentTime = 0;
+          wrongSnd.play().catch(() => playSynthFallback('wrong'));
+        } else if (type === 'clap') {
+          clapSnd.currentTime = 0;
+          clapSnd.play().catch(() => playSynthFallback('correct'));
+        } else if (type === 'click') {
+          playSynthFallback('click');
+        }
+      } catch (e) {
+        playSynthFallback(type);
+      }
+    }
+
+    // Direct Web Audio API synthesizer fallback
+    function playSynthFallback(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        if (type === 'correct') {
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc1.type = 'sine'; osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc1.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          osc2.frequency.setValueAtTime(783.99, ctx.currentTime + 0.15);
+          osc2.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.25);
+          gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+          osc1.connect(gainNode); osc2.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc1.start(); osc2.start();
+          osc1.stop(ctx.currentTime + 0.4); osc2.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(140, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(90, ctx.currentTime + 0.25);
+          gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        } else if (type === 'click') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.06);
+        }
+      } catch (e) {
+        console.log("Synthesizer bypassed");
+      }
+    }
+
+    // Summary screen builder
+    function endGame() {
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.remove('hidden');
+
+      document.getElementById('final-score').innerText = `${score} / 20`;
+
+      let trophy = "🏆 Gold";
+      let emoji = "🏆";
+      let msg = "Super Silent Spell Alchemist!";
+      let feedbackText = "Excellent job! You correctly completed all spelling challenges and solved the silent letter riddles!";
+
+      if (score >= 16) {
+        trophy = "🏆 Gold Rank";
+        emoji = "🧪";
+        msg = "Master Alchemist!";
+        feedbackText = `Outstanding! You successfully solved ${score}/20 silent letter puzzles and powered up your magical spells! Enjoy your shiny gold rank! 🌟`;
+      } else if (score >= 11) {
+        trophy = "🥈 Silver Rank";
+        emoji = "⭐";
+        msg = "Silent Sound Expert!";
+        feedbackText = `Well done! You got a solid score of ${score}/20. Try again to reach a perfect score!`;
+      } else {
+        trophy = "🥉 Bronze Participant";
+        emoji = "✨";
+        msg = "Keep Practicing!";
+        feedbackText = "A good learning try! Let's practice connecting silent words and clues together and play again!";
+      }
+
+      document.getElementById("trophy-emoji").textContent = emoji;
+      document.getElementById("trophy-title").textContent = `${trophy}`;
+      document.getElementById("trophy-msg").textContent = msg;
+      document.getElementById("summary-feedback").textContent = feedbackText;
+
+      triggerAudio('clap');
+    }
+  </script>
+</body>
+</html>
