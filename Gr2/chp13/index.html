@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Conjunction Caverns: Olympic Spear Thrower</title>
+  
+  <style>
+    /* ==========================================================================
+       FAST-LOAD NATIVE CSS - NETWORK INDEPENDENT
+       ========================================================================== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none; -webkit-user-select: none; touch-action: none;
+      min-height: 100vh; display: flex; flex-direction: column;
+      overflow: hidden; position: relative;
+      background: linear-gradient(180deg, #bae6fd 0%, #a7f3d0 40%, #fef08a 100%);
+      background-size: 400% 400%; animation: warmGlow 15s ease infinite;
+      color: #1e1b4b;
+    }
+
+    @keyframes warmGlow { 0%, 100% { background-position: 50% 0%; } 50% { background-position: 50% 100%; } }
+
+    .hidden { display: none !important; }
+    
+    .container {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 16px; width: 100%; max-width: 1280px; margin: 0 auto; z-index: 10;
+    }
+
+    /* Card Panels */
+    .quiz-card {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 32px; padding: 35px;
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+      border: 6px solid #0ea5e9; text-align: center; width: 100%; max-width: 800px;
+    }
+
+    .quest-box {
+      background: white; border-radius: 20px; padding: 15px; width: 100%;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 2px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* Olympic Arena Container */
+    .stadium-container {
+      position: relative; background: #a7f3d0; border-radius: 2rem;
+      border: 10px solid #ea580c; padding: 6px; width: 100%; max-width: 600px;
+      aspect-ratio: 4/3; box-shadow: 0 25px 35px -5px rgba(0, 0, 0, 0.2);
+    }
+    canvas { width: 100%; height: 100%; border-radius: 1.5rem; display: block; background: #e0f2fe; }
+
+    .badge { padding: 4px 12px; border-radius: 9999px; font-weight: 800; font-size: 0.85rem; }
+
+    /* Animations */
+    .shake-anim { animation: shake 0.4s ease-in-out; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+    .spark-particle { position: absolute; border-radius: 50%; pointer-events: none; z-index: 100; }
+  </style>
+</head>
+<body class="bg-sunny-lagoon text-[#1e1b4b] min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+
+  <!-- Twinkling sunbeams / gold glitter effects -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+    <div class="absolute bg-white rounded-full w-3 h-3 top-10 left-10 animate-ping"></div>
+    <div class="absolute bg-yellow-300 rounded-full w-4 h-4 top-32 right-24 animate-pulse"></div>
+    <div class="absolute bg-sky-200 rounded-full w-3 h-3 bottom-44 left-1/4 animate-pulse"></div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 1: 1.5-SECOND SPLASH SCREEN
+       ========================================== -->
+  <div id="screen-splash" style="position:fixed; inset:0; z-index:1000; background:white; display:flex; align-items:center; justify-content:center;">
+    <div style="text-align:center;">
+      <img id="splash-logo" src="assets/innovine-logo.png" style="width:450px; height:auto; max-width: 80vw;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzA4OTFiZSIvPjx0ZXh0IHg9IjUwIiB5PSI2MCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5MT0dPPC90ZXh0Pjwvc3ZnPg=='">
+      <div style="margin-top:20px; font-weight:900; color:#38bdf8; letter-spacing:4px; font-size:1.2rem;">LOADING OLYMPIC ARENA...</div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 2: START / TITLE SCREEN
+       ========================================== -->
+  <div id="screen-start" class="hidden container">
+    <div class="quiz-card">
+      <h1 style="font-size: 3.5rem; color: #0284c7; margin-bottom: 10px;">🏅 Olympic Spear Thrower</h1>
+      <p style="color: #ec4899; font-weight: 900; letter-spacing: 3px; margin-bottom: 25px;">20-ROUND CONJUNCTIONS CHAMPIONSHIP</p>
+      
+      <!-- Super-Sized Instructions -->
+      <div style="text-align: left; background: #f0f9ff; padding: 30px; border-radius: 25px; font-size: 1.4rem; margin-bottom: 30px; line-height: 1.6; border: 4px dashed #bae6fd; color: #334155;">
+        <p style="font-weight: 900; color: #0369a1; margin-bottom: 15px; font-size: 1.7rem;">How to Play:</p>
+        • Read the <strong>Conjunction Challenge</strong> at the top of the screen.<br>
+        • Floating in the Olympic sky are target shields containing conjunction words.<br>
+        • Drag backward from the Athlete holding the spear to aim, and release to throw! 🎳📱<br>
+        • Hit the correct target shield to complete the sentence and win the trophy!
+      </div>
+      <button class="btn w-full bg-yellow-400 hover:bg-yellow-300 text-sky-950 font-extrabold text-2xl py-5 rounded-2xl shadow-lg border-b-8 border-yellow-600 uppercase tracking-wider" onclick="startGame()" style="max-width:400px; height:80px;">START TOURNAMENT 🏆</button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SCREEN 3: GAMEPLAY SCREEN (OLYMPIC ARENA)
+       ========================================== -->
+  <div id="screen-game" class="hidden container" style="justify-content: flex-start; padding-top: 4px;">
+    
+    <!-- Top Progress Strip -->
+    <div class="header-panel w-full max-w-[600px] flex justify-between items-center bg-white rounded-2xl p-4 shadow mb-2 border border-sky-200">
+      <div>
+        <div id="level-indicator" style="font-size:0.75rem; font-weight:900; color:#0284c7; letter-spacing:1px;">LEVEL 1: LAGOON EXPLORATION</div>
+        <div id="game-progress-text" style="font-weight:800; font-size:1.1rem;">Question 1 / 20</div>
+      </div>
+      <div style="display:flex; gap: 8px;">
+        <div class="badge" style="background:#fee2e2; color:#b91c1c;">Tries: <span id="tries-count">2</span></div>
+        <div class="badge" style="background:#e0f2fe; color:#0369a1;">⭐ <span id="game-score-text">0</span></div>
+      </div>
+    </div>
+
+    <!-- Active Question Card -->
+    <div class="quest-box w-full max-w-[600px] mb-2">
+      <div style="flex: 1; padding-right: 12px; text-align: left;">
+        <p id="task-level-title" style="font-size: 0.75rem; font-weight: 900; color: #ea580c; text-transform: uppercase; margin-bottom: 2px;">Conjunction Challenge</p>
+        <h2 id="task-bold-header" style="font-size: 1.15rem; font-weight: 800; color: #1e293b; line-height: 1.4;">Loading challenge...</h2>
+      </div>
+      <div id="task-image-box" style="width:80px; height:80px; display:flex; align-items:center; justify-content:center; background:#f8fafc; border-radius:16px; flex-shrink:0; border: 2px solid #e2e8f0;">
+        <!-- Embedded High-Contrast SVGs -->
+      </div>
+    </div>
+
+    <!-- Turn Banner -->
+    <div id="hint-feedback" style="font-size:0.85rem; font-weight:900; text-align:center; color:#1e1b4b; background:white; padding: 6px 16px; border-radius: 9999px; margin-bottom:8px; width: 100%; max-width:[600px]; border: 1px solid #e2e8f0;" class="animate-pulse">
+      Aim and release to throw your spear at the correct word shield!
+    </div>
+
+    <!-- Interactive Layout Area -->
+    <div class="flex-1 flex items-center justify-center gap-6 w-full max-w-[800px] mb-4" id="game-cabinet">
+      
+      <!-- Canvas Olympic Arena Container -->
+      <div class="stadium-container">
+        <canvas id="poolCanvas"></canvas>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       SCREEN 4: ARCADE GAME OVER SUMMARY
+       ========================================== -->
+  <div id="screen-summary" class="hidden container">
+    <div class="card" style="border: 4px solid #facc15;">
+      <span style="font-size: 5rem; display:block; margin-bottom:8px;">🏆</span>
+      <h1 id="sum-title" style="color:#0284c7; font-size:2rem; font-family:'Fredoka One', cursive;">Stadium Cleared!</h1>
+      <div id="final-score" style="font-size:3rem; font-weight:900; color:#eab308; margin:16px 0;">0 / 20</div>
+      <p id="summary-feedback" style="font-size:1.1rem; color:#475569; margin-bottom:24px; line-height:1.4;">Outstanding work hitting correct conjunction targets!</p>
+      <button class="btn bg-yellow-400 hover:bg-yellow-300 text-sky-950 font-black py-4 px-8 rounded-xl shadow-lg border-b-4 border-yellow-600" onclick="location.reload()" style="max-width:250px;">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       AUDIO ELEMENTS
+       ========================================== -->
+  <audio id="correctSound" src="assets/correct.mp3" preload="auto"></audio>
+  <audio id="wrongSound" src="assets/wrong.mp3" preload="auto"></audio>
+  <audio id="clapSound" src="assets/clapping.mp3" preload="auto"></audio>
+
+  <!-- ==========================================
+       GAME ENGINE & INTERACTIVITY
+       ========================================== -->
+  <script>
+    // 20 Application-Based Grade 2 Conjunction Questions
+    const QUESTIONS = [
+      // Level 1: Missing Conjunctions (and, or, but, because)
+      { t: "I like apples ______ I love sweet oranges too!", word: "and", imageKey: "apple", options: [{char:"and", isCorrect:true}, {char:"but", isCorrect:false}, {char:"or", isCorrect:false}] },
+      { t: "Do you want to play tag ______ hide-and-seek?", word: "or", imageKey: "play", options: [{char:"or", isCorrect:true}, {char:"because", isCorrect:false}, {char:"and", isCorrect:false}] },
+      { t: "I ran very fast, ______ I missed the big yellow bus.", word: "but", imageKey: "bus", options: [{char:"but", isCorrect:true}, {char:"because", isCorrect:false}, {char:"or", isCorrect:false}] },
+      { t: "She wore a warm coat ______ it was very cold outside.", word: "because", imageKey: "coat", options: [{char:"because", isCorrect:true}, {char:"but", isCorrect:false}, {char:"or", isCorrect:false}] },
+      { t: "We got a new puppy ______ we named him Max.", word: "and", imageKey: "dog", options: [{char:"and", isCorrect:true}, {char:"but", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Would you like cold milk ______ apple juice?", word: "or", imageKey: "drink", options: [{char:"or", isCorrect:true}, {char:"but", isCorrect:false}, {char:"and", isCorrect:false}] },
+      { t: "The bright sun was shining, ______ the wind was cold.", word: "but", imageKey: "sun", options: [{char:"but", isCorrect:true}, {char:"because", isCorrect:false}, {char:"or", isCorrect:false}] },
+      { t: "He stayed inside the house ______ he was feeling sick.", word: "because", imageKey: "home", options: [{char:"because", isCorrect:true}, {char:"and", isCorrect:false}, {char:"but", isCorrect:false}] },
+      { t: "We bought sweet strawberries ______ fresh red cherries.", word: "and", imageKey: "fruit", options: [{char:"and", isCorrect:true}, {char:"or", isCorrect:false}, {char:"but", isCorrect:false}] },
+      { t: "Put on your winter boots ______ it is snowing outside!", word: "because", imageKey: "snow", options: [{char:"because", isCorrect:true}, {char:"but", isCorrect:false}, {char:"or", isCorrect:false}] },
+      
+      // Level 2: Sentence Error Correction
+      { t: "Fix: 'I went to bed <span class=\"text-red-500 font-extrabold line-through font-fun\">but</span> I was very tired.'", word: "because", imageKey: "home", options: [{char:"because", isCorrect:true}, {char:"or", isCorrect:false}, {char:"but", isCorrect:false}] },
+      { t: "Fix: 'Do you want milk <span class=\"text-red-500 font-extrabold line-through font-fun\">because</span> water?'", word: "or", imageKey: "drink", options: [{char:"or", isCorrect:true}, {char:"and", isCorrect:false}, {char:"but", isCorrect:false}] },
+      { t: "Fix: 'I like dogs <span class=\"text-red-500 font-extrabold line-through font-fun\">but</span> friendly cats.'", word: "and", imageKey: "dog", options: [{char:"and", isCorrect:true}, {char:"or", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Fix: 'I wore a heavy coat <span class=\"text-red-500 font-extrabold line-through font-fun\">because</span> it was warm.'", word: "but", imageKey: "coat", options: [{char:"but", isCorrect:true}, {char:"and", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Fix: 'I ran fast <span class=\"text-red-500 font-extrabold line-through font-fun\">or</span> I missed the school bus.'", word: "but", imageKey: "bus", options: [{char:"but", isCorrect:true}, {char:"and", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Fix: 'Do you like sweet apples <span class=\"text-red-500 font-extrabold line-through font-fun\">but</span> red grapes?'", word: "or", imageKey: "fruit", options: [{char:"or", isCorrect:true}, {char:"but", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Fix: 'We stayed inside <span class=\"text-red-500 font-extrabold line-through font-fun\">and</span> it was raining.'", word: "because", imageKey: "snow", options: [{char:"because", isCorrect:true}, {char:"but", isCorrect:false}, {char:"or", isCorrect:false}] },
+      { t: "Fix: 'He fell down <span class=\"text-red-500 font-extrabold line-through font-fun\">or</span> hurt his knee.'", word: "and", imageKey: "play", options: [{char:"and", isCorrect:true}, {char:"but", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Fix: 'We went inside <span class=\"text-red-500 font-extrabold line-through font-fun\">or</span> we were cold.'", word: "because", imageKey: "home", options: [{char:"because", isCorrect:true}, {char:"but", isCorrect:false}, {char:"and", isCorrect:false}] },
+      { t: "Fix: 'Would you like apple juice <span class=\"text-red-500 font-extrabold line-through font-fun\">but</span> sweet milk?'", word: "or", imageKey: "drink", options: [{char:"or", isCorrect:true}, {char:"and", isCorrect:false}, {char:"because", isCorrect:false}] }
+    ];
+
+    const VISUAL_HINTS = {
+      "apple": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#fee2e2" stroke="#ef4444" stroke-width="4"/>
+        <path d="M50,42 C40,25 25,35 30,55 C35,75 50,75 50,75 C50,75 65,75 70,55 C75,35 60,25 50,42 Z" fill="#ef4444"/>
+        <path d="M50,42 Q55,25 65,30" fill="none" stroke="#78350f" stroke-width="4"/>
+        <path d="M50,42 Q40,30 45,35 Z" fill="#22c55e"/>
+      </svg>`,
+      "play": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#bbf7d0" stroke="#16a34a" stroke-width="4"/>
+        <rect x="25" y="35" width="22" height="22" fill="#34d399" stroke="#059669" stroke-width="2" rx="4"/>
+        <rect x="52" y="35" width="22" height="22" fill="#60a5fa" stroke="#2563eb" stroke-width="2" rx="4"/>
+      </svg>`,
+      "bus": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#fef08a" stroke="#ca8a04" stroke-width="4"/>
+        <rect x="22" y="32" width="56" height="32" fill="#fbbf24" rx="6"/>
+        <circle cx="35" cy="68" r="8" fill="#1e293b"/>
+        <circle cx="65" cy="68" r="8" fill="#1e293b"/>
+        <rect x="55" y="38" width="16" height="12" fill="#e2e8f0"/>
+      </svg>`,
+      "eat": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#ffedd5" stroke="#ea580c" stroke-width="4"/>
+        <ellipse cx="50" cy="55" rx="20" ry="12" fill="#ef4444"/>
+        <path d="M50,30 L50,42 M46,42 L54,42" stroke="#ea580c" stroke-width="4" stroke-linecap="round"/>
+      </svg>`,
+      "coat": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#e0f2fe" stroke="#0284c7" stroke-width="4"/>
+        <path d="M30,35 L70,35 L65,75 L35,75 Z" fill="#0ea5e9"/>
+        <path d="M45,35 L45,75" stroke="#fff" stroke-width="4"/>
+        <circle cx="50" cy="45" r="4" fill="#facc15"/>
+        <circle cx="50" cy="60" r="4" fill="#facc15"/>
+      </svg>`,
+      "dog": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#fed7aa" stroke="#ea580c" stroke-width="4"/>
+        <circle cx="50" cy="50" r="22" fill="#ea580c"/>
+        <ellipse cx="28" cy="45" rx="6" ry="14" fill="#78350f" transform="rotate(15 28 45)"/>
+        <ellipse cx="72" cy="45" rx="6" ry="14" fill="#78350f" transform="rotate(-15 72 45)"/>
+      </svg>`,
+      "drink": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#d1fae5" stroke="#059669" stroke-width="4"/>
+        <rect x="35" y="30" width="30" height="45" fill="#22d3ee" rx="4" stroke="#0891b2" stroke-width="3"/>
+        <line x1="45" y1="42" x2="62" y2="18" stroke="#f43f5e" stroke-width="4" stroke-linecap="round"/>
+      </svg>`,
+      "sun": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#fef08a" stroke="#ca8a04" stroke-width="4"/>
+        <circle cx="50" cy="50" r="22" fill="#facc15"/>
+        <path d="M50,15 L50,22 M50,78 L50,88 M15,50 L25,50 M75,50 L85,50 M30,30 L37,37 M63,63 L70,70 M30,70 L37,63 M63,30 L70,37" stroke="#eab308" stroke-width="4" stroke-linecap="round"/>
+      </svg>`,
+      "home": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#ffedd5" stroke="#ea580c" stroke-width="4"/>
+        <polygon points="50,25 25,50 75,50" fill="#ef4444"/>
+        <rect x="30" y="50" width="40" height="25" fill="#f59e0b"/>
+        <rect x="44" y="58" width="12" height="17" fill="#1e293b"/>
+      </svg>`,
+      "fruit": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#fbcfe8" stroke="#db2777" stroke-width="4"/>
+        <circle cx="38" cy="50" r="14" fill="#a855f7"/>
+        <circle cx="62" cy="50" r="14" fill="#ec4899"/>
+        <path d="M38,36 Q50,25 62,36" fill="none" stroke="#22c55e" stroke-width="4"/>
+      </svg>`,
+      "snow": `<svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="40" fill="#f0fdf4" stroke="#16a34a" stroke-width="4"/>
+        <path d="M25,50 C20,40 35,35 48,38 C55,28 75,32 75,45 C82,48 80,60 70,60 L30,60 Z" fill="#cbd5e1"/>
+        <circle cx="35" cy="72" r="2.5" fill="#38bdf8"/>
+        <circle cx="50" cy="76" r="3.5" fill="#38bdf8"/>
+        <circle cx="65" cy="72" r="2.5" fill="#38bdf8"/>
+      </svg>`
+    };
+
+    let gameState = 'splash';
+    let score = 0, triesLeft = 2, currentQuestionIndex = 0;
+    let isFeedbackRunning = false;
+    let currentQuestions = [];
+
+    // Canvas Properties (800x600 coordinate grid for Olympic Spear Thrower)
+    let canvas = null, ctx = null;
+    const VIEW_W = 800, VIEW_H = 600;
+
+    // Greek Athlete Spear Thrower position
+    let athlete = { x: 400, y: 520, width: 60, height: 70 };
+
+    // Aim State
+    let isAiming = false;
+    let dragStartX = 0, dragStartY = 0;
+    let currentMouseX = 0, currentMouseY = 0;
+
+    // Flying Spear (Javelin) state
+    let spear = {
+      x: 0, y: 0,
+      vx: 0, vy: 0,
+      active: false,
+      angle: 0,
+      length: 70,
+      width: 4
+    };
+
+    // Target Shields floating/swaying at the top
+    let targets = [];
+
+    // Boot Loader Timer
+    setTimeout(() => { switchScreen('screen-start'); }, 1500);
+
+    function switchScreen(id) {
+      document.getElementById('screen-splash').classList.add('hidden');
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.add('hidden');
+      
+      document.getElementById(id).classList.remove('hidden');
+
+      if (id === 'screen-game') gameState = 'game';
+      else if (id === 'screen-summary') gameState = 'summary';
+      else if (id === 'screen-start') gameState = 'start';
+      else gameState = 'splash';
+    }
+
+    function startGame() {
+      // Setup Web Audio Context warmup
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume();
+      } catch (e) {}
+
+      // Register canvas
+      canvas = document.getElementById("mazeCanvas");
+      ctx = canvas.getContext("2d");
+      canvas.width = VIEW_W;
+      canvas.height = VIEW_H;
+
+      // Shuffle Level Pools
+      const poolL1 = [...QUESTIONS.slice(0, 10)].sort(() => Math.random() - 0.5);
+      const poolL2 = [...QUESTIONS.slice(10, 20)].sort(() => Math.random() - 0.5);
+      currentQuestions = [...poolL1, ...poolL2];
+
+      currentQuestionIndex = 0;
+      score = 0;
+      setupAimControls();
+      switchScreen('screen-game');
+      renderQuestion();
+      gameEngineLoop();
+    }
+
+    // Direct drag-to-aim controls for launching the Olympic Javelin Spear
+    function setupAimControls() {
+      const getCoords = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        return {
+          x: ((clientX - rect.left) / rect.width) * VIEW_W,
+          y: ((clientY - rect.top) / rect.height) * VIEW_H
+        };
+      };
+
+      canvas.addEventListener("pointerdown", (e) => {
+        if (isFeedbackRunning || spear.active) return;
+        const coords = getCoords(e);
+        
+        // Ensure starting point is near bottom athlete
+        if (coords.y > 400) {
+          isAiming = true;
+          dragStartX = coords.x;
+          dragStartY = coords.y;
+          currentMouseX = coords.x;
+          currentMouseY = coords.y;
+        }
+      });
+
+      window.addEventListener("pointermove", (e) => {
+        if (!isAiming) return;
+        const coords = getCoords(e);
+        currentMouseX = coords.x;
+        currentMouseY = coords.y;
+      });
+
+      window.addEventListener("pointerup", () => {
+        if (!isAiming) return;
+        isAiming = false;
+
+        const dx = dragStartX - currentMouseX;
+        const dy = dragStartY - currentMouseY;
+        const dist = Math.hypot(dx, dy);
+
+        // Minimum swipe pull to throw
+        if (dist > 15) {
+          playAudio('click');
+          spear.x = athlete.x;
+          spear.y = athlete.y - 10;
+          
+          // Projectile physics launching momentum
+          const powerFactor = 0.14;
+          spear.vx = dx * powerFactor;
+          spear.vy = dy * powerFactor;
+          spear.active = true;
+          spear.angle = Math.atan2(spear.vy, spear.vx);
+          document.getElementById('hint-feedback').innerText = "Javelin released! Watching trajectory...";
+        }
+      });
+    }
+
+    function renderQuestion() {
+      if (currentQuestionIndex >= 20) { endGame(); return; }
+      isFeedbackRunning = false;
+      triesLeft = 2;
+      document.getElementById('tries-count').innerText = triesLeft;
+
+      const q = currentQuestions[currentQuestionIndex];
+      const isL1 = currentQuestionIndex < 10;
+
+      // Dynamic Colors
+      if (isL1) {
+        document.body.className = "bg-sunny-lagoon text-[#1e1b4b] min-h-screen flex flex-col justify-between overflow-x-hidden relative";
+        document.getElementById('level-indicator').innerText = "LEVEL 1: LAGOON EXPLORATION";
+        document.getElementById('task-level-title').innerText = "LEVEL 1: MISSING CONJUNCTIONS";
+      } else {
+        document.body.className = "bg-coral-sunset text-[#4a044e] min-h-screen flex flex-col justify-between overflow-x-hidden relative";
+        document.getElementById('level-indicator').innerText = "LEVEL 2: SUNSET CAVERNS";
+        document.getElementById('task-level-title').innerText = "LEVEL 2: ERROR FIXER";
+      }
+
+      document.getElementById('task-bold-header').innerHTML = q.t;
+      document.getElementById('game-progress-text').innerText = `Question ${currentQuestionIndex + 1} / 20`;
+      document.getElementById('game-progress-bar').style.width = `${(currentQuestionIndex / 20) * 100}%`;
+      document.getElementById('game-score-text').innerText = score;
+      document.getElementById('task-image-box').innerHTML = VISUAL_HINTS[q.imageKey] || '';
+      document.getElementById('hint-feedback').innerText = "Aim and throw your spear at the correct word target!";
+
+      // Reset Spear State
+      spear.active = false;
+
+      // Map three target shields across the stadium sky
+      const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+      targets = [];
+      
+      const targetWidth = 140;
+      const horizontalSpan = VIEW_W - 100;
+      const step = horizontalSpan / Math.max(1, shuffledOptions.length - 1);
+
+      shuffledOptions.forEach((opt, i) => {
+        const tx = 50 + (i * step);
+        const ty = 140 + (Math.sin(i * 1.5) * 30); // Dynamic waving target wave heights
+        targets.push({
+          x: tx,
+          y: ty,
+          radius: 40,
+          label: opt.char,
+          isCorrect: opt.isCorrect,
+          angleOffset: Math.random() * Math.PI, // for swaying animation
+          broken: false
+        });
+      });
+    }
+
+    // MAIN PROJECTILE PHYSICS AND RENDER LOOP
+    function gameEngineLoop() {
+      if (gameState !== 'game') return;
+
+      // 1. Spear Projectile Physics Updates
+      if (spear.active && !isFeedbackRunning) {
+        spear.x += spear.vx;
+        spear.y += spear.vy;
+
+        // Apply soft gravity arc pull
+        spear.vy += 0.22;
+
+        // Calculate direct rotation align
+        spear.angle = Math.atan2(spear.vy, spear.vx);
+
+        // Gutter or boundary boundary checker
+        if (spear.x < -100 || spear.x > VIEW_W + 100 || spear.y > VIEW_H + 100) {
+          resetMissedSpear();
+        }
+
+        // Bounding circle collision detection against targets
+        targets.forEach(target => {
+          if (target.broken) return;
+
+          const dist = Math.hypot(spear.x - target.x, spear.y - target.y);
+          if (dist < target.radius + 15) {
+            target.broken = true;
+            spear.active = false;
+            evaluateHit(target);
+          }
+        });
+      }
+
+      // 2. Render Stadium Background & Assets
+      drawStadium();
+
+      requestAnimationFrame(gameEngineLoop);
+    }
+
+    function evaluateHit(target) {
+      isFeedbackRunning = true;
+      const q = currentQuestions[currentQuestionIndex];
+      const isL1 = currentQuestionIndex < 10;
+
+      if (target.isCorrect) {
+        playAudio('correct');
+        score += (triesLeft === 2) ? 10 : 5;
+        createExplosiveLaurels(target);
+
+        // Complete the sentence on success
+        let textResult = "";
+        if (isL1) {
+          textResult = q.t.replace("______", `<span class="text-emerald-600 font-extrabold underline">${target.label}</span>`);
+        } else {
+          textResult = q.t.replace(/<span[^>]*>.*?<\/span>/i, `<span class="text-emerald-600 font-extrabold underline">${target.label}</span>`);
+        }
+        document.getElementById('task-bold-header').innerHTML = textResult;
+        document.getElementById('hint-feedback').innerHTML = "🟢 BULLSEYE! Correct conjunction target hit!";
+
+        setTimeout(() => {
+          currentQuestionIndex++;
+          renderQuestion();
+        }, 1800);
+      } else {
+        triesLeft--;
+        document.getElementById('tries-count').innerText = triesLeft;
+        playAudio('wrong');
+
+        // Shake stadium cabinet container on fail
+        document.getElementById('game-cabinet').classList.add('shake-anim');
+        setTimeout(() => { document.getElementById('game-cabinet').classList.remove('shake-anim'); }, 400);
+
+        if (triesLeft > 0) {
+          document.getElementById('hint-feedback').innerHTML = "🔴 Wrong target! Respawning spear for another try...";
+          isFeedbackRunning = false;
+        } else {
+          document.getElementById('hint-feedback').innerHTML = "Skipping to next round...";
+          
+          let failResult = "";
+          const correctAns = q.options.find(o => o.isCorrect).char;
+          if (isL1) {
+            failResult = q.t.replace("______", `<span class="text-red-500 font-extrabold underline">${correctAns}</span>`);
+          } else {
+            failResult = q.t.replace(/<span[^>]*>.*?<\/span>/i, `<span class="text-red-500 font-extrabold underline">${correctAns}</span>`);
+          }
+          document.getElementById('task-bold-header').innerHTML = failResult;
+
+          setTimeout(() => {
+            currentQuestionIndex++;
+            renderQuestion();
+          }, 2200);
+        }
+      }
+    }
+
+    function resetMissedSpear() {
+      spear.active = false;
+      document.getElementById('hint-feedback').innerText = "Spear went out of bounds! Pull back and try again.";
+    }
+
+    // Programmatic 2D HTML5 Canvas Stadium Renderer
+    function drawStadium() {
+      ctx.clearRect(0, 0, VIEW_W, VIEW_H);
+
+      const isL1 = currentQuestionIndex < 10;
+
+      // 1. Sky Background (Lagoon Blue vs Coral Purple Sunset)
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, VIEW_H);
+      if (isL1) {
+        skyGrad.addColorStop(0, '#bae6fd');
+        skyGrad.addColorStop(1, '#e0f2fe');
+      } else {
+        skyGrad.addColorStop(0, '#fbcfe8');
+        skyGrad.addColorStop(1, '#f3e8ff');
+      }
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+      // Draw distant Olympic mountains
+      ctx.fillStyle = isL1 ? '#a7f3d0' : '#fed7aa';
+      ctx.beginPath();
+      ctx.moveTo(-50, 420);
+      ctx.lineTo(200, 240);
+      ctx.lineTo(450, 420);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(350, 420);
+      ctx.lineTo(600, 210);
+      ctx.lineTo(850, 420);
+      ctx.closePath();
+      ctx.fill();
+
+      // 2. Stadium Grass and Running Track (Bottom half)
+      ctx.fillStyle = '#10b981'; // Mint Green Field
+      ctx.fillRect(0, 400, VIEW_W, VIEW_H - 400);
+
+      const trackGrad = ctx.createLinearGradient(0, 450, 0, VIEW_H);
+      trackGrad.addColorStop(0, '#fb7185'); // Soft Red Track
+      trackGrad.addColorStop(1, '#be123c');
+      ctx.fillStyle = trackGrad;
+      ctx.fillRect(0, 450, VIEW_W, VIEW_H - 450);
+
+      // Track Lanes
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = 3;
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, 470 + i*40);
+        ctx.lineTo(VIEW_W, 470 + i*40);
+        ctx.stroke();
+      }
+
+      // 3. Draw target word shields swaying in the breeze
+      const timeSec = Date.now() / 1000;
+      targets.forEach(target => {
+        if (target.broken) return;
+
+        // Apply gentle natural swaying offset
+        const swayY = target.y + Math.sin(timeSec * 2 + target.angleOffset) * 10;
+
+        // Olympic Laurel Crown border
+        ctx.beginPath();
+        ctx.arc(target.x, swayY, target.radius + 6, 0, 2*Math.PI);
+        ctx.fillStyle = '#fef08a'; // Golden rim
+        ctx.fill();
+        ctx.strokeStyle = '#ca8a04';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Inner Shield Face (Mint/Pastel)
+        ctx.beginPath();
+        ctx.arc(target.x, swayY, target.radius, 0, 2*Math.PI);
+        ctx.fillStyle = '#f0fdfa';
+        ctx.fill();
+        ctx.strokeStyle = '#0d9488';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Center Word Label (Highly Legible)
+        ctx.fillStyle = '#1e1b4b';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(target.label, target.x, swayY);
+      });
+
+      // 4. Draw Olympic Greek Athlete (Spear Thrower)
+      ctx.fillStyle = '#fbcfe8'; // Skin
+      ctx.beginPath();
+      ctx.arc(athlete.x, athlete.y, 16, 0, 2*Math.PI); // Head
+      ctx.fill();
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Athlete Tunic/Toga (Pastel Sky Blue)
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(athlete.x - 20, athlete.y + 16, 40, 44);
+      ctx.strokeStyle = '#475569';
+      ctx.strokeRect(athlete.x - 20, athlete.y + 16, 40, 44);
+
+      // Gold Laurel wreath around head
+      ctx.fillStyle = '#ca8a04';
+      ctx.beginPath();
+      ctx.arc(athlete.x - 12, athlete.y - 4, 4, 0, 2*Math.PI);
+      ctx.arc(athlete.x + 12, athlete.y - 4, 4, 0, 2*Math.PI);
+      ctx.fill();
+
+      // 5. Draw Aiming Vector Dotted line
+      if (isAiming && !spear.active) {
+        const dx = dragStartX - currentMouseX;
+        const dy = dragStartY - currentMouseY;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > 15) {
+          ctx.beginPath();
+          ctx.moveTo(athlete.x, athlete.y + 20);
+          ctx.lineTo(athlete.x + dx * 1.5, athlete.y + 20 + dy * 1.5);
+          ctx.setLineDash([4, 6]);
+          ctx.strokeStyle = '#0284c7';
+          ctx.lineWidth = 4;
+          ctx.stroke();
+          ctx.setLineDash([]); // Reset to solid
+        }
+      }
+
+      // 6. Draw flying Spear (Javelin)
+      if (spear.active) {
+        ctx.save();
+        ctx.translate(spear.x, spear.y);
+        ctx.rotate(spear.angle);
+
+        // Spear wooden shaft
+        ctx.beginPath();
+        ctx.moveTo(-spear.length / 2, 0);
+        ctx.lineTo(spear.length / 2, 0);
+        ctx.strokeStyle = '#78350f'; // rich mahogany wood
+        ctx.lineWidth = spear.width;
+        ctx.stroke();
+
+        // Shining golden spearhead tip
+        ctx.beginPath();
+        ctx.moveTo(spear.length / 2, -5);
+        ctx.lineTo(spear.length / 2 + 15, 0);
+        ctx.lineTo(spear.length / 2, 5);
+        ctx.closePath();
+        ctx.fillStyle = '#fbbf24';
+        ctx.fill();
+
+        ctx.restore();
+      }
+    }
+
+    // Sparkles generator on Correct Hit
+    function createExplosiveLaurels(target) {
+      const parent = document.getElementById('game-cabinet');
+      const rect = canvas.getBoundingClientRect();
+      const parentRect = parent.getBoundingClientRect();
+
+      const px = (target.x) * (rect.width / canvas.width) + rect.left - parentRect.left;
+      const py = (target.y) * (rect.height / canvas.height) + rect.top - parentRect.top;
+
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.className = 'spark-particle';
+        p.style.width = '10px'; p.style.height = '10px';
+        p.style.background = '#facc15';
+        p.style.left = px + 'px'; p.style.top = py + 'px';
+        p.innerText = '🌿'; // Laurel leaves scatter
+        parent.appendChild(p);
+
+        const a = Math.random()*Math.PI*2, v = 3+Math.random()*4;
+        let curX = px, curY = py, op = 1;
+        const anim = () => {
+          curX += Math.cos(a)*v; curY += Math.sin(a)*v; op -= 0.03;
+          p.style.left = curX+'px'; p.style.top = curY+'px'; p.style.opacity = op;
+          if(op > 0) requestAnimationFrame(anim); else p.remove();
+        };
+        anim();
+      }
+    }
+
+    function updateTriesUI() {
+      document.getElementById('tries-count').innerText = triesLeft;
+    }
+
+    // Sound effects engine with safe element fallbacks
+    function playAudio(t) {
+      try {
+        const correctSnd = document.getElementById('correctSound');
+        const wrongSnd = document.getElementById('wrongSound');
+        const clapSnd = document.getElementById('clapSound');
+
+        if (t === 'correct' && correctSnd && correctSnd.readyState >= 2) {
+          correctSnd.currentTime = 0;
+          correctSnd.play().catch(() => synthAudio(t));
+        } else if (t === 'wrong' && wrongSnd && wrongSnd.readyState >= 2) {
+          wrongSnd.currentTime = 0;
+          wrongSnd.play().catch(() => synthAudio(t));
+        } else if (t === 'clapping' && clapSnd && clapSnd.readyState >= 2) {
+          clapSnd.currentTime = 0;
+          clapSnd.play().catch(() => synthAudio(t));
+        } else {
+          synthAudio(t);
+        }
+      } catch(e) { synthAudio(t); }
+    }
+
+    function synthAudio(t) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const audio = new AudioCtx();
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.connect(gain); gain.connect(audio.destination);
+
+      if (t === 'correct') {
+        osc.frequency.setValueAtTime(600, audio.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1000, audio.currentTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.4);
+        osc.start(); osc.stop(audio.currentTime + 0.4);
+      } else if (t === 'wrong') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(120, audio.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.4);
+        osc.start(); osc.stop(audio.currentTime + 0.4);
+      } else if (t === 'click') {
+        osc.frequency.setValueAtTime(800, audio.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.1);
+        osc.start(); osc.stop(audio.currentTime + 0.1);
+      }
+    }
+
+    function endGame() {
+      switchScreen('screen-summary');
+      document.getElementById('final-score').innerText = `${score} / 200`;
+      const win = score >= 140;
+      document.getElementById('sum-emoji').innerText = win ? "🏆" : "🥈";
+      document.getElementById('sum-title').innerText = win ? "TOURNAMENT WINNER!" : "TOURNAMENT RUNNER-UP";
+      playAudio('clapping');
+    }
+  </script>
+</body>
+</html>
