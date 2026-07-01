@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tense Tournament: 6-Ball Pool Arcade</title>
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none; -webkit-user-select: none; touch-action: none;
+      min-height: 100vh; display: flex; flex-direction: column;
+      overflow: hidden; position: relative;
+      background: linear-gradient(180deg, #bae6fd 0%, #a7f3d0 40%, #fef08a 100%);
+      background-size: 400% 400%; animation: warmGlow 15s ease infinite;
+      color: #1e1b4b;
+    }
+
+    @keyframes warmGlow { 0%, 100% { background-position: 50% 0%; } 50% { background-position: 50% 100%; } }
+
+    .hidden { display: none !important; }
+    
+    .container {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 20px; width: 100%; max-width: 800px; margin: 0 auto; z-index: 10;
+    }
+
+    /* Quiz Panel Styling */
+    .quiz-card {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 32px; padding: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      border: 6px solid #38bdf8; text-align: center; width: 100%;
+    }
+
+    .option-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 24px; width: 100%; }
+    
+    .option-btn {
+      padding: 18px; border-radius: 20px; border: 3px solid #e2e8f0;
+      background: #f8fafc; font-size: 1.2rem; font-weight: 800;
+      cursor: pointer; transition: all 0.2s; color: #334155;
+    }
+    .option-btn:hover { background: #f1f5f9; border-color: #38bdf8; transform: translateY(-2px); }
+    .option-btn:active { transform: scale(0.98); }
+
+    /* Pool Arena Styling */
+    .arena-panel { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
+    
+    .table-container {
+      position: relative; background: #92400e; border-radius: 2.5rem;
+      border: 12px solid #78350f; padding: 8px; width: 100%; max-width: 700px;
+      aspect-ratio: 4/3; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3);
+    }
+    canvas { width: 100%; height: 100%; border-radius: 1.5rem; background: #10b981; display: block; }
+
+    .header-strip {
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; max-width: 700px; margin-bottom: 12px;
+      background: white; padding: 12px 24px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .score-badge { padding: 6px 16px; border-radius: 9999px; font-weight: 900; font-size: 1rem; }
+
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    .animate-shake { animation: shake 0.3s ease-in-out; }
+
+    .spark-particle { position: absolute; border-radius: 50%; pointer-events: none; z-index: 100; }
+  </style>
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="screen-splash" style="position:fixed; inset:0; z-index:1000; background:white; display:flex; align-items:center; justify-content:center;">
+    <img id="splash-logo" src="assets/innovine-logo.png" style="width:200px; height:auto;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzA4OTFiZSIvPjx0ZXh0IHg9IjUwIiB5PSI2MCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5MT0dPPC90ZXh0Pjwvc3ZnPg=='">
+  </div>
+
+  <!-- Start Menu -->
+  <div id="screen-start" class="hidden container">
+    <div class="quiz-card">
+      <h1 style="font-size: 2.5rem; color: #0284c7; margin-bottom: 10px;">🎱 Tense Tournament</h1>
+      <p style="color: #db2777; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px;">20-ROUND CHAMPIONSHIP</p>
+      <div style="text-align: left; background: #f0f9ff; padding: 20px; border-radius: 20px; font-size: 1rem; margin-bottom: 25px; line-height: 1.5; border: 2px dashed #bae6fd;">
+        <strong>Tournament Rules:</strong><br>
+        1. Solve the Grammar Puzzle to earn your shot.<br>
+        2. **Correct:** You aim and shoot to sink a ball! 🎯<br>
+        3. **Wrong:** Computer AI takes the shot to steal a point!<br>
+        4. Most pocketed balls wins the tournament cup!
+      </div>
+      <button class="btn" onclick="startGame()" style="width:100%; max-width:300px;">Play Tournament 🏆</button>
+    </div>
+  </div>
+
+  <!-- Main Game Container -->
+  <div id="screen-game" class="hidden container">
+    
+    <!-- SUB-STATE 1: QUIZ SLIDE -->
+    <div id="sub-quiz" class="w-full">
+      <div class="header-strip">
+        <div style="font-weight:900; color:#0369a1;">QUESTION <span id="q-num">1</span> / 20</div>
+        <div style="display:flex; gap:10px;">
+          <div class="score-badge" style="background:#dcfce7; color:#166534;">YOU: <span id="p-score-top">0</span></div>
+          <div class="score-badge" style="background:#fee2e2; color:#991b1b;">AI: <span id="c-score-top">0</span></div>
+        </div>
+      </div>
+      <div class="quiz-card" style="padding: 30px;">
+        <div id="quiz-image" style="width:100px; height:100px; margin: 0 auto 15px;"></div>
+        <h2 id="quiz-question-text" style="font-size: 1.4rem; color: #1e293b; margin-bottom: 20px;">The logic puzzle goes here...</h2>
+        <div id="quiz-options" class="option-grid"></div>
+      </div>
+    </div>
+
+    <!-- SUB-STATE 2: POOL ARENA SLIDE -->
+    <div id="sub-pool" class="hidden arena-panel">
+      <div id="turn-banner" style="font-size: 1.2rem; font-weight: 900; color: #fff; background: #0369a1; padding: 10px 30px; border-radius: 999px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">YOUR TURN!</div>
+      <div class="table-container" id="table-box">
+        <canvas id="poolCanvas"></canvas>
+      </div>
+      <div style="margin-top: 15px; font-weight: 800; color: #475569; font-size: 0.9rem;">Drag backward from cue ball to aim</div>
+    </div>
+  </div>
+
+  <!-- Summary Screen -->
+  <div id="screen-summary" class="hidden container">
+    <div class="quiz-card" style="border-color: #facc15;">
+      <div style="font-size: 5rem;" id="sum-emoji">🏆</div>
+      <h1 id="sum-title" style="font-size: 2rem; color: #0369a1; margin: 10px 0;">Champion!</h1>
+      <div style="display:flex; justify-content:space-around; margin: 25px 0;">
+        <div><p style="color:#166534; font-weight:800;">YOU</p><p id="final-p" style="font-size:3rem; font-weight:900;">0</p></div>
+        <div><p style="color:#991b1b; font-weight:800;">AI</p><p id="final-c" style="font-size:3rem; font-weight:900;">0</p></div>
+      </div>
+      <button class="btn" onclick="location.reload()" style="max-width:250px;">New Tournament</button>
+    </div>
+  </div>
+
+  <script>
+    /* 20 APPLICATION & THINKING BASED QUESTIONS */
+    const QUESTIONS = [
+      { t: "Which word tells us this happened yesterday? 'We ___ to the park.'", o: ["went", "go", "will go"], c: 0, i: "go" },
+      { t: "Mom says, 'I ___ bake cookies tomorrow.' What is the tense?", o: ["Past", "Present", "Future"], c: 2, i: "eat" },
+      { t: "Identify the action happening right now: 'The baby ___.'", o: ["cried", "cries", "will cry"], c: 1, i: "sing" },
+      { t: "Choose the correct sentence for the past:", o: ["He will jump high.", "He jumps high.", "He jumped high."], c: 2, i: "jump" },
+      { t: "If you are planning your birthday next week, you ___ say:", o: ["I had a cake.", "I will have a cake.", "I have a cake."], c: 1, i: "eat" },
+      { t: "Which sentence describes a daily habit?", o: ["I brushed my teeth.", "I brush my teeth.", "I will brush my teeth."], c: 1, i: "play" },
+      { t: "The cat ___ the mouse two hours ago.", o: ["chases", "chased", "will chase"], c: 1, i: "play" },
+      { t: "Choose the word that fits: 'I ___ a rainbow later today.'", o: ["saw", "see", "will see"], c: 2, i: "go" },
+      { t: "What did he do yesterday? 'He ___ a blue shirt.'", o: ["wore", "wears", "will wear"], c: 0, i: "sing" },
+      { t: "If it is raining now, we say: 'The clouds ___ rain.'", o: ["drop", "dropped", "will drop"], c: 0, i: "go" },
+      { t: "Thinking: Which word is NOT about the past?", o: ["ran", "sang", "sing"], c: 2, i: "sing" },
+      { t: "Logic: If dinner is ready in 10 minutes, I ___ eat soon.", o: ["will", "did", "do"], c: 0, i: "eat" },
+      { t: "Find the error: 'Yesterday, I will play with my friend.'", o: ["Change 'will play' to 'played'", "Change 'will play' to 'play'", "No error"], c: 0, i: "play" },
+      { t: "Which word shows a future plan?", o: ["Looked", "Looking", "Look"], c: 2, i: "go" },
+      { t: "Identify the tense: 'The sun rises in the East.'", o: ["Past", "Present", "Future"], c: 1, i: "sun" },
+      { t: "Complete the logic: I was a baby, I ___ a child now.", o: ["am", "was", "will be"], c: 0, i: "play" },
+      { t: "Next year, I ___ in Grade 3.", o: ["am", "was", "will be"], c: 2, i: "jump" },
+      { t: "The bird ___ away when it saw the cat.", o: ["flies", "flew", "will fly"], c: 1, i: "go" },
+      { t: "Pick the future action:", o: ["Eating", "Ate", "Will eat"], c: 2, i: "eat" },
+      { t: "Yesterday morning, the school bell ___ loudly.", o: ["rang", "rings", "will ring"], c: 0, i: "sing" }
+    ];
+
+    const VISUALS = {
+      "sing": `<svg viewBox="0 0 100 100" width="80"><circle cx="50" cy="50" r="40" fill="#fbcfe8"/><path d="M40,60 L40,30 L65,25 L65,55" fill="none" stroke="#db2777" stroke-width="4"/><circle cx="34" cy="60" r="6" fill="#db2777"/><circle cx="59" cy="55" r="6" fill="#db2777"/></svg>`,
+      "play": `<svg viewBox="0 0 100 100" width="80"><circle cx="50" cy="50" r="40" fill="#bbf7d0"/><rect x="28" y="35" width="20" height="20" fill="#34d399" rx="3"/><rect x="52" y="45" width="20" height="20" fill="#60a5fa" rx="3"/></svg>`,
+      "eat": `<svg viewBox="0 0 100 100" width="80"><circle cx="50" cy="50" r="40" fill="#fed7aa"/><circle cx="50" cy="52" r="18" fill="#ef4444"/><path d="M50,34 Q52,24 58,26" stroke="#78350f" stroke-width="3" fill="none"/></svg>`,
+      "go": `<svg viewBox="0 0 100 100" width="80"><circle cx="50" cy="50" r="40" fill="#e0f2fe"/><path d="M25,50 H65 M50,30 L70,50 L50,70" fill="none" stroke="#0288d1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      "jump": `<svg viewBox="0 0 100 100" width="80"><circle cx="50" cy="50" r="40" fill="#fef08a"/><path d="M25,60 C25,45 75,45 75,60" stroke="#ca8a04" stroke-width="4" fill="none"/></svg>`,
+      "sun": `<svg viewBox="0 0 100 100" width="80"><circle cx="50" cy="50" r="30" fill="#facc15" stroke="#eab308" stroke-width="4"/></svg>`
+    };
+
+    let pScore = 0, cScore = 0, currentQ = 0, turn = 'player';
+    let canvas, ctx, balls = [], cueBall, isAiming = false, shotInProgress = false;
+    const TABLE_W = 600, TABLE_H = 450, B_RAD = 14, P_RAD = 25;
+
+    // Lifecycles
+    window.onload = () => setTimeout(() => { document.getElementById('screen-splash').style.display='none'; switchScreen('screen-start'); }, 1500);
+
+    function switchScreen(id) {
+      ['screen-start', 'screen-game', 'screen-summary'].forEach(s => document.getElementById(s).classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function startGame() {
+      pScore = 0; cScore = 0; currentQ = 0;
+      canvas = document.getElementById('poolCanvas');
+      ctx = canvas.getContext('2d');
+      canvas.width = TABLE_W; canvas.height = TABLE_H;
+      setupInput();
+      switchScreen('screen-game');
+      renderQuestion();
+      gameLoop();
+    }
+
+    function renderQuestion() {
+      if (currentQ >= 20) { showSummary(); return; }
+      document.getElementById('sub-quiz').classList.remove('hidden');
+      document.getElementById('sub-pool').classList.add('hidden');
+      
+      const q = QUESTIONS[currentQ];
+      document.getElementById('q-num').innerText = currentQ + 1;
+      document.getElementById('quiz-question-text').innerHTML = q.t;
+      document.getElementById('quiz-image').innerHTML = VISUALS[q.i] || '';
+      document.getElementById('p-score-top').innerText = pScore;
+      document.getElementById('c-score-top').innerText = cScore;
+
+      const optBox = document.getElementById('quiz-options');
+      optBox.innerHTML = '';
+      q.o.forEach((txt, idx) => {
+        const b = document.createElement('button');
+        b.className = 'option-btn';
+        b.innerText = txt;
+        b.onclick = () => handleAnswer(idx);
+        optBox.appendChild(b);
+      });
+      initTable();
+    }
+
+    function handleAnswer(idx) {
+      const correct = QUESTIONS[currentQ].c === idx;
+      turn = correct ? 'player' : 'ai';
+      playAudio(correct ? 'correct' : 'wrong');
+      
+      document.getElementById('turn-banner').innerText = correct ? "CORRECT! YOUR SHOT!" : "WRONG! AI SHOTS!";
+      document.getElementById('turn-banner').style.background = correct ? "#16a34a" : "#dc2626";
+
+      setTimeout(() => {
+        document.getElementById('sub-quiz').classList.add('hidden');
+        document.getElementById('sub-pool').classList.remove('hidden');
+        if (!correct) setTimeout(aiShot, 1000);
+      }, 800);
+    }
+
+    function initTable() {
+      cueBall = { x: 150, y: TABLE_H/2, vx: 0, vy: 0, r: B_RAD, color: 'white' };
+      balls = [];
+      const colors = ['#fbbf24', '#3b82f6', '#ef4444', '#8b5cf6', '#f97316', '#10b981'];
+      // Rack 6 balls in a small triangle
+      let startX = 420, startY = TABLE_H/2;
+      let count = 0;
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j <= i; j++) {
+          if (count >= 6) break;
+          balls.push({
+            x: startX + i * (B_RAD*2),
+            y: (startY - (i * B_RAD)) + j * (B_RAD*2),
+            vx: 0, vy: 0, r: B_RAD, color: colors[count], active: true
+          });
+          count++;
+        }
+      }
+    }
+
+    function setupInput() {
+      const getC = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const cx = e.clientX || (e.touches && e.touches[0].clientX);
+        const cy = e.clientY || (e.touches && e.touches[0].clientY);
+        return { x: (cx - r.left) * (TABLE_W/r.width), y: (cy - r.top) * (TABLE_H/r.height) };
+      };
+      canvas.onpointerdown = (e) => {
+        if (turn !== 'player' || areRolling() || shotInProgress) return;
+        isAiming = true;
+      };
+      window.onpointermove = (e) => { if(isAiming) currentInput = getC(e); };
+      window.onpointerup = (e) => {
+        if (!isAiming) return;
+        isAiming = false;
+        const c = getC(e);
+        const dx = cueBall.x - c.x, dy = cueBall.y - c.y;
+        cueBall.vx = dx * 0.12; cueBall.vy = dy * 0.12;
+        shotInProgress = true;
+        playAudio('click');
+      };
+    }
+    let currentInput = {x:0, y:0};
+
+    function aiShot() {
+      const target = balls.find(b => b.active);
+      if(!target) { finishRound(); return; }
+      const angle = Math.atan2(target.y - cueBall.y, target.x - cueBall.x) + (Math.random()-0.5)*0.1;
+      const pwr = 12 + Math.random()*5;
+      cueBall.vx = Math.cos(angle) * pwr;
+      cueBall.vy = Math.sin(angle) * pwr;
+      shotInProgress = true;
+      playAudio('click');
+    }
+
+    function areRolling() {
+      const v = (b) => Math.abs(b.vx) + Math.abs(b.vy);
+      if (v(cueBall) > 0.1) return true;
+      return balls.some(b => b.active && v(b) > 0.1);
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function update() {
+      const process = (b) => {
+        b.x += b.vx; b.y += b.vy; b.vx *= 0.985; b.vy *= 0.985;
+        if (b.x < B_RAD || b.x > TABLE_W-B_RAD) b.vx *= -1;
+        if (b.y < B_RAD || b.y > TABLE_H-B_RAD) b.vy *= -1;
+        // Pockets
+        [ [0,0],[300,0],[600,0],[0,450],[300,450],[600,450] ].forEach(p => {
+          if (Math.hypot(b.x-p[0], b.y-p[1]) < P_RAD) {
+            b.vx = 0; b.vy = 0;
+            if (b === cueBall) { b.x = 150; b.y = TABLE_H/2; }
+            else if (b.active) { 
+              b.active = false; 
+              if (turn === 'player') pScore++; else cScore++;
+              playAudio('correct');
+              createExplosion(b.x, b.y);
+            }
+          }
+        });
+      };
+      if (areRolling()) {
+        process(cueBall);
+        balls.forEach(b => { if(b.active) process(b); });
+        // Collisions
+        const all = [cueBall, ...balls.filter(b => b.active)];
+        for(let i=0; i<all.length; i++) {
+          for(let j=i+1; j<all.length; j++) {
+            let d = Math.hypot(all[i].x-all[j].x, all[i].y-all[j].y);
+            if (d < B_RAD*2) {
+              let tempX = all[i].vx; all[i].vx = all[j].vx; all[j].vx = tempX;
+              let tempY = all[i].vy; all[i].vy = all[j].vy; all[j].vy = tempY;
+            }
+          }
+        }
+      } else if (shotInProgress) {
+        shotInProgress = false;
+        setTimeout(finishRound, 1000);
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0,0,TABLE_W,TABLE_H);
+      // Felt
+      ctx.fillStyle = '#065f46'; ctx.fillRect(0,0,TABLE_W,TABLE_H);
+      // Pockets
+      ctx.fillStyle = '#111'; 
+      [ [0,0],[300,0],[600,0],[0,450],[300,450],[600,450] ].forEach(p => {
+        ctx.beginPath(); ctx.arc(p[0], p[1], P_RAD, 0, 7); ctx.fill();
+      });
+      // Balls
+      const drawB = (b) => {
+        ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7);
+        ctx.fillStyle = b.color; ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.stroke();
+      };
+      drawB(cueBall);
+      balls.forEach(b => { if(b.active) drawB(b); });
+      // Cue Line
+      if (isAiming) {
+        ctx.beginPath(); ctx.moveTo(cueBall.x, cueBall.y);
+        ctx.lineTo(currentInput.x, currentInput.y);
+        ctx.strokeStyle = 'white'; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
+      }
+    }
+
+    function finishRound() {
+      currentQ++;
+      renderQuestion();
+    }
+
+    function createExplosion(x, y) {
+      const parent = document.getElementById('table-box');
+      for (let i = 0; i < 15; i++) {
+        const p = document.createElement('div');
+        p.className = 'spark-particle';
+        p.style.width = '8px'; p.style.height = '8px';
+        p.style.background = '#facc15';
+        p.style.left = x + 'px'; p.style.top = y + 'px';
+        parent.appendChild(p);
+        const a = Math.random()*Math.PI*2, v = 2+Math.random()*4;
+        let curX = x, curY = y, op = 1;
+        const anim = () => {
+          curX += Math.cos(a)*v; curY += Math.sin(a)*v; op -= 0.02;
+          p.style.left = curX+'px'; p.style.top = curY+'px'; p.style.opacity = op;
+          if(op > 0) requestAnimationFrame(anim); else p.remove();
+        };
+        anim();
+      }
+    }
+
+    function playAudio(t) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const audio = new AudioCtx();
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        osc.connect(gain); gain.connect(audio.destination);
+        if (t === 'correct') {
+          osc.frequency.setValueAtTime(580, audio.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, audio.currentTime + 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.3);
+          osc.start(); osc.stop(audio.currentTime + 0.3);
+        } else if (t === 'wrong') {
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(150, audio.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.3);
+          osc.start(); osc.stop(audio.currentTime + 0.3);
+        } else if (t === 'click') {
+          osc.frequency.setValueAtTime(1000, audio.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.05);
+          osc.start(); osc.stop(audio.currentTime + 0.05);
+        }
+      } catch(e) {}
+    }
+
+    function showSummary() {
+      switchScreen('screen-summary');
+      document.getElementById('final-p').innerText = pScore;
+      document.getElementById('final-c').innerText = cScore;
+      const win = pScore >= cScore;
+      document.getElementById('sum-emoji').innerText = win ? "🏆" : "🥈";
+      document.getElementById('sum-title').innerText = win ? "Tournament Winner!" : "Runner Up!";
+      if (win) playAudio('correct');
+    }
+  </script>
+</body>
+</html>
