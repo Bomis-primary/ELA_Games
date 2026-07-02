@@ -1,1 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sunny's Garden — Interjections: Oh & Alas | Grade 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#8ECAE6;
+    --sky-bottom:#CDEAF7;
+    --grass-dark:#3A7D44;
+    --grass-light:#5CA85E;
+    --soil:#8B5E3C;
+    --sun:#FFB703;
+    --sun-glow:#FFD968;
+    --card:#FFF8ED;
+    --ink:#2B3A2E;
+    --oh-color:#4C9AFF;
+    --alas-color:#FF6B6B;
+    --happy:#3FA34D;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-bottom) 45%, var(--grass-light) 46%, var(--grass-dark) 100%);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:16px;
+    color:var(--ink);
+    overflow-x:hidden;
+  }
+  h1,h2,.display{font-family:'Baloo 2',cursive;}
 
+  /* ---------- Splash ---------- */
+  .splash{
+    position:fixed; inset:0; z-index:999;
+    background:linear-gradient(to bottom, var(--sky-top), var(--sky-bottom));
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:22px; transition:opacity .5s ease;
+  }
+  .splash.hidden{opacity:0; pointer-events:none;}
+  .splash img{max-width:260px; width:60%; animation:bob 2.4s ease-in-out infinite;}
+  .splash-title{font-size:26px; color:var(--ink); text-align:center; padding:0 20px;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  .start-btn{
+    font-family:'Baloo 2',cursive;
+    font-size:22px; font-weight:700; color:#fff;
+    background:var(--happy);
+    border:none; border-radius:50px;
+    padding:16px 44px;
+    box-shadow:0 6px 0 #2c7a37, 0 10px 18px rgba(0,0,0,.18);
+    cursor:pointer;
+    transition:transform .1s;
+  }
+  .start-btn:active{transform:translateY(4px); box-shadow:0 2px 0 #2c7a37, 0 4px 10px rgba(0,0,0,.18);}
+
+  /* ---------- Main container ---------- */
+  .container{
+    max-width:640px; width:100%;
+    background:var(--card);
+    border-radius:26px;
+    box-shadow:0 14px 40px rgba(0,0,0,.22);
+    overflow:hidden;
+    opacity:0; transition:opacity .5s ease;
+  }
+  .container.visible{opacity:1;}
+
+  .header{
+    background:linear-gradient(135deg, var(--sun) 0%, #FF9F1C 100%);
+    color:#fff; padding:20px; text-align:center;
+    position:relative;
+  }
+  .header h1{font-size:26px; text-shadow:0 2px 0 rgba(0,0,0,.12);}
+  .header p{font-size:14px; margin-top:4px; opacity:.95;}
+
+  .scoreboard{
+    display:flex; justify-content:space-around;
+    padding:12px; background:rgba(255,255,255,.28);
+    border-radius:14px; margin:14px 16px 0;
+  }
+  .score-item{text-align:center; font-size:13px; font-weight:700;}
+  .score-item span{display:block; font-family:'Baloo 2',cursive; font-size:22px; margin-top:2px;}
+
+  /* ---------- Garden scene ---------- */
+  .garden-wrap{padding:18px;}
+  .garden{
+    position:relative;
+    height:280px;
+    border-radius:18px;
+    background:linear-gradient(to bottom, #BFE3F3 0%, #DFF1DB 55%, #C7E8B0 56%, #9FD37E 100%);
+    overflow:hidden;
+    border:3px solid #FFD968;
+  }
+  .sun-deco{
+    position:absolute; top:14px; right:16px; width:54px; height:54px; border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, var(--sun-glow), var(--sun));
+    box-shadow:0 0 24px 8px rgba(255,183,3,.45);
+  }
+  .cloud{position:absolute; background:#fff; border-radius:50px; opacity:.85;}
+  .cloud1{width:60px; height:22px; top:24px; left:20px;}
+  .cloud1::after{content:'';position:absolute;width:34px;height:34px;background:#fff;border-radius:50%;top:-16px;left:10px;}
+  .cloud2{width:44px; height:16px; top:52px; left:120px;}
+
+  .pot{
+    position:absolute; bottom:18px; left:50%; transform:translateX(-50%);
+    width:86px; height:60px;
+    background:linear-gradient(180deg, #C97B4A, #A85F35);
+    border-radius:6px 6px 20px 20px;
+    box-shadow:inset 0 -8px 10px rgba(0,0,0,.15);
+  }
+  .pot::before{
+    content:''; position:absolute; top:-8px; left:-6px; right:-6px; height:14px;
+    background:#B96A3E; border-radius:6px;
+  }
+
+  .stem{
+    position:absolute; bottom:76px; left:50%; transform:translateX(-50%);
+    width:8px; background:linear-gradient(180deg,#6FBF6C,#3F8F45);
+    border-radius:6px;
+    transition:height .6s cubic-bezier(.34,1.56,.64,1);
+    height:0px;
+  }
+  .leaf{
+    position:absolute; width:0; height:0; opacity:0;
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  .leaf-left{
+    bottom:118px; left:calc(50% - 6px); transform:translateX(-100%) scale(0);
+    border-radius:0 60px 0 60px; background:#4CA652; width:34px; height:20px;
+  }
+  .leaf-right{
+    bottom:150px; left:calc(50% + 6px); transform:scale(0);
+    border-radius:60px 0 60px 0; background:#4CA652; width:34px; height:20px;
+  }
+
+  .flower-head{
+    position:absolute; left:50%; bottom:0;
+    transform:translate(-50%, 0) scale(0);
+    opacity:0;
+    transition:transform .6s cubic-bezier(.34,1.56,.64,1), opacity .4s ease, bottom .6s cubic-bezier(.34,1.56,.64,1);
+    width:140px; height:140px;
+    filter:drop-shadow(0 6px 8px rgba(60,40,10,.25));
+  }
+  .flower-head svg{width:100%; height:100%; overflow:visible;}
+  .flower-head.happy{transform:translate(-50%,0) scale(1.08) rotate(-2deg);}
+  .flower-head.sad .sun-eye{transform:translateY(2px) scaleY(.7);}
+  .flower-head.sad #mouthHappy{opacity:0;}
+  .flower-head.sad #mouthSad{opacity:1;}
+  .flower-head.happy #mouthHappy{opacity:1;}
+  .flower-head.happy #mouthSad{opacity:0;}
+  .sun-eye{transition:transform .2s ease; transform-origin:center;}
+  #mouthSad{opacity:0; transition:opacity .2s;}
+  #mouthHappy{opacity:1; transition:opacity .2s;}
+
+  /* stage growth */
+  .garden.stage-0 .stem{height:0px;}
+  .garden.stage-1 .stem{height:34px;}
+  .garden.stage-2 .stem{height:64px;}
+  .garden.stage-2 .leaf{opacity:1; transform:scale(1);}
+  .garden.stage-2 .leaf-left{transform:translateX(-100%) scale(1);}
+  .garden.stage-3 .stem{height:96px;}
+  .garden.stage-3 .leaf{opacity:1; transform:scale(1);}
+  .garden.stage-3 .leaf-left{transform:translateX(-100%) scale(1);}
+  .garden.stage-4 .stem{height:130px;}
+  .garden.stage-4 .leaf{opacity:1; transform:scale(1);}
+  .garden.stage-4 .leaf-left{transform:translateX(-100%) scale(1);}
+  .garden.stage-4 .flower-head, .garden.stage-5 .flower-head{opacity:1; transform:translate(-50%,0) scale(1);}
+  .garden.stage-4 .flower-head{bottom:118px;}
+  .garden.stage-5 .flower-head{bottom:152px; transform:translate(-50%,0) scale(1.15);}
+
+  .sparkle{
+    position:absolute; font-size:20px; opacity:0; pointer-events:none;
+    animation:sparkleUp 1s ease-out forwards;
+  }
+  @keyframes sparkleUp{
+    0%{opacity:1; transform:translateY(0) scale(.6);}
+    100%{opacity:0; transform:translateY(-50px) scale(1.3);}
+  }
+
+  .growth-label{
+    text-align:center; margin-top:8px; font-weight:800; color:#3F8F45; font-size:14px;
+  }
+
+  /* ---------- Question card ---------- */
+  .question-modal{
+    display:none; position:fixed; inset:0; background:rgba(30,50,30,.72);
+    z-index:1000; justify-content:center; align-items:center; padding:20px;
+  }
+  .question-box{
+    background:var(--card); border-radius:22px; padding:26px;
+    max-width:520px; width:100%; max-height:88vh; overflow-y:auto;
+    animation:pop .3s ease-out; box-shadow:0 16px 40px rgba(0,0,0,.3);
+  }
+  @keyframes pop{from{transform:scale(.85); opacity:0;} to{transform:scale(1); opacity:1;}}
+  .q-eyebrow{font-size:13px; font-weight:800; color:#FF9F1C; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;}
+  .q-scene{font-size:38px; text-align:center; margin-bottom:8px;}
+  .q-text{font-size:19px; font-weight:700; margin-bottom:20px; line-height:1.5; text-align:center;}
+  .blank{color:#FF9F1C;}
+
+  .choice-row{display:flex; gap:14px;}
+  .choice-btn{
+    flex:1; padding:20px 10px; border-radius:16px; border:3px solid transparent;
+    font-family:'Baloo 2',cursive; font-size:22px; font-weight:700; color:#fff;
+    cursor:pointer; transition:transform .12s;
+  }
+  .choice-btn:active{transform:scale(.96);}
+  .choice-oh{background:var(--oh-color);}
+  .choice-alas{background:var(--alas-color);}
+  .choice-btn.correct{background:var(--happy); box-shadow:0 0 0 4px #cdeecd;}
+  .choice-btn.wrong{background:#b95050; opacity:.6;}
+  .choice-btn:disabled{cursor:default;}
+
+  .feedback{
+    margin-top:18px; padding:12px 14px; border-radius:12px; font-weight:800;
+    text-align:center; display:none; font-size:15px;
+  }
+  .feedback.correct{background:#d8f3d9; color:#2E7D32;}
+  .feedback.wrong{background:#fbdada; color:#B23B3B;}
+
+  /* ---------- End screen ---------- */
+  .end-box .q-text{font-size:17px; line-height:1.6;}
+  .big-score{font-family:'Baloo 2',cursive; font-size:44px; text-align:center; color:#FF9F1C; margin:10px 0;}
+  .restart-btn{
+    display:block; margin:22px auto 0; padding:14px 36px;
+    font-family:'Baloo 2',cursive; font-size:18px; font-weight:700; color:#fff;
+    background:var(--happy); border:none; border-radius:50px; cursor:pointer;
+    box-shadow:0 5px 0 #2c7a37;
+  }
+  .restart-btn:active{transform:translateY(3px); box-shadow:0 2px 0 #2c7a37;}
+
+  .volume-row{display:flex; align-items:center; justify-content:center; gap:8px; padding:0 16px 18px; font-size:13px; font-weight:700;}
+  .volume-row input{width:140px;}
+
+  @media (max-width:480px){
+    .header h1{font-size:21px;}
+    .garden{height:230px;}
+    .q-text{font-size:16px;}
+    .choice-btn{font-size:18px; padding:16px 8px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="splash" id="splash">
+    <img src="assets/logo.png" alt="Logo" onerror="this.style.display='none'">
+    <div class="splash-title">🌻 Sunny's Garden<br><span style="font-size:16px; font-weight:600;">Learn "Oh" &amp; "Alas" — Grade 4</span></div>
+    <button class="start-btn" id="startBtn">Let's Grow! 🌱</button>
+  </div>
+
+  <div class="container" id="mainContainer">
+    <div class="header">
+      <h1>🌻 Sunny's Garden</h1>
+      <p>Help Sunny grow by choosing the right interjection!</p>
+    </div>
+
+    <div class="scoreboard">
+      <div class="score-item">Correct<span id="correctCount">0</span></div>
+      <div class="score-item">Question<span id="qProgress">0/10</span></div>
+      <div class="score-item">Growth<span id="growthPct">0%</span></div>
+    </div>
+
+    <div class="garden-wrap">
+      <div class="garden stage-0" id="garden">
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="sun-deco"></div>
+        <div class="pot"></div>
+        <div class="stem" id="stem"></div>
+        <div class="leaf leaf-left" id="leafLeft"></div>
+        <div class="leaf leaf-right" id="leafRight"></div>
+        <div class="flower-head" id="flowerHead">
+          <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="petalBackGrad" cx="50%" cy="20%" r="80%">
+                <stop offset="0%" stop-color="#F7931E"/>
+                <stop offset="100%" stop-color="#E07A0A"/>
+              </radialGradient>
+              <radialGradient id="petalFrontGrad" cx="50%" cy="20%" r="80%">
+                <stop offset="0%" stop-color="#FFDE6B"/>
+                <stop offset="100%" stop-color="#FFC93C"/>
+              </radialGradient>
+              <radialGradient id="centerGrad" cx="40%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="#A9702E"/>
+                <stop offset="55%" stop-color="#7C4A1E"/>
+                <stop offset="100%" stop-color="#5C3315"/>
+              </radialGradient>
+            </defs>
+            <g id="petalsBack"></g>
+            <g id="petalsFront"></g>
+            <circle cx="70" cy="70" r="26" fill="url(#centerGrad)"/>
+            <g id="seedSpiral"></g>
+            <circle cx="70" cy="70" r="26" fill="none" stroke="#4A2A10" stroke-width="1.5" opacity=".5"/>
+            <g id="faceGroup">
+              <ellipse class="sun-eye" cx="61" cy="66" rx="2.6" ry="3.6" fill="#2B1B0C"/>
+              <ellipse class="sun-eye" cx="79" cy="66" rx="2.6" ry="3.6" fill="#2B1B0C"/>
+              <path id="mouthHappy" d="M60 76 Q70 84 80 76" stroke="#2B1B0C" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+              <path id="mouthSad" d="M60 80 Q70 74 80 80" stroke="#2B1B0C" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="growth-label" id="growthLabel">Sunny is a tiny seed, waiting to sprout 🌱</div>
+    </div>
+
+    <div class="volume-row">
+      🔊 <input type="range" id="volumeSlider" min="0" max="100" value="80"> <span id="volumeLabel">80%</span>
+    </div>
+  </div>
+
+  <div class="question-modal" id="questionModal">
+    <div class="question-box" id="questionBox">
+      <div class="q-eyebrow">Question <span id="qNum">1</span> of 10</div>
+      <div class="q-scene" id="qScene">😲</div>
+      <div class="q-text" id="qText"></div>
+      <div class="choice-row" id="choiceRow">
+        <button class="choice-btn choice-oh" id="ohBtn">Oh</button>
+        <button class="choice-btn choice-alas" id="alasBtn">Alas</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+
+<script>
+  // ---------- Audio ----------
+  const correctSound = new Audio('assets/correct.mp3');
+  const wrongSound = new Audio('assets/wrong.mp3');
+  const celebrationSound = new Audio('assets/freesound_community-claps-44774.mp3');
+  let volume = 0.8;
+  [correctSound, wrongSound, celebrationSound].forEach(a => a.volume = volume);
+
+  document.getElementById('volumeSlider').addEventListener('input', e => {
+    volume = e.target.value / 100;
+    [correctSound, wrongSound, celebrationSound].forEach(a => a.volume = volume);
+    document.getElementById('volumeLabel').textContent = e.target.value + '%';
+  });
+
+  function playCorrect(){ correctSound.currentTime = 0; correctSound.play().catch(()=>{}); }
+  function playWrong(){ wrongSound.currentTime = 0; wrongSound.play().catch(()=>{}); }
+  function playCelebration(){ celebrationSound.currentTime = 0; celebrationSound.play().catch(()=>{}); }
+
+  // ---------- Build the sunflower (layered petals + real phyllotaxis seed spiral) ----------
+  function buildSunflower(){
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const cx = 70, cy = 70;
+
+    function makePetal(len, width){
+      // teardrop petal path, tip pointing outward (up), base at center
+      return `M0,0 C${-width/2},${-len*0.35} ${-width/2},${-len*0.75} 0,${-len} C${width/2},${-len*0.75} ${width/2},${-len*0.35} 0,0 Z`;
+    }
+
+    const backGroup = document.getElementById('petalsBack');
+    const frontGroup = document.getElementById('petalsFront');
+
+    const backCount = 14, frontCount = 14;
+    for(let i=0;i<backCount;i++){
+      const angle = (360/backCount) * i;
+      const p = document.createElementNS(svgNS,'path');
+      p.setAttribute('d', makePetal(52, 22));
+      p.setAttribute('fill', 'url(#petalBackGrad)');
+      p.setAttribute('transform', `translate(${cx},${cy}) rotate(${angle})`);
+      backGroup.appendChild(p);
+    }
+    for(let i=0;i<frontCount;i++){
+      const angle = (360/frontCount) * i + (360/frontCount)/2;
+      const p = document.createElementNS(svgNS,'path');
+      p.setAttribute('d', makePetal(40, 17));
+      p.setAttribute('fill', 'url(#petalFrontGrad)');
+      p.setAttribute('transform', `translate(${cx},${cy}) rotate(${angle})`);
+      frontGroup.appendChild(p);
+    }
+
+    // Real sunflower seed arrangement: golden-angle phyllotaxis spiral
+    const seedGroup = document.getElementById('seedSpiral');
+    const seedCount = 110;
+    const goldenAngle = 137.50776;
+    const maxRadius = 23;
+    for(let n=0;n<seedCount;n++){
+      const r = maxRadius * Math.sqrt(n / seedCount);
+      const theta = n * goldenAngle * Math.PI / 180;
+      const x = cx + r * Math.cos(theta);
+      const y = cy + r * Math.sin(theta);
+      const seed = document.createElementNS(svgNS,'ellipse');
+      seed.setAttribute('cx', x.toFixed(2));
+      seed.setAttribute('cy', y.toFixed(2));
+      seed.setAttribute('rx', 1.6);
+      seed.setAttribute('ry', 2.2);
+      seed.setAttribute('transform', `rotate(${(theta*180/Math.PI + 90).toFixed(1)} ${x.toFixed(2)} ${y.toFixed(2)})`);
+      seed.setAttribute('fill', n % 3 === 0 ? '#3F2410' : '#5A3418');
+      seed.setAttribute('opacity', '0.85');
+      seedGroup.appendChild(seed);
+    }
+  }
+  buildSunflower();
+
+  // ---------- Splash ----------
+  document.getElementById('startBtn').addEventListener('click', () => {
+    document.getElementById('splash').classList.add('hidden');
+    document.getElementById('mainContainer').classList.add('visible');
+    initGame();
+  });
+
+  // ---------- Questions ----------
+  const questions = [
+    { scene: '😲', text: '<span class="blank">___</span>! A butterfly landed right on my nose!', answer: 'oh' },
+    { scene: '😢', text: '<span class="blank">___</span>! My kite got stuck in the tall tree.', answer: 'alas' },
+    { scene: '😮', text: '<span class="blank">___</span>! I didn\'t know you were coming to visit today!', answer: 'oh' },
+    { scene: '😔', text: '<span class="blank">___</span>! I forgot my homework at home.', answer: 'alas' },
+    { scene: '🌻', text: '<span class="blank">___</span>! Look how tall the sunflower grew overnight!', answer: 'oh' },
+    { scene: '🌧️', text: '<span class="blank">___</span>! The rain ruined our picnic in the park.', answer: 'alas' },
+    { scene: '🌈', text: '<span class="blank">___</span>! There\'s a rainbow in the sky after the rain!', answer: 'oh' },
+    { scene: '💔', text: '<span class="blank">___</span>! My favorite mug slipped and broke.', answer: 'alas' },
+    { scene: '😱', text: '<span class="blank">___</span>! You scared me when you jumped out like that!', answer: 'oh' },
+    { scene: '🚌', text: '<span class="blank">___</span>! We ran outside just as the school bus left.', answer: 'alas' }
+  ];
+
+  function shuffle(arr){
+    const a = [...arr];
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  let order = [];
+  let qIndex = 0;
+  let correctCount = 0;
+
+  const growthLabels = [
+    'Sunny is a tiny seed, waiting to sprout 🌱',
+    'A little sprout is peeking out! 🌿',
+    'Sunny is stretching taller every answer! 🌿',
+    'Leaves are unfurling nicely! 🍃',
+    'A bud is forming — almost there! 🌼',
+    'Sunny is in full, happy bloom! 🌻'
+  ];
+
+  function initGame(){
+    order = shuffle(questions);
+    qIndex = 0;
+    correctCount = 0;
+    setStage(0);
+    updateScoreboard();
+    document.getElementById('restartWrap')?.remove();
+    setTimeout(() => showQuestion(), 500);
+  }
+
+  function updateScoreboard(){
+    document.getElementById('correctCount').textContent = correctCount;
+    document.getElementById('qProgress').textContent = qIndex + '/10';
+    document.getElementById('growthPct').textContent = Math.round((qIndex/10)*100) + '%';
+  }
+
+  function setStage(stage){
+    const garden = document.getElementById('garden');
+    garden.className = 'garden stage-' + stage;
+    document.getElementById('growthLabel').textContent = growthLabels[stage];
+  }
+
+  function showQuestion(){
+    const q = order[qIndex];
+    document.getElementById('qNum').textContent = qIndex + 1;
+    document.getElementById('qScene').textContent = q.scene;
+    document.getElementById('qText').innerHTML = q.text;
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('feedback').className = 'feedback';
+
+    const ohBtn = document.getElementById('ohBtn');
+    const alasBtn = document.getElementById('alasBtn');
+    ohBtn.disabled = false; alasBtn.disabled = false;
+    ohBtn.className = 'choice-btn choice-oh';
+    alasBtn.className = 'choice-btn choice-alas';
+
+    ohBtn.onclick = () => checkAnswer('oh', ohBtn, alasBtn);
+    alasBtn.onclick = () => checkAnswer('alas', alasBtn, ohBtn);
+
+    document.getElementById('questionModal').style.display = 'flex';
+  }
+
+  function spawnSparkle(){
+    const garden = document.getElementById('garden');
+    for(let i=0;i<5;i++){
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.textContent = '✨';
+      s.style.left = (30 + Math.random()*40) + '%';
+      s.style.bottom = (40 + Math.random()*30) + 'px';
+      s.style.animationDelay = (i*0.08) + 's';
+      garden.appendChild(s);
+      setTimeout(() => s.remove(), 1200);
+    }
+  }
+
+  function checkAnswer(picked, pickedBtn, otherBtn){
+    const q = order[qIndex];
+    const isCorrect = picked === q.answer;
+    pickedBtn.disabled = true; otherBtn.disabled = true;
+    const feedback = document.getElementById('feedback');
+    const flowerHead = document.getElementById('flowerHead');
+
+    if(isCorrect){
+      pickedBtn.classList.add('correct');
+      feedback.textContent = '🎉 Yes! That\'s correct — Sunny is happy!';
+      feedback.className = 'feedback correct';
+      correctCount++;
+      playCorrect();
+      spawnSparkle();
+      flowerHead.classList.add('happy');
+      setTimeout(() => flowerHead.classList.remove('happy'), 900);
+    } else {
+      pickedBtn.classList.add('wrong');
+      otherBtn.classList.add('correct');
+      feedback.textContent = `❌ Not quite. The right word is "${q.answer === 'oh' ? 'Oh' : 'Alas'}".`;
+      feedback.className = 'feedback wrong';
+      playWrong();
+      flowerHead.classList.add('sad');
+      setTimeout(() => flowerHead.classList.remove('sad'), 900);
+    }
+    feedback.style.display = 'block';
+
+    qIndex++;
+    setStage(Math.min(5, Math.ceil(qIndex/2)));
+    updateScoreboard();
+
+    setTimeout(() => {
+      document.getElementById('questionModal').style.display = 'none';
+      if(qIndex < order.length){
+        showQuestion();
+      } else {
+        endGame();
+      }
+    }, 1800);
+  }
+
+  function endGame(){
+    const modal = document.getElementById('questionModal');
+    const box = document.getElementById('questionBox');
+    const pct = Math.round((correctCount/order.length)*100);
+    let message = '';
+    if(pct >= 80){ message = '🌟 Sunny bloomed beautifully — you know "Oh" and "Alas" really well!'; playCelebration(); }
+    else if(pct >= 50){ message = '👍 Nice work! Sunny grew a lot. A little more practice and you\'ll be an expert!'; }
+    else { message = '💪 Sunny needs a bit more sunshine! Try again to help it bloom fully.'; }
+
+    box.className = 'question-box end-box';
+    box.innerHTML = `
+      <div class="q-eyebrow">Game Complete</div>
+      <div class="q-scene">🌻</div>
+      <div class="big-score">${correctCount}/${order.length}</div>
+      <div class="q-text">${pct}% Correct<br><br>${message}</div>
+      <button class="restart-btn" id="restartBtn">🔄 Plant a New Seed</button>
+    `;
+    modal.style.display = 'flex';
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      modal.style.display = 'none';
+      box.className = 'question-box';
+      box.innerHTML = `
+        <div class="q-eyebrow">Question <span id="qNum">1</span> of 10</div>
+        <div class="q-scene" id="qScene">😲</div>
+        <div class="q-text" id="qText"></div>
+        <div class="choice-row" id="choiceRow">
+          <button class="choice-btn choice-oh" id="ohBtn">Oh</button>
+          <button class="choice-btn choice-alas" id="alasBtn">Alas</button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      `;
+      initGame();
+    });
+  }
+</script>
+</body>
+</html>
