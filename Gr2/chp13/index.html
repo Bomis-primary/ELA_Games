@@ -54,6 +54,36 @@
 
     .badge { padding: 4px 12px; border-radius: 9999px; font-weight: 800; font-size: 0.85rem; }
 
+    /* Spectacular 3D Arcade Button Styling */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #facc15; /* Bright Sunny Gold Yellow */
+      color: #1e1b4b; /* Royal Indigo */
+      font-family: system-ui, sans-serif;
+      font-weight: 900;
+      font-size: 1.6rem;
+      padding: 16px 40px;
+      border: 4px solid #1e1b4b;
+      border-radius: 24px;
+      box-shadow: 0 8px 0 #b45309, 0 12px 20px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.1s ease;
+      outline: none;
+    }
+    .btn:hover {
+      background: #fef08a; /* Soft buttercup yellow on hover */
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 #b45309, 0 15px 25px rgba(0, 0, 0, 0.2);
+    }
+    .btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #b45309, 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
     /* Animations */
     .shake-anim { animation: shake 0.4s ease-in-out; }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
@@ -93,10 +123,10 @@
         <p style="font-weight: 900; color: #0369a1; margin-bottom: 15px; font-size: 1.7rem;">How to Play:</p>
         • Read the <strong>Conjunction Challenge</strong> at the top of the screen.<br>
         • Floating in the Olympic sky are target shields containing conjunction words.<br>
-        • Drag backward from the Athlete holding the spear to aim, and release to throw! 🎳📱<br>
+        • Drag backward from <strong>anywhere on the screen</strong> to aim like a windshield wiper, and release to throw! 🎯📱<br>
         • Hit the correct target shield to complete the sentence and win the trophy!
       </div>
-      <button class="btn w-full bg-yellow-400 hover:bg-yellow-300 text-sky-950 font-extrabold text-2xl py-5 rounded-2xl shadow-lg border-b-8 border-yellow-600 uppercase tracking-wider" onclick="startGame()" style="max-width:400px; height:80px;">START TOURNAMENT 🏆</button>
+      <button class="btn" onclick="startGame()">START TOURNAMENT 🏆</button>
     </div>
   </div>
 
@@ -110,6 +140,9 @@
       <div>
         <div id="level-indicator" style="font-size:0.75rem; font-weight:900; color:#0284c7; letter-spacing:1px;">LEVEL 1: LAGOON EXPLORATION</div>
         <div id="game-progress-text" style="font-weight:800; font-size:1.1rem;">Question 1 / 20</div>
+      </div>
+      <div class="flex-1 mx-4 h-3 bg-sky-100 rounded-full overflow-hidden hidden md:block relative border border-sky-200">
+        <div id="game-progress-bar" class="h-full bg-gradient-to-r from-yellow-400 to-sky-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
       </div>
       <div style="display:flex; gap: 8px;">
         <div class="badge" style="background:#fee2e2; color:#b91c1c;">Tries: <span id="tries-count">2</span></div>
@@ -130,7 +163,7 @@
 
     <!-- Turn Banner -->
     <div id="hint-feedback" style="font-size:0.85rem; font-weight:900; text-align:center; color:#1e1b4b; background:white; padding: 6px 16px; border-radius: 9999px; margin-bottom:8px; width: 100%; max-width:[600px]; border: 1px solid #e2e8f0;" class="animate-pulse">
-      Aim and release to throw your spear at the correct word shield!
+      Aim anywhere and release to throw your spear at the correct word shield!
     </div>
 
     <!-- Interactive Layout Area -->
@@ -154,13 +187,13 @@
       <h1 id="sum-title" style="color:#0284c7; font-size:2rem; font-family:'Fredoka One', cursive;">Stadium Cleared!</h1>
       <div id="final-score" style="font-size:3rem; font-weight:900; color:#eab308; margin:16px 0;">0 / 20</div>
       <p id="summary-feedback" style="font-size:1.1rem; color:#475569; margin-bottom:24px; line-height:1.4;">Outstanding work hitting correct conjunction targets!</p>
-      <button class="btn bg-yellow-400 hover:bg-yellow-300 text-sky-950 font-black py-4 px-8 rounded-xl shadow-lg border-b-4 border-yellow-600" onclick="location.reload()" style="max-width:250px;">PLAY AGAIN</button>
+      <button class="btn" onclick="location.reload()">PLAY AGAIN 🔄</button>
     </div>
   </div>
 
   <!-- ==========================================
        AUDIO ELEMENTS
-       ========================================== -->
+       ========================================= -->
   <audio id="correctSound" src="assets/correct.mp3" preload="auto"></audio>
   <audio id="wrongSound" src="assets/wrong.mp3" preload="auto"></audio>
   <audio id="clapSound" src="assets/clapping.mp3" preload="auto"></audio>
@@ -184,16 +217,16 @@
       { t: "Put on your winter boots ______ it is snowing outside!", word: "because", imageKey: "snow", options: [{char:"because", isCorrect:true}, {char:"but", isCorrect:false}, {char:"or", isCorrect:false}] },
       
       // Level 2: Sentence Error Correction
-      { t: "Fix: 'I went to bed <span class=\"text-red-500 font-extrabold line-through font-fun\">but</span> I was very tired.'", word: "because", imageKey: "home", options: [{char:"because", isCorrect:true}, {char:"or", isCorrect:false}, {char:"but", isCorrect:false}] },
-      { t: "Fix: 'Do you want milk <span class=\"text-red-500 font-extrabold line-through font-fun\">because</span> water?'", word: "or", imageKey: "drink", options: [{char:"or", isCorrect:true}, {char:"and", isCorrect:false}, {char:"but", isCorrect:false}] },
-      { t: "Fix: 'I like dogs <span class=\"text-red-500 font-extrabold line-through font-fun\">but</span> friendly cats.'", word: "and", imageKey: "dog", options: [{char:"and", isCorrect:true}, {char:"or", isCorrect:false}, {char:"because", isCorrect:false}] },
-      { t: "Fix: 'I wore a heavy coat <span class=\"text-red-500 font-extrabold line-through font-fun\">because</span> it was warm.'", word: "but", imageKey: "coat", options: [{char:"but", isCorrect:true}, {char:"and", isCorrect:false}, {char:"because", isCorrect:false}] },
-      { t: "Fix: 'I ran fast <span class=\"text-red-500 font-extrabold line-through font-fun\">or</span> I missed the school bus.'", word: "but", imageKey: "bus", options: [{char:"but", isCorrect:true}, {char:"and", isCorrect:false}, {char:"because", isCorrect:false}] },
-      { t: "Fix: 'Do you like sweet apples <span class=\"text-red-500 font-extrabold line-through font-fun\">but</span> red grapes?'", word: "or", imageKey: "fruit", options: [{char:"or", isCorrect:true}, {char:"but", isCorrect:false}, {char:"because", isCorrect:false}] },
-      { t: "Fix: 'We stayed inside <span class=\"text-red-500 font-extrabold line-through font-fun\">and</span> it was raining.'", word: "because", imageKey: "snow", options: [{char:"because", isCorrect:true}, {char:"but", isCorrect:false}, {char:"or", isCorrect:false}] },
-      { t: "Fix: 'He fell down <span class=\"text-red-500 font-extrabold line-through font-fun\">or</span> hurt his knee.'", word: "and", imageKey: "play", options: [{char:"and", isCorrect:true}, {char:"but", isCorrect:false}, {char:"because", isCorrect:false}] },
-      { t: "Fix: 'We went inside <span class=\"text-red-500 font-extrabold line-through font-fun\">or</span> we were cold.'", word: "because", imageKey: "home", options: [{char:"because", isCorrect:true}, {char:"but", isCorrect:false}, {char:"and", isCorrect:false}] },
-      { t: "Fix: 'Would you like apple juice <span class=\"text-red-500 font-extrabold line-through font-fun\">but</span> sweet milk?'", word: "or", imageKey: "drink", options: [{char:"or", isCorrect:true}, {char:"and", isCorrect:false}, {char:"because", isCorrect:false}] }
+      { t: "Fix: 'I went to bed <span class=\"text-red-500 font-extrabold line-through\">but</span> I was very tired.'", word: "because", imageKey: "home", options: [{char:"because", isCorrect:true}, {char:"or", isCorrect:false}, {char:"but", isCorrect:false}] },
+      { t: "Fix: 'Do you want milk <span class=\"text-red-500 font-extrabold line-through\">because</span> water?'", word: "or", imageKey: "drink", options: [{char:"or", isCorrect:true}, {char:"and", isCorrect:false}, {char:"but", isCorrect:false}] },
+      { t: "Fix: 'I like dogs <span class=\"text-red-500 font-extrabold line-through\">but</span> friendly cats.'", word: "and", imageKey: "dog", options: [{char:"and", isCorrect:true}, {char:"or", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Fix: 'I wore a heavy coat <span class=\"text-red-500 font-extrabold line-through\">because</span> it was warm.'", word: "but", imageKey: "coat", options: [{char:"but", isCorrect:true}, {char:"and", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Fix: 'I ran fast <span class=\"text-red-500 font-extrabold line-through\">or</span> I missed the school bus.'", word: "but", imageKey: "bus", options: [{char:"but", isCorrect:true}, {char:"and", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Fix: 'Do you like sweet apples <span class=\"text-red-500 font-extrabold line-through\">but</span> red grapes?'", word: "or", imageKey: "fruit", options: [{char:"or", isCorrect:true}, {char:"but", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Fix: 'We stayed inside <span class=\"text-red-500 font-extrabold line-through\">and</span> it was raining.'", word: "because", imageKey: "snow", options: [{char:"because", isCorrect:true}, {char:"but", isCorrect:false}, {char:"or", isCorrect:false}] },
+      { t: "Fix: 'He fell down <span class=\"text-red-500 font-extrabold line-through\">or</span> hurt his knee.'", word: "and", imageKey: "play", options: [{char:"and", isCorrect:true}, {char:"but", isCorrect:false}, {char:"because", isCorrect:false}] },
+      { t: "Fix: 'We went inside <span class=\"text-red-500 font-extrabold line-through\">or</span> we were cold.'", word: "because", imageKey: "home", options: [{char:"because", isCorrect:true}, {char:"but", isCorrect:false}, {char:"and", isCorrect:false}] },
+      { t: "Fix: 'Would you like apple juice <span class=\"text-red-500 font-extrabold line-through\">but</span> sweet milk?'", word: "or", imageKey: "drink", options: [{char:"or", isCorrect:true}, {char:"and", isCorrect:false}, {char:"because", isCorrect:false}] }
     ];
 
     const VISUAL_HINTS = {
@@ -274,7 +307,7 @@
     const VIEW_W = 800, VIEW_H = 600;
 
     // Greek Athlete Spear Thrower position
-    let athlete = { x: 400, y: 520, width: 60, height: 70 };
+    let athlete = { x: 400, y: 510, width: 60, height: 70 };
 
     // Aim State
     let isAiming = false;
@@ -293,6 +326,7 @@
 
     // Target Shields floating/swaying at the top
     let targets = [];
+    let animationFrameId = null;
 
     // Boot Loader Timer
     setTimeout(() => { switchScreen('screen-start'); }, 1500);
@@ -319,7 +353,7 @@
       } catch (e) {}
 
       // Register canvas
-      canvas = document.getElementById("mazeCanvas");
+      canvas = document.getElementById("poolCanvas");
       ctx = canvas.getContext("2d");
       canvas.width = VIEW_W;
       canvas.height = VIEW_H;
@@ -334,43 +368,57 @@
       setupAimControls();
       switchScreen('screen-game');
       renderQuestion();
+      
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
       gameEngineLoop();
     }
 
-    // Direct drag-to-aim controls for launching the Olympic Javelin Spear
+    // Unlocked Aiming Mechanics supporting unified Mouse & Touch across any pixel coordinate
     function setupAimControls() {
       const getCoords = (e) => {
         const rect = canvas.getBoundingClientRect();
-        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        let clientX = 0;
+        let clientY = 0;
+        
+        if (e.touches && e.touches.length > 0) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+          clientX = e.changedTouches[0].clientX;
+          clientY = e.changedTouches[0].clientY;
+        } else {
+          clientX = e.clientX;
+          clientY = e.clientY;
+        }
+
         return {
           x: ((clientX - rect.left) / rect.width) * VIEW_W,
           y: ((clientY - rect.top) / rect.height) * VIEW_H
         };
       };
 
-      canvas.addEventListener("pointerdown", (e) => {
-        if (isFeedbackRunning || spear.active) return;
-        const coords = getCoords(e);
-        
-        // Ensure starting point is near bottom athlete
-        if (coords.y > 400) {
-          isAiming = true;
-          dragStartX = coords.x;
-          dragStartY = coords.y;
-          currentMouseX = coords.x;
-          currentMouseY = coords.y;
-        }
-      });
+      // Guard duplicate listeners
+      if (window.aimControlsInitialized) return;
+      window.aimControlsInitialized = true;
 
-      window.addEventListener("pointermove", (e) => {
-        if (!isAiming) return;
-        const coords = getCoords(e);
+      const startAim = (coords) => {
+        if (isFeedbackRunning || spear.active) return;
+        isAiming = true;
+        dragStartX = coords.x;
+        dragStartY = coords.y;
         currentMouseX = coords.x;
         currentMouseY = coords.y;
-      });
+      };
 
-      window.addEventListener("pointerup", () => {
+      const moveAim = (coords) => {
+        if (!isAiming) return;
+        currentMouseX = coords.x;
+        currentMouseY = coords.y;
+      };
+
+      const releaseAim = () => {
         if (!isAiming) return;
         isAiming = false;
 
@@ -382,16 +430,52 @@
         if (dist > 15) {
           playAudio('click');
           spear.x = athlete.x;
-          spear.y = athlete.y - 10;
+          spear.y = athlete.y - 12;
           
-          // Projectile physics launching momentum
-          const powerFactor = 0.14;
-          spear.vx = dx * powerFactor;
-          spear.vy = dy * powerFactor;
+          // Calculate windshield-wiper angle restricted strictly to the upper sky hemisphere
+          let theta = Math.atan2(dy, dx);
+          if (theta > 0) {
+            theta = -theta; // Keep pointing upward
+          }
+          // Clamp angle strictly in front of the player (sky area)
+          theta = Math.max(-Math.PI * 0.92, Math.min(-Math.PI * 0.08, theta));
+
+          // Projectile physics launching momentum with a toddler-friendly safety speed booster
+          let power = Math.min(25, dist * 0.16);
+          power = Math.max(8, power); // Easy launch booster guarantee!
+
+          spear.vx = Math.cos(theta) * power;
+          spear.vy = Math.sin(theta) * power;
           spear.active = true;
-          spear.angle = Math.atan2(spear.vy, spear.vx);
+          spear.angle = theta;
           document.getElementById('hint-feedback').innerText = "Javelin released! Watching trajectory...";
         }
+      };
+
+      // Mouse Listeners
+      canvas.addEventListener("mousedown", (e) => {
+        startAim(getCoords(e));
+      });
+      window.addEventListener("mousemove", (e) => {
+        if (isAiming) moveAim(getCoords(e));
+      });
+      window.addEventListener("mouseup", () => {
+        releaseAim();
+      });
+
+      // Mobile Touch Listeners (Critical for Tablet / Phone iFrame drag operations)
+      canvas.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        startAim(getCoords(e));
+      }, { passive: false });
+      window.addEventListener("touchmove", (e) => {
+        if (isAiming) {
+          e.preventDefault();
+          moveAim(getCoords(e));
+        }
+      }, { passive: false });
+      window.addEventListener("touchend", () => {
+        releaseAim();
       });
     }
 
@@ -420,7 +504,7 @@
       document.getElementById('game-progress-bar').style.width = `${(currentQuestionIndex / 20) * 100}%`;
       document.getElementById('game-score-text').innerText = score;
       document.getElementById('task-image-box').innerHTML = VISUAL_HINTS[q.imageKey] || '';
-      document.getElementById('hint-feedback').innerText = "Aim and throw your spear at the correct word target!";
+      document.getElementById('hint-feedback').innerText = "Aim anywhere and release to throw your spear at the correct word target!";
 
       // Reset Spear State
       spear.active = false;
@@ -429,20 +513,19 @@
       const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
       targets = [];
       
-      const targetWidth = 140;
-      const horizontalSpan = VIEW_W - 100;
+      const horizontalSpan = VIEW_W - 140;
       const step = horizontalSpan / Math.max(1, shuffledOptions.length - 1);
 
       shuffledOptions.forEach((opt, i) => {
-        const tx = 50 + (i * step);
-        const ty = 140 + (Math.sin(i * 1.5) * 30); // Dynamic waving target wave heights
+        const tx = 70 + (i * step);
+        const ty = 140 + (Math.sin(i * 1.5) * 20); // Dynamic target waving
         targets.push({
           x: tx,
           y: ty,
-          radius: 40,
+          radius: 58, // SCALED UP (was 40px) - Incredibly easy target visual sizes
           label: opt.char,
           isCorrect: opt.isCorrect,
-          angleOffset: Math.random() * Math.PI, // for swaying animation
+          angleOffset: Math.random() * Math.PI, // swaying offset
           broken: false
         });
       });
@@ -450,7 +533,10 @@
 
     // MAIN PROJECTILE PHYSICS AND RENDER LOOP
     function gameEngineLoop() {
-      if (gameState !== 'game') return;
+      if (gameState !== 'game') {
+        animationFrameId = null;
+        return;
+      }
 
       // 1. Spear Projectile Physics Updates
       if (spear.active && !isFeedbackRunning) {
@@ -463,7 +549,7 @@
         // Calculate direct rotation align
         spear.angle = Math.atan2(spear.vy, spear.vx);
 
-        // Gutter or boundary boundary checker
+        // Boundary checker
         if (spear.x < -100 || spear.x > VIEW_W + 100 || spear.y > VIEW_H + 100) {
           resetMissedSpear();
         }
@@ -473,7 +559,8 @@
           if (target.broken) return;
 
           const dist = Math.hypot(spear.x - target.x, spear.y - target.y);
-          if (dist < target.radius + 15) {
+          // FIXED: Extremely forgiving collision offset hitbox (radius + 28px) for easier targeting
+          if (dist < target.radius + 28) {
             target.broken = true;
             spear.active = false;
             evaluateHit(target);
@@ -484,7 +571,7 @@
       // 2. Render Stadium Background & Assets
       drawStadium();
 
-      requestAnimationFrame(gameEngineLoop);
+      animationFrameId = requestAnimationFrame(gameEngineLoop);
     }
 
     function evaluateHit(target) {
@@ -613,52 +700,131 @@
         // Olympic Laurel Crown border
         ctx.beginPath();
         ctx.arc(target.x, swayY, target.radius + 6, 0, 2*Math.PI);
-        ctx.fillStyle = '#fef08a'; // Golden rim
+        ctx.fillStyle = '#facc15'; // Golden rim
         ctx.fill();
-        ctx.strokeStyle = '#ca8a04';
+        ctx.strokeStyle = '#c2410c';
         ctx.lineWidth = 3;
         ctx.stroke();
 
         // Inner Shield Face (Mint/Pastel)
         ctx.beginPath();
         ctx.arc(target.x, swayY, target.radius, 0, 2*Math.PI);
-        ctx.fillStyle = '#f0fdfa';
+        ctx.fillStyle = '#ffffff'; // White background plate for maximum contrast
         ctx.fill();
-        ctx.strokeStyle = '#0d9488';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#0284c7';
+        ctx.lineWidth = 2.5;
         ctx.stroke();
 
-        // Center Word Label (Highly Legible)
+        // Center Word Label (Highly Legible - 22px system font)
         ctx.fillStyle = '#1e1b4b';
-        ctx.font = 'bold 15px sans-serif';
+        ctx.font = 'bold 22px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(target.label, target.x, swayY);
       });
 
-      // 4. Draw Olympic Greek Athlete (Spear Thrower)
-      ctx.fillStyle = '#fbcfe8'; // Skin
+      // 4. Draw Olympic Greek Athlete (Redesigned with premium detail and animations)
+      const ax = athlete.x;
+      const ay = athlete.y;
+
+      // Shadow under feet
       ctx.beginPath();
-      ctx.arc(athlete.x, athlete.y, 16, 0, 2*Math.PI); // Head
+      ctx.ellipse(ax, ay + 42, 25, 8, 0, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
       ctx.fill();
-      ctx.strokeStyle = '#475569';
-      ctx.lineWidth = 2;
+
+      // Athlete Legs
+      ctx.fillStyle = '#fca5a5'; // Legs skin
+      ctx.fillRect(ax - 12, ay + 15, 6, 20);
+      ctx.fillRect(ax + 6, ay + 15, 6, 20);
+      // Red sports shoes
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(ax - 15, ay + 32, 11, 10);
+      ctx.fillRect(ax + 4, ay + 32, 11, 10);
+
+      // Body Shirt (Jersey with yellow stripes)
+      ctx.fillStyle = '#3b82f6'; // Jersey Blue
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(ax - 20, ay - 10, 40, 32, [8, 8, 4, 4]);
+      } else {
+        ctx.rect(ax - 20, ay - 10, 40, 32);
+      }
+      ctx.fill();
+      // Stripe
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(ax - 20, ay + 2, 40, 6);
+
+      // Cute Face
+      ctx.fillStyle = '#fbcfe8'; // Peach skin
+      ctx.beginPath();
+      ctx.arc(ax, ay - 24, 18, 0, 2*Math.PI);
+      ctx.fill();
+
+      // Face Details
+      ctx.fillStyle = '#1e1b4b';
+      ctx.beginPath();
+      ctx.arc(ax - 6, ay - 26, 2.5, 0, 2*Math.PI); // Left eye
+      ctx.arc(ax + 6, ay - 26, 2.5, 0, 2*Math.PI); // Right eye
+      ctx.fill();
+
+      // Cheeks
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+      ctx.beginPath();
+      ctx.arc(ax - 11, ay - 21, 3.5, 0, 2*Math.PI);
+      ctx.arc(ax + 11, ay - 21, 3.5, 0, 2*Math.PI);
+      ctx.fill();
+
+      // Smile
+      ctx.strokeStyle = '#1e1b4b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(ax, ay - 20, 5, 0, Math.PI, false);
       ctx.stroke();
 
-      // Athlete Tunic/Toga (Pastel Sky Blue)
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillRect(athlete.x - 20, athlete.y + 16, 40, 44);
-      ctx.strokeStyle = '#475569';
-      ctx.strokeRect(athlete.x - 20, athlete.y + 16, 40, 44);
-
-      // Gold Laurel wreath around head
-      ctx.fillStyle = '#ca8a04';
+      // Curly hair
+      ctx.fillStyle = '#78350f';
       ctx.beginPath();
-      ctx.arc(athlete.x - 12, athlete.y - 4, 4, 0, 2*Math.PI);
-      ctx.arc(athlete.x + 12, athlete.y - 4, 4, 0, 2*Math.PI);
+      ctx.arc(ax - 10, ay - 36, 10, 0, 2*Math.PI);
+      ctx.arc(ax, ay - 40, 11, 0, 2*Math.PI);
+      ctx.arc(ax + 10, ay - 36, 10, 0, 2*Math.PI);
       ctx.fill();
 
-      // 5. Draw Aiming Vector Dotted line
+      // Gold Headband
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(ax - 18, ay - 33, 36, 5);
+
+      // Arms drawing (Aiming vs Throwing stance)
+      ctx.strokeStyle = '#fbcfe8';
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+
+      if (isAiming) {
+        // Pointing front arm
+        ctx.beginPath();
+        ctx.moveTo(ax - 18, ay - 2);
+        ctx.lineTo(ax - 38, ay - 10);
+        ctx.stroke();
+
+        // Cocking back throwing arm with drag pull
+        const dx = dragStartX - currentMouseX;
+        const dy = dragStartY - currentMouseY;
+        const pullDist = Math.min(25, Math.hypot(dx, dy) * 0.15);
+        ctx.beginPath();
+        ctx.moveTo(ax + 18, ay - 2);
+        ctx.lineTo(ax + 20 + pullDist, ay + 10);
+        ctx.stroke();
+      } else {
+        // Cheerful standard waving pose
+        ctx.beginPath();
+        ctx.moveTo(ax - 18, ay - 2);
+        ctx.lineTo(ax - 30, ay + 12);
+        ctx.moveTo(ax + 18, ay - 2);
+        ctx.lineTo(ax + 30, ay + 12);
+        ctx.stroke();
+      }
+
+      // 5. Predictive Gravity Trajectory Line (Upgraded for easy windshield-wiper aiming)
       if (isAiming && !spear.active) {
         const dx = dragStartX - currentMouseX;
         const dy = dragStartY - currentMouseY;
@@ -666,13 +832,36 @@
 
         if (dist > 15) {
           ctx.beginPath();
-          ctx.moveTo(athlete.x, athlete.y + 20);
-          ctx.lineTo(athlete.x + dx * 1.5, athlete.y + 20 + dy * 1.5);
           ctx.setLineDash([4, 6]);
           ctx.strokeStyle = '#0284c7';
-          ctx.lineWidth = 4;
+          ctx.lineWidth = 3.5;
+
+          // Windshield-wiper aiming vector restricted to the upper hemisphere
+          let theta = Math.atan2(dy, dx);
+          if (theta > 0) {
+            theta = -theta; // Keep pointing upward
+          }
+          // Clamp angle strictly in front of the player (sky area)
+          theta = Math.max(-Math.PI * 0.92, Math.min(-Math.PI * 0.08, theta));
+
+          let power = Math.min(25, dist * 0.16);
+          power = Math.max(8, power); // Easy launch booster guarantee!
+
+          // Plot the actual parabolic gravity points so kids see EXACTLY where the spear lands
+          let testX = athlete.x;
+          let testY = athlete.y - 12;
+          let testVx = Math.cos(theta) * power;
+          let testVy = Math.sin(theta) * power;
+
+          ctx.moveTo(testX, testY);
+          for (let step = 0; step < 40; step++) {
+            testX += testVx;
+            testY += testVy;
+            testVy += 0.22; // gravity drop simulator
+            ctx.lineTo(testX, testY);
+          }
           ctx.stroke();
-          ctx.setLineDash([]); // Reset to solid
+          ctx.setLineDash([]); // Reset
         }
       }
 
