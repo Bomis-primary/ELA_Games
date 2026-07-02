@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Great Article Crane & Drag Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none; -webkit-user-select: none; touch-action: none;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #ddd6fe 0%, #c084fc 100%);
+      color: #111827;
+    }
+    .hidden { display: none !important; }
+    
+    /* Fun Neon Arcade 3D Buttons */
+    .btn-arcade {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #a855f7;
+      color: white;
+      font-weight: 900;
+      font-size: 1.4rem;
+      padding: 12px 28px;
+      border: 4px solid #3b0764;
+      border-radius: 20px;
+      box-shadow: 0 8px 0 #581c87, 0 12px 20px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.1s ease;
+    }
+    .btn-arcade:hover {
+      background: #c084fc;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 #581c87, 0 15px 25px rgba(0, 0, 0, 0.25);
+    }
+    .btn-arcade:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #581c87, 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .ctrl-btn {
+      background: #f43f5e;
+      border: 3px solid #4c0519;
+      color: white;
+      box-shadow: 0 4px 0 #9f1239;
+    }
+    .ctrl-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #9f1239;
+    }
+    .drop-btn {
+      background: #10b981;
+      border: 3px solid #064e3b;
+      color: white;
+      box-shadow: 0 4px 0 #047857;
+    }
+    .drop-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #047857;
+    }
+
+    .shake-anim { animation: shake 0.4s ease-in-out; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between p-4 relative overflow-x-hidden">
+
+  <div id="screen-splash" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center text-center">
+    <img id="splash-logo" src="assets/innovine-logo.png" style="width: 440px; max-width: 85vw; height: auto;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwMjg0YzciIHJ4PSIxMCIvPjx0ZXh0IHg9IjEwMCIgeT0iMzUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPklOTk9WSU5FIExPR088L3RleHQ+PC9zdmc+'">
+    <div class="mt-6 font-black text-purple-600 tracking-widest text-lg animate-pulse">PREPARING ARCADE LABS...</div>
+  </div>
+
+  <div id="screen-start" class="hidden w-full max-w-2xl bg-white rounded-[32px] p-6 my-auto shadow-xl border-8 border-purple-400 text-center">
+    <h1 class="text-3xl md:text-4xl font-black text-purple-700 mb-1">🏗️ The Great Article Arcade</h1>
+    <p class="text-pink-500 font-extrabold tracking-wider text-sm mb-4">2 LEVELS OF FUN LEARNING</p>
+    
+    <div class="text-left bg-purple-50 p-5 rounded-2xl border-4 border-dashed border-purple-200 text-base text-slate-700 space-y-3 mb-6">
+      <p class="font-black text-lg text-purple-800 mb-1">🕹️ Game Modes:</p>
+      <div>🏗️ **Level 1 (Items 1-10):** Drop the word blocks into the right chutes using the crane!</div>
+      <div>🖐️ **Level 2 (Items 11-20):** Drag the article blocks up into the blanks to finish sentences!</div>
+    </div>
+    
+    <button class="btn-arcade" onclick="startGame()">Play Game 🎮</button>
+  </div>
+
+  <div id="screen-game" class="hidden w-full max-w-4xl flex flex-col items-center">
+    
+    <div class="w-full bg-white rounded-2xl p-3 shadow-md border border-purple-100 flex justify-between items-center mb-3">
+      <div>
+        <div id="level-badge" class="text-xs font-black text-purple-600 tracking-wider uppercase">Level 1: Noun Sorting</div>
+        <div id="question-counter" class="text-base font-extrabold text-slate-800">Item 1 / 20</div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full font-bold text-xs">Tries: <span id="lbl-tries">2</span></span>
+        <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-bold text-xs">⭐ <span id="lbl-score">0</span></span>
+      </div>
+    </div>
+
+    <div class="w-full bg-white rounded-2xl p-4 shadow-md border-2 border-slate-200 text-center mb-3">
+      <h2 id="sentence-prompt" class="text-xl md:text-2xl font-bold text-slate-800 tracking-wide">
+        Sorting items with the Crane!
+      </h2>
+    </div>
+
+    <div class="w-full flex flex-col md:flex-row items-center gap-4">
+      
+      <div id="game-sandbox-container" class="flex-1 w-full bg-zinc-900 border-4 border-purple-700 rounded-[2rem] shadow-2xl relative overflow-hidden aspect-[4/3]">
+        <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+      </div>
+
+      <div id="arcade-controls-panel" class="flex flex-row md:flex-col items-center gap-3 bg-white p-4 rounded-2xl shadow-md border border-slate-200 shrink-0 w-full md:w-40 justify-center">
+        <div class="flex gap-2">
+          <button class="ctrl-btn text-2xl font-black rounded-xl w-14 h-14 flex items-center justify-center" onmousedown="setDirection(-1)" onmouseup="clearDirection()" ontouchstart="setDirection(-1)" ontouchend="clearDirection()">◀</button>
+          <button class="ctrl-btn text-2xl font-black rounded-xl w-14 h-14 flex items-center justify-center" onmousedown="setDirection(1)" onmouseup="clearDirection()" ontouchstart="setDirection(1)" ontouchend="clearDirection()">▶</button>
+        </div>
+        <button class="drop-btn text-base font-black uppercase tracking-wider rounded-xl px-6 h-14 w-full flex items-center justify-center gap-1" onclick="triggerClawDrop()">
+          <span>DROP</span> 👇
+        </button>
+      </div>
+
+    </div>
+
+    <div id="action-hint" class="mt-3 bg-white/90 border border-slate-200 px-6 py-1.5 rounded-full font-bold text-xs text-slate-700 text-center animate-pulse">
+      Move left or right, then drop the item block into the correct matching chute!
+    </div>
+
+  </div>
+
+  <div id="screen-summary" class="hidden w-full max-w-md bg-white rounded-[2rem] p-8 my-auto shadow-2xl border-4 border-purple-400 text-center">
+    <span class="text-6xl block mb-4">🏆</span>
+    <h1 class="text-3xl font-black text-purple-700">Arcade Champion!</h1>
+    <div class="my-6">
+      <div class="text-sm font-bold text-slate-400 uppercase tracking-widest">Total Score</div>
+      <div id="txt-final-score" class="text-5xl font-black text-amber-500 mt-1">0</div>
+    </div>
+    <p class="text-slate-500 font-medium mb-6">You masterfully solved all 20 puzzles!</p>
+    <button class="btn-arcade text-base" onclick="location.reload()">Play Again 🔄</button>
+  </div>
+
+  <audio id="audio-correct" src="assets/correct.mp3" preload="none"></audio>
+  <audio id="audio-wrong" src="assets/wrong.mp3" preload="none"></audio>
+
+  <script>
+    const NOUN_DATASET = [
+      // LEVEL 1: Crane Drop Sorting Track (Items 1 - 10)
+      { noun: "Apple 🍏", answer: "an", sentence: "Drop the word block into the right chute!" },
+      { noun: "Sun ☀️", answer: "the", sentence: "Drop the word block into the right chute!" },
+      { noun: "Dog 🐶", answer: "a", sentence: "Drop the word block into the right chute!" },
+      { noun: "Owl 🦉", answer: "an", sentence: "Drop the word block into the right chute!" },
+      { noun: "Moon 🌙", answer: "the", sentence: "Drop the word block into the right chute!" },
+      { noun: "Cat 🐱", answer: "a", sentence: "Drop the word block into the right chute!" },
+      { noun: "Ice Cream 🍦", answer: "an", sentence: "Drop the word block into the right chute!" },
+      { noun: "Sky 🌌", answer: "the", sentence: "Drop the word block into the right chute!" },
+      { noun: "Tree 🌳", answer: "a", sentence: "Drop the word block into the right chute!" },
+      { noun: "Umbrella ☂️", answer: "an", sentence: "Drop the word block into the right chute!" },
+
+      // LEVEL 2: Sentence Interactive Drag Track (Items 11 - 20)
+      { noun: "school", answer: "the", sentence: "______ school is very big. 🏫" },
+      { noun: "ant", answer: "an", sentence: "Look, I see ______ little ant! 🐜" },
+      { noun: "kite", answer: "a", sentence: "We can fly ______ yellow kite. 🪁" },
+      { noun: "stars", answer: "the", sentence: "______ stars look bright tonight. ⭐" },
+      { noun: "orange", answer: "an", sentence: "She wants to eat ______ juicy orange. 🍊" },
+      { noun: "sandcastle", answer: "a", sentence: "He built ______ sandcastle at the beach. 🏰" },
+      { noun: "ocean", answer: "the", sentence: "______ blue ocean is beautiful. 🌊" },
+      { noun: "bus", answer: "a", sentence: "They are riding on ______ big school bus. 🚌" },
+      { noun: "red car", answer: "the", sentence: "Look at ______ shiny red car go! 🚗" },
+      { noun: "egg", answer: "an", sentence: "Please pass me ______ fresh egg. 🥚" }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    let tries = 2;
+    let isTransitioning = false;
+
+    let canvas, ctx;
+    const CANVAS_W = 800;
+    const CANVAS_H = 600;
+
+    // Level 1 Crane Core Model
+    let crane = { x: 345, y: 40, w: 110, h: 60, speed: 7, dir: 0 };
+    let cargoBlock = { x: 320, y: 95, w: 160, h: 75, isDropping: false, speed: 13 };
+
+    // Level 2 Draggable Element Handles
+    let dragTokens = [];
+    let activeDraggedToken = null;
+    let dragOffset = { x: 0, y: 0 };
+    let targetDropZone = { x: 0, y: 0, w: 110, h: 50 }; // Dynamically mapped blank box location inside canvas calculations
+
+    // Target Chutes (Level 1 Locations)
+    const chutes = [
+      { name: "A", x: 60, y: 450, w: 180, h: 150, color: "#38bdf8" },
+      { name: "AN", x: 310, y: 450, w: 180, h: 150, color: "#f43f5e" },
+      { name: "THE", x: 560, y: 450, w: 180, h: 150, color: "#eab308" }
+    ];
+
+    let neonPulse = 0;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.getElementById('screen-splash').classList.add('hidden');
+        document.getElementById('screen-start').classList.remove('hidden');
+      }, 1200);
+    });
+
+    function startGame() {
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.remove('hidden');
+      
+      canvas = document.getElementById('gameCanvas');
+      ctx = canvas.getContext('2d');
+      canvas.width = CANVAS_W;
+      canvas.height = CANVAS_H;
+
+      bindInputListeners();
+      bindDragAndDropListeners();
+      loadQuestion();
+      animateLoop();
+    }
+
+    function loadQuestion() {
+      if (currentIdx >= NOUN_DATASET.length) {
+        endGame();
+        return;
+      }
+
+      isTransitioning = false;
+      tries = 2;
+      document.getElementById('lbl-tries').innerText = tries;
+      document.getElementById('lbl-score').innerText = score;
+      document.getElementById('question-counter').innerText = `Item ${currentIdx + 1} / ${NOUN_DATASET.length}`;
+
+      const item = NOUN_DATASET[currentIdx];
+
+      if (currentIdx < 10) {
+        // Level 1 Settings
+        document.getElementById('level-badge').innerText = "Level 1: Noun Sorting Bay";
+        document.getElementById('action-hint').innerText = "Drop the item block into its matching word chute!";
+        document.getElementById('arcade-controls-panel').classList.remove('hidden');
+        document.getElementById('sentence-prompt').innerText = "Sort items using the Crane!";
+
+        crane.x = 345;
+        crane.dir = 0;
+        cargoBlock.w = 170; // Expanded to safely hold "Ice Cream 🍦" without text overflow
+        cargoBlock.x = crane.x + (crane.w / 2) - (cargoBlock.w / 2);
+        cargoBlock.y = 95;
+        cargoBlock.isDropping = false;
+      } else {
+        // Level 2 Settings
+        document.getElementById('level-badge').innerText = "Level 2: Sentence Drag Tracker";
+        document.getElementById('action-hint').innerText = "Drag an article tile from the tray straight into the blank slot!";
+        document.getElementById('arcade-controls-panel').classList.add('hidden');
+        
+        // Show the sentence above the canvas in high contrast large font format
+        updateDisplaySentence("______");
+
+        // Spawn 3 draggable article option tiles at the bottom tray layer
+        dragTokens = [
+          { name: "a", x: 140, y: 480, startX: 140, startY: 480, w: 110, h: 65, color: "#38bdf8" },
+          { name: "an", x: 345, y: 480, startX: 345, startY: 480, w: 110, h: 65, color: "#f43f5e" },
+          { name: "the", x: 550, y: 480, startX: 550, startY: 480, w: 110, h: 65, color: "#eab308" }
+        ];
+        activeDraggedToken = null;
+      }
+    }
+
+    function updateDisplaySentence(filledWord) {
+      const item = NOUN_DATASET[currentIdx];
+      let line = item.sentence;
+      if (filledWord !== "______") {
+        line = line.replace("______", `<span class="bg-emerald-500 text-white font-black px-4 py-1 rounded mx-1 shadow-md uppercase animate-bounce">${filledWord.toUpperCase()}</span>`);
+      } else {
+        line = line.replace("______", `<span class="bg-yellow-100 border-4 border-dashed border-purple-500 px-5 py-0.5 rounded mx-1 text-purple-700 font-extrabold">______</span>`);
+      }
+      document.getElementById('sentence-prompt').innerHTML = line;
+    }
+
+    function setDirection(d) {
+      if (isTransitioning || cargoBlock.isDropping || currentIdx >= 10) return;
+      crane.dir = d;
+    }
+
+    function clearDirection() {
+      crane.dir = 0;
+    }
+
+    function triggerClawDrop() {
+      if (isTransitioning || cargoBlock.isDropping || currentIdx >= 10) return;
+      cargoBlock.isDropping = true;
+    }
+
+    function bindInputListeners() {
+      window.addEventListener('keydown', (e) => {
+        if (isTransitioning || currentIdx >= 10) return;
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') crane.dir = -1;
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') crane.dir = 1;
+        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S' || e.key === ' ') triggerClawDrop();
+      });
+      window.addEventListener('keyup', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') crane.dir = 0;
+      });
+    }
+
+    function bindDragAndDropListeners() {
+      const getMouseCoords = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: ((clientX - rect.left) / rect.width) * CANVAS_W,
+          y: ((clientY - rect.top) / rect.height) * CANVAS_H
+        };
+      };
+
+      const handleStart = (e) => {
+        if (currentIdx < 10 || isTransitioning) return;
+        const coords = getMouseCoords(e);
+        
+        // Check if any drag token was clicked
+        for (let token of dragTokens) {
+          if (coords.x >= token.x && coords.x <= token.x + token.w && coords.y >= token.y && coords.y <= token.y + token.h) {
+            activeDraggedToken = token;
+            dragOffset.x = coords.x - token.x;
+            dragOffset.y = coords.y - token.y;
+            break;
+          }
+        }
+      };
+
+      const handleMove = (e) => {
+        if (!activeDraggedToken || isTransitioning) return;
+        const coords = getMouseCoords(e);
+        activeDraggedToken.x = coords.x - dragOffset.x;
+        activeDraggedToken.y = coords.y - dragOffset.y;
+      };
+
+      const handleEnd = () => {
+        if (!activeDraggedToken || isTransitioning) return;
+        
+        // Calculate drop zone center overlap
+        const midTokenX = activeDraggedToken.x + (activeDraggedToken.w / 2);
+        const midTokenY = activeDraggedToken.y + (activeDraggedToken.h / 2);
+
+        // Center drop area for Level 2 sentence completion board
+        const targetX = CANVAS_W / 2 - 80;
+        const targetY = 170;
+        const targetW = 160;
+        const targetH = 80;
+
+        if (midTokenX >= targetX && midTokenX <= targetX + targetW && midTokenY >= targetY && midTokenY <= targetY + targetH) {
+          evaluateDragSelection(activeDraggedToken);
+        } else {
+          // Send back to inventory tray slot if dropped in outer space
+          bounceTokenHome(activeDraggedToken);
+          activeDraggedToken = null;
+        }
+      };
+
+      canvas.addEventListener('mousedown', handleStart);
+      canvas.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', handleEnd);
+
+      canvas.addEventListener('touchstart', handleStart, { passive: true });
+      canvas.addEventListener('touchmove', handleMove, { passive: true });
+      window.addEventListener('touchend', handleEnd);
+    }
+
+    function bounceTokenHome(token) {
+      token.x = token.startX;
+      token.y = token.startY;
+    }
+
+    function animateLoop() {
+      updateGamePhysics();
+      renderGraphics();
+      requestAnimationFrame(animateLoop);
+    }
+
+    function updateGamePhysics() {
+      if (currentIdx >= 10) return; // Level 2 bypasses claw physical math calculations
+
+      // 1. Horizontally shift Crane trolley framework
+      if (!cargoBlock.isDropping && !isTransitioning) {
+        crane.x += crane.dir * crane.speed;
+        if (crane.x < 30) crane.x = 30;
+        if (crane.x > CANVAS_W - crane.w - 30) crane.x = CANVAS_W - crane.w - 30;
+        cargoBlock.x = crane.x + (crane.w / 2) - (cargoBlock.w / 2);
+      }
+
+      // 2. Animate Falling Cargo package box values
+      if (cargoBlock.isDropping && !isTransitioning) {
+        cargoBlock.y += cargoBlock.speed;
+        if (cargoBlock.y + cargoBlock.h >= 465) {
+          evaluateLandingIntersection();
+        }
+      }
+    }
+
+    function evaluateLandingIntersection() {
+      isTransitioning = true;
+      const item = NOUN_DATASET[currentIdx];
+      const midBlockX = cargoBlock.x + (cargoBlock.w / 2);
+      
+      let landedChute = null;
+      chutes.forEach(chute => {
+        if (midBlockX >= chute.x && midBlockX <= chute.x + chute.w) landedChute = chute;
+      });
+
+      if (landedChute && landedChute.name.toLowerCase() === item.answer.toLowerCase()) {
+        playAudioClip('correct');
+        score += (tries === 2) ? 20 : 10;
+        document.getElementById('lbl-score').innerText = score;
+        document.getElementById('action-hint').innerText = "🌟 FANTASTIC! Perfect drop catch!";
+        setTimeout(() => { currentIdx++; loadQuestion(); }, 1800);
+      } else {
+        tries--;
+        document.getElementById('lbl-tries').innerText = tries;
+        playAudioClip('wrong');
+        triggerScreenShake();
+
+        if (tries <= 0) {
+          document.getElementById('action-hint').innerText = `The correct answer was: ${item.answer.toUpperCase()}`;
+          setTimeout(() => { currentIdx++; loadQuestion(); }, 2200);
+        } else {
+          cargoBlock.y = 95;
+          cargoBlock.isDropping = false;
+          isTransitioning = false;
+          document.getElementById('action-hint').innerText = "Oops! Drive over and try another chute choice!";
+        }
+      }
+    }
+
+    function evaluateDragSelection(draggedToken) {
+      isTransitioning = true;
+      const item = NOUN_DATASET[currentIdx];
+
+      if (draggedToken.name.toLowerCase() === item.answer.toLowerCase()) {
+        playAudioClip('correct');
+        score += (tries === 2) ? 20 : 10;
+        document.getElementById('lbl-score').innerText = score;
+        
+        // Snap directly into center place layout view and lock sentence update view labels
+        draggedToken.x = CANVAS_W / 2 - draggedToken.w / 2;
+        draggedToken.y = 175;
+        updateDisplaySentence(item.answer);
+        document.getElementById('action-hint').innerText = "🌟 SPLENDID! Sentence Completed!";
+
+        setTimeout(() => { currentIdx++; loadQuestion(); }, 2000);
+      } else {
+        tries--;
+        document.getElementById('lbl-tries').innerText = tries;
+        playAudioClip('wrong');
+        triggerScreenShake();
+        bounceTokenHome(draggedToken);
+        activeDraggedToken = null;
+
+        if (tries <= 0) {
+          updateDisplaySentence(item.answer);
+          document.getElementById('action-hint').innerText = `Answer: It belongs to "${item.answer.toUpperCase()}"!`;
+          setTimeout(() => { currentIdx++; loadQuestion(); }, 2400);
+        } else {
+          isTransitioning = false;
+          document.getElementById('action-hint').innerText = "Not quite! Try dragging a different article choice tile.";
+        }
+      }
+    }
+
+    function triggerScreenShake() {
+      const sandbox = document.getElementById('game-sandbox-container');
+      sandbox.classList.add('shake-anim');
+      setTimeout(() => sandbox.classList.remove('shake-anim'), 400);
+    }
+
+    function renderGraphics() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+      neonPulse += 0.04;
+
+      const isLevel2 = currentIdx >= 10;
+
+      // 1. Background Arena Theme Design Setup
+      ctx.fillStyle = !isLevel2 ? '#1e1b4b' : '#0f172a';
+      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+      // Neon Arena Back Wall Grid Lines Mapping Engine
+      ctx.strokeStyle = !isLevel2 ? 'rgba(168, 85, 247, 0.15)' : 'rgba(16, 185, 129, 0.12)';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < CANVAS_W; i += 50) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, CANVAS_H); ctx.stroke();
+      }
+      for (let j = 0; j < CANVAS_H; j += 50) {
+        ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(CANVAS_W, j); ctx.stroke();
+      }
+
+      if (!isLevel2) {
+        // ==========================================
+        // GRAPHICS VIEW MODE: LEVEL 1 CRANE MODE
+        // ==========================================
+        
+        // Steel Crane Rail Line Bar
+        ctx.fillStyle = '#4b5563'; ctx.fillRect(0, 25, CANVAS_W, 20);
+        ctx.fillStyle = '#9ca3af'; ctx.fillRect(0, 32, CANVAS_W, 6);
+
+        // Draw 3 Floor Delivery Chutes
+        chutes.forEach(chute => {
+          ctx.fillStyle = chute.color;
+          ctx.beginPath(); ctx.roundRect(chute.x, chute.y, chute.w, chute.h, [16, 16, 0, 0]); ctx.fill();
+          ctx.fillStyle = '#18181b';
+          ctx.beginPath(); ctx.roundRect(chute.x + 12, chute.y, chute.w - 24, 45, [8, 8, 0, 0]); ctx.fill();
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.strokeRect(chute.x, chute.y, chute.w, chute.h);
+
+          // Labels
+          ctx.fillStyle = '#ffffff'; ctx.font = "bold 36px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText(chute.name, chute.x + (chute.w / 2), chute.y + 90);
+        });
+
+        // Suspended Steel Claw Winch String Cable
+        ctx.strokeStyle = '#f4f4f5'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(crane.x + (crane.w / 2), crane.y + crane.h - 10);
+        ctx.lineTo(cargoBlock.x + (cargoBlock.w / 2), cargoBlock.y + 5); ctx.stroke();
+
+        // Mechanical Crane Carriage Block Frame
+        ctx.fillStyle = '#a1a1aa'; ctx.fillRect(crane.x, crane.y, crane.w, crane.h - 20);
+        ctx.fillStyle = '#f43f5e'; ctx.beginPath();
+        ctx.arc(crane.x + (crane.w / 2), crane.y + 5, 6 + Math.sin(neonPulse * 3.5) * 2, 0, 2 * Math.PI); ctx.fill();
+
+        // Dual Metal Carriage Claws Hooks
+        ctx.strokeStyle = '#d4d4d8'; ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(crane.x + 15, crane.y + crane.h - 20); ctx.lineTo(crane.x + 5, crane.y + crane.h);
+        ctx.moveTo(crane.x + crane.w - 15, crane.y + crane.h - 20); ctx.lineTo(crane.x + crane.w - 5, crane.y + crane.h);
+        ctx.stroke();
+
+        // Active Noun Cargo Prize Box Item (With auto-padding to handle words like "Ice Cream")
+        const item = NOUN_DATASET[currentIdx];
+        if (item) {
+          ctx.fillStyle = '#fafafa'; ctx.strokeStyle = '#ca8a04'; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.roundRect(cargoBlock.x, cargoBlock.y, cargoBlock.w, cargoBlock.h, 14); ctx.fill(); ctx.stroke();
+
+          ctx.strokeStyle = '#eab308'; ctx.lineWidth = 2;
+          ctx.strokeRect(cargoBlock.x + 5, cargoBlock.y + 5, cargoBlock.w - 10, cargoBlock.h - 10);
+
+          // Clear, large text matching level 1 standard specifications
+          ctx.fillStyle = '#1c1917'; ctx.font = "bold 22px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText(item.noun, cargoBlock.x + (cargoBlock.w / 2), cargoBlock.y + (cargoBlock.h / 2));
+        }
+
+      } else {
+        // ==========================================
+        // GRAPHICS VIEW MODE: LEVEL 2 DRAG & DROP MODE
+        // ==========================================
+        
+        // Central Station Target Machine Housing
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#14b8a6'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.roundRect(100, 80, 600, 240, 24); ctx.fill(); ctx.stroke();
+
+        // Central Stage Sentence Dynamic Target Box Display
+        const item = NOUN_DATASET[currentIdx];
+        ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#334155'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.roundRect(140, 120, 520, 160, 16); ctx.fill(); ctx.stroke();
+
+        // Label indicators tracking empty connector position area spot
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.fillRect(CANVAS_W/2 - 80, 170, 160, 70);
+        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 3; ctx.setLineDash([6, 4]);
+        ctx.strokeRect(CANVAS_W/2 - 80, 170, 160, 70); ctx.setLineDash([]); // Reset default lines
+
+        // Word Noun Object indicator label
+        ctx.fillStyle = '#38bdf8'; ctx.font = "extrabold 28px Arial"; ctx.textAlign = "center";
+        ctx.fillText(`Target Word:  ${item.noun.toUpperCase()}`, CANVAS_W / 2, 145);
+
+        // Bottom Dashboard Storage Tray Bed for Options
+        ctx.fillStyle = '#334155'; ctx.fillRect(40, 440, 720, 120);
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 4; ctx.strokeRect(40, 440, 720, 120);
+
+        // Print Draggable Article option cards onto user panel views
+        dragTokens.forEach(token => {
+          // Skip drawing active token here if dragged so it prints cleanly above everything else on top layers
+          if (token === activeDraggedToken) return;
+          drawOptionTile(token);
+        });
+
+        // Always render active token on top layer so user doesn't lose visibility under layers
+        if (activeDraggedToken) {
+          drawOptionTile(activeDraggedToken);
+        }
+      }
+    }
+
+    function drawOptionTile(token) {
+      ctx.fillStyle = token.color; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.roundRect(token.x, token.y, token.w, token.h, 16); ctx.fill(); ctx.stroke();
+
+      // Bold white high contrast text layout engine
+      ctx.fillStyle = '#ffffff'; ctx.font = "bold 26px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(token.name.toUpperCase(), token.x + (token.w / 2), token.y + (token.h / 2));
+    }
+
+    function playAudioClip(type) {
+      try {
+        const node = document.getElementById(type === 'correct' ? 'audio-correct' : 'audio-wrong');
+        if (node && typeof node.play === 'function') {
+          node.currentTime = 0;
+          node.play().catch(() => synthFallbackSound(type));
+        } else {
+          synthFallbackSound(type);
+        }
+      } catch (e) {
+        synthFallbackSound(type);
+      }
+    }
+
+    function synthFallbackSound(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctxNode = new AudioContext();
+        const osc = ctxNode.createOscillator();
+        const gain = ctxNode.createGain();
+        osc.connect(gain); gain.connect(ctxNode.destination);
+        
+        if (type === 'correct') {
+          osc.frequency.setValueAtTime(523.25, ctxNode.currentTime); 
+          osc.frequency.setValueAtTime(659.25, ctxNode.currentTime + 0.1); 
+          gain.gain.exponentialRampToValueAtTime(0.01, ctxNode.currentTime + 0.3);
+          osc.start(); osc.stop(ctxNode.currentTime + 0.3);
+        } else {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(146.83, ctxNode.currentTime); 
+          gain.gain.exponentialRampToValueAtTime(0.01, ctxNode.currentTime + 0.35);
+          osc.start(); osc.stop(ctxNode.currentTime + 0.35);
+        }
+      } catch (e) {}
+    }
+
+    function endGame() {
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.remove('hidden');
+      document.getElementById('txt-final-score').innerText = `${score} pts`;
+    }
+  </script>
+</body>
+</html>
