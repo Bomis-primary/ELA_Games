@@ -379,7 +379,7 @@
 <body>
     <!-- Splash Screen with Logo -->
     <div class="splash-screen" id="splashScreen">
-        <img src="g4/chp8/conjunctions/assets/logo.png" alt="Logo" onerror="this.style.display='none'">
+        <img src="assets/logo.png" alt="Innovine Logo" onerror="this.style.display='none'">
     </div>
 
     <div class="container" id="mainContainer">
@@ -392,7 +392,7 @@
                 </div>
                 <div class="score-item">
                     <div>Questions</div>
-                    <span id="questionsAnswered">0/10</span>
+                    <span id="questionsAnswered">0/12</span>
                 </div>
                 <div class="score-item">
                     <div>Correct</div>
@@ -431,7 +431,7 @@
 
     <div class="question-modal" id="questionModal">
         <div class="question-box">
-            <h2>Question <span id="questionNumber">1</span> of 10</h2>
+            <h2>Question <span id="questionNumber">1</span> of 12</h2>
             <div class="question-text" id="questionText"></div>
             <div class="options" id="optionsContainer"></div>
             <div class="feedback" id="feedback"></div>
@@ -448,9 +448,9 @@
         }, 5000);
 
         // Audio elements for external sound files
-        const correctSound = new Audio('g4/chp8/conjunctions/assets/correct.mp3');
-        const wrongSound = new Audio('g4/chp8/conjunctions/assets/wrong.mp3');
-        const celebrationSound = new Audio('g4/chp8/conjunctions/assets/freesound_community-claps-44774.mp3');
+        const correctSound = new Audio('assets/correct.mp3');
+        const wrongSound = new Audio('assets/wrong.mp3');
+        const celebrationSound = new Audio('assets/freesound_community-claps-44774.mp3');
         
         let volume = 0.8;
 
@@ -503,54 +503,64 @@
         // Questions array - Conjunctions: and, because, when, if, till, but, while, so, or
         const questions = [
             {
-                question: "Choose the correct conjunction: 'I like tea ___ coffee, but I don't like both together.'",
-                options: ["and", "or", "because", "till"],
-                correct: 1
-            },
-            {
-                question: "Choose the correct conjunction: 'She was late ___ she missed the bus.'",
-                options: ["so", "if", "because", "while"],
-                correct: 2
-            },
-            {
-                question: "Choose the correct conjunction: 'Please wait here ___ I come back.'",
-                options: ["till", "and", "when", "but"],
+                question: "Riya bought apples ___ oranges from the market.",
+                options: ["and", "or", "because", "if"],
                 correct: 0
             },
             {
-                question: "Choose the correct conjunction: '___ it rains, we will cancel the picnic.'",
-                options: ["Because", "So", "If", "Or"],
+                question: "I stayed indoors ___ it was raining heavily outside.",
+                options: ["but", "when", "because", "or"],
                 correct: 2
             },
             {
-                question: "Choose the correct conjunction: 'He was tired, ___ he kept on working.'",
-                options: ["but", "and", "till", "if"],
+                question: "Wear a raincoat ___ you don't want to get wet.",
+                options: ["if", "so", "till", "and"],
                 correct: 0
             },
             {
-                question: "Choose the correct conjunction: 'I will call you ___ I reach home.'",
-                options: ["because", "when", "or", "so"],
+                question: "We must hurry, ___ we will miss the train.",
+                options: ["because", "so", "while", "or"],
                 correct: 1
             },
             {
-                question: "Choose the correct conjunction: 'She sang ___ danced at the party.'",
-                options: ["but", "if", "while", "and"],
-                correct: 3
-            },
-            {
-                question: "Choose the correct conjunction: 'He was hungry, ___ he ate a sandwich.'",
-                options: ["so", "till", "but", "when"],
-                correct: 0
-            },
-            {
-                question: "Choose the correct conjunction: '___ she was tired, she finished her homework.'",
-                options: ["Because", "While", "Or", "Till"],
-                correct: 1
-            },
-            {
-                question: "Which conjunction is used to show a RESULT of an action, like 'He studied hard, ___ he passed the exam'?",
-                options: ["and", "but", "so", "if"],
+                question: "For breakfast, you can have tea ___ coffee — not both.",
+                options: ["and", "but", "or", "when"],
                 correct: 2
+            },
+            {
+                question: "The children played happily ___ their parents watched them closely.",
+                options: ["while", "till", "because", "if"],
+                correct: 0
+            },
+            {
+                question: "I will not go out to play ___ I finish my homework.",
+                options: ["so", "till", "and", "when"],
+                correct: 1
+            },
+            {
+                question: "She is very small in size, ___ she is extremely strong.",
+                options: ["and", "but", "or", "because"],
+                correct: 1
+            },
+            {
+                question: "Ring the doorbell ___ you reach the gate.",
+                options: ["when", "till", "so", "but"],
+                correct: 0
+            },
+            {
+                question: "The plant died ___ nobody watered it for two weeks. (This tells us the REASON.)",
+                options: ["so", "because", "or", "while"],
+                correct: 1
+            },
+            {
+                question: "The sky turned dark and cloudy, ___ we knew a storm was coming. (This tells us the RESULT.)",
+                options: ["because", "if", "so", "till"],
+                correct: 2
+            },
+            {
+                question: "He fell asleep ___ watching the movie, showing two things happening at the same time.",
+                options: ["when", "while", "till", "so"],
+                correct: 1
             }
         ];
 
