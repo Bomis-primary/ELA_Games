@@ -1,1 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conjunction Maze Runner - Grade 4 Chapter 8</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .splash-screen img {
+            max-width: 500px;
+            width: 90%;
+            height: auto;
+            animation: logoFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+
+        .container.visible {
+            opacity: 1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-item span {
+            display: block;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .game-container {
+            padding: 20px;
+            position: relative;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            background: #f0f4ff;
+            touch-action: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 10px;
+        }
+
+        .control-grid .control-btn:nth-child(1) {
+            grid-column: 2;
+        }
+
+        .control-grid .control-btn:nth-child(2) {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .control-grid .control-btn:nth-child(3) {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .control-grid .control-btn:nth-child(4) {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        .question-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .question-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .question-box h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option-btn.correct {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+            animation: correctPulse 0.5s;
+        }
+
+        .option-btn.wrong {
+            background: #f44336;
+            color: white;
+            border-color: #f44336;
+            animation: shake 0.5s;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .feedback.wrong {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .restart-btn {
+            display: none;
+            margin: 30px auto;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .volume-control {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .volume-control input {
+            width: 200px;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 100px;
+            animation: celebrationAnim 1s ease-out;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        @keyframes celebrationAnim {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .instructions {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .instructions p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            #gameCanvas {
+                height: 300px;
+            }
+
+            .question-box {
+                padding: 20px;
+            }
+
+            .question-text {
+                font-size: 16px;
+            }
+
+            .option-btn {
+                font-size: 14px;
+                padding: 12px 15px;
+            }
+
+            .splash-screen img {
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen with Logo -->
+    <div class="splash-screen" id="splashScreen">
+        <img src="g4/chp8/conjunctions/assets/logo.png" alt="Logo" onerror="this.style.display='none'">
+    </div>
+
+    <div class="container" id="mainContainer">
+        <div class="header">
+            <h1>🔗 Conjunction Maze Runner 🔗</h1>
+            <div class="score-board">
+                <div class="score-item">
+                    <div>Stars</div>
+                    <span id="stars">0</span>
+                </div>
+                <div class="score-item">
+                    <div>Questions</div>
+                    <span id="questionsAnswered">0/10</span>
+                </div>
+                <div class="score-item">
+                    <div>Correct</div>
+                    <span id="correctCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <div class="instructions">
+                <p><strong>How to Play:</strong></p>
+                <p>🎮 Use arrow keys or on-screen buttons to move</p>
+                <p>⭐ Collect 3 stars to unlock a question about Conjunctions</p>
+                <p>✅ Answer correctly to get a speed boost!</p>
+            </div>
+
+            <canvas id="gameCanvas"></canvas>
+
+            <div class="controls">
+                <div class="control-grid">
+                    <button class="control-btn" id="upBtn">↑</button>
+                    <button class="control-btn" id="leftBtn">←</button>
+                    <button class="control-btn" id="rightBtn">→</button>
+                    <button class="control-btn" id="downBtn">↓</button>
+                </div>
+            </div>
+
+            <div class="volume-control">
+                <label for="volumeSlider">🔊 Volume: <span id="volumeLabel">80%</span></label><br>
+                <input type="range" id="volumeSlider" min="0" max="100" value="80">
+            </div>
+
+            <button class="restart-btn" id="restartBtn">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <div class="question-modal" id="questionModal">
+        <div class="question-box">
+            <h2>Question <span id="questionNumber">1</span> of 10</h2>
+            <div class="question-text" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="feedback" id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        // Hide splash screen and show game after 5 seconds
+        setTimeout(() => {
+            document.getElementById('splashScreen').classList.add('hidden');
+            document.getElementById('mainContainer').classList.add('visible');
+            initGame();
+            draw();
+        }, 5000);
+
+        // Audio elements for external sound files
+        const correctSound = new Audio('g4/chp8/conjunctions/assets/correct.mp3');
+        const wrongSound = new Audio('g4/chp8/conjunctions/assets/wrong.mp3');
+        const celebrationSound = new Audio('g4/chp8/conjunctions/assets/freesound_community-claps-44774.mp3');
+        
+        let volume = 0.8;
+
+        // Set initial volume
+        correctSound.volume = volume;
+        wrongSound.volume = volume;
+        celebrationSound.volume = volume;
+
+        function playCorrectSound() {
+            correctSound.currentTime = 0;
+            correctSound.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        function playWrongSound() {
+            wrongSound.currentTime = 0;
+            wrongSound.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        function playCelebrationSound() {
+            celebrationSound.currentTime = 0;
+            celebrationSound.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        function playStarSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            
+            gainNode.gain.setValueAtTime(volume * 0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        // Volume control
+        document.getElementById('volumeSlider').addEventListener('input', function(e) {
+            volume = e.target.value / 100;
+            correctSound.volume = volume;
+            wrongSound.volume = volume;
+            celebrationSound.volume = volume;
+            document.getElementById('volumeLabel').textContent = e.target.value + '%';
+        });
+
+        // Questions array - Conjunctions: and, because, when, if, till, but, while, so, or
+        const questions = [
+            {
+                question: "Choose the correct conjunction: 'I like tea ___ coffee, but I don't like both together.'",
+                options: ["and", "or", "because", "till"],
+                correct: 1
+            },
+            {
+                question: "Choose the correct conjunction: 'She was late ___ she missed the bus.'",
+                options: ["so", "if", "because", "while"],
+                correct: 2
+            },
+            {
+                question: "Choose the correct conjunction: 'Please wait here ___ I come back.'",
+                options: ["till", "and", "when", "but"],
+                correct: 0
+            },
+            {
+                question: "Choose the correct conjunction: '___ it rains, we will cancel the picnic.'",
+                options: ["Because", "So", "If", "Or"],
+                correct: 2
+            },
+            {
+                question: "Choose the correct conjunction: 'He was tired, ___ he kept on working.'",
+                options: ["but", "and", "till", "if"],
+                correct: 0
+            },
+            {
+                question: "Choose the correct conjunction: 'I will call you ___ I reach home.'",
+                options: ["because", "when", "or", "so"],
+                correct: 1
+            },
+            {
+                question: "Choose the correct conjunction: 'She sang ___ danced at the party.'",
+                options: ["but", "if", "while", "and"],
+                correct: 3
+            },
+            {
+                question: "Choose the correct conjunction: 'He was hungry, ___ he ate a sandwich.'",
+                options: ["so", "till", "but", "when"],
+                correct: 0
+            },
+            {
+                question: "Choose the correct conjunction: '___ she was tired, she finished her homework.'",
+                options: ["Because", "While", "Or", "Till"],
+                correct: 1
+            },
+            {
+                question: "Which conjunction is used to show a RESULT of an action, like 'He studied hard, ___ he passed the exam'?",
+                options: ["and", "but", "so", "if"],
+                correct: 2
+            }
+        ];
+
+        let shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const gridSize = 40;
+        const MAX_STARS = 3;
+        let player = {
+            x: 1,
+            y: 1,
+            speed: 1,
+            speedBoost: false
+        };
+
+        let stars = [];
+        let walls = [];
+        let starsCollected = 0;
+        let totalStarsCollected = 0;
+        let occupiedCells = new Set();
+
+        function generateMaze() {
+            walls = [];
+            occupiedCells.clear();
+            const cols = Math.floor(canvas.width / gridSize);
+            const rows = Math.floor(canvas.height / gridSize);
+
+            for (let i = 0; i < cols; i++) {
+                walls.push({x: i, y: 0});
+                walls.push({x: i, y: rows - 1});
+                occupiedCells.add(`${i},0`);
+                occupiedCells.add(`${i},${rows - 1}`);
+            }
+            for (let i = 0; i < rows; i++) {
+                walls.push({x: 0, y: i});
+                walls.push({x: cols - 1, y: i});
+                occupiedCells.add(`0,${i}`);
+                occupiedCells.add(`${cols - 1},${i}`);
+            }
+
+            occupiedCells.add('1,1');
+
+            for (let i = 0; i < 15; i++) {
+                const wallX = Math.floor(Math.random() * (cols - 2)) + 1;
+                const wallY = Math.floor(Math.random() * (rows - 2)) + 1;
+                const cellKey = `${wallX},${wallY}`;
+                if (!occupiedCells.has(cellKey)) {
+                    walls.push({x: wallX, y: wallY});
+                    occupiedCells.add(cellKey);
+                }
+            }
+        }
+
+        function isValidPosition(x, y) {
+            const cellKey = `${x},${y}`;
+            if (occupiedCells.has(cellKey)) {
+                return false;
+            }
+            for (let star of stars) {
+                if (star.x === x && star.y === y) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function generateSingleStar() {
+            const cols = Math.floor(canvas.width / gridSize);
+            const rows = Math.floor(canvas.height / gridSize);
+            let attempts = 0;
+            const maxAttempts = 100;
+
+            while (attempts < maxAttempts) {
+                const starX = Math.floor(Math.random() * (cols - 2)) + 1;
+                const starY = Math.floor(Math.random() * (rows - 2)) + 1;
+                
+                if (isValidPosition(starX, starY)) {
+                    return {x: starX, y: starY};
+                }
+                attempts++;
+            }
+            
+            for (let y = 1; y < rows - 1; y++) {
+                for (let x = 1; x < cols - 1; x++) {
+                    if (isValidPosition(x, y)) {
+                        return {x, y};
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        // Maintain exactly 3 stars at all times
+        function maintainStarCount() {
+            while (stars.length < MAX_STARS) {
+                const newStar = generateSingleStar();
+                if (newStar) {
+                    stars.push(newStar);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        function generateStars() {
+            stars = [];
+            maintainStarCount();
+        }
+
+        function initGame() {
+            player.x = 1;
+            player.y = 1;
+            generateMaze();
+            generateStars();
+            starsCollected = 0;
+            totalStarsCollected = 0;
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+            updateScoreboard();
+        }
+
+        function checkCollision(x, y) {
+            return walls.some(wall => wall.x === x && wall.y === y);
+        }
+
+        function movePlayer(dx, dy) {
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+
+            if (!checkCollision(newX, newY)) {
+                player.x = newX;
+                player.y = newY;
+
+                const starIndex = stars.findIndex(star => star.x === player.x && star.y === player.y);
+                if (starIndex !== -1) {
+                    stars.splice(starIndex, 1);
+                    starsCollected++;
+                    totalStarsCollected++;
+                    playStarSound();
+                    updateScoreboard();
+
+                    // Regenerate star after 1 second to maintain 3 stars
+                    setTimeout(() => {
+                        maintainStarCount();
+                    }, 1000);
+
+                    if (starsCollected >= 3) {
+                        if (currentQuestionIndex < shuffledQuestions.length) {
+                            showQuestion();
+                        } else {
+                            endGame();
+                        }
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#667eea';
+            walls.forEach(wall => {
+                ctx.fillRect(wall.x * gridSize, wall.y * gridSize, gridSize - 2, gridSize - 2);
+            });
+
+            stars.forEach(star => {
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                const centerX = star.x * gridSize + gridSize / 2;
+                const centerY = star.y * gridSize + gridSize / 2;
+                const radius = gridSize / 3;
+                
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+                    const x = centerX + radius * Math.cos(angle);
+                    const y = centerY + radius * Math.sin(angle);
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.closePath();
+                ctx.fill();
+            });
+
+            ctx.fillStyle = player.speedBoost ? '#4CAF50' : '#f5576c';
+            ctx.beginPath();
+            ctx.arc(
+                player.x * gridSize + gridSize / 2,
+                player.y * gridSize + gridSize / 2,
+                gridSize / 2.5,
+                0,
+                2 * Math.PI
+            );
+            ctx.fill();
+
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(player.x * gridSize + gridSize / 2 - 5, player.y * gridSize + gridSize / 2 - 3, 3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(player.x * gridSize + gridSize / 2 + 5, player.y * gridSize + gridSize / 2 - 3, 3, 0, 2 * Math.PI);
+            ctx.fill();
+
+            requestAnimationFrame(draw);
+        }
+
+        function updateScoreboard() {
+            document.getElementById('stars').textContent = totalStarsCollected;
+            document.getElementById('questionsAnswered').textContent = currentQuestionIndex + '/' + shuffledQuestions.length;
+            document.getElementById('correctCount').textContent = correctAnswers;
+        }
+
+        function showQuestion() {
+            const modal = document.getElementById('questionModal');
+            const questionText = document.getElementById('questionText');
+            const optionsContainer = document.getElementById('optionsContainer');
+            const questionNumber = document.getElementById('questionNumber');
+            const feedback = document.getElementById('feedback');
+
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            
+            questionNumber.textContent = currentQuestionIndex + 1;
+            questionText.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+            feedback.style.display = 'none';
+            feedback.className = 'feedback';
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.onclick = () => checkAnswer(index, button);
+                optionsContainer.appendChild(button);
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        function checkAnswer(selectedIndex, button) {
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const feedback = document.getElementById('feedback');
+            const allButtons = document.querySelectorAll('.option-btn');
+
+            allButtons.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === currentQuestion.correct) {
+                button.classList.add('correct');
+                feedback.textContent = '🎉 Excellent! That\'s correct!';
+                feedback.className = 'feedback correct';
+                feedback.style.display = 'block';
+                correctAnswers++;
+                playCorrectSound();
+                showCelebration();
+                
+                player.speedBoost = true;
+                setTimeout(() => {
+                    player.speedBoost = false;
+                }, 5000);
+
+            } else {
+                button.classList.add('wrong');
+                allButtons[currentQuestion.correct].classList.add('correct');
+                feedback.textContent = '❌ Not quite right. The correct answer is highlighted above.';
+                feedback.className = 'feedback wrong';
+                feedback.style.display = 'block';
+                playWrongSound();
+            }
+
+            updateScoreboard();
+
+            setTimeout(() => {
+                document.getElementById('questionModal').style.display = 'none';
+                currentQuestionIndex++;
+                starsCollected = 0;
+            }, 3000);
+        }
+
+        function showCelebration() {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.textContent = '⭐';
+            document.body.appendChild(celebration);
+            setTimeout(() => {
+                celebration.remove();
+            }, 1000);
+        }
+
+        function endGame() {
+            const modal = document.getElementById('questionModal');
+            const questionBox = document.querySelector('.question-box');
+            
+            const percentage = Math.round((correctAnswers / shuffledQuestions.length) * 100);
+            let message = '';
+            
+            if (percentage >= 80) {
+                message = '🌟 Outstanding! You have excellent understanding of Conjunctions!';
+                playCelebrationSound();
+            } else if (percentage >= 60) {
+                message = '👍 Great job! You have a good grasp of Conjunctions!';
+            } else {
+                message = '💪 Keep practicing! Review the chapter and try again!';
+            }
+
+            questionBox.innerHTML = `
+                <h2>🎯 Game Complete!</h2>
+                <div class="question-text">
+                    <p style="font-size: 24px; text-align: center; margin: 20px 0;">
+                        <strong>Your Score: ${correctAnswers}/${shuffledQuestions.length}</strong>
+                    </p>
+                    <p style="font-size: 20px; text-align: center; margin: 20px 0;">
+                        ${percentage}% Correct
+                    </p>
+                    <p style="text-align: center; font-size: 18px; color: #667eea;">
+                        ${message}
+                    </p>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+            document.getElementById('restartBtn').style.display = 'block';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('questionModal').style.display === 'flex') return;
+
+            switch(e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    movePlayer(0, -1);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    movePlayer(0, 1);
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    movePlayer(-1, 0);
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    movePlayer(1, 0);
+                    break;
+            }
+        });
+
+        document.getElementById('upBtn').addEventListener('click', () => movePlayer(0, -1));
+        document.getElementById('downBtn').addEventListener('click', () => movePlayer(0, 1));
+        document.getElementById('leftBtn').addEventListener('click', () => movePlayer(-1, 0));
+        document.getElementById('rightBtn').addEventListener('click', () => movePlayer(1, 0));
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            document.getElementById('questionModal').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'none';
+            initGame();
+        });
+    </script>
+</body>
+</html>
