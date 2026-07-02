@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dolphin Word Adventure</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none; -webkit-user-select: none; touch-action: none;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #ccfbf1 0%, #6ee7b7 100%);
+      color: #111827;
+    }
+    .hidden { display: none !important; }
+    
+    /* Fun 3D Buttons for Kids */
+    .btn-arcade {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #06b6d4;
+      color: white;
+      font-weight: 900;
+      font-size: 1.5rem;
+      padding: 14px 32px;
+      border: 4px solid #083344;
+      border-radius: 20px;
+      box-shadow: 0 8px 0 #155e75, 0 12px 20px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.1s ease;
+    }
+    .btn-arcade:hover {
+      background: #22d3ee;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 #155e75, 0 15px 25px rgba(0, 0, 0, 0.2);
+    }
+    .btn-arcade:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #155e75, 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .dpad-btn {
+      background: #facc15;
+      border: 3px solid #713f12;
+      box-shadow: 0 4px 0 #a16207;
+    }
+    .dpad-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #a16207;
+    }
+
+    .shake-anim { animation: shake 0.4s ease-in-out; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between p-4 relative overflow-x-hidden">
+
+  <div id="screen-splash" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center text-center">
+    <img id="splash-logo" src="assets/innovine-logo.png" style="width: 440px; max-width: 85vw; height: auto;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwMjg0YzciIHJ4PSIxMCIvPjx0ZXh0IHg9IjEwMCIgeT0iMzUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPklOTk9WSU5FIExPR088L3RleHQ+PC9zdmc+'">
+    <div class="mt-6 font-black text-teal-500 tracking-widest text-lg animate-pulse">LOADING GAME...</div>
+  </div>
+
+  <div id="screen-start" class="hidden w-full max-w-2xl bg-white rounded-[32px] p-6 my-auto shadow-xl border-8 border-teal-400 text-center">
+    <h1 class="text-3xl md:text-4xl font-black text-teal-600 mb-1">🐬 Dolphin Word Adventure</h1>
+    <p class="text-amber-500 font-extrabold tracking-wider text-sm mb-4">WORDS ENDING WITH -LY</p>
+    
+    <div class="text-left bg-teal-50 p-5 rounded-2xl border-4 border-dashed border-teal-200 text-base text-slate-700 space-y-3 mb-6">
+      <p class="font-black text-lg text-teal-700 mb-1">🕹️ How to Play:</p>
+      <div>🎯 Read the sentence and find the missing <strong class="text-teal-600">-ly word</strong>.</div>
+      <div>⌨️ Use the **Arrow Keys** or tap the yellow **buttons** to swim.</div>
+      <div>📦 Swim into the right chest or submarine card to win points!</div>
+    </div>
+    
+    <button class="btn-arcade" onclick="startGame()">Play Game 🚀</button>
+  </div>
+
+  <div id="screen-game" class="hidden w-full max-w-4xl flex flex-col items-center">
+    
+    <div class="w-full bg-white rounded-2xl p-3 shadow-md border border-teal-100 flex justify-between items-center mb-3">
+      <div>
+        <div id="level-badge" class="text-xs font-black text-teal-500 tracking-wider uppercase">Level 1</div>
+        <div id="question-counter" class="text-base font-extrabold text-slate-800">Question 1 / 10</div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full font-bold text-xs">Tries: <span id="lbl-tries">2</span></span>
+        <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-bold text-xs">⭐ <span id="lbl-score">0</span></span>
+      </div>
+    </div>
+
+    <div class="w-full bg-white rounded-2xl p-4 shadow-md border-2 border-slate-200 text-center mb-3">
+      <h2 id="sentence-prompt" class="text-lg md:text-xl font-bold text-slate-800 leading-relaxed">
+        The bright yellow sun shone <span class="bg-yellow-200 px-2 py-0.5 rounded">______</span> at the beach.
+      </h2>
+    </div>
+
+    <div class="w-full flex flex-col md:flex-row items-center gap-4">
+      
+      <div id="game-sandbox-container" class="flex-1 w-full bg-sky-200 border-4 border-teal-600 rounded-[2rem] shadow-xl relative overflow-hidden aspect-[4/3]">
+        <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+      </div>
+
+      <div class="flex flex-col items-center bg-white p-4 rounded-2xl shadow-md border border-slate-200 shrink-0">
+        <span class="text-xs font-bold text-slate-400 mb-2 uppercase">Move Dolphin</span>
+        <div class="grid grid-cols-3 gap-2 w-32 h-32">
+          <td></td>
+          <button class="dpad-btn text-xl font-black rounded-lg flex items-center justify-center text-slate-800" onmousedown="setDirection('up')" onmouseup="clearDirection()" ontouchstart="setDirection('up')" ontouchend= "clearDirection()">▲</button>
+          <td></td>
+          <button class="dpad-btn text-xl font-black rounded-lg flex items-center justify-center text-slate-800" onmousedown="setDirection('left')" onmouseup="clearDirection()" ontouchstart="setDirection('left')" ontouchend= "clearDirection()">◀</button>
+          <div class="bg-slate-100 rounded-full flex items-center justify-center text-lg">🐬</div>
+          <button class="dpad-btn text-xl font-black rounded-lg flex items-center justify-center text-slate-800" onmousedown="setDirection('right')" onmouseup="clearDirection()" ontouchstart="setDirection('right')" ontouchend= "clearDirection()">▶</button>
+          <td></td>
+          <button class="dpad-btn text-xl font-black rounded-lg flex items-center justify-center text-slate-800" onmousedown="setDirection('down')" onmouseup="clearDirection()" ontouchstart="setDirection('down')" ontouchend= "clearDirection()">▼</button>
+          <td></td>
+        </div>
+        <p class="text-[10px] text-slate-400 font-medium text-center mt-3 max-w-[120px]">Or use Keyboard Arrows!</p>
+      </div>
+
+    </div>
+
+    <div id="action-hint" class="mt-3 bg-white/80 border border-slate-200 px-4 py-1.5 rounded-full font-bold text-xs text-slate-600 text-center animate-pulse">
+      Swim to the right word chest!
+    </div>
+
+  </div>
+
+  <div id="screen-summary" class="hidden w-full max-w-md bg-white rounded-[2rem] p-8 my-auto shadow-2xl border-4 border-yellow-400 text-center">
+    <span class="text-6xl block mb-4">🏆</span>
+    <h1 class="text-3xl font-black text-teal-600">Great Job!</h1>
+    <div class="my-6">
+      <div class="text-sm font-bold text-slate-400 uppercase tracking-widest">Total Score</div>
+      <div id="txt-final-score" class="text-5xl font-black text-amber-500 mt-1">0</div>
+    </div>
+    <p class="text-slate-500 font-medium mb-6">You are a master of -ly words!</p>
+    <button class="btn-arcade text-base" onclick="location.reload()">Play Again 🔄</button>
+  </div>
+
+  <audio id="audio-correct" src="assets/correct.mp3" preload="none"></audio>
+  <audio id="audio-wrong" src="assets/wrong.mp3" preload="none"></audio>
+
+  <script>
+    // 10 Kid-friendly Grade 2 Adverb sentences
+    const QUESTION_DATASET = [
+      // Level 1: Floating Chests
+      { sentence: "The bright yellow sun shone ______ in the sky.", correct: "brightly", wrongs: ["sadly", "loudly"] },
+      { sentence: "The happy turtle crawled ______ across the sand.", correct: "slowly", wrongs: ["quickly", "brightly"] },
+      { sentence: "The happy children played ______ near the water.", correct: "happily", wrongs: ["angrily", "quietly"] },
+      { sentence: "The loud thunder crashed ______ during the storm.", correct: "loudly", wrongs: ["softly", "safely"] },
+      { sentence: "Please hold your ice cream ______ so it does not fall!", correct: "carefully", wrongs: ["wildly", "badly"] },
+      
+      // Level 2: Submarine Dashboard Deep Dive
+      { sentence: "The little puppy barked ______ when it saw the ball.", correct: "excitedly", wrongs: ["slowly", "sadly"] },
+      { sentence: "The warm wind blew ______ through the trees.", correct: "gently", wrongs: ["loudly", "angrily"] },
+      { sentence: "The beautiful stars shone ______ in the dark night sky.", correct: "clearly", wrongs: ["safely", "slowly"] },
+      { sentence: "The brave little crab walked ______ toward the sea.", correct: "boldly", wrongs: ["scaredly", "quietly"] },
+      { sentence: "The kind teacher smiled ______ at the good student.", correct: "proudly", wrongs: ["crossly", "loudly"] }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    let tries = 2;
+    let isTransitioning = false;
+
+    let canvas, ctx;
+    const CANVAS_W = 800;
+    const CANVAS_H = 600;
+
+    // Fixed dolphin orientation properties: defaults to facing forward (right) toward words
+    let player = {
+      x: 80, y: 260,
+      w: 105, h: 75,
+      speed: 7,
+      vx: 0, vy: 0,
+      emoji: "🐬",
+      facingLeft: false // false means facing right (forward toward word targets)
+    };
+
+    let targets = [];
+    let keysPressed = {};
+    
+    // Living Ocean Scenery
+    let ambientFish = [];
+    let oceanBubbles = [];
+    let environmentTimer = 0;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Create swimming background fish
+      for(let i=0; i<6; i++) {
+        ambientFish.push({
+          x: Math.random() * CANVAS_W,
+          y: 100 + Math.random() * 380,
+          speed: 1.5 + Math.random() * 2,
+          size: 20 + Math.random() * 20,
+          emoji: ["🐠", "🐟", "🐡", "🦑"][Math.floor(Math.random() * 4)],
+          dir: Math.random() > 0.5 ? 1 : -1
+        });
+      }
+      // Create floating background water bubbles
+      for(let i=0; i<15; i++) {
+        oceanBubbles.push({
+          x: Math.random() * CANVAS_W,
+          y: Math.random() * CANVAS_H,
+          r: 2 + Math.random() * 5,
+          speed: 1 + Math.random() * 1.5
+        });
+      }
+
+      setTimeout(() => {
+        document.getElementById('screen-splash').classList.add('hidden');
+        document.getElementById('screen-start').classList.remove('hidden');
+      }, 1200);
+    });
+
+    function startGame() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          const tCtx = new AudioContext();
+          if (tCtx.state === 'suspended') tCtx.resume();
+        }
+      } catch(e) {}
+
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.remove('hidden');
+      
+      canvas = document.getElementById('gameCanvas');
+      ctx = canvas.getContext('2d');
+      canvas.width = CANVAS_W;
+      canvas.height = CANVAS_H;
+
+      bindInputListeners();
+      loadQuestion();
+      
+      // Setup touch/click actions for Level 2 submarine panels
+      canvas.addEventListener('click', handleCanvasClick);
+      canvas.addEventListener('touchstart', (e) => {
+        if(currentIdx >= 5) {
+          const rect = canvas.getBoundingClientRect();
+          const t = e.touches[0];
+          const clickX = ((t.clientX - rect.left) / rect.width) * CANVAS_W;
+          const clickY = ((t.clientY - rect.top) / rect.height) * CANVAS_H;
+          checkSubOptionClick(clickX, clickY);
+        }
+      });
+
+      animateLoop();
+    }
+
+    function loadQuestion() {
+      if (currentIdx >= QUESTION_DATASET.length) {
+        endGame();
+        return;
+      }
+
+      isTransitioning = false;
+      tries = 2;
+      document.getElementById('lbl-tries').innerText = tries;
+      document.getElementById('lbl-score').innerText = score;
+      document.getElementById('question-counter').innerText = `Question ${currentIdx + 1} / ${QUESTION_DATASET.length}`;
+
+      const q = QUESTION_DATASET[currentIdx];
+      const isL2 = currentIdx >= 5;
+
+      if (!isL2) {
+        document.getElementById('level-badge').innerText = "Level 1: Chest Swim";
+        document.getElementById('action-hint').innerText = "Swim into the correct chest option!";
+      } else {
+        document.getElementById('level-badge').innerText = "Level 2: Submarine Dive";
+        document.getElementById('action-hint').innerText = "Look at the submarine and tap the correct word button!";
+      }
+
+      document.getElementById('sentence-prompt').innerHTML = q.sentence.replace("______", `<span class="bg-yellow-100 border-2 border-dashed border-amber-400 px-3 py-0.5 rounded mx-1 text-teal-800 font-extrabold">______</span>`);
+
+      targets = [];
+      const choiceWords = [q.correct, ...q.wrongs].sort(() => Math.random() - 0.5);
+
+      if(!isL2) {
+        // Level 1: Words are on chests on the right side of the screen
+        const verticalSlots = [120, 290, 460];
+        choiceWords.forEach((word, index) => {
+          targets.push({
+            word: word,
+            isCorrect: word === q.correct,
+            x: 610,
+            y: verticalSlots[index],
+            w: 145,
+            h: 85,
+            pulseTimer: Math.random() * 10
+          });
+        });
+      } else {
+        // Level 2: Words are on the submarine buttons
+        const startX = 180;
+        choiceWords.forEach((word, index) => {
+          targets.push({
+            word: word,
+            isCorrect: word === q.correct,
+            x: startX + (index * 160),
+            y: 430,
+            w: 140,
+            h: 50
+          });
+        });
+      }
+
+      // Reset Dolphin Position
+      player.x = 80;
+      player.y = isL2 ? 140 : 260;
+      player.vx = 0;
+      player.vy = 0;
+      player.facingLeft = false; // Starts looking forward toward the targets
+    }
+
+    function setDirection(dir) {
+      if (isTransitioning) return;
+      if (dir === 'up') player.vy = -player.speed;
+      if (dir === 'down') player.vy = player.speed;
+      if (dir === 'left') { player.vx = -player.speed; player.facingLeft = true; }
+      if (dir === 'right') { player.vx = player.speed; player.facingLeft = false; }
+    }
+
+    function clearDirection() {
+      player.vx = 0;
+      player.vy = 0;
+    }
+
+    function bindInputListeners() {
+      window.addEventListener('keydown', (e) => { keysPressed[e.key] = true; });
+      window.addEventListener('keyup', (e) => { keysPressed[e.key] = false; });
+    }
+
+    function processKeyboardMovement() {
+      if (isTransitioning) return;
+      
+      player.vx = 0;
+      player.vy = 0;
+
+      if (keysPressed['ArrowUp'] || keysPressed['w'] || keysPressed['W']) player.vy = -player.speed;
+      if (keysPressed['ArrowDown'] || keysPressed['s'] || keysPressed['S']) player.vy = player.speed;
+      
+      if (keysPressed['ArrowLeft'] || keysPressed['a'] || keysPressed['A']) {
+        player.vx = -player.speed;
+        player.facingLeft = true; // Turn back left
+      }
+      if (keysPressed['ArrowRight'] || keysPressed['d'] || keysPressed['D']) {
+        player.vx = player.speed;
+        player.facingLeft = false; // Face forward right
+      }
+    }
+
+    function handleCanvasClick(e) {
+      if (currentIdx < 5) return;
+      const rect = canvas.getBoundingClientRect();
+      const clickX = ((e.clientX - rect.left) / rect.width) * CANVAS_W;
+      const clickY = ((e.clientY - rect.top) / rect.height) * CANVAS_H;
+      checkSubOptionClick(clickX, clickY);
+    }
+
+    function checkSubOptionClick(cx, cy) {
+      if(isTransitioning) return;
+      targets.forEach(target => {
+        if (cx >= target.x && cx <= target.x + target.w && cy >= target.y && cy <= target.y + target.h) {
+          evaluateAnswerSelection(target);
+        }
+      });
+    }
+
+    function animateLoop() {
+      updateGamePhysics();
+      renderGraphics();
+      requestAnimationFrame(animateLoop);
+    }
+
+    function updateGamePhysics() {
+      processKeyboardMovement();
+
+      player.x += player.vx;
+      player.y += player.vy;
+
+      // Screen boundaries
+      if (player.x < 10) player.x = 10;
+      if (player.x > CANVAS_W - player.w - 10) player.x = CANVAS_W - player.w - 10;
+      if (player.y < 40) player.y = 40;
+      if (player.y > CANVAS_H - player.h - 40) player.y = CANVAS_H - player.h - 40;
+
+      // Move ambient background fish
+      ambientFish.forEach(fish => {
+        fish.x += fish.speed * fish.dir;
+        if(fish.dir === 1 && fish.x > CANVAS_W + 50) fish.x = -50;
+        if(fish.dir === -1 && fish.x < -50) fish.x = CANVAS_W + 50;
+      });
+
+      // Move background water bubbles
+      oceanBubbles.forEach(b => {
+        b.y -= b.speed;
+        if(b.y < -10) { b.y = CANVAS_H + 10; b.x = Math.random() * CANVAS_W; }
+      });
+
+      if (isTransitioning || currentIdx >= 5) return;
+
+      // Check collision with chests (Level 1 only)
+      targets.forEach(target => {
+        if (
+          player.x < target.x + target.w &&
+          player.x + player.w > target.x &&
+          player.y < target.y + target.h &&
+          player.y + player.h > target.y
+        ) {
+          evaluateAnswerSelection(target);
+        }
+      });
+    }
+
+    function evaluateAnswerSelection(hitTarget) {
+      isTransitioning = true;
+      const q = QUESTION_DATASET[currentIdx];
+
+      if (hitTarget.isCorrect) {
+        playAudioClip('correct');
+        score += (tries === 2) ? 20 : 10;
+        document.getElementById('lbl-score').innerText = score;
+        document.getElementById('sentence-prompt').innerHTML = q.sentence.replace("______", `<span class="bg-emerald-500 text-white font-black px-4 py-1 rounded mx-1 shadow-md uppercase">${q.correct}</span>`);
+        document.getElementById('action-hint').innerText = "🌟 AWESOME JOB!";
+
+        setTimeout(() => {
+          currentIdx++;
+          loadQuestion();
+        }, 2000);
+      } else {
+        tries--;
+        document.getElementById('lbl-tries').innerText = tries;
+        playAudioClip('wrong');
+
+        const sandbox = document.getElementById('game-sandbox-container');
+        sandbox.classList.add('shake-anim');
+        setTimeout(() => sandbox.classList.remove('shake-anim'), 400);
+
+        if (tries <= 0) {
+          document.getElementById('sentence-prompt').innerHTML = q.sentence.replace("______", `<span class="bg-rose-500 text-white font-black px-4 py-1 rounded mx-1 shadow-md uppercase">${q.correct}</span>`);
+          document.getElementById('action-hint').innerText = "Let's look at the answer together!";
+          
+          setTimeout(() => {
+            currentIdx++;
+            loadQuestion();
+          }, 2400);
+        } else {
+          player.x = 80;
+          isTransitioning = false;
+          document.getElementById('action-hint').innerText = "Oops, try another word option!";
+        }
+      }
+    }
+
+    function renderGraphics() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+      environmentTimer += 0.03;
+
+      const isL2 = currentIdx >= 5;
+
+      // Ocean Background Colors
+      let skyGrad = ctx.createLinearGradient(0, 0, 0, CANVAS_H);
+      if (!isL2) {
+        skyGrad.addColorStop(0, '#0ea5e9'); // Nice bright lagoon blue
+        skyGrad.addColorStop(0.3, '#38bdf8');
+        skyGrad.addColorStop(1, '#0284c7');
+      } else {
+        skyGrad.addColorStop(0, '#0369a1'); // Deeper blue for Level 2 submarine dive
+        skyGrad.addColorStop(0.4, '#075985');
+        skyGrad.addColorStop(1, '#0c4a6e');
+      }
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+      // Draw background bubbles
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      oceanBubbles.forEach(b => {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, 2*Math.PI);
+        ctx.fill();
+      });
+
+      // Draw background fish
+      ctx.font = "30px Arial";
+      ctx.textAlign = "center";
+      ambientFish.forEach(fish => {
+        ctx.save();
+        ctx.translate(fish.x, fish.y);
+        if(fish.dir === -1) ctx.scale(-1, 1);
+        ctx.fillText(fish.emoji, 0, 0);
+        ctx.restore();
+      });
+
+      // Draw animated waving seaweed on ocean floor
+      ctx.fillStyle = '#059669';
+      for (let xCoord = 30; xCoord < CANVAS_W; xCoord += 110) {
+        const waveH = 70 + Math.sin(environmentTimer + xCoord) * 15;
+        ctx.beginPath();
+        ctx.moveTo(xCoord, CANVAS_H);
+        ctx.quadraticCurveTo(xCoord - 15 + Math.sin(environmentTimer)*10, CANVAS_H - (waveH/2), xCoord + Math.sin(environmentTimer)*15, CANVAS_H - waveH);
+        ctx.quadraticCurveTo(xCoord + 20, CANVAS_H - (waveH/2), xCoord + 30, CANVAS_H);
+        ctx.fill();
+      }
+
+      // Sandy Floor
+      ctx.fillStyle = isL2 ? '#d97706' : '#eab308';
+      ctx.beginPath();
+      ctx.ellipse(400, 595, 460, 25, 0, 0, 2*Math.PI);
+      ctx.fill();
+
+      // Draw Word Targets
+      if (!isL2) {
+        // LEVEL 1: Draw Chest Option Cards
+        targets.forEach(target => {
+          const hoverOffset = Math.sin(environmentTimer * 1.5 + target.pulseTimer) * 6;
+
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+          ctx.strokeStyle = '#0284c7';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.roundRect(target.x, target.y + hoverOffset, target.w, target.h, 16);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#78350f';
+          ctx.font = "bold 21px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("📦 " + target.word, target.x + (target.w / 2), target.y + (target.h / 2) + hoverOffset);
+        });
+      } else {
+        // LEVEL 2: Draw Yellow Submarine Dashboard
+        const subX = 120, subY = 360, subW = 560, subH = 170;
+        
+        ctx.fillStyle = '#facc15';
+        ctx.strokeStyle = '#ca8a04';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.roundRect(subX, subY, subW, subH, 40);
+        ctx.fill();
+        ctx.stroke();
+
+        // Submarine Windows
+        ctx.fillStyle = '#bae6fd';
+        ctx.beginPath(); ctx.arc(subX + 80, subY + 50, 25, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(subX + 480, subY + 50, 25, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+
+        // Submarine Periscope
+        ctx.strokeStyle = '#ca8a04'; ctx.lineWidth = 12;
+        ctx.beginPath(); ctx.moveTo(subX + 280, subY); ctx.lineTo(subX + 280, subY - 40); ctx.lineTo(subX + 310, subY - 40); ctx.stroke();
+
+        // Submarine Digital Word Display Buttons
+        targets.forEach(target => {
+          ctx.fillStyle = '#0f172a';
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.roundRect(target.x, target.y, target.w, target.h, 10);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#3ee2ff';
+          ctx.font = "bold 18px Courier New";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(target.word, target.x + (target.w / 2), target.y + (target.h / 2));
+        });
+      }
+
+      // Draw Big Player Dolphin
+      ctx.save();
+      ctx.font = "78px Arial"; 
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      
+      const midPlayerX = player.x + (player.w / 2);
+      const midPlayerY = player.y + (player.h / 2);
+
+      ctx.translate(midPlayerX, midPlayerY);
+      
+      // Look right normally, mirror when swimming left
+      if (player.facingLeft) {
+        ctx.scale(-1, 1);
+      }
+      
+      ctx.fillText(player.emoji, 0, 0);
+      ctx.restore();
+    }
+
+    function playAudioClip(type) {
+      try {
+        const node = document.getElementById(type === 'correct' ? 'audio-correct' : 'audio-wrong');
+        if (node && typeof node.play === 'function') {
+          node.currentTime = 0;
+          node.play().catch(() => synthFallbackSound(type));
+        } else {
+          synthFallbackSound(type);
+        }
+      } catch (e) {
+        synthFallbackSound(type);
+      }
+    }
+
+    function synthFallbackSound(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctxNode = new AudioContext();
+        const osc = ctxNode.createOscillator();
+        const gain = ctxNode.createGain();
+        osc.connect(gain); gain.connect(ctxNode.destination);
+        
+        if (type === 'correct') {
+          osc.frequency.setValueAtTime(523.25, ctxNode.currentTime); 
+          osc.frequency.setValueAtTime(659.25, ctxNode.currentTime + 0.1); 
+          gain.gain.exponentialRampToValueAtTime(0.01, ctxNode.currentTime + 0.3);
+          osc.start(); osc.stop(ctxNode.currentTime + 0.3);
+        } else {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(146.83, ctxNode.currentTime); 
+          gain.gain.exponentialRampToValueAtTime(0.01, ctxNode.currentTime + 0.35);
+          osc.start(); osc.stop(ctxNode.currentTime + 0.35);
+        }
+      } catch (e) {}
+    }
+
+    function endGame() {
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.remove('hidden');
+      document.getElementById('txt-final-score').innerText = `${score} pts`;
+    }
+  </script>
+</body>
+</html>
