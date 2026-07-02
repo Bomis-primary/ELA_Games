@@ -1,1 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preposition Sorter - Grade 4 Chapter 9</title>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
 
+    body {
+        font-family:'Comic Sans MS','Arial',sans-serif;
+        background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+        min-height:100vh;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        padding:10px;
+    }
+
+    .splash-screen {
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:white; display:flex; justify-content:center; align-items:center;
+        z-index:9999; transition:opacity 0.5s ease-out;
+    }
+    .splash-screen.hidden { opacity:0; pointer-events:none; }
+    .splash-screen img {
+        max-width:500px; width:90%; height:auto;
+        animation:logoFloat 2s ease-in-out infinite;
+    }
+    @keyframes logoFloat {
+        0%,100% { transform:translateY(0px); }
+        50% { transform:translateY(-20px); }
+    }
+
+    .container {
+        max-width:800px; width:100%; background:white; border-radius:20px;
+        box-shadow:0 10px 40px rgba(0,0,0,0.3); overflow:hidden;
+        opacity:0; transition:opacity 0.5s ease-in;
+    }
+    .container.visible { opacity:1; }
+
+    .header {
+        background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);
+        color:white; padding:20px; text-align:center;
+    }
+    .header h1 { font-size:26px; margin-bottom:10px; }
+
+    .score-board {
+        display:flex; justify-content:space-around; padding:15px;
+        background:rgba(255,255,255,0.2); border-radius:10px; margin-top:10px;
+    }
+    .score-item { text-align:center; }
+    .score-item span { display:block; font-size:22px; font-weight:bold; margin-top:5px; }
+
+    .game-container { padding:20px; position:relative; }
+
+    .instructions {
+        background:#fff3cd; padding:15px; border-radius:10px;
+        margin-bottom:20px; border-left:4px solid #ffc107;
+    }
+    .instructions p { margin:4px 0; font-size:14px; }
+
+    .sentence-card {
+        background:#f0f4ff; border:3px solid #667eea; border-radius:15px;
+        padding:25px 20px; margin-bottom:10px; min-height:90px;
+        display:flex; align-items:center; justify-content:center; text-align:center;
+    }
+    .sentence-card p { font-size:19px; line-height:1.6; color:#333; }
+    .sentence-card .hl {
+        font-weight:bold; color:#f5576c; text-decoration:underline;
+        text-decoration-style:dotted;
+    }
+
+    .progress-label {
+        text-align:center; font-size:14px; color:#667eea; font-weight:bold;
+        margin-bottom:20px;
+    }
+
+    .chip-tray {
+        display:flex; justify-content:center; flex-wrap:wrap; gap:12px;
+        min-height:60px; margin-bottom:30px;
+    }
+
+    .chip {
+        touch-action:none; cursor:grab; user-select:none;
+        padding:12px 22px; border-radius:30px; font-size:18px; font-weight:bold;
+        color:white; background:linear-gradient(135deg,#f5576c 0%,#f093fb 100%);
+        box-shadow:0 4px 10px rgba(0,0,0,0.25);
+        transition:transform 0.2s, left 0.35s ease, top 0.35s ease, opacity 0.35s ease;
+    }
+    .chip.dragging {
+        cursor:grabbing; transform:scale(1.1); box-shadow:0 8px 20px rgba(0,0,0,0.35);
+        transition:none;
+    }
+    .chip.flying { transition:left 0.35s ease, top 0.35s ease, opacity 0.35s ease, transform 0.35s ease; }
+    .chip.vanish { opacity:0; transform:scale(0.3); }
+
+    .bins {
+        display:flex; justify-content:center; gap:15px; flex-wrap:wrap;
+    }
+
+    .bin {
+        width:150px; min-height:150px; border-radius:20px; padding:15px 10px;
+        display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+        color:white; position:relative; box-shadow:0 6px 16px rgba(0,0,0,0.2);
+        transition:transform 0.2s, box-shadow 0.2s;
+        animation:binBob 3s ease-in-out infinite;
+    }
+    @keyframes binBob {
+        0%,100% { transform:translateY(0); }
+        50% { transform:translateY(-4px); }
+    }
+
+    .bin-place { background:linear-gradient(160deg,#4a90e2,#357abd); }
+    .bin-direction { background:linear-gradient(160deg,#f5a623,#e08e0b); }
+    .bin-time { background:linear-gradient(160deg,#9b59b6,#7d3c98); }
+
+    .bin .icon { font-size:38px; margin-bottom:6px; }
+    .bin .label { font-size:16px; font-weight:bold; margin-bottom:8px; }
+    .bin .counter {
+        background:rgba(255,255,255,0.3); border-radius:20px;
+        padding:4px 14px; font-size:14px; font-weight:bold;
+    }
+
+    .bin.glow { transform:scale(1.08); box-shadow:0 0 0 5px rgba(255,255,255,0.6),0 8px 20px rgba(0,0,0,0.3); }
+    .bin.bounce { animation:binBounce 0.5s ease; }
+    @keyframes binBounce {
+        0%,100% { transform:scale(1); }
+        30% { transform:scale(1.15); }
+        60% { transform:scale(0.95); }
+    }
+    .bin.shake { animation:binShake 0.5s ease; }
+    @keyframes binShake {
+        0%,100% { transform:translateX(0); }
+        25% { transform:translateX(-8px); }
+        75% { transform:translateX(8px); }
+    }
+
+    .sparkle {
+        position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+        font-size:40px; pointer-events:none; animation:sparklePop 0.6s ease-out forwards;
+    }
+    @keyframes sparklePop {
+        0% { opacity:1; transform:translate(-50%,-50%) scale(0.3); }
+        100% { opacity:0; transform:translate(-50%,-50%) scale(2); }
+    }
+
+    .streak-badge {
+        text-align:center; margin-top:15px; font-size:14px; font-weight:bold; color:#f5576c;
+        min-height:20px;
+    }
+
+    .volume-control { text-align:center; margin-top:20px; }
+    .volume-control input { width:200px; }
+
+    .end-modal {
+        display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;
+        padding:20px;
+    }
+    .end-box {
+        background:white; border-radius:20px; padding:30px; max-width:500px; width:100%;
+        text-align:center; animation:slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+        from { transform:translateY(-50px); opacity:0; }
+        to { transform:translateY(0); opacity:1; }
+    }
+    .end-box h2 { color:#667eea; margin-bottom:15px; }
+    .cat-breakdown { text-align:left; margin:20px 0; }
+    .cat-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee; font-size:15px; }
+
+    .restart-btn {
+        margin-top:20px; padding:15px 40px; border:none; border-radius:10px;
+        background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%); color:white;
+        font-size:18px; font-weight:bold; cursor:pointer;
+        box-shadow:0 4px 15px rgba(0,0,0,0.3);
+    }
+    .restart-btn:hover { transform:translateY(-2px); }
+
+    @media (max-width:600px) {
+        .header h1 { font-size:20px; }
+        .sentence-card p { font-size:16px; }
+        .bin { width:100px; min-height:120px; }
+        .bin .icon { font-size:28px; }
+        .bin .label { font-size:13px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="splash-screen" id="splashScreen">
+    <img src="assets/logo.png" alt="Innovine Logo" onerror="this.style.display='none'">
+</div>
+
+<div class="container" id="mainContainer">
+    <div class="header">
+        <h1>🧩 Preposition Sorter 🧩</h1>
+        <div class="score-board">
+            <div class="score-item"><div>Sentence</div><span id="sentenceCount">1/15</span></div>
+            <div class="score-item"><div>Sorted</div><span id="sortedCount">0/20</span></div>
+            <div class="score-item"><div>Streak</div><span id="streakCount">0</span></div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="instructions">
+            <p><strong>How to Play:</strong></p>
+            <p>📖 Read the sentence. The preposition(s) are underlined in red.</p>
+            <p>✋ Drag each highlighted word (chip below) into the correct bin: Place, Direction, or Time.</p>
+        </div>
+
+        <div class="progress-label" id="progressLabel">Sentence 1 of 15</div>
+
+        <div class="sentence-card">
+            <p id="sentenceText"></p>
+        </div>
+
+        <div class="chip-tray" id="chipTray"></div>
+
+        <div class="bins">
+            <div class="bin bin-place" data-category="place" id="binPlace">
+                <div class="icon">🏠</div>
+                <div class="label">Place</div>
+                <div class="counter" id="counterPlace">0</div>
+            </div>
+            <div class="bin bin-direction" data-category="direction" id="binDirection">
+                <div class="icon">🧭</div>
+                <div class="label">Direction</div>
+                <div class="counter" id="counterDirection">0</div>
+            </div>
+            <div class="bin bin-time" data-category="time" id="binTime">
+                <div class="icon">⏰</div>
+                <div class="label">Time</div>
+                <div class="counter" id="counterTime">0</div>
+            </div>
+        </div>
+
+        <div class="streak-badge" id="streakBadge"></div>
+
+        <div class="volume-control">
+            <label for="volumeSlider">🔊 Volume: <span id="volumeLabel">80%</span></label><br>
+            <input type="range" id="volumeSlider" min="0" max="100" value="80">
+        </div>
+    </div>
+</div>
+
+<div class="end-modal" id="endModal">
+    <div class="end-box" id="endBox"></div>
+</div>
+
+<script>
+    // Splash screen
+    setTimeout(() => {
+        document.getElementById('splashScreen').classList.add('hidden');
+        document.getElementById('mainContainer').classList.add('visible');
+        initGame();
+    }, 5000);
+
+    // Audio
+    const correctSound = new Audio('assets/correct.mp3');
+    const wrongSound = new Audio('assets/wrong.mp3');
+    const celebrationSound = new Audio('assets/freesound_community-claps-44774.mp3');
+    let volume = 0.8;
+    correctSound.volume = volume;
+    wrongSound.volume = volume;
+    celebrationSound.volume = volume;
+
+    function playCorrectSound() { correctSound.currentTime = 0; correctSound.play().catch(e=>console.log(e)); }
+    function playWrongSound() { wrongSound.currentTime = 0; wrongSound.play().catch(e=>console.log(e)); }
+    function playCelebrationSound() { celebrationSound.currentTime = 0; celebrationSound.play().catch(e=>console.log(e)); }
+
+    document.getElementById('volumeSlider').addEventListener('input', function(e) {
+        volume = e.target.value / 100;
+        correctSound.volume = volume;
+        wrongSound.volume = volume;
+        celebrationSound.volume = volume;
+        document.getElementById('volumeLabel').textContent = e.target.value + '%';
+    });
+
+    // Rounds data: sentence with {word} markers + chips with category
+    const rounds = [
+        { text: "The keys are {under} the mat.", chips: [{word:"under", category:"place"}] },
+        { text: "She walked {into} the room quietly.", chips: [{word:"into", category:"direction"}] },
+        { text: "The train leaves {at} six o'clock.", chips: [{word:"at", category:"time"}] },
+        { text: "The ball rolled {across} the field {towards} the goal.", chips: [{word:"across", category:"direction"},{word:"towards", category:"direction"}] },
+        { text: "We arrived {before} sunset and rested {near} the lake.", chips: [{word:"before", category:"time"},{word:"near", category:"place"}] },
+        { text: "The cat jumped {onto} the table.", chips: [{word:"onto", category:"direction"}] },
+        { text: "I will finish my homework {during} the weekend.", chips: [{word:"during", category:"time"}] },
+        { text: "The dog is sleeping {between} the sofa and the chair.", chips: [{word:"between", category:"place"}] },
+        { text: "He walked {through} the tunnel {until} he reached daylight.", chips: [{word:"through", category:"direction"},{word:"until", category:"time"}] },
+        { text: "The library is closed {on} Sundays.", chips: [{word:"on", category:"time"}] },
+        { text: "The picture hangs {above} the fireplace.", chips: [{word:"above", category:"place"}] },
+        { text: "They climbed {up} the hill {since} early morning.", chips: [{word:"up", category:"direction"},{word:"since", category:"time"}] },
+        { text: "Please wait {in front of} the school gate.", chips: [{word:"in front of", category:"place"}] },
+        { text: "The plane flew {along} the coastline.", chips: [{word:"along", category:"direction"}] },
+        { text: "We will start the test {at} 9 AM and finish {before} lunch.", chips: [{word:"at", category:"time"},{word:"before", category:"time"}] }
+    ];
+
+    const categoryLabels = { place:"Place", direction:"Direction", time:"Time" };
+
+    let currentRoundIndex = 0;
+    let totalChips = 0;
+    let firstTryCorrect = 0;
+    let streak = 0;
+    let maxStreak = 0;
+    let sortedSoFar = 0; // chips fully placed (any attempts), drives bin counters + overall progress
+    let categoryStats = {};
+
+    function computeTotals() {
+        totalChips = 0;
+        categoryStats = { place:{correct:0,total:0}, direction:{correct:0,total:0}, time:{correct:0,total:0} };
+        rounds.forEach(r => {
+            r.chips.forEach(c => {
+                totalChips++;
+                categoryStats[c.category].total++;
+            });
+        });
+    }
+
+    function initGame() {
+        computeTotals();
+        currentRoundIndex = 0;
+        firstTryCorrect = 0;
+        streak = 0;
+        maxStreak = 0;
+        sortedSoFar = 0;
+        document.getElementById('counterPlace').textContent = '0';
+        document.getElementById('counterDirection').textContent = '0';
+        document.getElementById('counterTime').textContent = '0';
+        document.getElementById('streakBadge').textContent = '';
+        updateScoreboard();
+        loadRound();
+    }
+
+    function updateScoreboard() {
+        document.getElementById('sentenceCount').textContent = Math.min(currentRoundIndex+1, rounds.length) + '/' + rounds.length;
+        document.getElementById('sortedCount').textContent = firstTryCorrect + '/' + totalChips;
+        document.getElementById('streakCount').textContent = streak;
+        document.getElementById('progressLabel').textContent = 'Sentence ' + Math.min(currentRoundIndex+1, rounds.length) + ' of ' + rounds.length;
+    }
+
+    let remainingInRound = 0;
+
+    function loadRound() {
+        if (currentRoundIndex >= rounds.length) {
+            endGame();
+            return;
+        }
+        const round = rounds[currentRoundIndex];
+        remainingInRound = round.chips.length;
+
+        const sentenceEl = document.getElementById('sentenceText');
+        sentenceEl.innerHTML = round.text.replace(/{([^}]+)}/g, '<span class="hl">$1</span>');
+
+        const tray = document.getElementById('chipTray');
+        tray.innerHTML = '';
+        round.chips.forEach((chipData, idx) => {
+            const chip = document.createElement('div');
+            chip.className = 'chip';
+            chip.textContent = chipData.word;
+            chip.dataset.category = chipData.category;
+            chip.dataset.attempted = 'false';
+            chip.dataset.chipId = currentRoundIndex + '-' + idx;
+            tray.appendChild(chip);
+            makeDraggable(chip);
+        });
+
+        updateScoreboard();
+    }
+
+    function makeDraggable(chip) {
+        chip.addEventListener('pointerdown', function(e) {
+            e.preventDefault();
+            chip.setPointerCapture(e.pointerId);
+            const rect = chip.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
+
+            chip.classList.add('dragging');
+            chip.style.position = 'fixed';
+            chip.style.left = rect.left + 'px';
+            chip.style.top = rect.top + 'px';
+            chip.style.width = rect.width + 'px';
+            chip.style.zIndex = 1000;
+
+            function onMove(ev) {
+                chip.style.left = (ev.clientX - offsetX) + 'px';
+                chip.style.top = (ev.clientY - offsetY) + 'px';
+                highlightBinUnderPoint(ev.clientX, ev.clientY);
+            }
+
+            function onUp(ev) {
+                chip.releasePointerCapture(ev.pointerId);
+                chip.removeEventListener('pointermove', onMove);
+                chip.removeEventListener('pointerup', onUp);
+                clearBinGlows();
+
+                const bin = getBinUnderPoint(ev.clientX, ev.clientY);
+                chip.classList.remove('dragging');
+
+                if (bin) {
+                    handleDrop(chip, bin);
+                } else {
+                    resetChipPosition(chip);
+                }
+            }
+
+            chip.addEventListener('pointermove', onMove);
+            chip.addEventListener('pointerup', onUp);
+        });
+    }
+
+    function getAllBins() {
+        return [document.getElementById('binPlace'), document.getElementById('binDirection'), document.getElementById('binTime')];
+    }
+
+    function getBinUnderPoint(x, y) {
+        const bins = getAllBins();
+        for (const bin of bins) {
+            const r = bin.getBoundingClientRect();
+            if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return bin;
+        }
+        return null;
+    }
+
+    function highlightBinUnderPoint(x, y) {
+        clearBinGlows();
+        const bin = getBinUnderPoint(x, y);
+        if (bin) bin.classList.add('glow');
+    }
+
+    function clearBinGlows() {
+        getAllBins().forEach(b => b.classList.remove('glow'));
+    }
+
+    function resetChipPosition(chip) {
+        chip.style.position = '';
+        chip.style.left = '';
+        chip.style.top = '';
+        chip.style.width = '';
+        chip.style.zIndex = '';
+    }
+
+    function handleDrop(chip, bin) {
+        const category = chip.dataset.category;
+        const binCategory = bin.dataset.category;
+        const wasAttempted = chip.dataset.attempted === 'true';
+
+        if (category === binCategory) {
+            playCorrectSound();
+            bin.classList.add('bounce');
+            setTimeout(() => bin.classList.remove('bounce'), 500);
+            showSparkle(bin);
+
+            if (!wasAttempted) {
+                firstTryCorrect++;
+                categoryStats[category].correct++;
+            }
+            chip.dataset.attempted = 'true';
+
+            streak++;
+            maxStreak = Math.max(maxStreak, streak);
+            updateStreakBadge();
+
+            const counterEl = document.getElementById('counter' + capitalize(binCategory));
+            const newCount = parseInt(counterEl.textContent) + 1;
+            counterEl.textContent = newCount;
+
+            flyChipInto(chip, bin, () => {
+                chip.remove();
+                remainingInRound--;
+                updateScoreboard();
+                if (remainingInRound <= 0) {
+                    setTimeout(() => {
+                        currentRoundIndex++;
+                        loadRound();
+                    }, 700);
+                }
+            });
+        } else {
+            playWrongSound();
+            bin.classList.add('shake');
+            setTimeout(() => bin.classList.remove('shake'), 500);
+            chip.dataset.attempted = 'true';
+            streak = 0;
+            updateStreakBadge();
+            resetChipPosition(chip);
+            updateScoreboard();
+        }
+    }
+
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function flyChipInto(chip, bin, callback) {
+        const binRect = bin.getBoundingClientRect();
+        chip.classList.add('flying');
+        chip.style.left = (binRect.left + binRect.width/2 - chip.offsetWidth/2) + 'px';
+        chip.style.top = (binRect.top + binRect.height/2 - chip.offsetHeight/2) + 'px';
+        chip.classList.add('vanish');
+        setTimeout(callback, 350);
+    }
+
+    function showSparkle(bin) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.textContent = '✨';
+        bin.appendChild(sparkle);
+        setTimeout(() => sparkle.remove(), 600);
+    }
+
+    function updateStreakBadge() {
+        const badge = document.getElementById('streakBadge');
+        if (streak >= 3) {
+            badge.textContent = '🔥 Streak: ' + streak + ' in a row!';
+        } else {
+            badge.textContent = '';
+        }
+    }
+
+    function endGame() {
+        const percentage = Math.round((firstTryCorrect / totalChips) * 100);
+        let message = '';
+        if (percentage >= 80) {
+            message = '🌟 Outstanding! You have excellent understanding of Prepositions!';
+            playCelebrationSound();
+        } else if (percentage >= 60) {
+            message = '👍 Great job! You have a good grasp of Prepositions!';
+        } else {
+            message = '💪 Keep practicing! Review the chapter and try again!';
+        }
+
+        const endBox = document.getElementById('endBox');
+        endBox.innerHTML = `
+            <h2>🎯 Game Complete!</h2>
+            <p style="font-size:22px;margin:15px 0;"><strong>Score: ${firstTryCorrect}/${totalChips}</strong></p>
+            <p style="font-size:18px;color:#667eea;margin-bottom:10px;">${percentage}% Correct on First Try</p>
+            <div class="cat-breakdown">
+                <div class="cat-row"><span>🏠 Place</span><span>${categoryStats.place.correct}/${categoryStats.place.total}</span></div>
+                <div class="cat-row"><span>🧭 Direction</span><span>${categoryStats.direction.correct}/${categoryStats.direction.total}</span></div>
+                <div class="cat-row"><span>⏰ Time</span><span>${categoryStats.time.correct}/${categoryStats.time.total}</span></div>
+            </div>
+            <p style="font-size:16px;color:#333;">${message}</p>
+            <button class="restart-btn" id="restartBtn">🔄 Play Again</button>
+        `;
+        document.getElementById('endModal').style.display = 'flex';
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            document.getElementById('endModal').style.display = 'none';
+            initGame();
+        });
+    }
+</script>
+</body>
+</html>
