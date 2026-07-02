@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Preposition Playground: Drag & Match Arcade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none; -webkit-user-select: none; touch-action: none;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #e0f2fe 0%, #f0fdf4 100%);
+      color: #1e1b4b;
+    }
+    .hidden { display: none !important; }
+    
+    /* Dedicated 3D Classroom Button */
+    .btn-arcade {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #facc15;
+      color: #1e1b4b;
+      font-weight: 900;
+      font-size: 1.5rem;
+      padding: 16px 36px;
+      border: 4px solid #1e1b4b;
+      border-radius: 20px;
+      box-shadow: 0 8px 0 #b45309, 0 12px 20px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.1s ease;
+    }
+    .btn-arcade:hover {
+      background: #fef08a;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 #b45309, 0 15px 25px rgba(0, 0, 0, 0.2);
+    }
+    .btn-arcade:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #b45309, 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .shake-anim { animation: shake 0.4s ease-in-out; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between p-4 relative overflow-x-hidden">
+
+  <div id="screen-splash" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center text-center">
+    <img id="splash-logo" src="assets/innovine-logo.png" style="width: 480px; max-width: 85vw; height: auto;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwMjg0YzciIHJ4PSIxMCIvPjx0ZXh0IHg9IjEwMCIgeT0iMzUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPklOTk9WSU5FIExPR088L3RleHQ+PC9zdmc+'">
+    <div class="mt-8 font-black text-sky-500 tracking-widest text-lg animate-pulse">LOADING PLAYGROUND ARENA...</div>
+  </div>
+
+  <div id="screen-start" class="hidden w-full max-w-3xl bg-white rounded-[32px] p-8 my-auto shadow-xl border-8 border-sky-400 text-center">
+    <h1 class="text-4xl md:text-5xl font-black text-sky-600 mb-2">☀️ Preposition Playground</h1>
+    <p class="text-pink-500 font-extrabold tracking-wider text-sm mb-6">GRADE 2 GRAMMAR ADVENTURE</p>
+    
+    <div class="text-left bg-sky-50 p-6 rounded-2xl border-4 border-dashed border-sky-200 text-lg text-slate-700 space-y-4 mb-8">
+      <p class="font-black text-xl text-sky-700 mb-2">🕹️ Game Rules:</p>
+      <div>🎯 <strong class="text-amber-600">Level 1 (Questions 1-5):</strong> Read the challenge sentence, then physically click and drag the cute animal into the correct zone around the object!</div>
+      <div>🌟 <strong class="text-purple-600">Level 2 (Questions 6-10):</strong> Look at the visual target scenario, then tap on the correct preposition option card down below!</div>
+    </div>
+    
+    <button class="btn-arcade" onclick="startGame()">Start Game 🚀</button>
+  </div>
+
+  <div id="screen-game" class="hidden w-full max-w-2xl flex flex-col items-center">
+    
+    <div class="w-full bg-white rounded-2xl p-4 shadow-md border border-sky-100 flex justify-between items-center mb-4">
+      <div>
+        <div id="level-badge" class="text-xs font-black text-sky-500 tracking-wider uppercase">Level 1: Drag &amp; Drop Sandbox</div>
+        <div id="question-counter" class="text-lg font-extrabold text-slate-800">Question 1 / 10</div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full font-bold text-sm">Tries Left: <span id="lbl-tries">2</span></span>
+        <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-bold text-sm">⭐ <span id="lbl-score">0</span></span>
+      </div>
+    </div>
+
+    <div class="w-full bg-white rounded-2xl p-5 shadow-md border-2 border-slate-200 text-center mb-4">
+      <h2 id="sentence-prompt" class="text-xl font-extrabold text-slate-800 leading-relaxed">
+        Place the animal <span class="bg-yellow-200 px-2 py-0.5 rounded">______</span> the box.
+      </h2>
+    </div>
+
+    <div id="game-sandbox-container" class="w-full bg-emerald-100 border-8 border-amber-500 rounded-[2rem] shadow-2xl relative overflow-hidden aspect-[4/3]">
+      <canvas id="gameCanvas" class="w-full h-full block bg-sky-100"></canvas>
+    </div>
+
+    <div id="level2-buttons-container" class="w-full grid grid-cols-3 gap-3 mt-4 hidden">
+      </div>
+    
+    <div id="action-hint" class="mt-4 bg-white/80 border border-slate-200 px-4 py-2 rounded-full font-bold text-xs text-slate-600 text-center animate-pulse">
+      Hold and drag your animal to the designated placement ring.
+    </div>
+
+  </div>
+
+  <div id="screen-summary" class="hidden w-full max-w-md bg-white rounded-[2rem] p-8 my-auto shadow-2xl border-4 border-yellow-400 text-center">
+    <span class="text-6xl block mb-4">🏆</span>
+    <h1 class="text-3xl font-black text-sky-600">Playground Cleared!</h1>
+    <div class="my-6">
+      <div class="text-sm font-bold text-slate-400 uppercase tracking-widest">Final Score</div>
+      <div id="txt-final-score" class="text-5xl font-black text-amber-500 mt-1">0</div>
+    </div>
+    <p class="text-slate-500 font-medium mb-6">Fantastic job identifying spatial grammar relationships!</p>
+    <button class="btn-arcade text-base" onclick="location.reload()">Play Again 🔄</button>
+  </div>
+
+  <audio id="audio-correct" src="assets/correct.mp3" preload="none"></audio>
+  <audio id="audio-wrong" src="assets/wrong.mp3" preload="none"></audio>
+
+  <script>
+    const QUESTION_DATASET = [
+      // Level 1: Pure Drag & Drop Interactions
+      { sentence: "Place the friendly **puppy** ______ the brown box.", prep: "on", character: "🐶", itemType: "box", targetZone: "top" },
+      { sentence: "Place the green **frog** ______ the blue umbrella.", prep: "under", character: "🐸", itemType: "umbrella", targetZone: "bottom" },
+      { sentence: "Place the playful **kitten** ______ the red basket.", prep: "inside", character: "🐱", itemType: "basket", targetZone: "center" },
+      { sentence: "Place the little **ladybug** ______ the green leaf.", prep: "on", character: "🐞", itemType: "leaf", targetZone: "top" },
+      { sentence: "Place the sweet **bunny** ______ the giant orange carrot.", prep: "beside", character: "🐰", itemType: "carrot", targetZone: "side" },
+      
+      // Level 2: Target Visual Choice Options
+      { sentence: "The happy bird lives ______ the fluffy cloud.", prep: "above", character: "☁️", itemType: "cloud", options: ["above", "under", "inside"] },
+      { sentence: "The gold key is hidden ______ the welcome mat.", prep: "under", character: "🚪", itemType: "mat", options: ["on", "under", "beside"] },
+      { sentence: "The funny fish swims ______ the glass fishbowl.", prep: "inside", character: "🥣", itemType: "bowl", options: ["inside", "above", "between"] },
+      { sentence: "The red apple sits right ______ the lunch box.", prep: "beside", character: "🍎", itemType: "lunchbox", options: ["between", "under", "beside"] },
+      { sentence: "The purple star fell ______ the two high trees.", prep: "between", character: "🌲", itemType: "trees", options: ["on", "between", "inside"] }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    let tries = 2;
+    let isTransitioning = false;
+
+    // Canvas Scenery Variables
+    let canvas, ctx;
+    const CANVAS_W = 800;
+    const CANVAS_H = 600;
+
+    // Level 1 Interaction Object Tracking
+    let actorItem = { x: 120, y: 460, radius: 40, emoji: "🐶", isDragging: false, homeX: 120, homeY: 460 };
+    let dropRegions = [];
+
+    // Force clear Splash screen safely on load without hanging
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.getElementById('screen-splash').classList.add('hidden');
+        document.getElementById('screen-start').classList.remove('hidden');
+      }, 1000);
+    });
+
+    function startGame() {
+      // Unblock Web Audio constraints directly on user click gesture
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          const tCtx = new AudioContext();
+          if (tCtx.state === 'suspended') tCtx.resume();
+        }
+      } catch(e) {}
+
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.remove('hidden');
+      
+      canvas = document.getElementById('gameCanvas');
+      ctx = canvas.getContext('2d');
+      canvas.width = CANVAS_W;
+      canvas.height = CANVAS_H;
+
+      bindInteractionListeners();
+      loadQuestion();
+      animateLoop();
+    }
+
+    function loadQuestion() {
+      if (currentIdx >= QUESTION_DATASET.length) {
+        endGame();
+        return;
+      }
+
+      isTransitioning = false;
+      tries = 2;
+      document.getElementById('lbl-tries').innerText = tries;
+      document.getElementById('lbl-score').innerText = score;
+      document.getElementById('question-counter').innerText = `Question ${currentIdx + 1} / ${QUESTION_DATASET.length}`;
+
+      const q = QUESTION_DATASET[currentIdx];
+      const isL2 = currentIdx >= 5;
+
+      if (!isL2) {
+        document.getElementById('level-badge').innerText = "Level 1: Drag & Drop Sandbox";
+        document.getElementById('action-hint').innerText = "Hold and drag your animal to the correct placement helper zone!";
+        document.getElementById('level2-buttons-container').classList.add('hidden');
+        
+        actorItem.emoji = q.character;
+        actorItem.x = actorItem.homeX;
+        actorItem.y = actorItem.homeY;
+        actorItem.isDragging = false;
+
+        setupPlacementHitboxes(q);
+      } else {
+        document.getElementById('level-badge').innerText = "Level 2: Look & Tap Choice Card";
+        document.getElementById('action-hint').innerText = "Examine the picture scenario and tap the correct option word below!";
+        
+        const btnBox = document.getElementById('level2-buttons-container');
+        btnBox.innerHTML = '';
+        btnBox.classList.remove('hidden');
+
+        q.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = "bg-white border-4 border-slate-300 text-slate-800 font-extrabold text-xl py-3 rounded-xl hover:border-purple-400 active:bg-purple-50 transition-all shadow-sm capitalize";
+          btn.innerText = opt;
+          btn.onclick = () => handleOptionSelection(opt, btn);
+          btnBox.appendChild(btn);
+        });
+      }
+
+      document.getElementById('sentence-prompt').innerHTML = q.sentence.replace("______", `<span class="bg-yellow-200 border-2 border-dashed border-yellow-400 px-3 py-1 rounded mx-1 text-slate-700">______</span>`);
+    }
+
+    function setupPlacementHitboxes(q) {
+      dropRegions = [];
+      const cx = 520; 
+      const cy = 340;
+
+      if (q.targetZone === "top") {
+        dropRegions.push({ name: q.prep, x: cx, y: cy - 60, r: 60 });
+      } else if (q.targetZone === "bottom") {
+        dropRegions.push({ name: q.prep, x: cx, y: cy + 70, r: 60 });
+      } else if (q.targetZone === "center") {
+        dropRegions.push({ name: q.prep, x: cx, y: cy + 15, r: 60 });
+      } else if (q.targetZone === "side") {
+        dropRegions.push({ name: q.prep, x: cx - 100, y: cy + 20, r: 60 });
+        dropRegions.push({ name: q.prep, x: cx + 100, y: cy + 20, r: 60 });
+      }
+    }
+
+    function checkPlacementAccuracy() {
+      const q = QUESTION_DATASET[currentIdx];
+      let matchFound = false;
+
+      dropRegions.forEach(zone => {
+        const distance = Math.hypot(actorItem.x - zone.x, actorItem.y - zone.y);
+        if (distance < zone.r + 20) {
+          matchFound = true;
+          actorItem.x = zone.x;
+          actorItem.y = zone.y;
+        }
+      });
+
+      if (matchFound) {
+        triggerSuccessState(q.prep);
+      } else {
+        triggerDeductState();
+        actorItem.x = actorItem.homeX;
+        actorItem.y = actorItem.homeY;
+      }
+    }
+
+    function handleOptionSelection(chosenWord, buttonEl) {
+      if (isTransitioning) return;
+      const q = QUESTION_DATASET[currentIdx];
+
+      if (chosenWord === q.prep) {
+        buttonEl.classList.remove('border-slate-300');
+        buttonEl.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+        triggerSuccessState(q.prep);
+      } else {
+        buttonEl.classList.remove('border-slate-300');
+        buttonEl.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
+        triggerDeductState();
+      }
+    }
+
+    function triggerSuccessState(word) {
+      isTransitioning = true;
+      playAudioClip('correct');
+      score += (tries === 2) ? 20 : 10;
+      document.getElementById('lbl-score').innerText = score;
+
+      const q = QUESTION_DATASET[currentIdx];
+      document.getElementById('sentence-prompt').innerHTML = q.sentence.replace("______", `<span class="bg-emerald-500 text-white font-black px-4 py-1 rounded mx-1 shadow-md uppercase">${word}</span>`);
+      document.getElementById('action-hint').innerText = "🌟 FANTASTIC JOB! Keep moving forward!";
+
+      setTimeout(() => {
+        currentIdx++;
+        loadQuestion();
+      }, 1800);
+    }
+
+    function triggerDeductState() {
+      tries--;
+      document.getElementById('lbl-tries').innerText = tries;
+      playAudioClip('wrong');
+
+      const sandbox = document.getElementById('game-sandbox-container');
+      sandbox.classList.add('shake-anim');
+      setTimeout(() => sandbox.classList.remove('shake-anim'), 400);
+
+      if (tries <= 0) {
+        isTransitioning = true;
+        const q = QUESTION_DATASET[currentIdx];
+        document.getElementById('sentence-prompt').innerHTML = q.sentence.replace("______", `<span class="bg-red-500 text-white font-black px-4 py-1 rounded mx-1 shadow-md uppercase">${q.prep}</span>`);
+        document.getElementById('action-hint').innerText = "Let's learn the answer together and shift to the next board!";
+        
+        setTimeout(() => {
+          currentIdx++;
+          loadQuestion();
+        }, 2200);
+      }
+    }
+
+    function bindInteractionListeners() {
+      const getMouseCoords = (e) => {
+        const bounds = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: ((clientX - bounds.left) / bounds.width) * CANVAS_W,
+          y: ((clientY - bounds.top) / bounds.height) * CANVAS_H
+        };
+      };
+
+      const startAction = (e) => {
+        if (currentIdx >= 5 || isTransitioning) return;
+        const pos = getMouseCoords(e);
+        const dist = Math.hypot(pos.x - actorItem.x, pos.y - actorItem.y);
+        if (dist < actorItem.radius + 15) {
+          actorItem.isDragging = true;
+        }
+      };
+
+      const moveAction = (e) => {
+        if (!actorItem.isDragging || currentIdx >= 5) return;
+        const pos = getMouseCoords(e);
+        actorItem.x = Math.max(40, Math.min(CANVAS_W - 40, pos.x));
+        actorItem.y = Math.max(40, Math.min(CANVAS_H - 40, pos.y));
+      };
+
+      const endAction = () => {
+        if (!actorItem.isDragging) return;
+        actorItem.isDragging = false;
+        checkPlacementAccuracy();
+      };
+
+      canvas.addEventListener('mousedown', startAction);
+      window.addEventListener('mousemove', moveAction);
+      window.addEventListener('mouseup', endAction);
+
+      canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startAction(e); }, { passive: false });
+      window.addEventListener('touchmove', (e) => { e.preventDefault(); moveAction(e); }, { passive: false });
+      window.addEventListener('touchend', endAction);
+    }
+
+    function animateLoop() {
+      drawCanvasFrame();
+      requestAnimationFrame(animateLoop);
+    }
+
+    function drawCanvasFrame() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+      const isL2 = currentIdx >= 5;
+      const q = QUESTION_DATASET[currentIdx];
+
+      ctx.fillStyle = isL2 ? '#fae8ff' : '#bae6fd'; 
+      ctx.fillRect(0, 0, CANVAS_W, 420);
+      
+      ctx.fillStyle = '#10b981'; 
+      ctx.fillRect(0, 420, CANVAS_W, 180);
+
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(40, 440, CANVAS_W - 80, 130);
+      ctx.strokeStyle = '#ca8a04';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(40, 440, CANVAS_W - 80, 130);
+
+      if (!q) return;
+
+      const targetX = 520;
+      const targetY = 340;
+
+      if (!isL2) {
+        dropRegions.forEach(zone => {
+          ctx.beginPath();
+          ctx.arc(zone.x, zone.y, zone.r, 0, 2 * Math.PI);
+          ctx.fillStyle = "rgba(14, 165, 233, 0.15)";
+          ctx.fill();
+          ctx.strokeStyle = "#0ea5e9";
+          ctx.lineWidth = 3;
+          ctx.setLineDash([6, 6]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        });
+
+        if (q.itemType === 'box') {
+          ctx.fillStyle = '#d97706';
+          ctx.fillRect(targetX - 60, targetY - 40, 120, 80);
+          ctx.strokeStyle = '#78350f';
+          ctx.lineWidth = 4;
+          ctx.strokeRect(targetX - 60, targetY - 40, 120, 80);
+        } else if (q.itemType === 'umbrella') {
+          ctx.beginPath();
+          ctx.arc(targetX, targetY + 20, 65, Math.PI, 2 * Math.PI);
+          ctx.fillStyle = '#38bdf8';
+          ctx.fill();
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = '#0284c7';
+          ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(targetX, targetY+20); ctx.lineTo(targetX, targetY+70);
+          ctx.strokeStyle = '#475569'; ctx.lineWidth = 5; ctx.stroke();
+        } else if (q.itemType === 'basket') {
+          ctx.fillStyle = '#f87171';
+          ctx.beginPath(); ctx.ellipse(targetX, targetY + 20, 55, 35, 0, 0, 2*Math.PI); ctx.fill();
+          ctx.strokeStyle = '#b91c1c'; ctx.lineWidth = 4; ctx.stroke();
+        } else if (q.itemType === 'leaf') {
+          ctx.fillStyle = '#4ade80';
+          ctx.beginPath(); ctx.ellipse(targetX, targetY + 30, 75, 30, 0, 0, 2*Math.PI); ctx.fill();
+          ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 4; ctx.stroke();
+        } else if (q.itemType === 'carrot') {
+          ctx.fillStyle = '#f97316';
+          ctx.beginPath(); ctx.arc(targetX, targetY + 20, 45, 0, 2*Math.PI); ctx.fill();
+        }
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(actorItem.homeX, actorItem.homeY, actorItem.radius + 5, 0, 2*Math.PI); ctx.fill();
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3; ctx.stroke();
+
+        ctx.font = "52px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(actorItem.emoji, actorItem.x, actorItem.y);
+
+      } else {
+        const midX = CANVAS_W / 2;
+        const midY = 240;
+
+        if (q.itemType === 'cloud') {
+          ctx.font = "70px Arial"; ctx.fillText("☁️", midX, midY);
+          ctx.font = "40px Arial"; ctx.fillText("🐦", midX, midY - 65); 
+        } else if (q.itemType === 'mat') {
+          ctx.fillStyle = '#94a3b8'; ctx.fillRect(midX - 70, midY + 20, 140, 25);
+          ctx.font = "36px Arial"; ctx.fillText("🔑", midX, midY + 45); 
+        } else if (q.itemType === 'bowl') {
+          ctx.fillStyle = 'rgba(34, 211, 238, 0.4)';
+          ctx.beginPath(); ctx.arc(midX, midY, 60, 0, 2*Math.PI); ctx.fill();
+          ctx.strokeStyle = '#0891b2'; ctx.lineWidth = 4; ctx.stroke();
+          ctx.font = "40px Arial"; ctx.fillText("🐠", midX, midY + 10); 
+        } else if (q.itemType === 'lunchbox') {
+          ctx.fillStyle = '#fb923c'; ctx.fillRect(midX - 50, midY, 100, 70);
+          ctx.font = "40px Arial"; ctx.fillText("🍎", midX + 85, midY + 40); 
+        } else if (q.itemType === 'trees') {
+          ctx.font = "65px Arial"; ctx.fillText("🌲", midX - 80, midY + 10);
+          ctx.font = "65px Arial"; ctx.fillText("🌲", midX + 80, midY + 10);
+          ctx.font = "40px Arial"; ctx.fillText("⭐", midX, midY + 20); 
+        }
+      }
+    }
+
+    function playAudioClip(type) {
+      try {
+        const node = document.getElementById(type === 'correct' ? 'audio-correct' : 'audio-wrong');
+        if (node && typeof node.play === 'function') {
+          node.currentTime = 0;
+          node.play().catch(() => synthFallbackSound(type));
+        } else {
+          synthFallbackSound(type);
+        }
+      } catch (e) {
+        synthFallbackSound(type);
+      }
+    }
+
+    function synthFallbackSound(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctxNode = new AudioContext();
+        const osc = ctxNode.createOscillator();
+        const gain = ctxNode.createGain();
+        osc.connect(gain); gain.connect(ctxNode.destination);
+        
+        if (type === 'correct') {
+          osc.frequency.setValueAtTime(587.33, ctxNode.currentTime); 
+          osc.frequency.setValueAtTime(880, ctxNode.currentTime + 0.1); 
+          gain.gain.exponentialRampToValueAtTime(0.01, ctxNode.currentTime + 0.3);
+          osc.start(); osc.stop(ctxNode.currentTime + 0.3);
+        } else {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(130.81, ctxNode.currentTime); 
+          gain.gain.exponentialRampToValueAtTime(0.01, ctxNode.currentTime + 0.35);
+          osc.start(); osc.stop(ctxNode.currentTime + 0.35);
+        }
+      } catch (e) {}
+    }
+
+    function endGame() {
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-summary').classList.remove('hidden');
+      document.getElementById('txt-final-score').innerText = `${score} pts`;
+    }
+  </script>
+</body>
+</html>
