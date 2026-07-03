@@ -1,1 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Frog Hop - Subject-Verb Agreement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body{
+    font-family:'Nunito', Arial, sans-serif;
+    background: radial-gradient(circle at top, #a5f3fc 0%, #bbf7d0 45%, #86efac 100%);
+    min-height:100vh;
+    display:flex; justify-content:center; align-items:center;
+    padding:10px;
+    color:#134231;
+  }
 
+  /* Splash */
+  .splash-screen{
+    position:fixed; inset:0;
+    background: radial-gradient(circle at center, #eafff2 0%, #b7f0d8 100%);
+    display:flex; justify-content:center; align-items:center;
+    z-index:9999; transition:opacity .6s ease-out;
+  }
+  .splash-screen.hidden{ opacity:0; pointer-events:none; }
+  .splash-screen img{ max-width:420px; width:80%; height:auto; filter:drop-shadow(0 10px 30px rgba(16,120,80,.35)); animation:floaty 2s ease-in-out infinite; }
+  @keyframes floaty{ 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-18px) scale(1.03)} }
+
+  /* Instructions overlay */
+  .instructions-overlay{
+    position:fixed; inset:0;
+    background: radial-gradient(circle at 30% 20%, rgba(16,185,129,.25), transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(56,189,248,.25), transparent 60%),
+                rgba(6,40,28,.72);
+    backdrop-filter: blur(6px);
+    display:none;
+    justify-content:center; align-items:center;
+    z-index:9998;
+    padding:16px;
+  }
+  .instructions-overlay.visible{ display:flex; }
+  .instructions-card{
+    max-width:520px; width:100%;
+    background:linear-gradient(160deg, rgba(255,255,255,.97), rgba(240,255,247,.97));
+    border-radius:28px;
+    border:3px solid #34d399;
+    box-shadow:0 25px 60px rgba(6,40,28,.5), 0 0 0 8px rgba(52,211,153,.15);
+    padding:30px 26px 24px;
+    text-align:center;
+    animation:popIn .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn{ from{ transform:scale(.7); opacity:0 } to{ transform:scale(1); opacity:1 } }
+  .instructions-card h2{
+    font-family:'Baloo 2', sans-serif;
+    font-size:26px; color:#065f46; margin-bottom:4px;
+  }
+  .instructions-card .lead{ font-size:13.5px; color:#0f766e; font-weight:700; margin-bottom:18px; }
+  .instr-list{ text-align:left; display:flex; flex-direction:column; gap:12px; margin-bottom:22px; }
+  .instr-item{ display:flex; align-items:center; gap:12px; }
+  .instr-icon{
+    flex:0 0 auto; width:42px; height:42px; border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px;
+    background:linear-gradient(135deg,#fde68a,#86efac);
+    box-shadow:0 4px 10px rgba(0,0,0,.12);
+  }
+  .instr-text{ font-size:13.5px; color:#1f2937; font-weight:600; line-height:1.35; }
+  .instr-text b{ color:#065f46; }
+  .btn-start{
+    padding:14px 38px;
+    border:none; border-radius:20px;
+    font-size:16px; font-weight:900; letter-spacing:.5px;
+    text-transform:uppercase;
+    cursor:pointer;
+    color:#062018;
+    background:linear-gradient(135deg,#facc15,#4ade80,#22d3ee);
+    background-size:200% 200%;
+    animation:gradientShift 3s ease infinite;
+    box-shadow:0 8px 0 #ca9a0a, 0 14px 24px rgba(0,0,0,.25);
+  }
+  @keyframes gradientShift{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+  .btn-start:active{ transform:translateY(4px); box-shadow:0 4px 0 #ca9a0a; }
+
+  .container{
+    max-width:1100px; width:100%;
+    background:#ffffff;
+    border-radius:28px;
+    border:4px solid #34a373;
+    box-shadow:0 25px 55px rgba(20,90,60,.3), 0 0 0 6px rgba(134,239,172,.25);
+    overflow:hidden;
+    opacity:0; transition:opacity .6s ease-in;
+  }
+  .container.visible{ opacity:1; }
+
+  .header{
+    position:relative;
+    padding:22px 18px 28px;
+    text-align:center;
+    background:linear-gradient(120deg,#34d399 0%,#22c1c3 45%,#3ba5e6 75%,#818cf8 100%);
+    background-size:200% 200%;
+    animation:gradientShift 8s ease infinite;
+    color:#06281c;
+    overflow:hidden;
+  }
+  .header::after{
+    content:'';
+    position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 12% 30%, rgba(255,255,255,.4) 0 10px, transparent 11px),
+      radial-gradient(circle at 85% 70%, rgba(255,255,255,.3) 0 14px, transparent 15px),
+      radial-gradient(circle at 60% 15%, rgba(255,255,255,.35) 0 8px, transparent 9px),
+      radial-gradient(circle at 35% 80%, rgba(255,255,255,.25) 0 6px, transparent 7px);
+  }
+  .header-content{ position:relative; z-index:1; }
+  .header h1{
+    font-family:'Baloo 2', sans-serif;
+    font-size:32px; letter-spacing:.5px;
+    text-shadow:0 3px 0 rgba(255,255,255,.4), 0 6px 16px rgba(0,0,0,.15);
+  }
+  .subtitle{ font-size:14px; font-weight:800; color:#06281c; opacity:.9; margin-top:2px; }
+  .stage-indicator{
+    display:inline-block; margin-top:10px;
+    padding:7px 20px; border-radius:22px;
+    background:rgba(6,40,28,.88);
+    color:#d1fae5;
+    font-size:13px; font-weight:800;
+    letter-spacing:.4px;
+    box-shadow:0 0 18px rgba(52,211,153,.6);
+  }
+
+  .top-bar{
+    padding:9px 16px;
+    background:linear-gradient(90deg,#f0fdf4,#ecfeff);
+    border-bottom:1px solid #bbf7d0;
+    font-size:12.5px;
+    color:#166534;
+    text-align:center;
+  }
+
+  /* Canvas / pond */
+  .pond-wrap{
+    position:relative;
+    margin:16px 16px 6px;
+    border-radius:20px;
+    overflow:hidden;
+    border:4px solid #2e7d4f;
+    box-shadow:inset 0 0 0 4px rgba(255,255,255,.55), 0 12px 24px rgba(20,90,60,.25);
+  }
+  #pondCanvas{
+    display:block;
+    width:100%;
+    height:280px;
+    background:#8fe3c0;
+    touch-action:none;
+  }
+
+  .stats-row{
+    display:flex; flex-wrap:wrap; gap:10px;
+    padding:12px 16px 4px;
+    justify-content:space-between;
+  }
+  .stat-card{
+    flex:1; min-width:100px;
+    text-align:center;
+    padding:9px 6px;
+    border-radius:16px;
+    background:linear-gradient(160deg,#f0fdf9,#e0f7ec);
+    border:2px solid #bbf7d0;
+    box-shadow:0 4px 10px rgba(20,90,60,.08);
+  }
+  .stat-label{
+    font-size:10.5px; letter-spacing:.5px; text-transform:uppercase;
+    color:#0f766e; font-weight:800; margin-bottom:3px;
+  }
+  .stat-value{ font-size:18px; font-weight:900; color:#065f46; }
+
+  .timer-card{
+    flex:1.4; min-width:140px;
+    text-align:center;
+    padding:9px 10px;
+    border-radius:16px;
+    background:linear-gradient(160deg,#fff7ed,#ffedd5);
+    border:2px solid #fdba74;
+    box-shadow:0 4px 10px rgba(154,52,18,.1);
+  }
+  .timer-value{ font-size:18px; font-weight:900; color:#9a3412; margin-bottom:4px; }
+  .timer-bar-track{ height:8px; border-radius:6px; background:#fde5c9; overflow:hidden; }
+  .timer-bar-fill{ height:100%; width:100%; border-radius:6px; background:#22c55e; transition:width .1s linear, background .3s linear; }
+  .timer-card.urgent .timer-value{ animation:pulseUrgent .5s infinite; color:#dc2626; }
+  @keyframes pulseUrgent{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+  /* Question panel */
+  .question-panel{
+    margin:10px 16px 16px;
+    padding:18px;
+    border-radius:20px;
+    background:linear-gradient(160deg,#fffef4 0%,#fdf6e3 100%);
+    border:2px solid #fcd34d;
+    box-shadow:0 8px 18px rgba(180,130,10,.1);
+  }
+  .q-eyebrow{
+    font-size:11px; font-weight:800; color:#b45309;
+    text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px;
+  }
+  .q-sentence{
+    font-family:'Baloo 2', sans-serif;
+    font-size:18px; font-weight:700; color:#1f2937;
+    line-height:1.55; margin-bottom:4px;
+  }
+  .q-blank{
+    display:inline-block; min-width:70px;
+    border-bottom:3px solid #f97316;
+    text-align:center;
+  }
+  .q-hint{ font-size:13px; color:#7c5b00; font-style:italic; margin-bottom:12px; }
+
+  .answer-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .answer-row input{
+    flex:1; min-width:160px;
+    padding:11px 14px;
+    border-radius:14px;
+    border:2px solid #93d5b8;
+    font-size:15px;
+    font-family:'Nunito', sans-serif;
+    outline:none;
+    color:#0f172a;
+    transition:box-shadow .2s, border-color .2s;
+  }
+  .answer-row input:focus{ border-color:#22c55e; box-shadow:0 0 0 4px rgba(34,197,94,.22); }
+  .answer-row input:disabled{ background:#f1f5f9; color:#94a3b8; }
+
+  .btn-hop{
+    padding:11px 24px;
+    border:none; border-radius:16px;
+    font-size:14px; font-weight:900;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+    cursor:pointer;
+    color:#06281c;
+    background:linear-gradient(135deg,#facc15,#4ade80);
+    box-shadow:0 5px 0 #ca9a0a, 0 8px 14px rgba(0,0,0,.15);
+    transition:transform .05s;
+  }
+  .btn-hop:active{ transform:translateY(3px); box-shadow:0 2px 0 #ca9a0a; }
+  .btn-hop:disabled{ opacity:.5; cursor:default; box-shadow:none; transform:none; }
+
+  .feedback{
+    margin-top:12px; padding:11px 13px;
+    border-radius:12px; font-size:13.5px; line-height:1.45;
+    display:none;
+  }
+  .feedback.good{ background:#dcfce7; border:1.5px solid #4ade80; color:#166534; }
+  .feedback.warn{ background:#fff1e0; border:1.5px solid #fb923c; color:#9a3412; }
+
+  .bottom-row{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:12px; gap:10px; flex-wrap:wrap;
+  }
+  .volume-control{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:#0f766e; font-weight:700; }
+  .volume-control input{ width:110px; }
+  .btn-reset{
+    padding:6px 14px; border-radius:14px;
+    border:1.5px solid #94a3b8; background:#fff;
+    font-size:12px; color:#334155; cursor:pointer; font-weight:700;
+  }
+  .btn-reset:hover{ border-color:#22c55e; color:#166534; }
+
+  /* Final / game over screens */
+  .end-screen{ padding:36px 20px 30px; text-align:center; }
+  .end-badge{ font-size:64px; margin-bottom:8px; animation:badgeBounce 1s ease infinite; }
+  @keyframes badgeBounce{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  .end-title{ font-family:'Baloo 2', sans-serif; font-size:26px; color:#065f46; margin-bottom:6px; }
+  .end-rank{ font-size:19px; font-weight:900; color:#b45309; margin-bottom:10px; }
+  .end-stats{ font-size:15px; color:#1f2937; margin-bottom:6px; font-weight:700; }
+  .end-text{ font-size:14px; color:#374151; max-width:460px; margin:10px auto 20px; line-height:1.5; }
+
+  @media (max-width:640px){
+    .header h1{ font-size:24px; }
+    #pondCanvas{ height:210px; }
+    .q-sentence{ font-size:15.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="splash-screen" id="splashScreen">
+  <img src="assets/logo.png" alt="Innovine Logo" onerror="this.style.display='none'" />
+</div>
+
+<div class="instructions-overlay" id="instructionsOverlay">
+  <div class="instructions-card">
+    <h2>🐸 Ready to Hop?</h2>
+    <div class="lead">Subject-Verb Agreement · Grade 4</div>
+    <div class="instr-list">
+      <div class="instr-item">
+        <div class="instr-icon">✍️</div>
+        <div class="instr-text">Read each sentence and <b>type the correct verb</b> to complete it.</div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-icon">⏱️</div>
+        <div class="instr-text">You have <b>45 seconds</b> per question — answer before time runs out!</div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-icon">🔁</div>
+        <div class="instr-text">You get <b>2 tries</b> per question. Miss both, and the answer is revealed.</div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-icon">🏁</div>
+        <div class="instr-text">Get the frog across all <b>15 lily pads</b> to finish the pond!</div>
+      </div>
+    </div>
+    <button class="btn-start" id="startBtn">Start Game</button>
+  </div>
+</div>
+
+<div class="container" id="mainContainer">
+  <div class="header">
+    <div class="header-content">
+      <h1>🐸 FROG HOP 🌿</h1>
+      <div class="subtitle">Subject-Verb Agreement · Grade 4</div>
+      <div class="stage-indicator" id="stageIndicator">Pad 1 of 15</div>
+    </div>
+  </div>
+
+  <div class="top-bar">
+    Type the correct verb to help the frog hop across the pond before time runs out!
+  </div>
+
+  <div class="pond-wrap">
+    <canvas id="pondCanvas"></canvas>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Pad</div>
+      <div class="stat-value" id="padCounter">1 / 15</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Score</div>
+      <div class="stat-value" id="scoreValue">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Streak</div>
+      <div class="stat-value" id="streakValue">0</div>
+    </div>
+    <div class="timer-card" id="timerCard">
+      <div class="stat-label">Time Left</div>
+      <div class="timer-value" id="timerValue">45s</div>
+      <div class="timer-bar-track"><div class="timer-bar-fill" id="timerBarFill"></div></div>
+    </div>
+  </div>
+
+  <div class="question-panel" id="questionPanel">
+    <div class="q-eyebrow">Fix the sentence</div>
+    <div class="q-sentence" id="qSentenceBefore"></div>
+    <div class="q-hint" id="qHint"></div>
+
+    <div class="answer-row">
+      <input type="text" id="answerInput" placeholder="Type the correct verb..." autocomplete="off" />
+      <button class="btn-hop" id="hopBtn">Hop!</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="bottom-row">
+      <button class="btn-reset" id="resetBtn">Restart Game</button>
+      <div class="volume-control">
+        🔊 <input type="range" id="volumeSlider" min="0" max="100" value="80" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- Splash -> Instructions ----------
+  setTimeout(() => {
+    document.getElementById('splashScreen').classList.add('hidden');
+    document.getElementById('instructionsOverlay').classList.add('visible');
+  }, 5000);
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    document.getElementById('instructionsOverlay').classList.remove('visible');
+    document.getElementById('mainContainer').classList.add('visible');
+    initGame();
+  });
+
+  // ---------- Audio ----------
+  const correctSound = new Audio('assets/correct.mp3');
+  const wrongSound = new Audio('assets/wrong.mp3');
+  const celebrationSound = new Audio('assets/freesound_community-claps-44774.mp3');
+  let volume = 0.8;
+  correctSound.volume = volume;
+  wrongSound.volume = volume;
+  celebrationSound.volume = volume;
+  function playCorrect(){ correctSound.currentTime = 0; correctSound.play().catch(()=>{}); }
+  function playWrong(){ wrongSound.currentTime = 0; wrongSound.play().catch(()=>{}); }
+  function playCelebrate(){ celebrationSound.currentTime = 0; celebrationSound.play().catch(()=>{}); }
+  document.getElementById('volumeSlider').addEventListener('input', e => {
+    volume = e.target.value / 100;
+    correctSound.volume = volume;
+    wrongSound.volume = volume;
+    celebrationSound.volume = volume;
+  });
+
+  // ---------- Questions (Grade 4, Subject-Verb Agreement, longer sentences) ----------
+  const questions = [
+    { before:"Each of the boys sitting quietly in the front row", after:"a red bag full of books.", hint:"(have)", answers:["has"], explain:'"Each" is singular, so it takes "has," not "have."' },
+    { before:"The flock of geese that flies over our school every autumn", after:"south long before the first snow falls.", hint:"(fly)", answers:["flies"], explain:'"Flock" is one singular group, so it takes "flies."' },
+    { before:"Neither the teacher nor the students who stayed behind after class", after:"to cancel the trip planned for next week.", hint:"(want)", answers:["want"], explain:'With "neither...nor," the verb agrees with the nearer subject — "students" (plural).' },
+    { before:"Everybody in the noisy fourth-grade class, even the shy new student,", after:"the colourful new library that opened last month.", hint:"(love)", answers:["loves"], explain:'"Everybody" is singular, so it takes "loves."' },
+    { before:"The scissors kept inside the old wooden art box on the shelf", after:"far too sharp for young children to use alone.", hint:"(be)", answers:["are"], explain:'"Scissors" is always treated as a plural word, so use "are."' },
+    { before:"My family, including my grandparents and my little cousin,", after:"grandmother in her village every single Sunday afternoon.", hint:"(visit)", answers:["visits"], explain:'"Family" acting as one unit takes the singular verb "visits."' },
+    { before:"Either Ravi or his two friends from the next classroom", after:"the snacks for the picnic tomorrow morning.", hint:"(bring)", answers:["bring"], explain:'With "either...or," the verb agrees with the nearer subject — "friends" (plural).' },
+    { before:"The news about the sudden floods in the coastal villages", after:"everyone in our neighbourhood extremely worried.", hint:"(make)", answers:["makes"], explain:'"News" looks plural but is actually singular, so it takes "makes."' },
+    { before:"A number of students from the fourth grade", after:"the school bus almost every single Monday morning.", hint:"(miss)", answers:["miss"], explain:'"A number of" means "many," so the verb stays plural: "miss."' },
+    { before:"The number of pages in this thick adventure book that I borrowed", after:"me every time I open it.", hint:"(surprise)", answers:["surprises"], explain:'"The number of" refers to one total number, so the verb is singular: "surprises."' },
+    { before:"There", after:"exactly fifteen shiny red apples left in the wooden basket near the kitchen window.", hint:"(be)", answers:["are"], explain:'The real subject is "apples" (plural), so use "are."' },
+    { before:"Each of the tricky puzzles that our teacher gave us for homework", after:"patience and careful thinking.", hint:"(require)", answers:["requires"], explain:'"Each" is singular, so it takes "requires."' },
+    { before:"The school committee formed to plan the annual sports day", after:"every Friday afternoon without fail.", hint:"(meet)", answers:["meets"], explain:'"Committee" acting as one group takes the singular verb "meets."' },
+    { before:"Both of my sisters, who started learning music two years ago,", after:"the violin beautifully at every school concert.", hint:"(play)", answers:["play"], explain:'"Both" is plural, so it takes "play."' },
+    { before:"The bouquet of fresh flowers placed carefully on the teacher's wooden table", after:"absolutely wonderful all day long.", hint:"(smell)", answers:["smells"], explain:'"Bouquet" is one singular collection, so it takes "smells."' }
+  ];
+  const TOTAL_PADS = questions.length;
+
+  // ---------- DOM refs ----------
+  const canvas = document.getElementById('pondCanvas');
+  const ctx = canvas.getContext('2d');
+  const stageIndicator = document.getElementById('stageIndicator');
+  const padCounterEl = document.getElementById('padCounter');
+  const scoreValueEl = document.getElementById('scoreValue');
+  const streakValueEl = document.getElementById('streakValue');
+  const timerValueEl = document.getElementById('timerValue');
+  const timerBarFillEl = document.getElementById('timerBarFill');
+  const timerCardEl = document.getElementById('timerCard');
+  const qSentenceBeforeEl = document.getElementById('qSentenceBefore');
+  const qHintEl = document.getElementById('qHint');
+  const answerInput = document.getElementById('answerInput');
+  const hopBtn = document.getElementById('hopBtn');
+  const feedbackEl = document.getElementById('feedback');
+  const questionPanel = document.getElementById('questionPanel');
+  const resetBtn = document.getElementById('resetBtn');
+
+  function resizeCanvas(){
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  // ---------- Game state ----------
+  const SPACING = 150;
+  const QUESTION_TIME = 45;
+  let pads = [];
+  let camera = { x: 0 };
+  let frog = { worldIndex:0, hopping:false, hopStart:0, hopDur:650, fromX:0, fromY:0, toX:0, toY:0, arcHeight:46, success:true, pendingIndex:0 };
+  let questionIndex = 0;
+  let attemptsThisQ = 0;
+  let score = 0;
+  let streak = 0;
+  let correctFirstTry = 0;
+  let gameEnded = false;
+  let timerInterval = null;
+  let timeRemaining = QUESTION_TIME;
+
+  let ripples = [];
+  let particles = [];
+  let dragonflies = [];
+  let clouds = [];
+
+  function buildPads(){
+    pads = [];
+    for (let i = 0; i <= TOTAL_PADS; i++){
+      pads.push({ x: 90 + i * SPACING, wobbleSeed: Math.random() * Math.PI * 2, isFinish: i === TOTAL_PADS });
+    }
+  }
+
+  function buildAtmosphere(){
+    dragonflies = [];
+    for (let i=0;i<3;i++){
+      dragonflies.push({ seed: Math.random()*1000, speed: 0.4 + Math.random()*0.3, laneY: 0.15 + Math.random()*0.15 });
+    }
+    clouds = [];
+    for (let i=0;i<3;i++){
+      clouds.push({ seed: Math.random()*1000, speed: 0.02 + Math.random()*0.02, laneY: 0.08 + Math.random()*0.12, scale: 0.7+Math.random()*0.6 });
+    }
+  }
+
+  function initGame(){
+    resizeCanvas();
+    buildPads();
+    buildAtmosphere();
+    questionIndex = 0;
+    score = 0;
+    streak = 0;
+    correctFirstTry = 0;
+    gameEnded = false;
+    frog.worldIndex = 0;
+    frog.hopping = false;
+    camera.x = 0;
+    ripples = [];
+    particles = [];
+    updateStats();
+    loadQuestion();
+    requestAnimationFrame(loop);
+    setUpInput();
+  }
+
+  function canvasMidY(){ return canvas.height * 0.55; }
+
+  function updateStats(){
+    stageIndicator.textContent = `Pad ${Math.min(questionIndex+1, TOTAL_PADS)} of ${TOTAL_PADS}`;
+    padCounterEl.textContent = `${Math.min(questionIndex+1, TOTAL_PADS)} / ${TOTAL_PADS}`;
+    scoreValueEl.textContent = score;
+    streakValueEl.textContent = streak;
+  }
+
+  function loadQuestion(){
+    attemptsThisQ = 0;
+    feedbackEl.style.display = "none";
+    feedbackEl.textContent = "";
+    const q = questions[questionIndex];
+    qSentenceBeforeEl.innerHTML = `${q.before} <span class="q-blank">_____</span> ${q.after}`;
+    qHintEl.textContent = "Verb hint: " + q.hint;
+    answerInput.value = "";
+    answerInput.disabled = false;
+    hopBtn.disabled = false;
+    answerInput.focus();
+    updateStats();
+    startTimer();
+  }
+
+  function normalize(str){
+    return str.trim().toLowerCase().replace(/[.!?]+$/,"");
+  }
+
+  function setUpInput(){
+    hopBtn.onclick = submitAnswer;
+    answerInput.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); submitAnswer(); } };
+    resetBtn.onclick = () => location.reload();
+  }
+
+  // ---------- Timer ----------
+  function startTimer(){
+    clearInterval(timerInterval);
+    timeRemaining = QUESTION_TIME;
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+      timeRemaining -= 0.1;
+      if (timeRemaining <= 0){
+        timeRemaining = 0;
+        updateTimerDisplay();
+        clearInterval(timerInterval);
+        handleTimeout();
+      } else {
+        updateTimerDisplay();
+      }
+    }, 100);
+  }
+  function stopTimer(){ clearInterval(timerInterval); }
+  function updateTimerDisplay(){
+    const secs = Math.ceil(timeRemaining);
+    timerValueEl.textContent = secs + "s";
+    const pct = Math.max(0, (timeRemaining / QUESTION_TIME) * 100);
+    timerBarFillEl.style.width = pct + "%";
+    let color = "#22c55e";
+    if (pct < 30) color = "#ef4444";
+    else if (pct < 60) color = "#f59e0b";
+    timerBarFillEl.style.background = color;
+    timerCardEl.classList.toggle('urgent', timeRemaining <= 10 && timeRemaining > 0);
+  }
+
+  function handleTimeout(){
+    if (gameEnded || frog.hopping) return;
+    processWrong(true);
+  }
+
+  function submitAnswer(){
+    if (frog.hopping || gameEnded) return;
+    const val = normalize(answerInput.value);
+    if (!val) return;
+    const q = questions[questionIndex];
+    const isCorrect = q.answers.includes(val);
+    if (isCorrect){
+      stopTimer();
+      processCorrect();
+    } else {
+      processWrong(false);
+    }
+  }
+
+  function processCorrect(){
+    const q = questions[questionIndex];
+    if (attemptsThisQ === 0){ score += 10; correctFirstTry++; }
+    else { score += 5; }
+    streak++;
+    feedbackEl.className = "feedback good";
+    feedbackEl.textContent = "🎉 Hop, hop, hooray! " + q.explain;
+    feedbackEl.style.display = "block";
+    playCorrect();
+    lockInput();
+    spawnParticles(pads[frog.worldIndex].x - camera.x, canvasMidY());
+    startHop(questionIndex + 1, true);
+  }
+
+  function processWrong(isTimeout){
+    const q = questions[questionIndex];
+    attemptsThisQ++;
+    streak = 0;
+    playWrong();
+    if (attemptsThisQ < 2){
+      feedbackEl.className = "feedback warn";
+      feedbackEl.textContent = isTimeout
+        ? "⏰ Time's up! Think about singular vs. plural, then try again quickly."
+        : "Not quite — think about whether the subject is singular or plural, then try again!";
+      feedbackEl.style.display = "block";
+      answerInput.value = "";
+      answerInput.disabled = false;
+      hopBtn.disabled = false;
+      answerInput.focus();
+      startTimer();
+    } else {
+      stopTimer();
+      feedbackEl.className = "feedback warn";
+      feedbackEl.textContent = `Splash! The correct answer was "${q.answers[0]}." ${q.explain}`;
+      feedbackEl.style.display = "block";
+      lockInput();
+      startHop(questionIndex + 1, false);
+    }
+    updateStats();
+  }
+
+  function lockInput(){ answerInput.disabled = true; hopBtn.disabled = true; }
+
+  function startHop(toIndex, success){
+    frog.hopping = true;
+    frog.hopStart = performance.now();
+    frog.hopDur = 650;
+    frog.fromX = pads[frog.worldIndex].x;
+    frog.toX = pads[toIndex].x;
+    frog.pendingIndex = toIndex;
+    frog.arcHeight = success ? 48 : 22;
+    frog.success = success;
+  }
+
+  function onHopComplete(){
+    frog.hopping = false;
+    frog.worldIndex = frog.pendingIndex;
+    spawnRipple(pads[frog.worldIndex].x - camera.x, canvasMidY());
+
+    if (frog.worldIndex >= TOTAL_PADS){
+      finishGame();
+      return;
+    }
+    questionIndex = frog.worldIndex;
+    updateStats();
+    setTimeout(loadQuestion, 300);
+  }
+
+  function finishGame(){
+    gameEnded = true;
+    stopTimer();
+    updateStats();
+    playCelebrate();
+    const percent = Math.round((correctFirstTry / TOTAL_PADS) * 100);
+    let badge, rank, text;
+    if (percent >= 80){
+      badge = "🏆"; rank = "Pond Champion";
+      text = "Amazing! You matched almost every subject with its correct verb on the very first try.";
+    } else if (percent >= 50){
+      badge = "🌿"; rank = "Lily Leaper";
+      text = "Good hopping! You're getting comfortable with subject-verb agreement — a little more practice and you'll be an expert.";
+    } else {
+      badge = "🐣"; rank = "Tadpole in Training";
+      text = "You made it across the pond! Review tricky subjects like collective nouns and indefinite pronouns, then hop again.";
+    }
+    questionPanel.innerHTML = `
+      <div class="end-screen">
+        <div class="end-badge">${badge}</div>
+        <div class="end-title">You crossed the pond!</div>
+        <div class="end-rank">${rank}</div>
+        <div class="end-stats">First-try correct: ${correctFirstTry} / ${TOTAL_PADS} (${percent}%)</div>
+        <div class="end-stats">Final Score: ${score}</div>
+        <div class="end-text">${text}</div>
+        <button class="btn-hop" id="playAgainBtn">Hop Again</button>
+      </div>
+    `;
+    document.getElementById('playAgainBtn').addEventListener('click', () => location.reload());
+  }
+
+  // ---------- Particles & Ripples ----------
+  function spawnParticles(x, y){
+    for (let i=0;i<16;i++){
+      const angle = Math.random()*Math.PI*2;
+      const speed = 1.5 + Math.random()*2.5;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed - 1,
+        life: 1,
+        color: ["#facc15","#4ade80","#38bdf8","#f472b6"][i%4]
+      });
+    }
+  }
+  function spawnRipple(x, y){
+    ripples.push({ x, y, radius: 8, alpha: 0.6 });
+  }
+  function updateParticles(){
+    particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.life -= 0.02; });
+    particles = particles.filter(p => p.life > 0);
+  }
+  function updateRipples(){
+    ripples.forEach(r => { r.radius += 1.6; r.alpha -= 0.02; });
+    ripples = ripples.filter(r => r.alpha > 0);
+  }
+  function drawParticles(){
+    particles.forEach(p => {
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3.2, 0, Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+  function drawRipples(){
+    ripples.forEach(r => {
+      ctx.strokeStyle = `rgba(255,255,255,${r.alpha})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, r.radius, 0, Math.PI*2);
+      ctx.stroke();
+    });
+  }
+
+  // ---------- Drawing ----------
+  function easeInOutQuad(t){ return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2; }
+
+  function drawBackground(t){
+    const w = canvas.width, h = canvas.height;
+    const sky = ctx.createLinearGradient(0,0,0,h);
+    sky.addColorStop(0, "#bdeeff");
+    sky.addColorStop(0.45, "#d7f7e6");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0,0,w,h);
+
+    // sun with glow
+    const sunGlow = ctx.createRadialGradient(w*0.85, h*0.16, 4, w*0.85, h*0.16, 46);
+    sunGlow.addColorStop(0, "rgba(255,224,102,0.9)");
+    sunGlow.addColorStop(1, "rgba(255,224,102,0)");
+    ctx.fillStyle = sunGlow;
+    ctx.fillRect(w*0.85-46, h*0.16-46, 92, 92);
+    ctx.fillStyle = "#ffe066";
+    ctx.beginPath();
+    ctx.arc(w*0.85, h*0.16, 22, 0, Math.PI*2);
+    ctx.fill();
+
+    // clouds
+    clouds.forEach(c => {
+      const cx = ((t*c.speed*40 + c.seed*50) % (w+200)) - 100;
+      const cy = h * c.laneY;
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 26*c.scale, 12*c.scale, 0, 0, Math.PI*2);
+      ctx.ellipse(cx+18*c.scale, cy+4, 18*c.scale, 10*c.scale, 0, 0, Math.PI*2);
+      ctx.ellipse(cx-18*c.scale, cy+4, 18*c.scale, 9*c.scale, 0, 0, Math.PI*2);
+      ctx.fill();
+    });
+
+    // dragonflies
+    dragonflies.forEach(d => {
+      const dx = ((t*d.speed*70 + d.seed*30) % (w+120)) - 60;
+      const dy = h*d.laneY + Math.sin(t*2 + d.seed)*10;
+      ctx.save();
+      ctx.translate(dx, dy);
+      const wing = Math.sin(t*20 + d.seed) * 5;
+      ctx.strokeStyle = "rgba(30,64,90,0.5)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(-6,-wing); ctx.lineTo(6,wing); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-6,wing); ctx.lineTo(6,-wing); ctx.stroke();
+      ctx.fillStyle = "#0e7490";
+      ctx.beginPath(); ctx.ellipse(0,0,7,2,0,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    });
+
+    // water band
+    const waterTop = h*0.42;
+    const water = ctx.createLinearGradient(0, waterTop, 0, h);
+    water.addColorStop(0, "#34c4d9");
+    water.addColorStop(1, "#1f8fae");
+    ctx.fillStyle = water;
+    ctx.fillRect(0, waterTop, w, h-waterTop);
+
+    // ripples texture
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.lineWidth = 2;
+    for (let i=0;i<4;i++){
+      ctx.beginPath();
+      for (let x=0;x<=w;x+=14){
+        const y = waterTop + 22 + i*32 + Math.sin(x*0.04 + t*1.4 + i)*4;
+        if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  function drawLilyPad(screenX, y, radius, highlight, isFinish){
+    ctx.save();
+    ctx.translate(screenX, y);
+    if (highlight){
+      ctx.shadowColor = "rgba(74,222,128,0.9)";
+      ctx.shadowBlur = 22;
+    }
+    ctx.fillStyle = isFinish ? "#facc15" : (highlight ? "#5fd88a" : "#4caf6d");
+    ctx.strokeStyle = "#2e7d4f";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0,0,radius,0.35,Math.PI*2-0.35);
+    ctx.lineTo(0,0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    if (!isFinish){
+      ctx.fillStyle = "#ff8fc2";
+      ctx.beginPath(); ctx.arc(0,-radius*0.15,5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#fff6a8";
+      ctx.beginPath(); ctx.arc(0,-radius*0.15,2.4,0,Math.PI*2); ctx.fill();
+    } else {
+      ctx.fillStyle = "#7c4a1e";
+      ctx.fillRect(-2, -radius-30, 4, 30);
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.moveTo(2, -radius-30); ctx.lineTo(28, -radius-22); ctx.lineTo(2, -radius-14);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawFrog(x, y, squish){
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(1, 1 - squish*0.15);
+    ctx.fillStyle = "#2e7d32";
+    ctx.beginPath(); ctx.ellipse(-16, 10, 9, 5, 0.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(16, 10, 9, 5, -0.4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#4CAF50";
+    ctx.beginPath(); ctx.ellipse(0, 0, 20, 16, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath(); ctx.arc(-8,-14,6,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(8,-14,6,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#0f172a";
+    ctx.beginPath(); ctx.arc(-8,-14,2.6,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(8,-14,2.6,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function loop(ts){
+    const t = performance.now()*0.001;
+    if (!gameEnded){
+      const w = canvas.width, h = canvas.height;
+      const targetIndex = frog.hopping ? frog.pendingIndex : frog.worldIndex;
+      const targetWorldX = pads[Math.min(targetIndex, pads.length-1)].x;
+      const targetCam = Math.max(0, targetWorldX - w*0.32);
+      camera.x += (targetCam - camera.x) * 0.08;
+
+      drawBackground(t);
+
+      for (let i=0;i<pads.length;i++){
+        const p = pads[i];
+        const sx = p.x - camera.x;
+        if (sx < -60 || sx > w+60) continue;
+        const bob = Math.sin(t*1.5 + p.wobbleSeed) * 4;
+        const y = canvasMidY() + bob;
+        const isCurrent = (!frog.hopping && i === frog.worldIndex);
+        drawLilyPad(sx, y, p.isFinish ? 34 : 30, isCurrent, p.isFinish);
+      }
+
+      updateRipples(); drawRipples();
+      updateParticles(); drawParticles();
+
+      let fx, fy, squish = 0;
+      if (frog.hopping){
+        const elapsed = ts - frog.hopStart;
+        let progress = Math.min(1, elapsed / frog.hopDur);
+        const eased = easeInOutQuad(progress);
+        fx = frog.fromX + (frog.toX - frog.fromX) * eased;
+        const arc = Math.sin(progress * Math.PI) * frog.arcHeight;
+        fy = canvasMidY() - arc + (frog.success ? 0 : Math.sin(progress*Math.PI*2)*6);
+        squish = progress < 0.08 || progress > 0.92 ? 0.6 : 0;
+        if (progress >= 1){ onHopComplete(); }
+      } else {
+        fx = pads[frog.worldIndex].x;
+        fy = canvasMidY() + Math.sin(t*1.5 + 99) * 2;
+      }
+      drawFrog(fx - camera.x, fy, squish);
+    }
+    requestAnimationFrame(loop);
+  }
+</script>
+</body>
+</html>
