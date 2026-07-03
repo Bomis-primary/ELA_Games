@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pastel Meadow: Grade 4 Modal Verbs Edition</title>
+  <title>Grammar Meadow: Grade 4 Modal Verbs</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <style>
@@ -11,8 +11,8 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       user-select: none; -webkit-user-select: none; touch-action: none;
       min-height: 100vh;
-      background: linear-gradient(180deg, #e0f2fe 0%, #f3e8ff 100%);
-      color: #1e293b;
+      background: linear-gradient(180deg, #f0fdf4 0%, #fae8ff 100%);
+      color: #0f172a;
     }
     .hidden { display: none !important; }
     
@@ -20,26 +20,26 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: #f472b6;
+      background: #10b981;
       color: white;
       font-weight: 900;
       font-size: 1.2rem;
       padding: 12px 28px;
-      border: 4px solid #fbcfe8;
+      border: 4px solid #a7f3d0;
       border-radius: 24px;
-      box-shadow: 0 6px 0 #db2777, 0 10px 15px rgba(219, 39, 119, 0.2);
+      box-shadow: 0 6px 0 #047857, 0 10px 15px rgba(4, 120, 87, 0.2);
       cursor: pointer;
       text-transform: uppercase;
       transition: all 0.1s ease;
     }
     .btn-arcade:hover {
-      background: #f43f5e;
+      background: #059669;
       transform: translateY(-2px);
-      box-shadow: 0 8px 0 #be123c, 0 12px 20px rgba(219, 39, 119, 0.3);
+      box-shadow: 0 8px 0 #065f46, 0 12px 20px rgba(4, 120, 87, 0.3);
     }
     .btn-arcade:active {
       transform: translateY(4px);
-      box-shadow: 0 2px 0 #be123c, 0 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 0 #065f46, 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .shake-anim { animation: shake 0.4s ease-in-out; }
@@ -50,18 +50,18 @@
 
   <div id="screen-splash" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center text-center p-4">
     <div class="relative flex flex-col items-center justify-center min-h-[160px]">
-      <img id="splash-logo" src="g4/chp12/modalverbs/assets/logo.png" style="width: 380px; max-width: 85vw; height: auto;" 
-           onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwMjg0YzciIHJ4PSIxMCIvPjx0ZXh0IHg9IjEwMCIgeT0iMzUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPklOTk9WSU5FIExPR088L3RleHQ+PC9zdmc+';">
+      <img id="splash-logo" src="assets/logo.png" style="width: 380px; max-width: 85vw; height: auto;" 
+           onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwNDc4NTciIHJ4PSIxMCIvPjx0ZXh0IHg9IjEwMCIgeT0iMzUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPklOTk9WSU5FIExPR088L3RleHQ+PC9zdmc+';">
     </div>
-    <div class="mt-4 font-black text-purple-400 tracking-widest text-lg animate-pulse">PREPARING MODAL VERBS MEADOW...</div>
+    <div class="mt-4 font-black text-emerald-600 tracking-widest text-lg animate-pulse">PREPARING MODAL VERBS MEADOW...</div>
   </div>
 
-  <div id="screen-start" class="hidden w-full max-w-xl bg-white/90 backdrop-blur rounded-[32px] p-6 my-auto shadow-xl border-8 border-purple-200 text-center">
-    <h1 class="text-3xl md:text-4xl font-black text-purple-600 mb-1">🎲 Modal Verbs</h1>
-    <p class="text-pink-500 font-extrabold tracking-wider text-sm mb-4 uppercase">Player vs Computer Grammar Race (Grade 4)</p>
+  <div id="screen-start" class="hidden w-full max-w-xl bg-white/95 backdrop-blur rounded-[32px] p-6 my-auto shadow-xl border-8 border-emerald-100 text-center">
+    <h1 class="text-3xl md:text-4xl font-black text-emerald-700 mb-1">🎲 Modal Verbs</h1>
+    <p class="text-purple-600 font-extrabold tracking-wider text-sm mb-4 uppercase">Player vs Computer Grammar Race (Grade 4)</p>
     
-    <div class="text-left bg-purple-50/50 p-4 rounded-2xl border-4 border-dashed border-purple-100 text-xs md:text-sm text-slate-600 space-y-2 mb-6">
-      <p class="font-black text-purple-700 mb-1">🎮 Rules of engagement:</p>
+    <div class="text-left bg-emerald-50/50 p-4 rounded-2xl border-4 border-dashed border-emerald-100 text-xs md:text-sm text-slate-600 space-y-2 mb-6">
+      <p class="font-black text-emerald-800 mb-1">🎮 Rules of engagement:</p>
       <div>✨ Analyze the context clues carefully and choose the correct modal verb to roll the dice!</div>
       <div>❌ If your first answer is incorrect, you will get a **Second Chance Hint**.</div>
       <div>🤖 If you miss it twice, your turn is skipped and the **Computer** gets to roll!</div>
@@ -72,31 +72,31 @@
   </div>
 
   <div id="screen-game" class="hidden w-full max-w-5xl flex flex-col items-center">
-    <div class="w-full bg-white rounded-2xl p-3 shadow-sm border-2 border-purple-100 flex flex-col sm:flex-row justify-between items-center gap-2 mb-3">
+    <div class="w-full bg-white rounded-2xl p-3 shadow-sm border-2 border-emerald-100 flex flex-col sm:flex-row justify-between items-center gap-2 mb-3">
       <div>
-        <div class="text-xs font-black text-pink-500 tracking-wider uppercase flex items-center gap-2">
+        <div class="text-xs font-black text-purple-600 tracking-wider uppercase flex items-center gap-2">
           <span>Grammar Track</span>
-          <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full" id="lbl-question-count">Question: 1/20</span>
+          <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full" id="lbl-question-count">Question: 1/20</span>
         </div>
         <div id="game-status-text" class="text-sm md:text-base font-black text-slate-700">Your Turn! Press Roll Dice.</div>
       </div>
       <div class="flex items-center space-x-2 shrink-0">
-        <span class="bg-cyan-50 text-cyan-700 border-2 border-cyan-200 px-3 py-1 rounded-full font-black text-xs">You: <span id="lbl-pos-player">1</span></span>
-        <span class="bg-red-50 text-red-700 border-2 border-red-200 px-3 py-1 rounded-full font-black text-xs">Computer: <span id="lbl-pos-cpu">1</span></span>
+        <span class="bg-emerald-50 text-emerald-700 border-2 border-emerald-200 px-3 py-1 rounded-full font-black text-xs">You: <span id="lbl-pos-player">1</span></span>
+        <span class="bg-purple-50 text-purple-700 border-2 border-purple-200 px-3 py-1 rounded-full font-black text-xs">Computer: <span id="lbl-pos-cpu">1</span></span>
       </div>
     </div>
 
     <div class="w-full flex flex-col lg:flex-row items-center justify-center gap-4">
-      <div id="game-sandbox-container" class="w-full max-w-[500px] bg-white border-8 border-purple-200 rounded-[2.5rem] shadow-xl relative overflow-hidden aspect-square">
+      <div id="game-sandbox-container" class="w-full max-w-[500px] bg-white border-8 border-emerald-100 rounded-[2.5rem] shadow-xl relative overflow-hidden aspect-square">
         <canvas id="boardCanvas" class="w-full h-full block"></canvas>
       </div>
 
-      <div class="flex flex-row lg:flex-col items-center justify-center gap-4 bg-white p-4 rounded-3xl border-2 border-purple-100 w-full lg:w-44 shadow-sm shrink-0">
-        <div id="dice-container" class="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-400 border-4 border-white rounded-2xl shadow-md flex items-center justify-center text-3xl font-black text-white transition-transform duration-150">
+      <div class="flex flex-row lg:flex-col items-center justify-center gap-4 bg-white p-4 rounded-3xl border-2 border-emerald-50 w-full lg:w-44 shadow-sm shrink-0">
+        <div id="dice-container" class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 border-4 border-white rounded-2xl shadow-md flex items-center justify-center text-3xl font-black text-white transition-transform duration-150">
           ⚀
         </div>
         <div class="flex flex-col gap-1 items-center lg:items-stretch w-full">
-          <button id="btn-roll" class="bg-cyan-400 hover:bg-cyan-300 text-white font-black text-base py-3 px-6 rounded-xl shadow-md border-b-4 border-cyan-600 active:translate-y-1 active:border-b-0 uppercase tracking-wider text-center w-full" onclick="handleDiceActionClick()">
+          <button id="btn-roll" class="bg-purple-500 hover:bg-purple-400 text-white font-black text-base py-3 px-6 rounded-xl shadow-md border-b-4 border-purple-700 active:translate-y-1 active:border-b-0 uppercase tracking-wider text-center w-full" onclick="handleDiceActionClick()">
             Roll 🎲
           </button>
         </div>
@@ -105,9 +105,9 @@
   </div>
 
   <div id="modal-quiz" class="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-[2rem] w-full max-w-lg border-8 border-pink-200 p-6 shadow-2xl space-y-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-lg border-8 border-emerald-100 p-6 shadow-2xl space-y-4">
       <div class="flex justify-between items-center border-b pb-2">
-        <span class="text-xs font-black uppercase text-pink-500 tracking-wider">🎯 Complete Sentence</span>
+        <span class="text-xs font-black uppercase text-emerald-600 tracking-wider">🎯 Complete Sentence</span>
         <span id="quiz-attempt-tag" class="text-xs font-bold px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">First Attempt</span>
       </div>
       
@@ -131,9 +131,9 @@
     <button class="btn-arcade" onclick="location.reload()">Play Again 🔄</button>
   </div>
 
-  <audio id="audio-correct" src="g4/chp12/modalverbs/assets/correct.mp3" preload="auto"></audio>
-  <audio id="audio-wrong" src="g4/chp12/modalverbs/assets/wrong.mp3" preload="auto"></audio>
-  <audio id="audio-claps" src="g4/chp12/modalverbs/assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+  <audio id="audio-correct" src="assets/correct.mp3" preload="auto"></audio>
+  <audio id="audio-wrong" src="assets/wrong.mp3" preload="auto"></audio>
+  <audio id="audio-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
   <script>
     let canvas, ctx;
@@ -152,9 +152,10 @@
     const diceFaces = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
     const LADDERS = { 4: 25, 13: 46, 33: 49, 42: 63, 50: 69, 62: 81, 74: 92 };
     const SNAKES = { 27: 5, 40: 19, 43: 18, 54: 31, 89: 53, 96: 75, 99: 41 };
-    const pastelColors = ['#fbcfe8', '#ccfbf1', '#e0f2fe', '#fef08a'];
+    
+    // Completely updated custom board tile themes
+    const pastelColors = ['#e6f4ea', '#f3e8ff', '#e0f2fe', '#fef3c7'];
 
-    // 20 Context-Driven Modal Verb Questions for Grade 4
     const QUESTIONS = [
       { q: "The traffic is completely stopped on the main highway. We _______ be late for the movie.", options: ["must not", "might", "can"], answer: "might", hint: "Look for a word that means 'it is possible.'" },
       { q: "When my grandfather was only five years old, he _______ already speak three different languages!", options: ["could", "can", "may"], answer: "could", hint: "The sentence talks about a past ability ('was only five')." },
@@ -178,7 +179,7 @@
       { q: "If it stops raining before noon, _______ we go out to the playground?", options: ["shall", "must", "would"], answer: "shall", hint: "This is a classic way to propose a shared suggestion or offer with 'we'." }
     ];
 
-    // Splash timer strictly extended to 5000ms (5 seconds)
+    // Fixed splash screen handling at exactly 5 seconds
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         document.getElementById('screen-splash').classList.add('hidden');
@@ -237,11 +238,11 @@
       
       if (questionAttemptCount === 1) {
         elTag.innerText = "First Attempt";
-        elTag.className = "text-xs font-bold px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full";
+        elTag.className = "text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full";
         elHint.classList.add('hidden');
       } else {
         elTag.innerText = "Second Chance Hint!";
-        elTag.className = "text-xs font-bold px-2 py-0.5 bg-orange-100 text-orange-800 rounded-full animate-bounce";
+        elTag.className = "text-xs font-bold px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full animate-bounce";
         elHint.innerText = `💡 ${qData.hint}`;
         elHint.classList.remove('hidden');
       }
@@ -250,7 +251,7 @@
       elGrid.innerHTML = '';
       qData.options.forEach(opt => {
         const btn = document.createElement('button');
-        btn.className = "bg-purple-100 hover:bg-purple-200 active:bg-purple-300 text-purple-950 font-black py-3 px-2 rounded-xl text-center border-2 border-purple-200 transition-all transform active:scale-95 text-sm shadow-sm";
+        btn.className = "bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-950 font-black py-3 px-2 rounded-xl text-center border-2 border-emerald-200 transition-all transform active:scale-95 text-sm shadow-sm";
         btn.innerText = opt;
         btn.onclick = () => processQuizSelection(opt);
         elGrid.appendChild(btn);
@@ -484,7 +485,7 @@
       ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
       let tileSize = BOARD_SIZE / 10;
 
-      // 1. Draw 100-Square Checkerboard Background
+      // 1. Draw Checkerboard Background
       for (let r = 0; r < 10; r++) {
         for (let c = 0; c < 10; c++) {
           let squareNum = (r % 2 === 0) ? (r * 10) + c + 1 : (r * 10) + (9 - c) + 1;
@@ -494,7 +495,7 @@
           ctx.lineWidth = 2;
           ctx.strokeRect(c * tileSize, BOARD_SIZE - (r + 1) * tileSize, tileSize, tileSize);
 
-          ctx.fillStyle = '#64748b';
+          ctx.fillStyle = '#475569';
           ctx.font = 'bold 15px system-ui';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -512,7 +513,7 @@
         let offset = 14; 
 
         ctx.save();
-        ctx.strokeStyle = '#b45309'; 
+        ctx.strokeStyle = '#065f46'; // Forest green sidebars for ladders
         ctx.lineWidth = 5;
         ctx.lineCap = 'round';
 
@@ -526,7 +527,7 @@
         ctx.lineTo(pEnd.x + offset * Math.sin(angle), pEnd.y - offset * Math.cos(angle));
         ctx.stroke();
 
-        ctx.strokeStyle = '#fbbf24'; 
+        ctx.strokeStyle = '#10b981'; // Bright mint rungs
         ctx.lineWidth = 4;
         let steps = 5;
         for (let i = 1; i < steps; i++) {
@@ -547,7 +548,7 @@
         let pEnd = getGridXYCoordinates(parseInt(end));
 
         ctx.save();
-        ctx.strokeStyle = '#c084fc'; 
+        ctx.strokeStyle = '#a855f7'; // Lavender/purple snakes
         ctx.lineWidth = 14;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
@@ -562,11 +563,11 @@
         ctx.bezierCurveTo(midX1, midY1, midX2, midY2, pEnd.x, pEnd.y);
         ctx.stroke();
 
-        ctx.strokeStyle = '#f472b6';
+        ctx.strokeStyle = '#c084fc';
         ctx.lineWidth = 4;
         ctx.stroke();
 
-        ctx.fillStyle = '#c084fc';
+        ctx.fillStyle = '#a855f7';
         ctx.beginPath();
         ctx.arc(pStart.x, pStart.y, 10, 0, Math.PI * 2);
         ctx.fill();
@@ -577,7 +578,7 @@
         ctx.arc(pStart.x + 3, pStart.y - 2, 3, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.strokeStyle = '#f43f5e';
+        ctx.strokeStyle = '#7e22ce';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(pStart.x, pStart.y - 8);
@@ -591,9 +592,9 @@
       let cCoords = getGridXYCoordinates(displayCpuPos);
       let sameBoxOffset = (displayPlayerPos === displayCpuPos) ? 8 : 0;
 
-      // Player Token (Coral Red)
+      // Player Token (Emerald Mint)
       ctx.save();
-      ctx.fillStyle = '#fb7185';
+      ctx.fillStyle = '#10b981';
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 3;
       ctx.shadowColor = 'rgba(0,0,0,0.1)';
@@ -609,9 +610,9 @@
       ctx.fillText("👑", pCoords.x - sameBoxOffset, pCoords.y);
       ctx.restore();
 
-      // Computer Token (Sky Blue)
+      // Computer Token (Amethyst Purple)
       ctx.save();
-      ctx.fillStyle = '#38bdf8';
+      ctx.fillStyle = '#a855f7';
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 3;
       ctx.shadowColor = 'rgba(0,0,0,0.1)';
