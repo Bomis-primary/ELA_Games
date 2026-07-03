@@ -1,1 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pastel Meadow: Grade 4 Modal Verbs Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none; -webkit-user-select: none; touch-action: none;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #e0f2fe 0%, #f3e8ff 100%);
+      color: #1e293b;
+    }
+    .hidden { display: none !important; }
+    
+    .btn-arcade {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #f472b6;
+      color: white;
+      font-weight: 900;
+      font-size: 1.2rem;
+      padding: 12px 28px;
+      border: 4px solid #fbcfe8;
+      border-radius: 24px;
+      box-shadow: 0 6px 0 #db2777, 0 10px 15px rgba(219, 39, 119, 0.2);
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.1s ease;
+    }
+    .btn-arcade:hover {
+      background: #f43f5e;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #be123c, 0 12px 20px rgba(219, 39, 119, 0.3);
+    }
+    .btn-arcade:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #be123c, 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
+    .shake-anim { animation: shake 0.4s ease-in-out; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between p-3 relative overflow-x-hidden">
+
+  <div id="screen-splash" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center text-center p-4">
+    <div class="relative flex flex-col items-center justify-center min-h-[160px]">
+      <img id="splash-logo" src="g4/chp12/modalverbs/assets/logo.png" style="width: 380px; max-width: 85vw; height: auto;" 
+           onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwMjg0YzciIHJ4PSIxMCIvPjx0ZXh0IHg9IjEwMCIgeT0iMzUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPklOTk9WSU5FIExPR088L3RleHQ+PC9zdmc+';">
+    </div>
+    <div class="mt-4 font-black text-purple-400 tracking-widest text-lg animate-pulse">PREPARING MODAL VERBS MEADOW...</div>
+  </div>
+
+  <div id="screen-start" class="hidden w-full max-w-xl bg-white/90 backdrop-blur rounded-[32px] p-6 my-auto shadow-xl border-8 border-purple-200 text-center">
+    <h1 class="text-3xl md:text-4xl font-black text-purple-600 mb-1">🎲 Modal Verbs</h1>
+    <p class="text-pink-500 font-extrabold tracking-wider text-sm mb-4 uppercase">Player vs Computer Grammar Race (Grade 4)</p>
+    
+    <div class="text-left bg-purple-50/50 p-4 rounded-2xl border-4 border-dashed border-purple-100 text-xs md:text-sm text-slate-600 space-y-2 mb-6">
+      <p class="font-black text-purple-700 mb-1">🎮 Rules of engagement:</p>
+      <div>✨ Analyze the context clues carefully and choose the correct modal verb to roll the dice!</div>
+      <div>❌ If your first answer is incorrect, you will get a **Second Chance Hint**.</div>
+      <div>🤖 If you miss it twice, your turn is skipped and the **Computer** gets to roll!</div>
+      <div>🏁 **Win Conditions:** Reach box 100, or hold the highest rank after all **20 Questions** are finished.</div>
+    </div>
+    
+    <button class="btn-arcade" onclick="startGame()">Play Game 🏁</button>
+  </div>
+
+  <div id="screen-game" class="hidden w-full max-w-5xl flex flex-col items-center">
+    <div class="w-full bg-white rounded-2xl p-3 shadow-sm border-2 border-purple-100 flex flex-col sm:flex-row justify-between items-center gap-2 mb-3">
+      <div>
+        <div class="text-xs font-black text-pink-500 tracking-wider uppercase flex items-center gap-2">
+          <span>Grammar Track</span>
+          <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full" id="lbl-question-count">Question: 1/20</span>
+        </div>
+        <div id="game-status-text" class="text-sm md:text-base font-black text-slate-700">Your Turn! Press Roll Dice.</div>
+      </div>
+      <div class="flex items-center space-x-2 shrink-0">
+        <span class="bg-cyan-50 text-cyan-700 border-2 border-cyan-200 px-3 py-1 rounded-full font-black text-xs">You: <span id="lbl-pos-player">1</span></span>
+        <span class="bg-red-50 text-red-700 border-2 border-red-200 px-3 py-1 rounded-full font-black text-xs">Computer: <span id="lbl-pos-cpu">1</span></span>
+      </div>
+    </div>
+
+    <div class="w-full flex flex-col lg:flex-row items-center justify-center gap-4">
+      <div id="game-sandbox-container" class="w-full max-w-[500px] bg-white border-8 border-purple-200 rounded-[2.5rem] shadow-xl relative overflow-hidden aspect-square">
+        <canvas id="boardCanvas" class="w-full h-full block"></canvas>
+      </div>
+
+      <div class="flex flex-row lg:flex-col items-center justify-center gap-4 bg-white p-4 rounded-3xl border-2 border-purple-100 w-full lg:w-44 shadow-sm shrink-0">
+        <div id="dice-container" class="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-400 border-4 border-white rounded-2xl shadow-md flex items-center justify-center text-3xl font-black text-white transition-transform duration-150">
+          ⚀
+        </div>
+        <div class="flex flex-col gap-1 items-center lg:items-stretch w-full">
+          <button id="btn-roll" class="bg-cyan-400 hover:bg-cyan-300 text-white font-black text-base py-3 px-6 rounded-xl shadow-md border-b-4 border-cyan-600 active:translate-y-1 active:border-b-0 uppercase tracking-wider text-center w-full" onclick="handleDiceActionClick()">
+            Roll 🎲
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-quiz" class="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-[2rem] w-full max-w-lg border-8 border-pink-200 p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <span class="text-xs font-black uppercase text-pink-500 tracking-wider">🎯 Complete Sentence</span>
+        <span id="quiz-attempt-tag" class="text-xs font-bold px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">First Attempt</span>
+      </div>
+      
+      <div id="quiz-sentence" class="text-lg md:text-xl font-black text-slate-800 bg-slate-50 p-4 rounded-xl border border-slate-100">
+        Sentence Placeholder
+      </div>
+
+      <div id="quiz-hint" class="text-xs font-bold text-amber-600 bg-amber-50 p-2 rounded-lg hidden">
+        💡 Hint!
+      </div>
+
+      <div id="quiz-options-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-summary" class="hidden w-full max-w-md bg-white rounded-[2rem] p-8 my-auto shadow-xl border-8 border-emerald-200 text-center">
+    <span id="txt-summary-emoji" class="text-6xl block mb-4">🏆</span>
+    <h1 id="txt-summary-title" class="text-3xl font-black text-emerald-600">Meadow Winner!</h1>
+    <p id="txt-summary-desc" class="text-slate-500 font-medium my-4">Description Text</p>
+    <button class="btn-arcade" onclick="location.reload()">Play Again 🔄</button>
+  </div>
+
+  <audio id="audio-correct" src="g4/chp12/modalverbs/assets/correct.mp3" preload="auto"></audio>
+  <audio id="audio-wrong" src="g4/chp12/modalverbs/assets/wrong.mp3" preload="auto"></audio>
+  <audio id="audio-claps" src="g4/chp12/modalverbs/assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+  <script>
+    let canvas, ctx;
+    const BOARD_SIZE = 600; 
+    
+    let playerPos = 1, displayPlayerPos = 1;
+    let cpuPos = 1, displayCpuPos = 1;
+    
+    let isMoving = false;
+    let isDiceRolling = false;
+    
+    let activeTurn = 'PLAYER'; 
+    let currentQuestionIdx = 0;
+    let questionAttemptCount = 0;
+
+    const diceFaces = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+    const LADDERS = { 4: 25, 13: 46, 33: 49, 42: 63, 50: 69, 62: 81, 74: 92 };
+    const SNAKES = { 27: 5, 40: 19, 43: 18, 54: 31, 89: 53, 96: 75, 99: 41 };
+    const pastelColors = ['#fbcfe8', '#ccfbf1', '#e0f2fe', '#fef08a'];
+
+    // 20 Context-Driven Modal Verb Questions for Grade 4
+    const QUESTIONS = [
+      { q: "The traffic is completely stopped on the main highway. We _______ be late for the movie.", options: ["must not", "might", "can"], answer: "might", hint: "Look for a word that means 'it is possible.'" },
+      { q: "When my grandfather was only five years old, he _______ already speak three different languages!", options: ["could", "can", "may"], answer: "could", hint: "The sentence talks about a past ability ('was only five')." },
+      { q: "Scientists notice the sky is clear and the wind has stopped. It _______ snow tonight.", options: ["will not", "must", "can"], answer: "will not", hint: "If the sky is completely clear, what is the chance of snow?" },
+      { q: "I forgot my binoculars at home, so I _______ see the rare birds at the top of the tree.", options: ["should not", "cannot", "might not"], answer: "cannot", hint: "Without your binoculars, is it physically possible to see them?" },
+      { q: "The dark storm clouds are moving away quickly. The sun _______ break through at any minute.", options: ["may", "must", "should not"], answer: "may", hint: "It isn't guaranteed, but it is a real possibility." },
+      { q: "Excuse me, Captain, _______ I step onto the flight deck to see the control panel?", options: ["may", "will", "must"], answer: "may", hint: "Choose the most formal and polite word for asking permission." },
+      { q: "_______ you mind holding this heavy box for just a second while I find my house keys?", options: ["Would", "Should", "May"], answer: "Would", hint: "This pairs with 'mind' to form a polite request for a favor." },
+      { q: "My teacher told us that we _______ use our calculators on the math challenge today, so put them away.", options: ["cannot", "must not", "should"], answer: "cannot", hint: "The teacher instructed everyone to put them away." },
+      { q: "If you are completely finished with your reading assignment, you _______ choose a game from the shelf.", options: ["can", "would", "must"], answer: "can", hint: "This means you are now permitted or allowed to do it." },
+      { q: "_______ you please hand me that map over there? I think we are lost.", options: ["Could", "May", "Must"], answer: "Could", hint: "You are asking if someone else is able to help you right now." },
+      { q: "The sign clearly says 'Danger: Deep Water.' You _______ swim here.", options: ["should not", "must not", "cannot"], answer: "must not", hint: "A danger sign indicates a strict, mandatory safety rule." },
+      { q: "Your library books are past their due date. You _______ return them tomorrow morning.", options: ["should", "might", "can"], answer: "should", hint: "It is the highly recommended and responsible thing to do." },
+      { q: "To become an astronaut for NASA, you _______ study science and pass many difficult tests.", options: ["must", "can", "may"], answer: "must", hint: "This is an absolute necessity; there is no alternative path." },
+      { q: "You look very tired and you have been coughing all day. You _______ rest in bed.", options: ["ought to", "will", "may"], answer: "ought to", hint: "This acts exactly like 'should' for offering solid advice." },
+      { q: "Passengers _______ remain seated with their seatbelts fastened while the plane is landing.", options: ["have to", "may", "could"], answer: "have to", hint: "This is a strict external rule imposed by airline regulations." },
+      { q: "The laboratory door is locked and the lights are completely off. Dr. Smith _______ be working inside.", options: ["cannot", "must", "should"], answer: "cannot", hint: "Deduce logically: if the lights are off and it's locked, it's impossible." },
+      { q: "If you practice your piano scales every single day, you _______ win the talent show next month.", options: ["might", "must", "could not"], answer: "might", hint: "Practicing makes it a likely possibility, but it isn't an instant guarantee." },
+      { q: "We have plenty of food left over from yesterday's party, so you _______ cook dinner tonight.", options: ["need not", "must not", "should not"], answer: "need not", hint: "Since food already exists, it means it is not necessary to cook." },
+      { q: "Lions are wild and unpredictable animals. You _______ try to pet them.", options: ["should never", "may not", "cannot"], answer: "should never", hint: "Think about the strongest piece of safe advice you can give." },
+      { q: "If it stops raining before noon, _______ we go out to the playground?", options: ["shall", "must", "would"], answer: "shall", hint: "This is a classic way to propose a shared suggestion or offer with 'we'." }
+    ];
+
+    // Splash timer strictly extended to 5000ms (5 seconds)
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.getElementById('screen-splash').classList.add('hidden');
+        document.getElementById('screen-start').classList.remove('hidden');
+      }, 5000);
+    });
+
+    function startGame() {
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-game').classList.remove('hidden');
+      
+      canvas = document.getElementById('boardCanvas');
+      ctx = canvas.getContext('2d');
+      canvas.width = BOARD_SIZE;
+      canvas.height = BOARD_SIZE;
+
+      bindControlInputs();
+      renderGraphicsLoop();
+      updateHUD();
+    }
+
+    function bindControlInputs() {
+      window.addEventListener('keydown', (e) => {
+        if (['Space', ' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
+          e.preventDefault();
+          handleDiceActionClick();
+        }
+      });
+    }
+
+    function updateHUD() {
+      document.getElementById('lbl-pos-player').innerText = playerPos;
+      document.getElementById('lbl-pos-cpu').innerText = cpuPos;
+      document.getElementById('lbl-question-count').innerText = `Question: ${Math.min(currentQuestionIdx + 1, 20)}/20`;
+    }
+
+    function handleDiceActionClick() {
+      if (isMoving || isDiceRolling || activeTurn === 'CPU') return;
+      
+      if (currentQuestionIdx >= QUESTIONS.length) {
+        checkWinState(true);
+        return;
+      }
+      
+      questionAttemptCount = 1;
+      displayQuizModal();
+    }
+
+    function displayQuizModal() {
+      const qData = QUESTIONS[currentQuestionIdx];
+      const elModal = document.getElementById('modal-quiz');
+      const elTag = document.getElementById('quiz-attempt-tag');
+      const elHint = document.getElementById('quiz-hint');
+      
+      document.getElementById('quiz-sentence').innerText = qData.q;
+      
+      if (questionAttemptCount === 1) {
+        elTag.innerText = "First Attempt";
+        elTag.className = "text-xs font-bold px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full";
+        elHint.classList.add('hidden');
+      } else {
+        elTag.innerText = "Second Chance Hint!";
+        elTag.className = "text-xs font-bold px-2 py-0.5 bg-orange-100 text-orange-800 rounded-full animate-bounce";
+        elHint.innerText = `💡 ${qData.hint}`;
+        elHint.classList.remove('hidden');
+      }
+
+      const elGrid = document.getElementById('quiz-options-grid');
+      elGrid.innerHTML = '';
+      qData.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "bg-purple-100 hover:bg-purple-200 active:bg-purple-300 text-purple-950 font-black py-3 px-2 rounded-xl text-center border-2 border-purple-200 transition-all transform active:scale-95 text-sm shadow-sm";
+        btn.innerText = opt;
+        btn.onclick = () => processQuizSelection(opt);
+        elGrid.appendChild(btn);
+      });
+
+      elModal.classList.remove('hidden');
+    }
+
+    function processQuizSelection(selectedOption) {
+      const qData = QUESTIONS[currentQuestionIdx];
+      const elModal = document.getElementById('modal-quiz');
+
+      if (selectedOption === qData.answer) {
+        elModal.classList.add('hidden');
+        playAudio('correct');
+        document.getElementById('game-status-text').innerText = "✨ Correct context! Rolling your dice...";
+        currentQuestionIdx++;
+        executeDiceRollSequence('PLAYER');
+      } else {
+        playAudio('wrong');
+        triggerVisualSandboxShake();
+        
+        if (questionAttemptCount === 1) {
+          questionAttemptCount = 2;
+          displayQuizModal(); 
+        } else {
+          elModal.classList.add('hidden');
+          document.getElementById('game-status-text').innerText = `❌ Skipped! The ideal modal was "${qData.answer}". Computer's turn!`;
+          currentQuestionIdx++;
+          updateHUD();
+          
+          setTimeout(() => {
+            executeCpuTurn();
+          }, 2000);
+        }
+      }
+    }
+
+    function executeCpuTurn() {
+      activeTurn = 'CPU';
+      document.getElementById('game-status-text').innerText = "🤖 Computer is rolling...";
+      executeDiceRollSequence('CPU');
+    }
+
+    function executeDiceRollSequence(actor) {
+      isDiceRolling = true;
+      let iterations = 0;
+      const elDice = document.getElementById('dice-container');
+      
+      const rollInterval = setInterval(() => {
+        const mockRoll = Math.floor(Math.random() * 6) + 1;
+        elDice.innerText = diceFaces[mockRoll];
+        elDice.style.transform = `scale(1.1) rotate(${Math.random() * 30 - 15}deg)`;
+        iterations++;
+
+        if (iterations > 8) {
+          clearInterval(rollInterval);
+          elDice.style.transform = 'none';
+          
+          const realRoll = Math.floor(Math.random() * 6) + 1;
+          elDice.innerText = diceFaces[realRoll];
+          executeMoveLogic(actor, realRoll);
+        }
+      }, 70);
+    }
+
+    function executeMoveLogic(actor, rollValue) {
+      isDiceRolling = false;
+      isMoving = true;
+      
+      let curPos = (actor === 'PLAYER') ? playerPos : cpuPos;
+      let targetPos = curPos + rollValue;
+      
+      document.getElementById('game-status-text').innerText = `${actor === 'PLAYER' ? 'You' : 'Computer'} rolled a ${rollValue}!`;
+
+      if (targetPos > 100) {
+        targetPos = curPos; 
+        document.getElementById('game-status-text').innerText = `${actor === 'PLAYER' ? 'You' : 'Computer'} needs an exact roll to reach 100!`;
+        finalizeTurnSequence(actor);
+        return;
+      }
+
+      const stepInterval = setInterval(() => {
+        if (actor === 'PLAYER') {
+          if (displayPlayerPos < targetPos) {
+            displayPlayerPos++;
+          } else {
+            clearInterval(stepInterval);
+            playerPos = targetPos;
+            evaluateSpecialBoxes(actor);
+          }
+        } else {
+          if (displayCpuPos < targetPos) {
+            displayCpuPos++;
+          } else {
+            clearInterval(stepInterval);
+            cpuPos = targetPos;
+            evaluateSpecialBoxes(actor);
+          }
+        }
+        updateHUD();
+      }, 200);
+    }
+
+    function evaluateSpecialBoxes(actor) {
+      let curPos = (actor === 'PLAYER') ? playerPos : cpuPos;
+      
+      if (LADDERS[curPos]) {
+        setTimeout(() => {
+          playAudio('correct');
+          if (actor === 'PLAYER') {
+            playerPos = LADDERS[curPos];
+            displayPlayerPos = playerPos;
+          } else {
+            cpuPos = LADDERS[curPos];
+            displayCpuPos = cpuPos;
+          }
+          document.getElementById('game-status-text').innerText = `🪜 YAY! ${actor === 'PLAYER' ? 'You' : 'Computer'} climbed a ladder!`;
+          updateHUD();
+          finalizeTurnSequence(actor);
+        }, 300);
+      } 
+      else if (SNAKES[curPos]) {
+        setTimeout(() => {
+          playAudio('wrong');
+          triggerVisualSandboxShake();
+          if (actor === 'PLAYER') {
+            playerPos = SNAKES[curPos];
+            displayPlayerPos = playerPos;
+          } else {
+            cpuPos = SNAKES[curPos];
+            displayCpuPos = cpuPos;
+          }
+          document.getElementById('game-status-text').innerText = `🐍 Whoops! ${actor === 'PLAYER' ? 'You' : 'Computer'} slid down a snake!`;
+          updateHUD();
+          finalizeTurnSequence(actor);
+        }, 300);
+      } else {
+        finalizeTurnSequence(actor);
+      }
+    }
+
+    function finalizeTurnSequence(actor) {
+      isMoving = false;
+      updateHUD();
+      
+      if (playerPos === 100 || cpuPos === 100) {
+        checkWinState(false);
+        return;
+      }
+
+      if (currentQuestionIdx >= QUESTIONS.length && actor === 'CPU') {
+        checkWinState(true);
+        return;
+      }
+
+      if (actor === 'PLAYER') {
+        setTimeout(() => { executeCpuTurn(); }, 1200);
+      } else {
+        activeTurn = 'PLAYER';
+        document.getElementById('game-status-text').innerText = "Your Turn! Click Roll Dice.";
+      }
+    }
+
+    function checkWinState(forceAllQuestionsSpent = false) {
+      let isGameOver = false;
+      let title = "", desc = "", emoji = "🏆", soundToPlay = "";
+
+      if (playerPos === 100) {
+        isGameOver = true;
+        title = "You Won Champion!";
+        desc = "Fantastic job! You managed to solve the modal verb context puzzle and beat the computer!";
+        soundToPlay = "claps";
+      } else if (cpuPos === 100) {
+        isGameOver = true;
+        title = "Computer Won!";
+        desc = "The computer hit box 100 first. Let's study our context clues and try again!";
+        emoji = "🤖";
+      } else if (forceAllQuestionsSpent || currentQuestionIdx >= QUESTIONS.length) {
+        isGameOver = true;
+        if (playerPos > cpuPos) {
+          title = "You Won on Points!";
+          desc = `All 20 questions spent! You finished on box ${playerPos}, ahead of the computer at box ${cpuPos}.`;
+          soundToPlay = "claps";
+        } else if (cpuPos > playerPos) {
+          title = "Computer Wins on Points!";
+          desc = `All 20 questions spent! The computer finished on box ${cpuPos}, ahead of you at box ${playerPos}.`;
+          emoji = "🤖";
+        } else {
+          title = "It's a Tie Match!";
+          desc = `Incredible! Both you and the computer finished exactly on box ${playerPos} after 20 questions!`;
+          emoji = "🤝";
+        }
+      }
+
+      if (isGameOver) {
+        document.getElementById('game-status-text').innerText = "Game Over!";
+        if (soundToPlay === "claps") {
+          playAudio('claps');
+        }
+        setTimeout(() => {
+          document.getElementById('screen-game').classList.add('hidden');
+          document.getElementById('screen-summary').classList.remove('hidden');
+          document.getElementById('txt-summary-title').innerText = title;
+          document.getElementById('txt-summary-desc').innerText = desc;
+          document.getElementById('txt-summary-emoji').innerText = emoji;
+        }, 1500);
+      }
+    }
+
+    function triggerVisualSandboxShake() {
+      const el = document.getElementById('game-sandbox-container');
+      el.classList.add('shake-anim');
+      setTimeout(() => el.classList.remove('shake-anim'), 400);
+    }
+
+    function getGridXYCoordinates(pos) {
+      let zeroIdx = pos - 1;
+      let row = Math.floor(zeroIdx / 10);
+      let col = zeroIdx % 10;
+      if (row % 2 === 1) col = 9 - col;
+      
+      let tileSize = BOARD_SIZE / 10;
+      let x = col * tileSize + tileSize / 2;
+      let y = BOARD_SIZE - (row * tileSize + tileSize / 2);
+      return { x, y };
+    }
+
+    function renderGraphicsLoop() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
+      let tileSize = BOARD_SIZE / 10;
+
+      // 1. Draw 100-Square Checkerboard Background
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 10; c++) {
+          let squareNum = (r % 2 === 0) ? (r * 10) + c + 1 : (r * 10) + (9 - c) + 1;
+          ctx.fillStyle = pastelColors[(r + c) % pastelColors.length];
+          ctx.fillRect(c * tileSize, BOARD_SIZE - (r + 1) * tileSize, tileSize, tileSize);
+          ctx.strokeStyle = '#f1f5f9';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(c * tileSize, BOARD_SIZE - (r + 1) * tileSize, tileSize, tileSize);
+
+          ctx.fillStyle = '#64748b';
+          ctx.font = 'bold 15px system-ui';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(squareNum, c * tileSize + tileSize/2, BOARD_SIZE - (r + 1) * tileSize + tileSize/2);
+        }
+      }
+
+      // 2. Render Connector Paths: LADDERS
+      Object.entries(LADDERS).forEach(([start, end]) => {
+        let pStart = getGridXYCoordinates(parseInt(start));
+        let pEnd = getGridXYCoordinates(parseInt(end));
+        let dx = pEnd.x - pStart.x;
+        let dy = pEnd.y - pStart.y;
+        let angle = Math.atan2(dy, dx);
+        let offset = 14; 
+
+        ctx.save();
+        ctx.strokeStyle = '#b45309'; 
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(pStart.x - offset * Math.sin(angle), pStart.y + offset * Math.cos(angle));
+        ctx.lineTo(pEnd.x - offset * Math.sin(angle), pEnd.y + offset * Math.cos(angle));
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(pStart.x + offset * Math.sin(angle), pStart.y - offset * Math.cos(angle));
+        ctx.lineTo(pEnd.x + offset * Math.sin(angle), pEnd.y - offset * Math.cos(angle));
+        ctx.stroke();
+
+        ctx.strokeStyle = '#fbbf24'; 
+        ctx.lineWidth = 4;
+        let steps = 5;
+        for (let i = 1; i < steps; i++) {
+          let t = i / steps;
+          let lx = pStart.x + dx * t;
+          let ly = pStart.y + dy * t;
+          ctx.beginPath();
+          ctx.moveTo(lx - offset * Math.sin(angle), ly + offset * Math.cos(angle));
+          ctx.lineTo(lx + offset * Math.sin(angle), ly - offset * Math.cos(angle));
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
+
+      // 3. Render SNAKES
+      Object.entries(SNAKES).forEach(([start, end]) => {
+        let pStart = getGridXYCoordinates(parseInt(start));
+        let pEnd = getGridXYCoordinates(parseInt(end));
+
+        ctx.save();
+        ctx.strokeStyle = '#c084fc'; 
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(pStart.x, pStart.y);
+        let midX1 = pStart.x + (pEnd.x - pStart.x) * 0.3 + 35;
+        let midY1 = pStart.y + (pEnd.y - pStart.y) * 0.3;
+        let midX2 = pStart.x + (pEnd.x - pStart.x) * 0.7 - 35;
+        let midY2 = pStart.y + (pEnd.y - pStart.y) * 0.7;
+
+        ctx.bezierCurveTo(midX1, midY1, midX2, midY2, pEnd.x, pEnd.y);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#f472b6';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.fillStyle = '#c084fc';
+        ctx.beginPath();
+        ctx.arc(pStart.x, pStart.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(pStart.x - 3, pStart.y - 2, 3, 0, Math.PI * 2);
+        ctx.arc(pStart.x + 3, pStart.y - 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(pStart.x, pStart.y - 8);
+        ctx.lineTo(pStart.x, pStart.y - 14);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // 4. Render Tokens
+      let pCoords = getGridXYCoordinates(displayPlayerPos);
+      let cCoords = getGridXYCoordinates(displayCpuPos);
+      let sameBoxOffset = (displayPlayerPos === displayCpuPos) ? 8 : 0;
+
+      // Player Token (Coral Red)
+      ctx.save();
+      ctx.fillStyle = '#fb7185';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = 'rgba(0,0,0,0.1)';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(pCoords.x - sameBoxOffset, pCoords.y, tileSize / 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText("👑", pCoords.x - sameBoxOffset, pCoords.y);
+      ctx.restore();
+
+      // Computer Token (Sky Blue)
+      ctx.save();
+      ctx.fillStyle = '#38bdf8';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = 'rgba(0,0,0,0.1)';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(cCoords.x + sameBoxOffset, cCoords.y, tileSize / 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText("🤖", cCoords.x + sameBoxOffset, cCoords.y);
+      ctx.restore();
+
+      requestAnimationFrame(renderGraphicsLoop);
+    }
+
+    function playAudio(type) {
+      try {
+        let nodeId = 'audio-correct';
+        if (type === 'wrong') nodeId = 'audio-wrong';
+        if (type === 'claps') nodeId = 'audio-claps';
+
+        const node = document.getElementById(nodeId);
+        if (node && node.readyState >= 2 && typeof node.play === 'function') {
+          node.currentTime = 0;
+          node.play().catch(() => playBeepFallback(type));
+        } else {
+          playBeepFallback(type);
+        }
+      } catch (err) {
+        playBeepFallback(type);
+      }
+    }
+
+    function playBeepFallback(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const audioCtx = new AudioContext();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        if (type === 'correct') {
+          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+          osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); 
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === 'claps') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+          osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.15);
+          osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.3);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+          osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+        } else {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(220, audioCtx.currentTime); 
+          osc.frequency.setValueAtTime(146.83, audioCtx.currentTime + 0.15); 
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+          osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+        }
+      } catch (e) {}
+    }
+  </script>
+</body>
+</html>
