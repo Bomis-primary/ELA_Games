@@ -1,1 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Balloon Pop Tags - Grade 4 Question Tags</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    body {
+        font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        background: linear-gradient(135deg, #FFD97D 0%, #FF8B7B 55%, #FF6B6B 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+    }
+
+    /* Splash */
+    .splash-screen {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: white;
+        display: flex; justify-content: center; align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+    }
+    .splash-screen.hidden { opacity: 0; pointer-events: none; }
+    .splash-screen img {
+        max-width: 500px; width: 90%; height: auto;
+        animation: logoFloat 2s ease-in-out infinite;
+    }
+    @keyframes logoFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .container {
+        max-width: 800px; width: 100%;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        overflow: hidden;
+        opacity: 0;
+        transition: opacity 0.5s ease-in;
+    }
+    .container.visible { opacity: 1; }
+
+    .header {
+        background: linear-gradient(135deg, #0B3D3F 0%, #145C5E 100%);
+        color: #FFF3D6;
+        padding: 20px;
+        text-align: center;
+        border-bottom: 5px solid #F4B400;
+    }
+    .header h1 { font-size: 28px; margin-bottom: 6px; }
+    .header p { font-size: 14px; opacity: 0.95; }
+
+    /* Instructions screen */
+    .screen { padding: 24px; display: none; }
+    .screen.active { display: block; }
+
+    .instructions-list {
+        text-align: left;
+        max-width: 520px;
+        margin: 0 auto 20px auto;
+        background: #FFF3D6;
+        border-left: 4px solid #F4B400;
+        border-radius: 10px;
+        padding: 16px 20px;
+    }
+    .instructions-list li { margin: 8px 0; font-size: 15px; line-height: 1.4; }
+
+    .center { text-align: center; }
+
+    .btn-primary {
+        display: inline-block;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #FF6B6B 0%, #F4B400 100%);
+        color: #0B3D3F;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(11,61,63,0.35);
+        font-family: inherit;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(11,61,63,0.45); }
+
+    /* Scoreboard */
+    .score-board {
+        display: flex;
+        justify-content: space-around;
+        padding: 12px;
+        background: rgba(11,61,63,0.08);
+        border-radius: 10px;
+        margin-bottom: 14px;
+    }
+    .score-item { text-align: center; }
+    .score-item div:first-child { font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+    .score-item span { display: block; font-size: 22px; font-weight: bold; color: #0B3D3F; margin-top: 3px; }
+
+    /* Timer */
+    .timer-wrap { margin-bottom: 12px; }
+    .timer-label { font-size: 12px; color: #555; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .timer-bar-bg {
+        width: 100%; height: 12px; border-radius: 6px;
+        background: #e0e0e0; overflow: hidden;
+    }
+    .timer-bar-fill {
+        height: 100%; border-radius: 6px;
+        background: linear-gradient(90deg, #4CAF50, #ffd700, #f44336);
+        transition: width 1s linear;
+    }
+
+    /* Sentence banner */
+    .sentence-banner {
+        background: linear-gradient(135deg, #FFF3D6 0%, #FFE2B0 100%);
+        border: 2px solid #F4B400;
+        border-radius: 16px;
+        padding: 18px 20px;
+        font-size: 17px;
+        line-height: 1.5;
+        color: #0B3D3F;
+        text-align: center;
+        margin-bottom: 6px;
+        min-height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .blank-mark { font-weight: bold; color: #FF6B6B; }
+
+    .attempts-row {
+        text-align: center;
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 10px;
+    }
+    .heart { font-size: 16px; }
+
+    /* Balloon field */
+    .sky {
+        position: relative;
+        width: 100%;
+        height: 380px;
+        background: linear-gradient(180deg, #8FDDE0 0%, #DFF6F1 100%);
+        border: 3px solid #0B3D3F;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+    .cloud {
+        position: absolute;
+        background: rgba(255,255,255,0.8);
+        border-radius: 50%;
+    }
+
+    .balloon {
+        position: absolute;
+        bottom: -140px;
+        width: 100px;
+        cursor: pointer;
+        text-align: center;
+        animation-name: rise;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+    @keyframes rise {
+        0%   { transform: translateY(0) translateX(0); }
+        25%  { transform: translateY(-140px) translateX(12px); }
+        50%  { transform: translateY(-280px) translateX(-10px); }
+        75%  { transform: translateY(-420px) translateX(10px); }
+        100% { transform: translateY(-560px) translateX(0); }
+    }
+    .balloon-body {
+        width: 90px;
+        height: 108px;
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12.5px;
+        padding: 6px;
+        line-height: 1.25;
+        box-shadow: inset -8px -8px 16px rgba(0,0,0,0.15), 0 6px 10px rgba(0,0,0,0.25);
+        position: relative;
+    }
+    .balloon-body::after {
+        content: '';
+        position: absolute;
+        bottom: -8px; left: 50%;
+        transform: translateX(-50%);
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 8px solid inherit;
+    }
+    .balloon-string {
+        width: 2px;
+        height: 40px;
+        background: #999;
+        margin: 0 auto;
+    }
+    .balloon.c1 .balloon-body { background: #FF6B6B; border-top-color: #FF6B6B; }
+    .balloon.c2 .balloon-body { background: #F4B400; border-top-color: #F4B400; color: #0B3D3F; }
+    .balloon.c3 .balloon-body { background: #0B3D3F; border-top-color: #0B3D3F; }
+    .balloon.c4 .balloon-body { background: #8E44AD; border-top-color: #8E44AD; }
+
+    .balloon.popped { animation: none !important; pointer-events: none; }
+    .balloon.pop-correct .balloon-body { animation: popBurst 0.45s ease-out forwards; }
+    .balloon.pop-wrong .balloon-body { animation: popFizzle 0.5s ease-out forwards; }
+    @keyframes popBurst {
+        0% { transform: scale(1); opacity: 1; }
+        60% { transform: scale(1.4); opacity: 0.8; }
+        100% { transform: scale(0.1); opacity: 0; }
+    }
+    @keyframes popFizzle {
+        0% { transform: scale(1) rotate(0deg); opacity: 1; }
+        50% { transform: scale(0.8) rotate(-8deg); opacity: 0.7; }
+        100% { transform: scale(0.3) rotate(10deg); opacity: 0; }
+    }
+
+    .balloon.reveal-correct .balloon-body {
+        box-shadow: 0 0 0 4px #4CAF50, 0 6px 14px rgba(0,0,0,0.3);
+        animation: correctPulse 0.6s ease-in-out infinite;
+    }
+    @keyframes correctPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+
+    /* Feedback */
+    .feedback {
+        margin-top: 10px;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: bold;
+        text-align: center;
+        display: none;
+        font-size: 14px;
+    }
+    .feedback.correct { background: #D6F5E3; color: #146C43; display: block; }
+    .feedback.wrong { background: #FFE9C7; color: #A65B00; display: block; }
+    .feedback.reveal { background: #FFD6D6; color: #B3261E; display: block; }
+
+    .volume-control { text-align: center; margin-top: 14px; font-size: 13px; color: #555; }
+    .volume-control input { width: 180px; vertical-align: middle; }
+
+    .celebration {
+        position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 100px;
+        animation: celebrationAnim 1s ease-out;
+        pointer-events: none;
+        z-index: 2000;
+    }
+    @keyframes celebrationAnim {
+        0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(-50%, -50%) scale(2) rotate(360deg); opacity: 0; }
+    }
+
+    /* End screen */
+    .final-badge { font-size: 60px; margin: 10px 0; text-align: center; }
+    .final-score { font-size: 22px; text-align: center; margin: 10px 0; font-weight: bold; color: #0B3D3F; }
+    .final-text { font-size: 16px; text-align: center; color: #444; margin-bottom: 18px; }
+
+    @media (max-width: 600px) {
+        .header h1 { font-size: 22px; }
+        .sky { height: 320px; }
+        .sentence-banner { font-size: 15px; }
+        .balloon { width: 80px; }
+        .balloon-body { width: 74px; height: 90px; font-size: 11px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="splash-screen" id="splashScreen">
+    <img src="assets/logo.png" alt="Logo" id="splashLogo" onerror="document.getElementById('splashLogo').style.display='none'; document.getElementById('splashFallback').style.display='block';">
+    <div id="splashFallback" style="display:none; font-size:60px; text-align:center; color:#0B3D3F;">🎈<br><span style="font-size:22px; font-family:'Comic Sans MS',Arial,sans-serif;">Balloon Pop Tags</span></div>
+</div>
+
+<div class="container" id="mainContainer">
+    <div class="header">
+        <h1>🎈 Balloon Pop Tags 🎈</h1>
+        <p>Grade 4 · English · Question Tags</p>
+    </div>
+
+    <!-- Instructions Screen -->
+    <div class="screen active" id="instructionsScreen">
+        <ul class="instructions-list">
+            <li>📖 Read the long sentence at the top of the screen carefully.</li>
+            <li>🎈 Four balloons will float up, each carrying a different question tag.</li>
+            <li>👆 Tap the balloon with the <strong>correct</strong> question tag to pop it.</li>
+            <li>❤️ You have <strong>2 attempts</strong> for each sentence.</li>
+            <li>⏱️ You have <strong>45 seconds</strong> per sentence — pop the right one before time runs out!</li>
+            <li>🚫 If both attempts are wrong, the correct answer will be shown before moving on.</li>
+            <li>🏆 There are 15 sentences in total. Good luck!</li>
+        </ul>
+        <div class="center">
+            <button class="btn-primary" id="startBtn">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="screen" id="gameScreen">
+        <div class="score-board">
+            <div class="score-item">
+                <div>Level</div>
+                <span id="levelCounter">1/15</span>
+            </div>
+            <div class="score-item">
+                <div>Score</div>
+                <span id="scoreCounter">0</span>
+            </div>
+            <div class="score-item">
+                <div>Attempts Left</div>
+                <span id="attemptsCounter">❤️❤️</span>
+            </div>
+        </div>
+
+        <div class="timer-wrap">
+            <div class="timer-label"><span>Time Left</span><span id="timeLeftText">45s</span></div>
+            <div class="timer-bar-bg"><div class="timer-bar-fill" id="timerBarFill" style="width:100%"></div></div>
+        </div>
+
+        <div class="sentence-banner" id="sentenceBanner"></div>
+
+        <div class="attempts-row" id="attemptsRow"></div>
+
+        <div class="sky" id="sky"></div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="volume-control">
+            <label>🔊 Volume: <span id="volumeLabel">80%</span></label><br>
+            <input type="range" id="volumeSlider" min="0" max="100" value="80">
+        </div>
+    </div>
+
+    <!-- End Screen -->
+    <div class="screen" id="endScreen">
+        <div class="final-badge" id="finalBadge"></div>
+        <div class="center" style="font-size:20px; font-weight:bold; color:#FF6B6B;" id="finalRank"></div>
+        <div class="final-score" id="finalScoreText"></div>
+        <div class="final-text" id="finalMessage"></div>
+        <div class="center">
+            <button class="btn-primary" id="playAgainBtn">🔄 Play Again</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- Splash ----------
+    setTimeout(() => {
+        document.getElementById('splashScreen').classList.add('hidden');
+        document.getElementById('mainContainer').classList.add('visible');
+    }, 5000);
+
+    // ---------- Audio ----------
+    const correctSound = new Audio('assets/correct.mp3');
+    const wrongSound = new Audio('assets/wrong.mp3');
+    const celebrationSound = new Audio('assets/freesound_community-claps-44774.mp3');
+    let volume = 0.8;
+    correctSound.volume = volume;
+    wrongSound.volume = volume;
+    celebrationSound.volume = volume;
+
+    function playCorrectSound(){ correctSound.currentTime = 0; correctSound.play().catch(()=>{}); }
+    function playWrongSound(){ wrongSound.currentTime = 0; wrongSound.play().catch(()=>{}); }
+    function playCelebrationSound(){ celebrationSound.currentTime = 0; celebrationSound.play().catch(()=>{}); }
+
+    document.getElementById('volumeSlider').addEventListener('input', function(e){
+        volume = e.target.value / 100;
+        correctSound.volume = volume;
+        wrongSound.volume = volume;
+        celebrationSound.volume = volume;
+        document.getElementById('volumeLabel').textContent = e.target.value + '%';
+    });
+
+    // ---------- Level data ----------
+    const levels = [
+        { sentence: "There are more than ten students waiting outside the classroom for the teacher, ___?", correct: "aren't there?", wrong: ["isn't there?", "wasn't there?", "doesn't it?"] },
+        { sentence: "Raj and Simran are going to the school fair this evening after their classes finish, ___?", correct: "aren't they?", wrong: ["isn't he?", "don't they?", "weren't they?"] },
+        { sentence: "She never finishes her homework on time, even when her mother reminds her every day, ___?", correct: "does she?", wrong: ["doesn't she?", "isn't she?", "didn't she?"] },
+        { sentence: "Nobody in the entire class was able to solve that difficult maths problem yesterday, ___?", correct: "was he?", wrong: ["were they?", "wasn't he?", "didn't he?"] },
+        { sentence: "Everyone in the fourth grade has already finished writing their science project, ___?", correct: "haven't they?", wrong: ["hasn't he?", "don't they?", "isn't it?"] },
+        { sentence: "Someone from the other section left their water bottle near the playground gate, ___?", correct: "didn't they?", wrong: ["doesn't he?", "wasn't it?", "hasn't she?"] },
+        { sentence: "He used to live in a small town near Delhi before his family moved here two years ago, ___?", correct: "didn't he?", wrong: ["doesn't he?", "wasn't he?", "hasn't he?"] },
+        { sentence: "We must finish decorating the classroom before the principal comes to inspect it, ___?", correct: "mustn't we?", wrong: ["shouldn't we?", "don't we?", "can't we?"] },
+        { sentence: "It might rain very heavily this afternoon, so we should carry our umbrellas to school, ___?", correct: "mightn't it?", wrong: ["isn't it?", "doesn't it?", "can't it?"] },
+        { sentence: "He hardly ever speaks in class, even when the teacher asks him a direct question, ___?", correct: "does he?", wrong: ["doesn't he?", "isn't he?", "didn't he?"] },
+        { sentence: "There are very few chances left for the students to submit their late assignments, ___?", correct: "are there?", wrong: ["aren't there?", "isn't there?", "weren't there?"] },
+        { sentence: "I think she is coming to the birthday party tomorrow with her elder brother, ___?", correct: "isn't she?", wrong: ["don't I?", "isn't he?", "doesn't she?"] },
+        { sentence: "That yellow umbrella lying near the school gate wasn't your umbrella, ___?", correct: "was it?", wrong: ["wasn't it?", "isn't it?", "didn't it?"] },
+        { sentence: "Neither Aman nor his two friends were late for the morning assembly today, ___?", correct: "were they?", wrong: ["weren't they?", "wasn't he?", "didn't they?"] },
+        { sentence: "Let's not waste any more of our time arguing about such a small and silly problem, ___?", correct: "shall we?", wrong: ["won't we?", "don't we?", "can't we?"] }
+    ];
+
+    const TOTAL_LEVELS = levels.length;
+    const TIME_PER_LEVEL = 45;
+    const MAX_ATTEMPTS = 2;
+
+    let currentLevel = 0;
+    let score = 0;
+    let attemptsUsed = 0;
+    let timeLeft = TIME_PER_LEVEL;
+    let timerInterval = null;
+    let levelLocked = false;
+
+    const sky = document.getElementById('sky');
+    const sentenceBanner = document.getElementById('sentenceBanner');
+    const attemptsRow = document.getElementById('attemptsRow');
+    const feedback = document.getElementById('feedback');
+    const levelCounter = document.getElementById('levelCounter');
+    const scoreCounter = document.getElementById('scoreCounter');
+    const attemptsCounter = document.getElementById('attemptsCounter');
+    const timeLeftText = document.getElementById('timeLeftText');
+    const timerBarFill = document.getElementById('timerBarFill');
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+        document.getElementById('instructionsScreen').classList.remove('active');
+        document.getElementById('gameScreen').classList.add('active');
+        currentLevel = 0;
+        score = 0;
+        loadLevel();
+    });
+
+    document.getElementById('playAgainBtn').addEventListener('click', () => {
+        document.getElementById('endScreen').classList.remove('active');
+        document.getElementById('gameScreen').classList.add('active');
+        currentLevel = 0;
+        score = 0;
+        loadLevel();
+    });
+
+    function shuffle(arr){
+        const a = arr.slice();
+        for(let i = a.length - 1; i > 0; i--){
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function loadLevel(){
+        levelLocked = false;
+        attemptsUsed = 0;
+        timeLeft = TIME_PER_LEVEL;
+        feedback.style.display = 'none';
+        feedback.className = 'feedback';
+        sky.innerHTML = '';
+
+        const level = levels[currentLevel];
+        sentenceBanner.innerHTML = level.sentence.replace('___', '<span class="blank-mark">___</span>');
+
+        updateAttemptsDisplay();
+        levelCounter.textContent = `${currentLevel + 1}/${TOTAL_LEVELS}`;
+        scoreCounter.textContent = score;
+
+        // Build shuffled options with colors also randomized
+        const options = shuffle([
+            { text: level.correct, isCorrect: true },
+            { text: level.wrong[0], isCorrect: false },
+            { text: level.wrong[1], isCorrect: false },
+            { text: level.wrong[2], isCorrect: false }
+        ]);
+        const colorClasses = shuffle(['c1', 'c2', 'c3', 'c4']);
+        const leftPositions = shuffle([6, 32, 58, 82]);
+        const durations = [9, 10.5, 8.5, 11];
+
+        options.forEach((opt, i) => {
+            const balloon = document.createElement('div');
+            balloon.className = `balloon ${colorClasses[i]}`;
+            balloon.style.left = leftPositions[i] + '%';
+            balloon.style.animationDuration = durations[i] + 's';
+            balloon.style.animationDelay = (-Math.random() * durations[i]) + 's';
+            balloon.dataset.correct = opt.isCorrect ? '1' : '0';
+            balloon.dataset.text = opt.text;
+            balloon.innerHTML = `<div class="balloon-body">${opt.text}</div><div class="balloon-string"></div>`;
+            balloon.addEventListener('click', () => handleBalloonClick(balloon));
+            sky.appendChild(balloon);
+        });
+
+        startTimer();
+    }
+
+    function updateAttemptsDisplay(){
+        const heartsLeft = MAX_ATTEMPTS - attemptsUsed;
+        attemptsCounter.textContent = '❤️'.repeat(Math.max(heartsLeft, 0)) || '—';
+    }
+
+    function startTimer(){
+        clearInterval(timerInterval);
+        timeLeftText.textContent = timeLeft + 's';
+        timerBarFill.style.width = '100%';
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timeLeftText.textContent = Math.max(timeLeft, 0) + 's';
+            timerBarFill.style.width = Math.max((timeLeft / TIME_PER_LEVEL) * 100, 0) + '%';
+            if(timeLeft <= 0){
+                clearInterval(timerInterval);
+                if(!levelLocked){
+                    revealAndAdvance(false);
+                }
+            }
+        }, 1000);
+    }
+
+    function handleBalloonClick(balloon){
+        if(levelLocked || balloon.classList.contains('popped')) return;
+
+        const isCorrect = balloon.dataset.correct === '1';
+
+        if(isCorrect){
+            levelLocked = true;
+            clearInterval(timerInterval);
+            balloon.classList.add('popped', 'pop-correct');
+            playCorrectSound();
+            showCelebration();
+            score++;
+            scoreCounter.textContent = score;
+            feedback.className = 'feedback correct';
+            feedback.textContent = '🎉 Excellent! That\'s the correct question tag!';
+            feedback.style.display = 'block';
+            setTimeout(goToNextLevel, 1800);
+        } else {
+            balloon.classList.add('popped', 'pop-wrong');
+            playWrongSound();
+            attemptsUsed++;
+            updateAttemptsDisplay();
+
+            if(attemptsUsed >= MAX_ATTEMPTS){
+                clearInterval(timerInterval);
+                revealAndAdvance(true);
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.textContent = '❌ Not quite. Check the verb and pronoun carefully — one more try!';
+                feedback.style.display = 'block';
+            }
+        }
+    }
+
+    function revealAndAdvance(alreadyPopped){
+        levelLocked = true;
+        const balloons = sky.querySelectorAll('.balloon');
+        balloons.forEach(b => {
+            if(b.dataset.correct === '1'){
+                b.classList.add('reveal-correct');
+            }
+        });
+        feedback.className = 'feedback reveal';
+        const level = levels[currentLevel];
+        feedback.textContent = `⏳ The correct tag was: "${level.correct}"`;
+        feedback.style.display = 'block';
+        setTimeout(goToNextLevel, 2200);
+    }
+
+    function goToNextLevel(){
+        if(currentLevel < TOTAL_LEVELS - 1){
+            currentLevel++;
+            loadLevel();
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function showCelebration(){
+        const el = document.createElement('div');
+        el.className = 'celebration';
+        el.textContent = '⭐';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    function showEndScreen(){
+        clearInterval(timerInterval);
+        document.getElementById('gameScreen').classList.remove('active');
+        document.getElementById('endScreen').classList.add('active');
+
+        const percent = Math.round((score / TOTAL_LEVELS) * 100);
+        let badge, rank, message;
+
+        if(percent >= 80){
+            badge = '🏆'; rank = 'Tag Master!';
+            message = 'Outstanding! You have a brilliant understanding of question tags!';
+            playCelebrationSound();
+        } else if(percent >= 60){
+            badge = '🌟'; rank = 'Great Tagger!';
+            message = 'Great job! You understand question tags well. A little more practice and you will master them!';
+        } else if(percent >= 40){
+            badge = '👍'; rank = 'Growing Tagger';
+            message = 'Good effort! Review the tricky tag rules and try again to improve your score.';
+        } else {
+            badge = '💪'; rank = 'Keep Practicing';
+            message = 'This is just the beginning. Review the question tag rules with your teacher and try again!';
+        }
+
+        document.getElementById('finalBadge').textContent = badge;
+        document.getElementById('finalRank').textContent = rank;
+        document.getElementById('finalScoreText').textContent = `Your Score: ${score}/${TOTAL_LEVELS} (${percent}%)`;
+        document.getElementById('finalMessage').textContent = message;
+    }
+</script>
+</body>
+</html>
