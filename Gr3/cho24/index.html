@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Silent Word Smasher: Grade 3 Silent Letters</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Friendly Google Fonts for Kids -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Lexend', sans-serif;
+      background-color: #1e1b4b;
+    }
+    .game-title-font {
+      font-family: 'Fredoka', sans-serif;
+    }
+    /* Playful soft bounce animation */
+    @keyframes simpleBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .kids-bounce {
+      animation: simpleBounce 3s ease-in-out infinite;
+    }
+    /* Cute rounded button shadow */
+    .bubble-shadow {
+      box-shadow: 0 6px 0 0 rgba(0, 0, 0, 0.25);
+    }
+    .bubble-shadow:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.25);
+    }
+    /* Dynamic progress loader animation */
+    @keyframes loadProgress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    .animate-progress {
+      animation: loadProgress 5s linear forwards;
+    }
+    /* CRT Scanlines overlay */
+    .crt-scanlines {
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.2) 50%
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="text-white min-h-screen flex flex-col justify-between overflow-x-hidden select-none relative">
+
+  <!-- SCREEN 0: 5-SECOND FULL-SCREEN BLANK LOADING SCREEN (Completely covers everything) -->
+  <div id="screen-splash" class="fixed inset-0 w-screen h-screen bg-black flex flex-col items-center justify-center gap-8 z-[9999] transition-opacity duration-300">
+    <div class="flex flex-col items-center gap-6 text-center">
+      <!-- Centered plain logo container -->
+      <div id="splash-logo-container" class="w-48 h-48 flex items-center justify-center overflow-hidden p-2">
+        <img id="splash-logo" src="https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/cho24/assets/innovine-logo.png" alt="Innovine Logo" class="w-full h-full object-contain" onerror="handleLogoFallback()">
+      </div>
+    </div>
+
+    <!-- Clean minimalist loading bar (No game elements) -->
+    <div class="w-full max-w-xs bg-zinc-900 rounded-full h-1.5 overflow-hidden relative">
+      <div class="bg-yellow-400 h-full animate-progress rounded-full"></div>
+    </div>
+    
+    <!-- Subtle skip button -->
+    <button onclick="endSplashScreen()" class="px-4 py-1 bg-zinc-900 hover:bg-zinc-800 rounded text-[10px] text-zinc-500 tracking-wider uppercase transition">
+      Skip [Space]
+    </button>
+  </div>
+
+  <!-- TOP HEADER (Hidden initially during splash screen) -->
+  <header class="w-full bg-indigo-950/90 border-b-4 border-yellow-400 p-4 sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="text-center sm:text-left">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-yellow-300 game-title-font tracking-wide drop-shadow-md">
+          SILENT WORD SMASHER
+        </h1>
+        <p class="text-xs text-pink-300 font-bold uppercase tracking-wider">Master Silent Letters: L, H, T, G</p>
+      </div>
+      
+      <!-- NAV NAVIGATION CONTROLS -->
+      <nav id="nav-controls" class="flex items-center gap-3 invisible">
+        <button onclick="switchScreen('menu')" class="px-4 py-2 bg-pink-500 hover:bg-pink-400 text-white rounded-xl text-xs font-bold uppercase tracking-wider border-b-4 border-pink-700 active:translate-y-0.5 transition">
+          🎮 Main Menu
+        </button>
+        <button onclick="switchScreen('study')" class="px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-indigo-950 rounded-xl text-xs font-bold uppercase tracking-wider border-b-4 border-yellow-600 active:translate-y-0.5 transition">
+          💡 Simple Lesson
+        </button>
+        <button onclick="toggleMute()" id="mute-btn" class="p-2 bg-indigo-800 hover:bg-indigo-700 rounded-xl border-b-4 border-indigo-950 text-sm transition">
+          🔊
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN PLAY AREA -->
+  <main class="flex-grow flex items-center justify-center p-4">
+
+    <!-- SCREEN 1: SIMPLIFIED RETRO MAIN MENU -->
+    <div id="screen-menu" class="w-full max-w-2xl bg-indigo-900/90 border-4 border-yellow-400 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col gap-6 hidden text-center">
+      
+      <div class="kids-bounce">
+        <span class="px-3 py-1 bg-yellow-400 text-indigo-950 rounded-full text-xs font-bold uppercase tracking-wider">
+          Fun Grade 3 Spelling Game!
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-yellow-300 game-title-font mt-3 drop-shadow">
+          SILENT WORD SMASHER
+        </h2>
+        <p class="text-indigo-200 text-sm mt-2 max-w-md mx-auto">
+          Look at the sentence. Tap the correct word bubble to smash it with your toy launcher!
+        </p>
+      </div>
+
+      <!-- SELECT LEVELS -->
+      <div class="grid sm:grid-cols-2 gap-4 mt-2">
+        <!-- LEVEL 1 -->
+        <div class="bg-indigo-950/80 border-2 border-pink-400 rounded-2xl p-4 flex flex-col justify-between gap-3 text-center">
+          <div>
+            <span class="text-xs font-bold text-pink-300 uppercase tracking-widest">Level 1</span>
+            <h3 class="text-lg font-bold text-white game-title-font mt-1">Easy Smasher</h3>
+            <p class="text-xs text-indigo-200 mt-1">
+              Practicing silent letters <strong class="text-pink-300">L</strong> and <strong class="text-pink-300">H</strong>!
+            </p>
+          </div>
+          <button onclick="startGame(1)" class="w-full py-2.5 bg-pink-500 hover:bg-pink-400 text-white font-extrabold text-sm rounded-xl border-b-4 border-pink-700 active:translate-y-0.5 transition uppercase tracking-wider">
+            Play Level 1 🚀
+          </button>
+        </div>
+
+        <!-- LEVEL 2 -->
+        <div class="bg-indigo-950/80 border-2 border-yellow-400 rounded-2xl p-4 flex flex-col justify-between gap-3 text-center">
+          <div>
+            <span class="text-xs font-bold text-yellow-300 uppercase tracking-widest">Level 2</span>
+            <h3 class="text-lg font-bold text-white game-title-font mt-1">Super Smasher</h3>
+            <p class="text-xs text-indigo-200 mt-1">
+              Practicing silent letters <strong class="text-yellow-300">T</strong> and <strong class="text-yellow-300">G</strong>!
+            </p>
+          </div>
+          <button onclick="startGame(2)" class="w-full py-2.5 bg-yellow-400 hover:bg-yellow-300 text-indigo-950 font-extrabold text-sm rounded-xl border-b-4 border-yellow-600 active:translate-y-0.5 transition uppercase tracking-wider">
+            Play Level 2 🎯
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: LEARN ZONE / STUDY BOARD -->
+    <div id="screen-study" class="w-full max-w-2xl bg-indigo-950 border-4 border-yellow-400 p-6 rounded-3xl shadow-2xl flex flex-col gap-4 hidden">
+      <div class="text-center border-b border-indigo-800 pb-3">
+        <h2 class="text-2xl font-black text-yellow-300 game-title-font">Silent Letters Lesson</h2>
+        <p class="text-xs text-indigo-300 mt-1">Letters we write, but do not say out loud!</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <!-- Silent L -->
+        <div class="bg-indigo-900/50 p-3 rounded-xl border border-indigo-800">
+          <h3 class="text-pink-300 font-bold mb-1">🤫 Silent L</h3>
+          <p class="text-indigo-200 mb-1">Quiet after A, O, or U.</p>
+          <div class="bg-black/20 p-1.5 rounded text-[11px] text-white">
+            • wa<strong class="text-pink-300">l</strong>k (sounds like wok)<br>
+            • ha<strong class="text-pink-300">l</strong>f
+          </div>
+        </div>
+
+        <!-- Silent H -->
+        <div class="bg-indigo-900/50 p-3 rounded-xl border border-indigo-800">
+          <h3 class="text-pink-300 font-bold mb-1">🤫 Silent H</h3>
+          <p class="text-indigo-200 mb-1">Quiet at the start or after G/R.</p>
+          <div class="bg-black/20 p-1.5 rounded text-[11px] text-white">
+            • <strong class="text-pink-300">h</strong>our (sounds like our)<br>
+            • g<strong class="text-pink-300">h</strong>ost
+          </div>
+        </div>
+
+        <!-- Silent T -->
+        <div class="bg-indigo-900/50 p-3 rounded-xl border border-indigo-800">
+          <h3 class="text-yellow-300 font-bold mb-1">🤫 Silent T</h3>
+          <p class="text-indigo-200 mb-1">Quiet in -sten, -tle, -tch.</p>
+          <div class="bg-black/20 p-1.5 rounded text-[11px] text-white">
+            • lis<strong class="text-yellow-300">t</strong>en<br>
+            • cas<strong class="text-yellow-300">t</strong>le
+          </div>
+        </div>
+
+        <!-- Silent G -->
+        <div class="bg-indigo-900/50 p-3 rounded-xl border border-indigo-800">
+          <h3 class="text-yellow-300 font-bold mb-1">🤫 Silent G</h3>
+          <p class="text-indigo-200 mb-1">Quiet when next to N.</p>
+          <div class="bg-black/40 p-1.5 rounded text-[11px] text-white">
+            • si<strong class="text-yellow-300">g</strong>n<br>
+            • <strong class="text-yellow-300">g</strong>nome
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-2 border-t border-indigo-800/40 pt-3">
+        <button onclick="switchScreen('menu')" class="px-4 py-2 bg-indigo-900 hover:bg-indigo-850 text-xs text-white rounded-xl transition">
+          Back
+        </button>
+        <button onclick="startGame(1)" class="px-5 py-2 bg-yellow-400 hover:bg-yellow-300 text-xs text-indigo-950 font-bold rounded-xl transition">
+          Let's Play Level 1!
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: ACTIVE ARCADE CAB GAMEPLAY -->
+    <div id="screen-game" class="w-full max-w-2xl flex flex-col items-center justify-center hidden">
+      
+      <!-- SIMPLE HUD -->
+      <div class="w-full bg-indigo-950 rounded-t-2xl border-t-4 border-x-4 border-yellow-400 p-3 flex flex-wrap justify-between items-center gap-3 z-10 relative">
+        <div class="flex items-center gap-3">
+          <div class="bg-indigo-900 px-3 py-1 rounded-lg border border-indigo-800 flex flex-col">
+            <span class="text-[9px] text-pink-300 font-bold uppercase">QUESTION</span>
+            <span id="hud-progress" class="text-xs font-bold text-white tracking-widest">01/20</span>
+          </div>
+          <div class="bg-indigo-900 px-3 py-1 rounded-lg border border-indigo-800 flex flex-col">
+            <span class="text-[9px] text-yellow-300 font-bold uppercase">SCORE</span>
+            <span id="hud-score" class="text-xs font-bold text-white tracking-widest">0000</span>
+          </div>
+        </div>
+
+        <!-- CONTEXT SENTENCE PROMPT -->
+        <div class="flex-grow max-w-xs bg-indigo-900 p-2 rounded-xl border-2 border-yellow-300 flex flex-col justify-center text-center">
+          <p id="game-prompt" class="text-xs sm:text-sm font-semibold text-white leading-snug">
+            Loading...
+          </p>
+        </div>
+
+        <!-- HEALTH BAR -->
+        <div class="flex items-center gap-1.5 bg-indigo-900 px-3 py-1 rounded-lg border border-indigo-800">
+          <span class="text-[9px] text-pink-300 font-bold uppercase mr-1">SHIELDS:</span>
+          <div id="hud-lives" class="flex items-center gap-1">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- STAGE CONTAINER -->
+      <div class="w-full bg-indigo-950 border-x-4 border-b-4 border-yellow-400 relative flex flex-col overflow-hidden aspect-[4/3] max-h-[380px] rounded-b-2xl">
+        <div class="absolute inset-0 crt-scanlines pointer-events-none z-30"></div>
+        <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair z-10 bg-indigo-950"></canvas>
+
+        <!-- RESULT OVERLAYS -->
+        <div id="canvas-overlay" class="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-6 text-center z-40 hidden">
+          
+          <!-- Game Over Modal -->
+          <div id="overlay-gameover" class="hidden flex flex-col items-center gap-4">
+            <div class="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center text-2xl shadow-lg">
+              💔
+            </div>
+            <h2 class="text-2xl font-black text-red-500 game-title-font tracking-wide">TRY AGAIN!</h2>
+            <p class="text-indigo-200 text-xs max-w-sm">
+              Keep practicing! You can do this. Try the lesson and play again.
+            </p>
+            <div class="flex gap-3 mt-2">
+              <button onclick="switchScreen('menu')" class="px-4 py-2 bg-indigo-900 hover:bg-indigo-850 text-xs font-bold rounded-xl transition">
+                Menu
+              </button>
+              <button onclick="restartGame()" class="px-5 py-2 bg-yellow-400 hover:bg-yellow-300 text-indigo-950 text-xs font-bold rounded-xl transition">
+                Play Again 🔄
+              </button>
+            </div>
+          </div>
+
+          <!-- Victory Modal -->
+          <div id="overlay-victory" class="hidden flex flex-col items-center gap-4">
+            <div class="w-14 h-14 bg-yellow-400 text-indigo-950 rounded-full flex items-center justify-center text-2xl shadow-lg">
+              🎖️
+            </div>
+            <h2 class="text-2xl font-black text-yellow-300 game-title-font tracking-wide">GREAT JOB!</h2>
+            <p id="victory-commentary" class="text-indigo-200 text-xs max-w-sm">
+              Super spelling skills! You've successfully cleared this level.
+            </p>
+            <div class="bg-indigo-900/80 px-6 py-2 rounded-xl border border-yellow-300 flex flex-col items-center">
+              <span class="text-[9px] text-yellow-300 font-bold uppercase tracking-widest">FINAL SCORE</span>
+              <span id="overlay-final-score" class="text-xl font-bold text-green-300">0000</span>
+            </div>
+            <div class="flex gap-3 mt-2">
+              <button onclick="switchScreen('menu')" class="px-4 py-2 bg-indigo-900 hover:bg-indigo-850 text-xs font-bold rounded-xl transition">
+                Menu
+              </button>
+              <button id="next-level-btn" onclick="nextLevel()" class="px-5 py-2 bg-pink-500 hover:bg-pink-400 text-white text-xs font-bold rounded-xl transition">
+                Next Level ➡️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- POP-UP NOTIFICATIONS -->
+        <div id="game-notif" class="absolute top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-indigo-950 px-4 py-2 rounded-xl border-2 border-indigo-950 font-bold text-xs z-20 flex items-center gap-2 transform translate-y-[-100px] transition-transform duration-300 shadow-md">
+          <span id="notif-emoji">✨</span>
+          <span id="notif-text">Perfect Pop!</span>
+        </div>
+      </div>
+
+      <!-- IN-GAME INTERACTIVE DIRECTIVE -->
+      <p class="text-center text-xs text-indigo-300 mt-3 max-w-sm">
+        💡 <strong>Tap/click the bubble with the correct word to pop it!</strong>
+      </p>
+    </div>
+
+  </main>
+
+  <!-- LOW-CONNECTIVITY SYSTEM FOOTER -->
+  <footer class="w-full bg-indigo-950/40 p-3 border-t border-indigo-900 text-center text-xs text-indigo-300 flex flex-col sm:flex-row items-center justify-between max-w-4xl mx-auto gap-2">
+    <p>© 2026 Word Quest Arcade.</p>
+    <div class="flex items-center gap-1.5">
+      <span class="inline-block w-2 h-2 rounded-full bg-green-400 animate-ping"></span>
+      <span class="text-[11px] text-indigo-200">Offline-ready Audio Protocol Active</span>
+    </div>
+  </footer>
+
+  <!-- DYNAMIC CORE ENGINE AND DATABASE -->
+  <script>
+    // --- GRADE 3 PEDAGOGICAL CONTENT (EXACTLY 30 SILENT L, H, T, G QUESTIONS) ---
+    const SILENT_LETTER_DB = [
+      // SILENT T
+      { q: "To keep our classroom quiet, we must ______ to the teacher.", a: "listen", choices: ["listen", "lisen", "listenn"], tag: "T" },
+      { q: "The old medieval king lived in a giant stone ______ with towers.", a: "castle", choices: ["castle", "casle", "castel"], tag: "T" },
+      { q: "Before our space shuttle takes off, remember to ______ your seatbelt.", a: "fasten", choices: ["fasten", "fassen", "fastin"], tag: "T" },
+      { q: "The soccer referee blew the loud ______ to stop the play.", a: "whistle", choices: ["whistle", "wisle", "whistel"], tag: "T" },
+      { q: "In the magical fairytale, the good ______ saved the village.", a: "witch", choices: ["witch", "wich", "witche"], tag: "T" },
+      { q: "I looked down at my wrist ______ to check if it was lunchtime.", a: "watch", choices: ["watch", "wach", "watche"], tag: "T" },
+      { q: "During a storm, the rain will ______ the dry soil outside.", a: "soften", choices: ["soften", "sofen", "softin"], tag: "T" },
+      { q: "The two school champions went to the gym mat to ______.", a: "wrestle", choices: ["wrestle", "resle", "wrestel"], tag: "T" },
+
+      // SILENT L
+      { q: "We went for a long, healthy ______ in the neighborhood park.", a: "walk", choices: ["walk", "wok", "wak"], tag: "L" },
+      { q: "Mom made an egg yolk but I didn't want to eat the yellow ______.", a: "yolk", choices: ["yolk", "yoke", "yolck"], tag: "L" },
+      { q: "I cut the big, juicy red apple in ______ to share with my friend.", a: "half", choices: ["half", "haf", "hawf"], tag: "L" },
+      { q: "We ordered a delicious grilled ______ fish at the restaurant.", a: "salmon", choices: ["salmon", "samon", "salmin"], tag: "L" },
+      { q: "The newborn baby cow, called a ______, was running in the field.", a: "calf", choices: ["calf", "caf", "kawf"], tag: "L" },
+      { q: "If we study hard, we ______ get a high score on the spelling quiz.", a: "should", choices: ["should", "shud", "shoud"], tag: "L" },
+      { q: "We sat around the campfire to ______ about our summer plans.", a: "talk", choices: ["talk", "tok", "tak"], tag: "L" },
+
+      // SILENT H
+      { q: "My watch was broken, so I was one ______ late for school.", a: "hour", choices: ["hour", "our", "hower"], tag: "H" },
+      { q: "The spooky story told us about a friendly ______ in the library.", a: "ghost", choices: ["ghost", "gost", "gohst"], tag: "H" },
+      { q: "My teacher is always ______; she always tells the absolute truth.", a: "honest", choices: ["honest", "onest", "honnest"], tag: "H" },
+      { q: "The mountain climber heard her own voice ______ back from the dark cave.", a: "echo", choices: ["echo", "eco", "ekko"], tag: "H" },
+      { q: "I love going to ______ every morning to learn new things.", a: "school", choices: ["school", "scool", "shool"], tag: "H" },
+      { q: "The zebra is black and ______ with beautiful patterns.", a: "white", choices: ["white", "wite", "whyte"], tag: "H" },
+      { q: "The school music band played a song with a very catchy ______.", a: "rhythm", choices: ["rhythm", "rythm", "rithim"], tag: "H" },
+      { q: "We stood at the station wondering ______ the yellow bus would arrive.", a: "when", choices: ["when", "wen", "whehn"], tag: "H" },
+
+      // SILENT G
+      { q: "I saw a funny little garden ______ holding a shovel under the bush.", a: "gnome", choices: ["gnome", "nome", "gnomy"], tag: "G" },
+      { q: "The highway traffic controller pointed to the stop ______.", a: "sign", choices: ["sign", "sine", "sgn"], tag: "G" },
+      { q: "Be careful! That small, flying ______ might bite your arm.", a: "gnat", choices: ["gnat", "nat", "gnatt"], tag: "G" },
+      { q: "Our class wants to ______ and build a brand-new birdhouse.", a: "design", choices: ["design", "dezign", "disign"], tag: "G" },
+      { q: "The cute puppy loves to ______ on its favorite rubber bone.", a: "gnaw", choices: ["gnaw", "naw", "gnawe"], tag: "G" },
+      { q: "A person visiting us from a different country is a ______ traveler.", a: "foreign", choices: ["foreign", "forin", "forein"], tag: "G" },
+      { q: "The roots of the ancient giant oak tree were old and ______.", a: "gnarl", choices: ["gnarl", "narl", "gnarled"], tag: "G" }
+    ];
+
+    // --- GAME CONTROL REGISTRY ---
+    let score = 0;
+    let lives = 3;
+    let currentLevel = 1;
+    let currentQuestionIdx = 0;
+    let soundEnabled = true;
+    let activeQuestions = [];
+    
+    // Canvas configurations
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let animationId = null;
+    let bubbles = [];
+    let laserBeams = [];
+    let particles = [];
+    let stars = [];
+
+    // Toy Blaster (Simple central point at the bottom)
+    const turret = {
+      x: 0,
+      y: 0,
+      angle: -Math.PI / 2,
+      targetAngle: -Math.PI / 2
+    };
+
+    // --- AUDIO PROTOCOL WITH SYNTH FALLBACK ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    const audioAssets = {
+      correct: new Audio("https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/cho24/assets/correct.mp3"),
+      wrong: new Audio("https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/cho24/assets/wrong.mp3")
+    };
+
+    // Preload audio files
+    Object.keys(audioAssets).forEach(k => {
+      audioAssets[k].load();
+    });
+
+    // Native Synth fallback function for offline support
+    function triggerSynth(frequency, duration, type = "sine", gainVal = 0.08) {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn("Synth state: busy");
+      }
+    }
+
+    // Audio router
+    const sounds = {
+      correct: () => {
+        audioAssets.correct.play().catch(() => {
+          // Playful kid chime
+          triggerSynth(523.25, 0.15, 'sine'); // C5
+          setTimeout(() => triggerSynth(659.25, 0.25, 'sine'), 100); // E5
+        });
+      },
+      wrong: () => {
+        audioAssets.wrong.play().catch(() => {
+          // Flat soft buzz
+          triggerSynth(180, 0.3, 'triangle', 0.15);
+        });
+      },
+      laser: () => {
+        // Fun cartoon laser pop
+        if (!soundEnabled) return;
+        try {
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          const osc = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.12);
+          gainNode.gain.setValueAtTime(0.06, audioCtx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+          osc.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.12);
+        } catch (err) {}
+      }
+    };
+
+    function toggleMute() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('mute-btn').innerText = soundEnabled ? '🔊' : '🔇';
+    }
+
+    // --- RECOVERY LOGO SVG FALLBACK ---
+    function handleLogoFallback() {
+      const parent = document.getElementById('splash-logo-container');
+      if (!parent) return;
+      
+      // Cheerful, colorful toy/alphabet placeholder vector
+      parent.innerHTML = `
+        <svg class="w-24 h-24 text-yellow-400 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10" fill="#1e1b4b"></circle>
+          <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="7" font-family="'Fredoka', sans-serif" font-weight="bold" fill="#facc15">INNOVINE</text>
+        </svg>
+      `;
+    }
+
+    // --- 5-SECOND DYNAMIC SPLASH SCREEN ---
+    let splashTimeLeft = 5;
+    let splashInterval = null;
+
+    function startSplashScreenTimer() {
+      const countdownSpan = document.getElementById('splash-timer');
+      splashInterval = setInterval(() => {
+        splashTimeLeft--;
+        if (splashTimeLeft <= 0) {
+          endSplashScreen();
+        }
+      }, 1000);
+    }
+
+    function endSplashScreen() {
+      if (splashInterval) {
+        clearInterval(splashInterval);
+        splashInterval = null;
+      }
+      document.getElementById('screen-splash').classList.add('hidden');
+      document.getElementById('screen-menu').classList.remove('hidden');
+      document.getElementById('nav-controls').classList.remove('invisible');
+    }
+
+    // Key Listener to skip loading
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !document.getElementById('screen-splash').classList.contains('hidden')) {
+        e.preventDefault();
+        endSplashScreen();
+      }
+    });
+
+    // Start on DOM Load
+    window.addEventListener('DOMContentLoaded', () => {
+      startSplashScreenTimer();
+      createTwinklingStars();
+    });
+
+    // --- NAVIGATION CONTROLLER ---
+    function switchScreen(screenId) {
+      document.getElementById('screen-menu').classList.add('hidden');
+      document.getElementById('screen-study').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      
+      document.getElementById('screen-' + screenId).classList.remove('hidden');
+
+      if (screenId !== 'game') {
+        stopGameLoop();
+      }
+    }
+
+    // --- STAR FIELD GENERATION ---
+    function createTwinklingStars() {
+      stars = [];
+      for (let i = 0; i < 25; i++) {
+        stars.push({
+          x: Math.random(),
+          y: Math.random(),
+          size: Math.random() * 3 + 1,
+          color: ['#facc15', '#f472b6', '#38bdf8', '#ffffff'][Math.floor(Math.random() * 4)]
+        });
+      }
+    }
+
+    // --- FRIENDLY ROUNDED BUBBLE TARGET ---
+    class BubbleTarget {
+      constructor(x, y, text, isCorrect, slotIdx) {
+        this.x = x;
+        this.y = y;
+        this.radius = 42; // Easy touch point size for kids
+        this.text = text;
+        this.isCorrect = isCorrect;
+        
+        // Sturdy, easy-to-follow floating down speed
+        this.speedY = 0.45 + (Math.random() * 0.25);
+        this.oscillationSpeed = 0.015 + Math.random() * 0.015;
+        this.oscillationWidth = 15 + Math.random() * 15;
+        this.angle = Math.random() * Math.PI;
+        this.baseX = x;
+        this.isDying = false;
+        this.fade = 1.0;
+
+        // Soft, happy bubble colors
+        const colors = ['#ec4899', '#06b6d4', '#8b5cf6', '#10b981'];
+        this.color = colors[slotIdx % colors.length];
+      }
+
+      update() {
+        if (this.isDying) {
+          this.fade -= 0.1;
+          return;
+        }
+        this.y += this.speedY;
+        this.angle += this.oscillationSpeed;
+        this.x = this.baseX + Math.sin(this.angle) * this.oscillationWidth;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.fade;
+
+        // Main Bubble Gradient
+        let grad = ctx.createRadialGradient(this.x - 8, this.y - 8, 4, this.x, this.y, this.radius);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.2, this.color);
+        grad.addColorStop(1, '#0f172a');
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.shadowColor = 'rgba(0,0,0,0.2)';
+        ctx.shadowBlur = 4;
+        ctx.fill();
+
+        // Cute bubble border
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Shiny bubble reflection highlight
+        ctx.beginPath();
+        ctx.arc(this.x - this.radius*0.35, this.y - this.radius*0.35, this.radius*0.15, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fill();
+
+        // Clear, readable word
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#000000';
+        ctx.shadowBlur = 3;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold 15px Lexend';
+        ctx.fillText(this.text, this.x, this.y);
+
+        ctx.restore();
+      }
+    }
+
+    // --- TOY TOY BLAST BEAMS ---
+    class BlastBeam {
+      constructor(sx, sy, tx, ty) {
+        this.sx = sx;
+        this.sy = sy;
+        this.tx = tx;
+        this.ty = ty;
+        this.progress = 0;
+        this.speed = 0.2;
+      }
+
+      update() {
+        this.progress += this.speed;
+        if (this.progress > 1) this.progress = 1;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = '#facc15';
+        ctx.shadowBlur = 8;
+
+        const currX = this.sx + (this.tx - this.sx) * this.progress;
+        const currY = this.sy + (this.ty - this.sy) * this.progress;
+
+        ctx.beginPath();
+        ctx.moveTo(this.sx, this.sy);
+        ctx.lineTo(currX, currY);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // --- BUBBLE POP DUST ---
+    class Sparkle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.radius = Math.random() * 4 + 2;
+        this.vx = (Math.random() - 0.5) * 6;
+        this.vy = (Math.random() - 0.5) * 6;
+        this.color = color;
+        this.alpha = 1;
+        this.decay = 0.04;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= this.decay;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // --- GAME LAUNCH CONTROLLER ---
+    function startGame(levelNum) {
+      currentLevel = levelNum;
+      score = 0;
+      lives = 3;
+      currentQuestionIdx = 0;
+      bubbles = [];
+      laserBeams = [];
+      particles = [];
+
+      // Create shuffled master collection
+      let shuffledPool = [...SILENT_LETTER_DB].sort(() => Math.random() - 0.5);
+      
+      // Grab 20 questions for the session
+      activeQuestions = shuffledPool.slice(0, 20);
+
+      document.getElementById('hud-score').innerText = "0000";
+      document.getElementById('next-level-btn').innerText = currentLevel === 1 ? "Level 2 ➡️" : "Level 1 Again 🔄";
+
+      switchScreen('game');
+      resizeCanvas();
+      
+      document.getElementById('canvas-overlay').classList.add('hidden');
+      document.getElementById('overlay-gameover').classList.add('hidden');
+      document.getElementById('overlay-victory').classList.add('hidden');
+
+      loadQuestion();
+      setupMainLoop();
+    }
+
+    function restartGame() {
+      startGame(currentLevel);
+    }
+
+    function nextLevel() {
+      if (currentLevel === 1) {
+        startGame(2);
+      } else {
+        startGame(1);
+      }
+    }
+
+    function resizeCanvas() {
+      const parent = canvas.parentElement;
+      canvas.width = parent.clientWidth;
+      canvas.height = parent.clientHeight;
+      turret.x = canvas.width / 2;
+      turret.y = canvas.height - 8;
+    }
+
+    window.addEventListener('resize', () => {
+      if (!document.getElementById('screen-game').classList.contains('hidden')) {
+        resizeCanvas();
+      }
+    });
+
+    // --- LOAD QUESTION MECHANICS ---
+    function loadQuestion() {
+      const q = activeQuestions[currentQuestionIdx];
+      document.getElementById('hud-progress').innerText = `${currentQuestionIdx + 1}/20`;
+      
+      // Formatting question prompt
+      document.getElementById('game-prompt').innerHTML = q.q.replace("______", "<span class='text-yellow-300 font-extrabold underline px-1'>______</span>");
+
+      bubbles = [];
+      
+      // Spawn bubbles with friendly staggered columns
+      const choicesCount = q.choices.length;
+      q.choices.forEach((choice, idx) => {
+        const spacing = canvas.width / (choicesCount + 1);
+        const startX = spacing * (idx + 1);
+        const startY = -60 - (idx * 30); // Gentle stagger heights
+        const isCorrect = (choice === q.a);
+        
+        bubbles.push(new BubbleTarget(startX, startY, choice, isCorrect, idx));
+      });
+    }
+
+    // Clean HUD feedback popups
+    function showBannerFeedback(emoji, msg) {
+      const banner = document.getElementById('game-notif');
+      document.getElementById('notif-emoji').innerText = emoji;
+      document.getElementById('notif-text').innerText = msg;
+      banner.classList.remove('translate-y-[-100px]');
+      banner.classList.add('translate-y-0');
+
+      setTimeout(() => {
+        banner.classList.remove('translate-y-0');
+        banner.classList.add('translate-y-[-100px]');
+      }, 1500);
+    }
+
+    // Tap Actions
+    canvas.addEventListener('click', (e) => {
+      handleTouchFire(e);
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (e.touches.length > 0) {
+        handleTouchFire(e.touches[0]);
+      }
+    }, { passive: false });
+
+    function handleTouchFire(point) {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = point.clientX - rect.left;
+      const clickY = point.clientY - rect.top;
+
+      for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        if (b.isDying) continue;
+
+        const dist = Math.hypot(clickX - b.x, clickY - b.y);
+        
+        // Friendly touch padding
+        if (dist <= b.radius + 15) {
+          turret.targetAngle = Math.atan2(clickY - turret.y, clickX - turret.x);
+          sounds.laser();
+          
+          laserBeams.push(new BlastBeam(turret.x, turret.y, b.x, b.y));
+
+          if (b.isCorrect) {
+            score += 100;
+            b.isDying = true;
+            
+            setTimeout(() => {
+              sounds.correct();
+              spawnPopParticles(b.x, b.y, b.color);
+              showBannerFeedback("🎉", "Perfect! +100");
+              
+              currentQuestionIdx++;
+              if (currentQuestionIdx >= 20) {
+                triggerVictory();
+              } else {
+                loadQuestion();
+              }
+            }, 250);
+          } else {
+            lives--;
+            b.isDying = true;
+
+            setTimeout(() => {
+              sounds.wrong();
+              spawnPopParticles(b.x, b.y, '#ef4444');
+              showBannerFeedback("❌", `Oops! Correct: "${activeQuestions[currentQuestionIdx].a}"`);
+              
+              if (lives <= 0) {
+                triggerGameOver();
+              } else {
+                currentQuestionIdx++;
+                if (currentQuestionIdx >= 20) {
+                  triggerVictory();
+                } else {
+                  loadQuestion();
+                }
+              }
+            }, 250);
+          }
+          break;
+        }
+      }
+    }
+
+    function spawnPopParticles(x, y, color) {
+      for (let i = 0; i < 15; i++) {
+        particles.push(new Sparkle(x, y, color));
+      }
+    }
+
+    function triggerGameOver() {
+      stopGameLoop();
+      document.getElementById('canvas-overlay').classList.remove('hidden');
+      document.getElementById('overlay-gameover').classList.remove('hidden');
+    }
+
+    function triggerVictory() {
+      stopGameLoop();
+      const scoreStr = String(score).padStart(4, '0');
+      document.getElementById('overlay-final-score').innerText = scoreStr;
+      
+      const commentary = document.getElementById('victory-commentary');
+      if (score >= 2000) {
+        commentary.innerText = "Awesome! Perfect 20/20 spelling star!";
+      } else if (score >= 1500) {
+        commentary.innerText = "Super spelling! High score achieved.";
+      } else {
+        commentary.innerText = "Level completed. Well done learning silent words!";
+      }
+
+      document.getElementById('canvas-overlay').classList.remove('hidden');
+      document.getElementById('overlay-victory').classList.remove('hidden');
+    }
+
+    function stopGameLoop() {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    }
+
+    // --- MAIN ENGINE HEARTBEAT LOOP ---
+    function setupMainLoop() {
+      function tick() {
+        if (document.getElementById('screen-game').classList.contains('hidden')) return;
+
+        // Friendly soft indigo space background
+        ctx.fillStyle = '#1e1b4b';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Simple stars
+        stars.forEach(s => {
+          ctx.fillStyle = s.color;
+          ctx.fillRect(s.x * canvas.width, s.y * canvas.height, s.size, s.size);
+        });
+
+        // 1. UPDATE AND DRAW BUBBLES
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+          const b = bubbles[i];
+          b.update();
+          b.draw();
+
+          // Boundary handler (Floated out of view)
+          if (!b.isDying && b.y > canvas.height - 30) {
+            if (b.isCorrect) {
+              sounds.wrong();
+              lives--;
+              showBannerFeedback("⏰", "The correct word floated away!");
+
+              if (lives <= 0) {
+                triggerGameOver();
+                return;
+              } else {
+                setTimeout(() => {
+                  currentQuestionIdx++;
+                  if (currentQuestionIdx >= 20) {
+                    triggerVictory();
+                  } else {
+                    loadQuestion();
+                  }
+                }, 1000);
+              }
+            }
+            bubbles.splice(i, 1);
+          }
+        }
+
+        // 2. BLAST BEAMS
+        for (let i = laserBeams.length - 1; i >= 0; i--) {
+          const beam = laserBeams[i];
+          beam.update();
+          beam.draw();
+          if (beam.progress >= 1) {
+            laserBeams.splice(i, 1);
+          }
+        }
+
+        // 3. EXPLOSIVE PARTICLES
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.update();
+          p.draw();
+          if (p.alpha <= 0) {
+            particles.splice(i, 1);
+          }
+        }
+
+        // 4. DRAW BLASTER TOY
+        drawToyBlaster();
+
+        // 5. UPDATE GRAPHIC INTERFACES (HUD)
+        updateHUD();
+
+        animationId = requestAnimationFrame(tick);
+      }
+      animationId = requestAnimationFrame(tick);
+    }
+
+    function drawToyBlaster() {
+      const diff = turret.targetAngle - turret.angle;
+      turret.angle += diff * 0.25;
+
+      ctx.save();
+      ctx.translate(turret.x, turret.y);
+      ctx.rotate(turret.angle);
+
+      // Simple yellow toy rocket/blaster launcher
+      ctx.fillStyle = '#facc15';
+      ctx.strokeStyle = '#1e1b4b';
+      ctx.lineWidth = 2;
+      
+      ctx.beginPath();
+      ctx.arc(0, 0, 15, Math.PI, 0);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ec4899';
+      ctx.fillRect(-4, -25, 8, 25);
+
+      ctx.restore();
+    }
+
+    function updateHUD() {
+      document.getElementById('hud-score').innerText = String(score).padStart(4, '0');
+      
+      const livesBlock = document.getElementById('hud-lives');
+      livesBlock.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const shieldCell = document.createElement('div');
+        shieldCell.className = `w-3 h-3 rounded-full transition-all duration-300 ${
+          i < lives 
+            ? 'bg-pink-500 border border-white' 
+            : 'bg-indigo-950 border border-indigo-900 opacity-40'
+        }`;
+        livesBlock.appendChild(shieldCell);
+      }
+    }
+  </script>
+</body>
+</html>
