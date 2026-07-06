@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Great Balloon Burst: Collocations!</title>
+  <!-- Google Fonts for Kids -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { 
+      width: 100%; 
+      height: 100%; 
+      overflow: hidden; 
+      background-color: #f0fdf4; 
+      font-family: 'Lexend', sans-serif;
+    }
+    
+    /* Premium Centered Game Container Shell */
+    #gameContainer { 
+      position: relative; 
+      width: 100%; 
+      height: 100%; 
+      max-width: 540px; 
+      max-height: 960px; 
+      margin: 0 auto; 
+      background: linear-gradient(to bottom, #e0f2fe 0%, #f0fdf4 100%); 
+      overflow: hidden; 
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12); 
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+    
+    /* Glassmorphism UI Screens */
+    .screen { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 10; 
+      padding: 30px; 
+      text-align: center; 
+      backdrop-filter: blur(8px);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* Screen 0: Brand Logo - Pure Premium White (True Full-Screen Blank Screen) */
+    #logoScreen { background-color: #ffffff; z-index: 100; }
+    #logoScreen img { max-width: 65%; max-height: 35%; object-fit: contain; }
+    
+    /* Loading Bar on Logo Screen */
+    .loading-bar-container {
+      width: 180px;
+      height: 6px;
+      background-color: #e2e8f0;
+      border-radius: 10px;
+      margin-top: 30px;
+      overflow: hidden;
+    }
+    .loading-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #ff6b8b 0%, #f43f5e 100%);
+      width: 0%;
+      border-radius: 10px;
+      animation: loadProgress 5s linear forwards;
+    }
+    
+    @keyframes loadProgress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    
+    /* Screen 2: Game Title Splash Menu */
+    #titleScreen { background: radial-gradient(circle, #fef08a 0%, #dbeafe 100%); z-index: 90; display: none; }
+    #titleScreen h1 { 
+      color: #f43f5e; 
+      font-size: 40px; 
+      margin-bottom: 40px; 
+      text-shadow: 4px 4px 0px #ffffff, -1px -1px 0px #ffffff; 
+      line-height: 1.2; 
+      font-weight: 900; 
+      font-family: 'Fredoka', sans-serif;
+      animation: floatTitle 3s ease-in-out infinite;
+    }
+    
+    @keyframes floatTitle {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-10px) rotate(1deg); }
+    }
+    
+    /* Screen 3: Interactive Mission Instructions */
+    #instructionScreen { 
+      background: rgba(255, 255, 255, 0.96); 
+      z-index: 85; 
+      display: none; 
+      border: 8px solid #ccfbf1; 
+      border-radius: 40px; 
+      color: #1e293b; 
+    }
+    
+    /* Premium Fancy Rounded 3D Buttons */
+    .btn { 
+      background: linear-gradient(135deg, #ff6b8b 0%, #f43f5e 100%); 
+      color: #fff; 
+      border: 3px solid #be123c; 
+      padding: 16px 42px; 
+      font-size: 22px; 
+      font-weight: 900; 
+      border-radius: 50px; 
+      cursor: pointer; 
+      box-shadow: 0 8px 0px #be123c, 0 15px 20px rgba(244,63,94,0.3); 
+      text-transform: uppercase; 
+      transition: all 0.1s ease; 
+      margin-top: 30px; 
+      letter-spacing: 1px;
+      font-family: 'Fredoka', sans-serif;
+    }
+    .btn:active { box-shadow: 0 2px 0px #be123c, 0 5px 10px rgba(244,63,94,0.3); transform: translateY(6px); }
+    
+    .big-bold-text { font-size: 18px; font-weight: 800; line-height: 1.5; margin-bottom: 14px; color: #334155; }
+    
+    /* HUD Top Dashboard Area Overlay */
+    #uiOverlay { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      padding: 20px 15px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      z-index: 20; 
+      pointer-events: none; 
+      display: none; 
+      align-items: center; 
+    }
+    #targetPrompt { 
+      font-size: 22px; 
+      font-weight: 900; 
+      color: #1d4ed8; 
+      text-shadow: 3px 3px 0px #fff, -1px -1px 0px #fff; 
+      text-align: center; 
+      line-height: 1.3; 
+    }
+    #progressText { 
+      font-size: 14px; 
+      font-weight: 900; 
+      color: #be185d; 
+      background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); 
+      padding: 6px 20px; 
+      border-radius: 25px; 
+      border: 3px solid #f472b6; 
+      display: inline-block; 
+      box-shadow: 0 6px 12px rgba(219,39,119,0.15); 
+    }
+    
+    .hud-row { display: flex; justify-content: space-between; width: 100%; margin-top: 4px; pointer-events: none; }
+    .ui-element { background: rgba(255, 255, 255, 0.95); color: #1e3a8a; padding: 8px 16px; border-radius: 25px; font-size: 14px; font-weight: 900; border: 3px solid #bfdbfe; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    
+    /* Completion Performance Card */
+    #completionScreen { background: radial-gradient(circle, #ffffff 0%, #ccfbf1 100%); display: none; z-index: 80; color: #1e3a8a; }
+  </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <!-- Pure blank logo screen on loading -->
+    <div id="logoScreen" class="screen">
+        <img src="https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp23/assets/innovine-logo.png" alt="Innovine Logo" onerror="handleLogoFallback('splash-logo')">
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- Title Screen -->
+    <div id="titleScreen" class="screen">
+        <h1>THE GREAT<br>BALLOON BURST! 🎈</h1>
+        <p style="font-size: 18px; font-weight:bold; color: #475569; margin-top: -20px; margin-bottom: 20px;">Collocation Edition</p>
+        <button class="btn" onclick="showInstructions()">Play Now ➔</button>
+    </div>
+
+    <!-- Instruction Screen -->
+    <div id="instructionScreen" class="screen">
+        <div class="big-bold-text" style="color: #f43f5e; font-size: 34px; margin-bottom: 20px; font-weight: 900; font-family: 'Fredoka', sans-serif;">Let's Play! ✨</div>
+        <div class="big-bold-text" style="font-size: 17px; background: #f0fdf4; padding: 15px; border-radius: 20px; border: 3px dashed #4ade80; color: #166534;">Read the mission at the top of the screen!</div>
+        <div class="big-bold-text" style="margin-top: 15px;">📍 Watch your Pin Monster friend slide out to pop the balloons!</div>
+        <div class="big-bold-text" style="color: #ea580c;">🎈 Avoid the wrong trick choices!</div>
+        <button class="btn" style="background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); box-shadow: 0 8px 0px #16a34a; border-color: #16a34a;" onclick="startGame()">Start Game 🚀</button>
+    </div>
+
+    <!-- HUD dashboard panel -->
+    <div id="uiOverlay">
+        <div id="targetPrompt">LOADING MISSION...</div>
+        <div id="progressText">Balloons Popped: 0 / 20</div>
+        <div class="hud-row">
+            <div id="scoreLabel" class="ui-element">Score: 0</div>
+            <div id="levelLabel" class="ui-element" style="color: #0d9488; background: #f0fdfa; border-color: #99f6e4;">Level: 1</div>
+            <div id="heartsLabel" class="ui-element" style="color: #ef4444; background: #fee2e2; border-color: #fca5a5;">Hearts: ❤️❤️❤️</div>
+        </div>
+    </div>
+    
+    <!-- Game End Screen -->
+    <div id="completionScreen" class="screen">
+        <h1 id="completionTitle" style="font-size: 36px; margin-bottom: 15px; font-weight: 900; font-family: 'Fredoka', sans-serif;">🎈 BALLOON KING! 👑</h1>
+        <p id="completionSubtitle" style="font-size: 18px; margin-bottom: 25px; font-weight: bold; color: #475569;">Fantastic word match skills!</p>
+        <div class="ui-element" id="finalScore" style="font-size: 24px; padding: 12px 35px; border-color: #34d399; background: white; margin-bottom: 35px; font-weight: 900; color: #065f46;">Final Score: 0</div>
+        <button id="nextLevelBtn" class="btn" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); box-shadow: 0 8px 0px #0369a1; border-color: #0369a1; margin-bottom: 12px;" onclick="advanceLevel()">Next Level ➔</button>
+        <button class="btn" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #78350f; box-shadow: 0 8px 0px #d97706; border-color: #d97706;" onclick="restartGame()">Play Again 🔄</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Remote audio assets with custom paths from attached image Structure (chp23)
+    const sndCorrect = new Audio('https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp23/assets/correct.mp3');
+    const sndWrong = new Audio('https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp23/assets/wrong.mp3');
+
+    let soundEnabled = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Trigger local synthesizer fallback for low connectivity
+    function triggerSynth(frequency, duration, type = "sine", gainVal = 0.08) {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn("Synth state: busy");
+      }
+    }
+
+    const sounds = {
+      correct: () => {
+        sndCorrect.play().catch(() => {
+          // Playful kid chime fallback
+          triggerSynth(523.25, 0.15, 'sine'); // C5
+          setTimeout(() => triggerSynth(659.25, 0.25, 'sine'), 100); // E5
+        });
+      },
+      wrong: () => {
+        sndWrong.play().catch(() => {
+          // Fail sound fallback
+          triggerSynth(180, 0.3, 'triangle', 0.15);
+        });
+      }
+    };
+
+    // Responsive Canvas Scale System
+    const BASE_WIDTH = 600;
+    const BASE_HEIGHT = 900;
+    let scaleFactor = 1;
+
+    function resize() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        scaleFactor = Math.min(canvas.width / BASE_WIDTH, canvas.height / BASE_HEIGHT);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 30 Backend Grade 3 Collocation Questions Database
+    const COLLOCATION_DATABASE = [
+      { q: "Before going to sleep, I always ______ my bed.", a: "make", wrongs: ["do", "take"] },
+      { q: "After playing in the mud, you should ______ a shower.", a: "take", wrongs: ["make", "do"] },
+      { q: "To get better at math, you must ______ your homework.", a: "do", wrongs: ["make", "take"] },
+      { q: "When you blow out the candles, ______ a wish!", a: "make", wrongs: ["do", "give"] },
+      { q: "My teacher told us to always ______ our best.", a: "do", wrongs: ["make", "have"] },
+      { q: "The library is quiet, so try not to ______ noise.", a: "make", wrongs: ["do", "take"] },
+      { q: "Can you ______ me a favor and hold this book?", a: "do", wrongs: ["make", "give"] },
+      { q: "If you made a mess, please ______ the dishes.", a: "do", wrongs: ["make", "go"] },
+      { q: "We were late, so we had to ______ a taxi.", a: "take", wrongs: ["do", "go"] },
+      { q: "If you are tired, you should ______ a break.", a: "take", wrongs: ["make", "do"] },
+      { q: "It's cold outside! Don't ______ a cold.", a: "catch", wrongs: ["keep", "make"] },
+      { q: "I promise to always ______ your secret safe.", a: "keep", wrongs: ["make", "do"] },
+      { q: "During class, we must ______ attention.", a: "pay", wrongs: ["give", "do"] },
+      { q: "We want to help, so let's ______ them a hand.", a: "give", wrongs: ["make", "do"] },
+      { q: "It's time for school! Go ______ dressed.", a: "get", wrongs: ["make", "take"] },
+      { q: "We are going to ______ a party for my birthday!", a: "have", wrongs: ["make", "do"] },
+      { q: "Please be a good friend and ______ your promise.", a: "keep", wrongs: ["do", "make"] },
+      { q: "Taking the bus will ______ us time.", a: "save", wrongs: ["do", "make"] },
+      { q: "The little birds built a nest to ______ their home.", a: "make", wrongs: ["do", "take"] },
+      { q: "If you are lost, you can ______ for help.", a: "ask", wrongs: ["do", "make"] },
+      { q: "The children love to ______ fun at the park.", a: "have", wrongs: ["do", "make"] },
+      { q: "Try not to ______ a mistake on the spelling test.", a: "make", wrongs: ["do", "take"] },
+      { q: "Mom said we should ______ some exercise today.", a: "do", wrongs: ["make", "have"] },
+      { q: "It's polite to ______ a seat for your friend.", a: "save", wrongs: ["make", "do"] },
+      { q: "Before crossing the road, ______ a look both ways.", a: "take", wrongs: ["make", "do"] },
+      { q: "Let's ______ a visit to our sweet grandmother.", a: "pay", wrongs: ["make", "do"] },
+      { q: "The dry wood can easily ______ fire in the sun.", a: "catch", wrongs: ["make", "do"] },
+      { q: "It is important to ______ quiet during the test.", a: "keep", wrongs: ["do", "make"] },
+      { q: "I will ______ a phone call to ask my dad.", a: "make", wrongs: ["do", "take"] },
+      { q: "When you meet someone new, ______ hello!", a: "say", wrongs: ["do", "make"] }
+    ];
+
+    // Game states
+    let score = 0;
+    let hearts = 3;
+    let gameActive = false;
+    let freezeTimerActive = false;
+    let currentLevelIndex = 1; 
+    let activeQuestions = [];
+    let currentQuestionIdx = 0;
+    let activeBalloons = [];
+    let poppedCount = 0;
+
+    let speechBubble = { x: 0, y: 0, text: "", color: "#10b981", visible: false };
+
+    // Mascot settings
+    let pinMascot = { 
+        homeX: BASE_WIDTH / 2, 
+        homeY: BASE_HEIGHT - 100, 
+        x: BASE_WIDTH / 2, 
+        y: BASE_HEIGHT - 100, 
+        targetX: BASE_WIDTH / 2, 
+        targetY: BASE_HEIGHT - 100, 
+        state: "idle", 
+        rotation: 0,
+        frame: 0,
+        assignedBalloon: null
+    };
+
+    // Splash Loader sequence
+    setTimeout(() => {
+        document.getElementById('logoScreen').style.display = 'none';
+        document.getElementById('titleScreen').style.display = 'flex';
+    }, 5000);
+
+    function showInstructions() {
+        document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('instructionScreen').style.display = 'flex';
+    }
+
+    function startGame() {
+        document.getElementById('instructionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        score = 0;
+        hearts = 3;
+        currentLevelIndex = 1;
+        poppedCount = 0;
+        currentQuestionIdx = 0;
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+        
+        pinMascot.x = pinMascot.homeX;
+        pinMascot.y = pinMascot.homeY;
+        pinMascot.targetX = pinMascot.homeX;
+        pinMascot.targetY = pinMascot.homeY;
+        pinMascot.state = "idle";
+        pinMascot.rotation = 0;
+
+        // Shuffle backend database and pull 20 questions
+        let masterPool = [...COLLOCATION_DATABASE].sort(() => Math.random() - 0.5);
+        activeQuestions = masterPool.slice(0, 20);
+
+        initQuestionRound();
+        gameActive = true;
+    }
+
+    function initQuestionRound() {
+        if (currentQuestionIdx >= 20) {
+            endGameSummary(true);
+            return;
+        }
+
+        activeBalloons = [];
+        const q = activeQuestions[currentQuestionIdx];
+
+        // Format prompt at the HUD
+        document.getElementById('targetPrompt').innerHTML = q.q.replace("______", "<span style='text-decoration: underline; color: #be185d;'>______</span>");
+
+        // Construct 3 choice balloons
+        let choices = [
+            { text: q.a, isCorrect: true },
+            { text: q.wrongs[0], isCorrect: false },
+            { text: q.wrongs[1], isCorrect: false }
+        ].sort(() => Math.random() - 0.5);
+
+        // Layout locations
+        const bRadius = 66; 
+        const coords = [
+            { x: 130, y: 350 },
+            { x: 300, y: 350 },
+            { x: 470, y: 350 }
+        ];
+
+        const softColors = ["#ffb4b4", "#b3e5fc", "#c8e6c9", "#f3e5f5", "#fff9c4", "#ffe0b2"];
+
+        choices.forEach((choice, idx) => {
+            activeBalloons.push({
+                x: coords[idx].x,
+                y: coords[idx].y,
+                radius: bRadius,
+                color: softColors[idx % softColors.length],
+                text: choice.text,
+                isCorrect: choice.isCorrect,
+                isPopped: false,
+                shakeOffset: 0,
+                shakeTimer: 0,
+                bobOffset: Math.random() * 100
+            });
+        });
+
+        updateHUD();
+    }
+
+    function updateHUD() {
+        document.getElementById('scoreLabel').innerText = `Score: ${score}`;
+        document.getElementById('levelLabel').innerText = `Level: ${currentLevelIndex}`;
+        document.getElementById('progressText').innerText = `Progress: ${currentQuestionIdx + 1} / 20`;
+        let heartStr = "Hearts: ";
+        for(let i=0; i<3; i++) heartStr += (i < hearts) ? "❤️" : "🖤";
+        document.getElementById('heartsLabel').innerText = heartStr;
+    }
+
+    window.addEventListener('mousedown', (e) => { handleCoordinatesTap(e.clientX, e.clientY); });
+    window.addEventListener('touchstart', (e) => {
+        if(e.touches.length > 0) handleCoordinatesTap(e.touches[0].clientX, e.touches[0].clientY);
+    });
+
+    function handleCoordinatesTap(clientX, clientY) {
+        if (!gameActive || freezeTimerActive || pinMascot.state !== "idle") return;
+
+        const rect = canvas.getBoundingClientRect();
+        const currentOffsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        const tapX = ((clientX - rect.left) / scaleFactor) - currentOffsetX;
+        const tapY = (clientY - rect.top) / scaleFactor;
+
+        for (let i = 0; i < activeBalloons.length; i++) {
+            let b = activeBalloons[i];
+            if (b.isPopped) continue;
+
+            let dx = tapX - b.x;
+            let dy = tapY - b.y;
+            if (Math.sqrt(dx * dx + dy * dy) < b.radius + 15) { 
+                pinMascot.targetX = b.x;
+                pinMascot.targetY = b.y + 20; 
+                pinMascot.state = "flying";
+                pinMascot.assignedBalloon = b;
+                freezeTimerActive = true; 
+                break;
+            }
+        }
+    }
+
+    function processBalloonInteraction(b) {
+        if(b.isCorrect) {
+            b.isPopped = true;
+            score += 10;
+            poppedCount++;
+            
+            speechBubble.x = b.x;
+            speechBubble.y = b.y;
+            speechBubble.text = "Perfect Match! ✨";
+            speechBubble.color = "#10b981";
+            speechBubble.visible = true;
+
+            sounds.correct();
+        } else {
+            b.shakeTimer = 30;
+            hearts--;
+            
+            speechBubble.x = b.x;
+            speechBubble.y = b.y;
+            speechBubble.text = "Oops! Trick Word! ❌";
+            speechBubble.color = "#ef4444";
+            speechBubble.visible = true;
+
+            sounds.wrong();
+        }
+
+        updateHUD();
+
+        setTimeout(() => {
+            speechBubble.visible = false;
+            pinMascot.targetX = pinMascot.homeX;
+            pinMascot.targetY = pinMascot.homeY;
+            pinMascot.state = "returning";
+        }, 1400);
+    }
+
+    function evaluateProgressionNextStep() {
+        freezeTimerActive = false;
+        
+        if (hearts <= 0) {
+            endGameSummary(false);
+            return;
+        }
+
+        // Advance to next collocation card
+        currentQuestionIdx++;
+        initQuestionRound();
+    }
+
+    function endGameSummary(isWin) {
+        gameActive = false;
+        document.getElementById('uiOverlay').style.display = 'none';
+        document.getElementById('finalScore').innerText = `Final Score: ${score}`;
+        
+        const title = document.getElementById('completionTitle');
+        const subtitle = document.getElementById('completionSubtitle');
+        const nextBtn = document.getElementById('nextLevelBtn');
+
+        if (isWin) {
+            if (currentLevelIndex === 1) {
+                title.innerText = "Level 1 Clear! 🎉";
+                subtitle.innerText = "You have unlocked Level 2!";
+                nextBtn.style.display = "inline-block";
+            } else {
+                title.innerText = "Collocation King! 👑";
+                subtitle.innerText = "Amazing complete master over Collocations!";
+                nextBtn.style.display = "none";
+            }
+        } else {
+            title.innerText = "Try Again! 👍";
+            subtitle.innerText = "Keep practicing to master all words.";
+            nextBtn.style.display = "none";
+        }
+        
+        document.getElementById('completionScreen').style.display = 'flex';
+    }
+
+    function advanceLevel() {
+        document.getElementById('completionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        currentLevelIndex = 2;
+        currentQuestionIdx = 0;
+        hearts = 3;
+        score = 0;
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+
+        // Shuffle backend database and pull a new batch of 20 questions
+        let masterPool = [...COLLOCATION_DATABASE].sort(() => Math.random() - 0.5);
+        activeQuestions = masterPool.slice(0, 20);
+
+        initQuestionRound();
+        gameActive = true;
+    }
+
+    function restartGame() {
+        document.getElementById('completionScreen').style.display = 'none';
+        startGame();
+    }
+
+    function toggleMute() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('mute-btn').innerText = soundEnabled ? '🔊' : '🔇';
+    }
+
+    function handleLogoFallback(id) {
+        // Fallback placeholder vector
+        const parent = document.getElementById('splash-logo-container');
+        if (parent) {
+            parent.innerHTML = `
+                <svg class="w-24 h-24 text-pink-500 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="12" r="10" fill="#fbcfe8"></circle>
+                  <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="6" font-family="'Lexend', sans-serif" font-weight="bold" fill="#be185d">INNOVINE</text>
+                </svg>
+            `;
+        }
+    }
+
+    function update() {
+        if (!gameActive) return;
+
+        pinMascot.frame += 0.06;
+
+        if (pinMascot.state === "flying") {
+            let dx = pinMascot.targetX - pinMascot.x;
+            let dy = pinMascot.targetY - pinMascot.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            
+            pinMascot.rotation = Math.atan2(dy, dx) + Math.PI/2;
+
+            if (dist > 15) {
+                pinMascot.x += dx * 0.25;
+                pinMascot.y += dy * 0.25;
+            } else {
+                pinMascot.x = pinMascot.targetX;
+                pinMascot.y = pinMascot.targetY;
+                pinMascot.state = "popping";
+                processBalloonInteraction(pinMascot.assignedBalloon);
+            }
+        } else if (pinMascot.state === "returning") {
+            let dx = pinMascot.targetX - pinMascot.x;
+            let dy = pinMascot.targetY - pinMascot.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            
+            pinMascot.rotation = Math.atan2(dy, dx) + Math.PI/2;
+
+            if (dist > 15) {
+                pinMascot.x += dx * 0.20;
+                pinMascot.y += dy * 0.20;
+            } else {
+                pinMascot.x = pinMascot.homeX;
+                pinMascot.y = pinMascot.homeY;
+                pinMascot.rotation = 0;
+                pinMascot.state = "idle";
+                evaluateProgressionNextStep();
+            }
+        } else if (pinMascot.state === "idle") {
+            pinMascot.rotation = 0;
+            pinMascot.x += (pinMascot.homeX - pinMascot.x) * 0.12;
+            pinMascot.y += (pinMascot.homeY - pinMascot.y) * 0.12;
+        }
+
+        activeBalloons.forEach(b => {
+            if (b.shakeTimer > 0) {
+                b.shakeTimer--;
+                b.shakeOffset = Math.sin(b.shakeTimer * 0.8) * 6;
+            } else {
+                b.shakeOffset = 0;
+            }
+        });
+    }
+
+    function drawMascotPin(ctx, mx, my, rotation) {
+        ctx.save();
+        ctx.translate(mx, my);
+        ctx.rotate(rotation);
+        
+        let hoverY = (pinMascot.state === "idle") ? Math.sin(pinMascot.frame) * 5 : 0;
+        ctx.translate(0, hoverY);
+        
+        // Soft drop shadow
+        ctx.fillStyle = "rgba(15,23,42,0.12)";
+        ctx.beginPath();
+        ctx.arc(0, 32, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Shiny steel needle body point
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 7;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(0, -10);
+        ctx.lineTo(0, 28);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(2, -10);
+        ctx.lineTo(2, 25);
+        ctx.stroke();
+
+        // Round Jelly Head Container
+        ctx.fillStyle = "#ff477e";
+        ctx.beginPath();
+        ctx.arc(0, -32, 26, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#1e1b4b";
+        ctx.lineWidth = 5;
+        ctx.stroke();
+
+        // Eye whites
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(-8, -34, 8, 0, Math.PI * 2);
+        ctx.arc(8, -34, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#1e1b4b";
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Big animated pupils looking slightly up
+        ctx.fillStyle = "#0f172a";
+        ctx.beginPath();
+        ctx.arc(-7.5, -36, 4, 0, Math.PI * 2);
+        ctx.arc(7.5, -36, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Cheerful blushing cheeks
+        ctx.fillStyle = "rgba(244,63,94,0.6)";
+        ctx.beginPath();
+        ctx.arc(-15, -24, 4.5, 0, Math.PI * 2);
+        ctx.arc(12, -24, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Happy little mouth line
+        ctx.strokeStyle = "#1e1b4b";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, -26, 5, 0, Math.PI);
+        ctx.stroke();
+
+        // Glassy sheen highlight spot
+        ctx.fillStyle = "rgba(255,255,255,0.45)";
+        ctx.beginPath();
+        ctx.arc(-10, -44, 5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+    }
+
+    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            let word = words[i];
+            let width = ctx.measureText(currentLine + " " + word).width;
+            if (width < maxWidth) {
+                currentLine += " " + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+
+        let totalHeight = lines.length * lineHeight;
+        let startY = y - (totalHeight / 2) + (lineHeight / 2);
+        
+        for (let j = 0; j < lines.length; j++) {
+            ctx.strokeText(lines[j], x, startY + (j * lineHeight));
+            ctx.fillText(lines[j], x, startY + (j * lineHeight));
+        }
+    }
+
+    function drawFeedbackBubble(bx, by, text, color) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 4;
+        
+        let bW = 250;
+        let bH = 55;
+        let tX = bx - bW / 2;
+        let tY = by - 130;
+
+        if (tX < 15) tX = 15;
+        if (tX + bW > BASE_WIDTH) tX = BASE_WIDTH - bW - 15;
+
+        ctx.beginPath();
+        ctx.roundRect(tX, tY, bW, bH, 18);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(bx, tY + bH);
+        ctx.lineTo(bx - 12, tY + bH + 12);
+        ctx.lineTo(bx + 12, tY + bH);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "900 16px 'Lexend'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, tX + bW / 2, tY + bH / 2);
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameActive) return;
+
+        ctx.save();
+        
+        let offsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        ctx.scale(scaleFactor, scaleFactor);
+        ctx.translate(offsetX, 0);
+
+        // Backdrop colors
+        let parkBg = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
+        parkBg.addColorStop(0, "#bae6fd");
+        parkBg.addColorStop(0.6, "#f0fdf4");
+        parkBg.addColorStop(1, "#bbf7d0");
+        ctx.fillStyle = parkBg;
+        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+        // Grass hills
+        ctx.fillStyle = "#4ade80";
+        ctx.beginPath();
+        ctx.arc(120, BASE_HEIGHT + 160, 280, 0, Math.PI * 2);
+        ctx.arc(BASE_WIDTH - 80, BASE_HEIGHT + 190, 310, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Render Balloons Loop
+        activeBalloons.forEach(b => {
+            if (b.isPopped) return;
+
+            ctx.save();
+            let currentBob = Math.sin((pinMascot.frame * 0.4) + b.bobOffset) * 6;
+            ctx.translate(b.x + b.shakeOffset, b.y + currentBob);
+
+            // Shaded string tails
+            ctx.strokeStyle = "rgba(71, 85, 105, 0.35)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, b.radius);
+            ctx.bezierCurveTo(-5, b.radius+10, 5, b.radius+15, 0, b.radius+25);
+            ctx.stroke();
+
+            // Colored Balloon Base
+            ctx.fillStyle = b.color;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, b.radius * 0.94, b.radius * 1.06, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = "#312e81";
+            ctx.lineWidth = 5;
+            ctx.stroke();
+
+            // Reflection curve
+            ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+            ctx.beginPath();
+            ctx.ellipse(-b.radius * 0.38, -b.radius * 0.45, b.radius * 0.16, b.radius * 0.26, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // High contrast typography
+            ctx.fillStyle = "#1e1b4b";
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 5.5; 
+            ctx.lineJoin = "round";
+            
+            ctx.font = "900 17px 'Lexend'"; 
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            
+            drawWrappedText(ctx, b.text, 0, -2, b.radius * 1.5, 20);
+
+            ctx.restore();
+        });
+
+        // Draw pin mascot
+        drawMascotPin(ctx, pinMascot.x, pinMascot.y, pinMascot.rotation);
+
+        // Speech bubble popups
+        if (speechBubble.visible) {
+            drawFeedbackBubble(speechBubble.x, speechBubble.y, speechBubble.text, speechBubble.color);
+        }
+
+        ctx.restore();
+    }
+
+    function mainLoop() {
+        update();
+        render();
+        requestAnimationFrame(mainLoop);
+    }
+    
+    mainLoop();
+</script>
+</body>
+</html>
