@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Spellbound Nouns: Magic Shop Adventure!</title>
+  <!-- Google Fonts for Kids -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { 
+      width: 100%; 
+      height: 100%; 
+      overflow: hidden; 
+      background-color: #faf5ff; 
+      font-family: 'Lexend', sans-serif;
+    }
+    
+    /* Premium Centered Game Container Shell */
+    #gameContainer { 
+      position: relative; 
+      width: 100%; 
+      height: 100%; 
+      max-width: 540px; 
+      max-height: 960px; 
+      margin: 0 auto; 
+      background: linear-gradient(to bottom, #f3e8ff 0%, #fae8ff 100%); 
+      overflow: hidden; 
+      box-shadow: 0 20px 50px rgba(88, 28, 135, 0.15); 
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+    
+    /* Glassmorphism UI Screens */
+    .screen { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 10; 
+      padding: 30px; 
+      text-align: center; 
+      backdrop-filter: blur(8px);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* Screen 0: Brand Logo - Pure Premium White (True Full-Screen Blank Screen) */
+    #logoScreen { background-color: #ffffff; z-index: 100; }
+    #logoScreen img { max-width: 65%; max-height: 35%; object-fit: contain; }
+    
+    /* Loading Bar on Logo Screen */
+    .loading-bar-container {
+      width: 180px;
+      height: 6px;
+      background-color: #e2e8f0;
+      border-radius: 10px;
+      margin-top: 30px;
+      overflow: hidden;
+    }
+    .loading-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+      width: 0%;
+      border-radius: 10px;
+      animation: loadProgress 5s linear forwards;
+    }
+    
+    @keyframes loadProgress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    
+    /* Screen 2: Game Title Splash Menu */
+    #titleScreen { background: radial-gradient(circle, #fae8ff 0%, #faf5ff 100%); z-index: 90; display: none; }
+    #titleScreen h1 { 
+      color: #6b21a8; 
+      font-size: 38px; 
+      margin-bottom: 35px; 
+      line-height: 1.2; 
+      font-weight: 900; 
+      font-family: 'Fredoka', sans-serif;
+      animation: floatTitle 3s ease-in-out infinite;
+    }
+    
+    @keyframes floatTitle {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-8px) rotate(1deg); }
+    }
+    
+    /* Screen 3: Interactive Mission Instructions */
+    #instructionScreen { 
+      background: rgba(255, 255, 255, 0.96); 
+      z-index: 85; 
+      display: none; 
+      border: 8px solid #f3e8ff; 
+      border-radius: 40px; 
+      color: #1e293b; 
+    }
+    
+    /* Premium Fancy Rounded 3D Buttons */
+    .btn { 
+      background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%); 
+      color: #ffffff; 
+      border: 3px solid #7e22ce; 
+      padding: 16px 42px; 
+      font-size: 22px; 
+      font-weight: 900; 
+      border-radius: 50px; 
+      cursor: pointer; 
+      box-shadow: 0 8px 0px #7e22ce, 0 15px 20px rgba(168,85,247,0.25); 
+      text-transform: uppercase; 
+      transition: all 0.1s ease; 
+      margin-top: 30px; 
+      letter-spacing: 1px;
+      font-family: 'Fredoka', sans-serif;
+    }
+    .btn:active { box-shadow: 0 2px 0px #7e22ce, 0 5px 10px rgba(168,85,247,0.25); transform: translateY(6px); }
+    
+    .big-bold-text { font-size: 18px; font-weight: 800; line-height: 1.5; margin-bottom: 14px; color: #475569; }
+    
+    /* HUD Top Dashboard Area Overlay */
+    #uiOverlay { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      padding: 20px 15px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      z-index: 20; 
+      pointer-events: none; 
+      display: none; 
+      align-items: center; 
+    }
+    #targetPrompt { 
+      font-size: 18px; 
+      font-weight: 900; 
+      color: #581c87; 
+      text-align: center; 
+      line-height: 1.35; 
+    }
+    #progressText { 
+      font-size: 14px; 
+      font-weight: 900; 
+      color: #7e22ce; 
+      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); 
+      padding: 6px 20px; 
+      border-radius: 25px; 
+      border: 3px solid #e9d5ff; 
+      display: inline-block; 
+      box-shadow: 0 6px 12px rgba(126,34,206,0.15); 
+    }
+    
+    .hud-row { display: flex; justify-content: space-between; width: 100%; margin-top: 4px; pointer-events: none; }
+    .ui-element { background: rgba(255, 255, 255, 0.95); color: #581c87; padding: 8px 16px; border-radius: 25px; font-size: 14px; font-weight: 900; border: 3px solid #f3e8ff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    
+    /* Completion Performance Card */
+    #completionScreen { background: radial-gradient(circle, #ffffff 0%, #faf5ff 100%); display: none; z-index: 80; color: #581c87; }
+  </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <!-- Pure blank white logo screen on loading -->
+    <div id="logoScreen" class="screen">
+        <img src="https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp1/assets/innovine-logo.png" alt="Innovine Logo" onerror="handleLogoFallback()">
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- Title Screen -->
+    <div id="titleScreen" class="screen">
+        <h1 class="game-title-font">SPELLBOUND NOUNS! 🔮</h1>
+        <p style="font-size: 18px; font-weight:bold; color: #7e22ce; margin-top: -20px; margin-bottom: 20px;">Magic Shop Adventure</p>
+        <button class="btn" onclick="showInstructions()">Enter Shop ➔</button>
+    </div>
+
+    <!-- Instruction Screen -->
+    <div id="instructionScreen" class="screen">
+        <div class="big-bold-text" style="color: #7e22ce; font-size: 34px; margin-bottom: 20px; font-weight: 900; font-family: 'Fredoka', sans-serif;">Wizard's Quest! ✨</div>
+        <div class="big-bold-text" style="font-size: 17px; background: #faf5ff; padding: 15px; border-radius: 20px; border: 3px dashed #d8b4fe; color: #581c87;">Read the real-life question at the top of the shop!</div>
+        <div class="big-bold-text" style="margin-top: 15px;">📍 Drag the little wizard directly onto the correct potion bottle to harvest it!</div>
+        <div class="big-bold-text" style="color: #c084fc;">🔮 Watch out for trick answers! Keep your magical hearts safe!</div>
+        <button class="btn" style="background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%); box-shadow: 0 8px 0px #7e22ce; border-color: #7e22ce;" onclick="startGame()">Start Spell 🚀</button>
+    </div>
+
+    <!-- HUD dashboard panel -->
+    <div id="uiOverlay">
+        <div id="targetPrompt">LOADING MISSION...</div>
+        <div id="progressText">Question: 1 / 10</div>
+        <div class="hud-row">
+            <div id="scoreLabel" class="ui-element">Score: 0</div>
+            <div id="levelLabel" class="ui-element" style="color: #7e22ce; background: #faf5ff; border-color: #e9d5ff;">Level: 1</div>
+            <div id="heartsLabel" class="ui-element" style="color: #ef4444; background: #fee2e2; border-color: #fca5a5;">Hearts: ❤️❤️❤️</div>
+        </div>
+    </div>
+    
+    <!-- Game End Screen -->
+    <div id="completionScreen" class="screen">
+        <h1 id="completionTitle" style="font-size: 36px; margin-bottom: 15px; font-weight: 900; font-family: 'Fredoka', sans-serif;">🔮 WIZARD KING! 👑</h1>
+        <p id="completionSubtitle" style="font-size: 18px; margin-bottom: 25px; font-weight: bold; color: #4b5563;">Superb noun classifying skills!</p>
+        <div class="ui-element" id="finalScore" style="font-size: 24px; padding: 12px 35px; border-color: #d8b4fe; background: white; margin-bottom: 35px; font-weight: 900; color: #6b21a8;">Final Score: 0</div>
+        <button id="nextLevelBtn" class="btn" style="background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%); box-shadow: 0 8px 0px #7e22ce; border-color: #7e22ce; margin-bottom: 12px;" onclick="advanceLevel()">Level 2 ➔</button>
+        <button class="btn" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #78350f; box-shadow: 0 8px 0px #d97706; border-color: #d97706;" onclick="restartGame()">Play Again 🔄</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Remote audio assets with paths from chp1 assets (Nouns folder)
+    const sndCorrect = new Audio('https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp1/assets/correct.mp3');
+    const sndWrong = new Audio('https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp1/assets/wrong.mp3');
+
+    let soundEnabled = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Trigger local synthesizer fallback for low connectivity
+    function triggerSynth(frequency, duration, type = "sine", gainVal = 0.08) {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn("Synth state: busy");
+      }
+    }
+
+    const sounds = {
+      correct: () => {
+        sndCorrect.play().catch(() => {
+          // Playful magic chime fallback
+          triggerSynth(587.33, 0.12, 'sine'); // D5
+          setTimeout(() => triggerSynth(783.99, 0.22, 'sine'), 80); // G5
+        });
+      },
+      wrong: () => {
+        sndWrong.play().catch(() => {
+          // Buzz fallback
+          triggerSynth(180, 0.25, 'triangle', 0.15);
+        });
+      },
+      zap: () => {
+        // Star zap sound
+        triggerSynth(400, 0.12, 'sine', 0.05);
+        setTimeout(() => triggerSynth(200, 0.12, 'sine', 0.02), 50);
+      }
+    };
+
+    // Safe Backward-Compatible Rounded Rect Drawing Functions
+    function fillRoundedRect(context, x, y, width, height, radius) {
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.lineTo(x + width - radius, y);
+        context.quadraticCurveTo(x + width, y, x + width, y + radius);
+        context.lineTo(x + width, y + height - radius);
+        context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        context.lineTo(x + radius, y + height);
+        context.quadraticCurveTo(x, y + height, x, y + height - radius);
+        context.lineTo(x, y + radius);
+        context.quadraticCurveTo(x, y, x + radius, y);
+        context.closePath();
+        context.fill();
+    }
+
+    function strokeRoundedRect(context, x, y, width, height, radius) {
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.lineTo(x + width - radius, y);
+        context.quadraticCurveTo(x + width, y, x + width, y + radius);
+        context.lineTo(x + width, y + height - radius);
+        context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        context.lineTo(x + radius, y + height);
+        context.quadraticCurveTo(x, y + height, x, y + height - radius);
+        context.lineTo(x, y + radius);
+        context.quadraticCurveTo(x, y, x + radius, y);
+        context.closePath();
+        context.stroke();
+    }
+
+    // Responsive Canvas System
+    const BASE_WIDTH = 600;
+    const BASE_HEIGHT = 900;
+    let scaleFactor = 1;
+
+    function resize() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        scaleFactor = Math.min(canvas.width / BASE_WIDTH, canvas.height / BASE_HEIGHT);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 25 Backend Questions (Apply and above, Real-life Connect)
+    const NOUNS_DATABASE = [
+      // Level 1: Identification & Real-life Selection (13 Questions)
+      { type: "proper", q: "Writing a letter: 'Dear ______,' Which word needs capitalization?", a: "samantha", wrongs: ["friend", "girl"], lvl: 1 },
+      { type: "collective", q: "At the safari park: 'Look! A ______ of lions is sleeping.'", a: "pride", wrongs: ["herd", "pack"], lvl: 1 },
+      { type: "common", q: "Observing pets: 'My dog, Max, chased a ball.' Which word is a Common Noun?", a: "dog", wrongs: ["Max", "chased"], lvl: 1 },
+      { type: "proper", q: "Labeling holidays: Which day is a Proper Noun and must be capitalized?", a: "Thanksgiving", wrongs: ["celebration", "feast"], lvl: 1 },
+      { type: "collective", q: "On the farm: 'We fed a fluffy ______ of chickens.'", a: "brood", wrongs: ["swarm", "pack"], lvl: 1 },
+      { type: "proper", q: "Traveling: 'We camped inside Yellowstone last summer.' Which word is a Proper Noun?", a: "Yellowstone", wrongs: ["summer", "camped"], lvl: 1 },
+      { type: "collective", q: "At the concert: 'The ______ of musicians played on stage.'", a: "band", wrongs: ["bunch", "flock"], lvl: 1 },
+      { type: "common", q: "Visiting shops: 'We bought delicious bread at the bakery.' Which word is a Common Noun?", a: "bakery", wrongs: ["bought", "delicious"], lvl: 1 },
+      { type: "proper", q: "Studying landmarks: 'The ______ Tower is in Paris.' Which word needs a capital letter?", a: "Eiffel", wrongs: ["metal", "tall"], lvl: 1 },
+      { type: "collective", q: "At the aquarium: 'We watched a giant ______ of fish swim past.'", a: "school", wrongs: ["pack", "crew"], lvl: 1 },
+      { type: "proper", q: "Grammar check: 'Mrs. Smith is very helpful.' What type of noun is Mrs. Smith?", a: "Proper Noun", wrongs: ["Common Noun", "Collective Noun"], lvl: 1 },
+      { type: "collective", q: "At the harbor: 'The friendly ______ of sailors worked together.'", a: "crew", wrongs: ["army", "bunch"], lvl: 1 },
+      { type: "proper", q: "Looking at planets: 'The spaceship landed safely on mars.' Which word is Mars?", a: "Proper Noun", wrongs: ["Common Noun", "Action Noun"], lvl: 1 },
+
+      // Level 2: Analysis & Tricky Application (12 Questions)
+      { type: "collective", q: "Sports: 'Our school team won the championship trophy!' Which word is a Collective Noun?", a: "team", wrongs: ["trophy", "won"], lvl: 2 },
+      { type: "collective", q: "Hiking: 'We saw a giant swarm of bees near the lake.' Which word is a Collective Noun?", a: "swarm", wrongs: ["bees", "lake"], lvl: 2 },
+      { type: "proper", q: "Geography quiz: Which country name is a Proper Noun?", a: "Canada", wrongs: ["country", "island"], lvl: 2 },
+      { type: "collective", q: "Wildlife safari: 'A herd of wild elephants crossed the plains.' Which word is a Collective Noun?", a: "herd", wrongs: ["elephants", "grasslands"], lvl: 2 },
+      { type: "common", q: "Playground: 'The happy children kicked a soccer ball.' Which word is a Common Noun?", a: "children", wrongs: ["kicked", "happy"], lvl: 2 },
+      { type: "proper", q: "Writing calendars: Which Proper Noun is spelled correctly?", a: "Friday", wrongs: ["friday", "day"], lvl: 2 },
+      { type: "collective", q: "Camping: 'A pack of wolves howled at the bright moon.' Which word is a Collective Noun?", a: "pack", wrongs: ["wolves", "moon"], lvl: 2 },
+      { type: "collective", q: "Picnic: 'An army of ants crawled on our blanket.' Which word is a Collective Noun?", a: "army", wrongs: ["ants", "blanket"], lvl: 2 },
+      { type: "proper", q: "Postcards: 'The cold rain fell on london all afternoon.' Which word needs a capital letter?", a: "London", wrongs: ["rain", "afternoon"], lvl: 2 },
+      { type: "common", q: "Groceries: 'I bought sweet apples from the market.' Which word is a Common Noun?", a: "market", wrongs: ["sweet", "bought"], lvl: 2 },
+      { type: "collective", q: "School library: 'The collection of books on shelves was neat.' A ______ of books.", a: "library", wrongs: ["pack", "flock"], lvl: 2 },
+      { type: "proper", q: "Holiday plan: 'We planned a trip on Sunday morning.' Which word is a Proper Noun?", a: "Sunday", wrongs: ["trip", "morning"], lvl: 2 }
+    ];
+
+    // Game states
+    let score = 0;
+    let hearts = 3;
+    let gameActive = false;
+    let freezeTimerActive = false;
+    let currentLevelIndex = 1;
+    let activeQuestions = [];
+    let currentQuestionIdx = 0;
+    let activePotions = []; // Drifting options
+    let magicParticles = [];
+    let sparklingStars = [];
+
+    // Drag-and-drop state parameters
+    let isDragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    let speechBubble = { x: 0, y: 0, text: "", color: "#7e22ce", visible: false };
+
+    // Cute Wizard Mascot definition
+    const WIZARD_HOME_X = BASE_WIDTH / 2;
+    const WIZARD_HOME_Y = BASE_HEIGHT - 130;
+
+    let wizard = {
+        homeX: WIZARD_HOME_X,
+        homeY: WIZARD_HOME_Y,
+        x: WIZARD_HOME_X,
+        y: WIZARD_HOME_Y,
+        targetX: WIZARD_HOME_X,
+        state: "idle", // "idle", "casting", "waiting", "returning"
+        castTimer: 0,
+        targetAngle: 0,
+        currentAngle: 0,
+        frame: 0,
+        assignedPotion: null
+    };
+
+    // Splash Loader sequence
+    setTimeout(() => {
+        document.getElementById('logoScreen').style.display = 'none';
+        document.getElementById('titleScreen').style.display = 'flex';
+    }, 5000);
+
+    function showInstructions() {
+        document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('instructionScreen').style.display = 'flex';
+    }
+
+    function startGame() {
+        document.getElementById('instructionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        score = 0;
+        hearts = 3;
+        currentLevelIndex = 1;
+        currentQuestionIdx = 0;
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+        magicParticles = [];
+        isDragging = false;
+        
+        // Reset Wizard parameters
+        wizard.x = wizard.homeX;
+        wizard.y = wizard.homeY;
+        wizard.targetX = wizard.homeX;
+        wizard.state = "idle";
+        wizard.castTimer = 0;
+        wizard.frame = 0;
+        wizard.assignedPotion = null;
+
+        // Shuffle backend database (Nouns)
+        let level1Pool = NOUNS_DATABASE.filter(x => x.lvl === 1).sort(() => Math.random() - 0.5);
+        let level2Pool = NOUNS_DATABASE.filter(x => x.lvl === 2).sort(() => Math.random() - 0.5);
+        
+        // Take exactly 10 questions per level to make up 20 questions in all
+        activeQuestions = [...level1Pool.slice(0, 10), ...level2Pool.slice(0, 10)];
+
+        initQuestionRound();
+        gameActive = true;
+    }
+
+    function initQuestionRound() {
+        if (currentQuestionIdx >= 10 && currentLevelIndex === 1) {
+            currentLevelIndex = 2;
+        }
+
+        if (currentQuestionIdx >= 20) {
+            endGameSummary(true);
+            return;
+        }
+
+        activePotions = [];
+        const q = activeQuestions[currentQuestionIdx];
+
+        // Format prompt at the HUD
+        document.getElementById('targetPrompt').innerHTML = q.q;
+
+        // Construct 3 choice potions
+        let choices = [
+            { text: q.a, isCorrect: true },
+            { text: q.wrongs[0], isCorrect: false },
+            { text: q.wrongs[1], isCorrect: false }
+        ].sort(() => Math.random() - 0.5);
+
+        // Highly separated vertical lanes to prevent overlapping
+        const heights = [210, 370, 530]; 
+        const softColors = ["#c084fc", "#e879f9", "#fb7185", "#38bdf8"];
+
+        choices.forEach((choice, idx) => {
+            // Generate non-overlapping horizontal positions statically
+            const rx = 80 + Math.random() * (BASE_WIDTH - 160);
+
+            activePotions.push({
+                x: rx,
+                y: heights[idx],
+                radius: 40,
+                color: softColors[idx % softColors.length],
+                text: choice.text,
+                isCorrect: choice.isCorrect,
+                speedX: 0, // Words do not fly!
+                direction: 1,
+                isPopped: false,
+                shakeOffset: 0,
+                shakeTimer: 0,
+                bobOffset: Math.random() * 100
+            });
+        });
+
+        updateHUD();
+    }
+
+    function updateHUD() {
+        document.getElementById('scoreLabel').innerText = `Score: ${score}`;
+        document.getElementById('levelLabel').innerText = `Level: ${currentLevelIndex}`;
+        document.getElementById('progressText').innerText = `Progress: ${(currentQuestionIdx % 10) + 1} / 10`;
+        let heartStr = "Hearts: ";
+        for(let i=0; i<3; i++) heartStr += (i < hearts) ? "❤️" : "🖤";
+        document.getElementById('heartsLabel').innerText = heartStr;
+    }
+
+    // Mapping coordinates to high precision virtual resolution
+    function getVirtualCoords(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const currentOffsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        const virtualX = ((clientX - rect.left) / scaleFactor) - currentOffsetX;
+        const virtualY = (clientY - rect.top) / scaleFactor;
+        return { x: virtualX, y: virtualY };
+    }
+
+    // Drag controllers
+    function handleDragStart(clientX, clientY) {
+        if (!gameActive || freezeTimerActive) return;
+        const coords = getVirtualCoords(clientX, clientY);
+        
+        // Check touch proximity to the little wizard
+        const dist = Math.hypot(coords.x - wizard.x, coords.y - (wizard.y - 15));
+        if (dist < 60) { 
+            isDragging = true;
+            dragOffsetX = coords.x - wizard.x;
+            dragOffsetY = coords.y - wizard.y;
+        }
+    }
+
+    function handleDragMove(clientX, clientY) {
+        if (!isDragging || !gameActive || freezeTimerActive) return;
+        const coords = getVirtualCoords(clientX, clientY);
+        
+        // Dynamic position update bounded inside our screen walls
+        wizard.x = Math.max(30, Math.min(BASE_WIDTH - 30, coords.x - dragOffsetX));
+        wizard.y = Math.max(100, Math.min(BASE_HEIGHT - 100, coords.y - dragOffsetY));
+        
+        checkPotionCollision();
+    }
+
+    function handleDragEnd() {
+        isDragging = false;
+    }
+
+    function checkPotionCollision() {
+        if (freezeTimerActive) return;
+        
+        for (let i = 0; i < activePotions.length; i++) {
+            let b = activePotions[i];
+            if (b.isPopped) continue;
+            
+            // Checking body overlap with potions
+            let dist = Math.hypot(wizard.x - b.x, wizard.y - b.y);
+            if (dist < 60) { 
+                isDragging = false; // Stop dragging immediately
+                freezeTimerActive = true;
+                wizard.assignedPotion = b;
+                processPotionInteraction(b);
+                break;
+            }
+        }
+    }
+
+    // Bind touch / mouse drag events
+    window.addEventListener('mousedown', (e) => { handleDragStart(e.clientX, e.clientY); });
+    window.addEventListener('mousemove', (e) => { handleDragMove(e.clientX, e.clientY); });
+    window.addEventListener('mouseup', handleDragEnd);
+
+    window.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
+    window.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+            e.preventDefault(); // Stop mobile scroll pull-to-refresh
+            handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: false });
+    window.addEventListener('touchend', handleDragEnd);
+
+    function processPotionInteraction(b) {
+        // Trigger spellcasting pose sequences
+        wizard.state = "casting";
+        wizard.castTimer = 25;
+        sounds.zap();
+    }
+
+    function createMagicSplash(x, y, color) {
+        for (let i = 0; i < 20; i++) {
+            magicParticles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                radius: Math.random() * 4 + 2,
+                color: color,
+                alpha: 1
+            });
+        }
+    }
+
+    function evaluateProgressionNextStep() {
+        freezeTimerActive = false;
+        
+        if (hearts <= 0) {
+            endGameSummary(false);
+            return;
+        }
+
+        // Advance to next noun question
+        currentQuestionIdx++;
+        
+        // Level Transition checks
+        if (currentQuestionIdx === 10 && currentLevelIndex === 1) {
+            endGameSummary(true);
+        } else {
+            initQuestionRound();
+        }
+    }
+
+    function endGameSummary(isWin) {
+        gameActive = false;
+        document.getElementById('uiOverlay').style.display = 'none';
+        document.getElementById('finalScore').innerText = `Final Score: ${score}`;
+        
+        const title = document.getElementById('completionTitle');
+        const subtitle = document.getElementById('completionSubtitle');
+        const nextBtn = document.getElementById('nextLevelBtn');
+
+        if (isWin) {
+            if (currentLevelIndex === 1) {
+                title.innerText = "Level 1 Clear! 🔮";
+                subtitle.innerText = "Super Spellcasting! Get ready for Level 2!";
+                nextBtn.style.display = "inline-block";
+            } else {
+                title.innerText = "WIZARD KING! 👑";
+                subtitle.innerText = "Amazing master over Common, Proper, and Collective Nouns!";
+                nextBtn.style.display = "none";
+            }
+        } else {
+            title.innerText = "Try Again! 👍";
+            subtitle.innerText = "Keep practicing to find the correct magic scrolls.";
+            nextBtn.style.display = "none";
+        }
+        
+        document.getElementById('completionScreen').style.display = 'flex';
+    }
+
+    function advanceLevel() {
+        document.getElementById('completionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        currentLevelIndex = 2;
+        hearts = 3;
+        score = 0;
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+        magicParticles = [];
+
+        initQuestionRound();
+        gameActive = true;
+    }
+
+    function restartGame() {
+        document.getElementById('completionScreen').style.display = 'none';
+        startGame();
+    }
+
+    function toggleMute() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('mute-btn').innerText = soundEnabled ? '🔊' : '🔇';
+    }
+
+    function handleLogoFallback() {
+        const parent = document.getElementById('logoScreen');
+        if (parent) {
+            parent.innerHTML = `
+                <div class="flex flex-col items-center gap-4">
+                  <svg class="w-24 h-24 text-purple-600 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" fill="#f3e8ff"></polygon>
+                    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="4.5" font-family="'Lexend', sans-serif" font-weight="bold" fill="#7e22ce">INNOVINE</text>
+                  </svg>
+                  <p class="text-xs text-purple-800 font-extrabold tracking-widest uppercase animate-pulse">Entering Magic Shop...</p>
+                </div>
+            `;
+        }
+    }
+
+    // --- COZY DECORATIVE BACKGROUND STARS ---
+    function setupShopTwinkle() {
+        sparklingStars = [];
+        for (let i = 0; i < 6; i++) {
+            sparklingStars.push({
+                x: Math.random() * BASE_WIDTH,
+                y: 100 + Math.random() * 200,
+                size: 15 + Math.random() * 15,
+                angle: Math.random() * Math.PI
+            });
+        }
+    }
+    setupShopTwinkle();
+
+    function update() {
+        if (!gameActive) return;
+
+        wizard.frame += 0.1;
+
+        // Player Wizard state engine
+        if (wizard.state === "casting") {
+            wizard.castTimer--;
+            
+            // Mid-cast spell beam resolution
+            if (wizard.castTimer === 12) {
+                const b = wizard.assignedPotion;
+                if(b.isCorrect) {
+                    b.isPopped = true;
+                    score += 10;
+                    poppedCount++;
+                    
+                    speechBubble.x = b.x;
+                    speechBubble.y = b.y;
+                    speechBubble.text = "Spell Successful! ✨";
+                    speechBubble.color = "#a855f7";
+                    speechBubble.visible = true;
+
+                    sounds.correct();
+                    createMagicSplash(b.x, b.y, "#c084fc");
+                } else {
+                    b.shakeTimer = 30;
+                    hearts--;
+                    
+                    speechBubble.x = b.x;
+                    speechBubble.y = b.y;
+                    speechBubble.text = "Magic Fizzle! ❌";
+                    speechBubble.color = "#ef4444";
+                    speechBubble.visible = true;
+
+                    sounds.wrong();
+                    createMagicSplash(b.x, b.y, "#92400e");
+                }
+                updateHUD();
+            }
+
+            if (wizard.castTimer <= 0) {
+                wizard.state = "waiting";
+                setTimeout(() => {
+                    speechBubble.visible = false;
+                    wizard.state = "returning";
+                }, 1200);
+            }
+        } else if (wizard.state === "returning") {
+            // Smoothly glide both X & Y back to bottom home pedestal
+            let dx = wizard.homeX - wizard.x;
+            let dy = wizard.homeY - wizard.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist > 15) {
+                wizard.x += dx * 0.18;
+                wizard.y += dy * 0.18;
+            } else {
+                wizard.x = wizard.homeX;
+                wizard.y = wizard.homeY;
+                wizard.state = "idle";
+                evaluateProgressionNextStep(); // Safe round progression
+            }
+        }
+
+        // Apply shakes / animations to active potions
+        activePotions.forEach(b => {
+            if (b.isPopped) return;
+            if (b.shakeTimer > 0) {
+                b.shakeTimer--;
+                b.shakeOffset = Math.sin(b.shakeTimer * 0.8) * 6;
+            } else {
+                b.shakeOffset = 0;
+            }
+        });
+
+        // Update Magic particles
+        for (let i = magicParticles.length - 1; i >= 0; i--) {
+            let p = magicParticles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 0.03;
+            if (p.alpha <= 0) {
+                magicParticles.splice(i, 1);
+            }
+        }
+    }
+
+    // --- DRAW FLOATING POTION BOTTLE TARGETS ---
+    function drawFlyingBee(ctx, b) {
+        if (b.isPopped) return;
+
+        ctx.save();
+        let bobY = Math.sin((wizard.frame * 0.4) + b.bobOffset) * 6;
+        ctx.translate(b.x + b.shakeOffset, b.y + bobY);
+
+        // Glass bottle body
+        ctx.fillStyle = b.color;
+        ctx.strokeStyle = "#3b0764";
+        ctx.lineWidth = 4;
+        
+        ctx.beginPath();
+        // Bottle base dome
+        ctx.arc(0, 5, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Bottle neck
+        ctx.fillStyle = "#faf5ff";
+        ctx.fillRect(-6, -26, 12, 14);
+        ctx.strokeRect(-6, -26, 12, 14);
+
+        // Wooden cork stopper
+        ctx.fillStyle = "#78350f";
+        ctx.fillRect(-8, -32, 16, 6);
+
+        // Glass reflection shine line (translucent, no shadows)
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.beginPath();
+        ctx.ellipse(-10, -2, 6, 12, -Math.PI/6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Magic flat placard for target choice word (no shadows)
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#4c1d95";
+        ctx.lineWidth = 3.5;
+        fillRoundedRect(ctx, -65, 30, 130, 32, 8);
+        strokeRoundedRect(ctx, -65, 30, 130, 32, 8);
+
+        ctx.fillStyle = "#4c1d95";
+        ctx.font = "900 15px 'Lexend'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(b.text, 0, 46);
+
+        ctx.restore();
+    }
+
+    // --- CUTE HIGH-DETAIL WIZARD CHARACTER WITH MAGICAL WAND ---
+    function drawBeekeeperPlayer(ctx) {
+        ctx.save();
+        ctx.translate(wizard.x, wizard.y);
+
+        // 1. Soft Drop Shadow on floor
+        ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.beginPath();
+        ctx.ellipse(0, 52, 22, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Cute Little Wizard Shoes
+        ctx.fillStyle = "#4c1d95"; // deep purple shoes
+        fillRoundedRect(ctx, -16, 42, 12, 10, 3);
+        fillRoundedRect(ctx, 4, 42, 12, 10, 3);
+        ctx.strokeStyle = "#1e1b4b";
+        ctx.lineWidth = 2.5;
+        strokeRoundedRect(ctx, -16, 42, 12, 10, 3);
+        strokeRoundedRect(ctx, 4, 42, 12, 10, 3);
+
+        // 3. Wizard Robe (Purple)
+        ctx.fillStyle = "#6b21a8";
+        fillRoundedRect(ctx, -18, 0, 36, 44, 8);
+        ctx.strokeStyle = "#1e1b4b";
+        ctx.lineWidth = 4;
+        strokeRoundedRect(ctx, -18, 0, 36, 44, 8);
+
+        // Golden Robe Collar
+        ctx.fillStyle = "#facc15";
+        ctx.beginPath();
+        ctx.moveTo(-12, 0);
+        ctx.lineTo(0, 12);
+        ctx.lineTo(12, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 4. Arms & Hands holding the glowing wand
+        ctx.save();
+        let armAngle = -Math.PI / 4;
+        if (wizard.state === "casting") {
+            armAngle = -Math.PI / 2 - (25 - wizard.castTimer) * 0.15;
+        }
+        ctx.translate(-10, 14);
+        ctx.rotate(armAngle);
+
+        // Left Sleeve
+        ctx.fillStyle = "#6b21a8";
+        fillRoundedRect(ctx, -6, -2, 12, 28, 4);
+        strokeRoundedRect(ctx, -6, -2, 12, 28, 4);
+
+        // Skin Hand
+        ctx.fillStyle = "#fed7aa";
+        ctx.beginPath();
+        ctx.arc(0, 28, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // Right Arm (Aiming wand)
+        ctx.save();
+        let rightArmAngle = Math.PI / 6;
+        if (wizard.state === "casting") {
+            rightArmAngle = armAngle + 0.15;
+        }
+        ctx.translate(10, 14);
+        ctx.rotate(rightArmAngle);
+        
+        ctx.fillStyle = "#6b21a8";
+        fillRoundedRect(ctx, -6, -2, 12, 28, 4);
+        strokeRoundedRect(ctx, -6, -2, 12, 28, 4);
+
+        // Skin Hand
+        ctx.fillStyle = "#fed7aa";
+        ctx.beginPath();
+        ctx.arc(0, 28, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // 5. Friendly Wizard Face & Beard
+        ctx.fillStyle = "#fed7aa"; // face
+        ctx.beginPath();
+        ctx.arc(0, -14, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Fluffy White Wizard Beard
+        ctx.fillStyle = "#faf5ff";
+        ctx.beginPath();
+        ctx.moveTo(-14, -14);
+        ctx.bezierCurveTo(-14, 16, 14, 16, 14, -14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Little nose
+        ctx.fillStyle = "#fdba74";
+        ctx.beginPath();
+        ctx.arc(0, -12, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 6. Giant Wizard Pointy Hat with a Star!
+        ctx.save();
+        ctx.translate(0, -25);
+        ctx.fillStyle = "#4c1d95"; // deep dark purple hat
+        ctx.beginPath();
+        ctx.moveTo(-22, 0);
+        ctx.quadraticCurveTo(0, -6, 0, -45); // Pointy tip
+        ctx.quadraticCurveTo(0, -6, 22, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Hat brim
+        ctx.fillStyle = "#581c87";
+        fillRoundedRect(ctx, -26, -4, 52, 8, 3.5);
+        strokeRoundedRect(ctx, -26, -4, 52, 8, 3.5);
+
+        // Golden Star on Hat tip
+        ctx.fillStyle = "#facc15";
+        ctx.beginPath();
+        ctx.arc(0, -45, 5, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+
+        // 7. MAGICAL SPELL CASTING BEAM DRAWING
+        ctx.save();
+        let wandAngle = -Math.PI / 4;
+        if (wizard.state === "casting") {
+            wandAngle = -Math.PI / 2 - (25 - wizard.castTimer) * 0.15;
+        } else {
+            wandAngle += Math.sin(wizard.frame * 0.15) * 0.05; // Gentle sway
+        }
+        ctx.rotate(wandAngle);
+
+        // Mahogany Magic Wand
+        ctx.strokeStyle = "#7c2d12"; 
+        ctx.lineWidth = 4;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(0, 15);
+        ctx.lineTo(0, -95);
+        ctx.stroke();
+
+        // Wand Tip Crystal
+        ctx.fillStyle = "#c084fc";
+        ctx.beginPath();
+        ctx.arc(0, -100, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#faf5ff";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Glowing Star Beam Sparkles during cast
+        if (wizard.state === "casting" && wizard.castTimer > 12) {
+            ctx.save();
+            ctx.translate(0, -100);
+            ctx.strokeStyle = "#c084fc";
+            ctx.lineWidth = 4;
+            ctx.shadowColor = "#e9d5ff";
+            ctx.shadowBlur = 12;
+
+            // Reach beam line to potion bottle
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -150);
+            ctx.stroke();
+
+            // Star bursts
+            ctx.fillStyle = "#fef08a";
+            ctx.beginPath();
+            ctx.arc(0, -150, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        ctx.restore(); // end of Wand
+
+        ctx.restore(); // end of Wizard
+    }
+
+    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            let word = words[i];
+            let width = ctx.measureText(currentLine + " " + word).width;
+            if (width < maxWidth) {
+                currentLine += " " + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+
+        let totalHeight = lines.length * lineHeight;
+        let startY = y - (totalHeight / 2) + (lineHeight / 2);
+        
+        for (let j = 0; j < lines.length; j++) {
+            ctx.strokeText(lines[j], x, startY + (j * lineHeight));
+            ctx.fillText(lines[j], x, startY + (j * lineHeight));
+        }
+    }
+
+    function drawFeedbackBubble(bx, by, text, color) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 4;
+        
+        let bW = 250;
+        let bH = 55;
+        let tX = bx - bW / 2;
+        let tY = by - 130;
+
+        if (tX < 15) tX = 15;
+        if (tX + bW > BASE_WIDTH) tX = BASE_WIDTH - bW - 15;
+
+        fillRoundedRect(ctx, tX, tY, bW, bH, 18);
+        strokeRoundedRect(ctx, tX, tY, bW, bH, 18);
+
+        ctx.beginPath();
+        ctx.moveTo(bx, tY + bH);
+        ctx.lineTo(bx - 12, tY + bH + 12);
+        ctx.lineTo(bx + 12, tY + bH);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "900 16px 'Lexend'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, tX + bW / 2, tY + bH / 2);
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameActive) return;
+
+        ctx.save();
+        
+        let offsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        ctx.scale(scaleFactor, scaleFactor);
+        ctx.translate(offsetX, 0);
+
+        // Backdrop colors (Magic Shop Room)
+        let magicShopBg = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
+        magicShopBg.addColorStop(0, "#2e1065"); // Dark cozy purple
+        magicShopBg.addColorStop(0.6, "#3b0764");
+        magicShopBg.addColorStop(1, "#581c87");
+        ctx.fillStyle = magicShopBg;
+        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+        // Draw wooden cabinet shelves in the background
+        ctx.fillStyle = "#7c2d12"; // Wood shelves
+        ctx.fillRect(0, 240, BASE_WIDTH, 14);
+        ctx.fillRect(0, 400, BASE_WIDTH, 14);
+        ctx.fillRect(0, 560, BASE_WIDTH, 14);
+
+        // Draw cute little glowing book stack or candles on floor
+        ctx.fillStyle = "#fbbf24";
+        ctx.beginPath();
+        ctx.arc(60, BASE_HEIGHT - 30, 8, 0, Math.PI * 2);
+        ctx.arc(BASE_WIDTH - 60, BASE_HEIGHT - 40, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Render Flying Choice Potions
+        activePotions.forEach(b => {
+            drawFlyingBee(ctx, b);
+        });
+
+        // Draw Splash Particles
+        magicParticles.forEach(p => {
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        // Draw the Wizard
+        drawBeekeeperPlayer(ctx);
+
+        // Speech bubble popups
+        if (speechBubble.visible) {
+            drawFeedbackBubble(speechBubble.x, speechBubble.y, speechBubble.text, speechBubble.color);
+        }
+
+        ctx.restore();
+    }
+
+    function mainLoop() {
+        update();
+        render();
+        requestAnimationFrame(mainLoop);
+    }
+    
+    mainLoop();
+</script>
+</body>
+</html>
