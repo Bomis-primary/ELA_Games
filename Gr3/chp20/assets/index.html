@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Honeybee Harvest: Compound Words!</title>
+  <!-- Google Fonts for Kids -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { 
+      width: 100%; 
+      height: 100%; 
+      overflow: hidden; 
+      background-color: #fef3c7; 
+      font-family: 'Lexend', sans-serif;
+    }
+    
+    /* Premium Centered Game Container Shell */
+    #gameContainer { 
+      position: relative; 
+      width: 100%; 
+      height: 100%; 
+      max-width: 540px; 
+      max-height: 960px; 
+      margin: 0 auto; 
+      background: linear-gradient(to bottom, #fffbeb 0%, #fef3c7 100%); 
+      overflow: hidden; 
+      box-shadow: 0 20px 50px rgba(120,53,4,0.15); 
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+    
+    /* Glassmorphism UI Screens */
+    .screen { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 10; 
+      padding: 30px; 
+      text-align: center; 
+      backdrop-filter: blur(8px);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* Screen 0: Brand Logo - Pure Premium White (True Full-Screen Blank Screen) */
+    #logoScreen { background-color: #ffffff; z-index: 100; }
+    #logoScreen img { max-width: 65%; max-height: 35%; object-fit: contain; }
+    
+    /* Loading Bar on Logo Screen */
+    .loading-bar-container {
+      width: 180px;
+      height: 6px;
+      background-color: #e2e8f0;
+      border-radius: 10px;
+      margin-top: 30px;
+      overflow: hidden;
+    }
+    .loading-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      width: 0%;
+      border-radius: 10px;
+      animation: loadProgress 5s linear forwards;
+    }
+    
+    @keyframes loadProgress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    
+    /* Screen 2: Game Title Splash Menu */
+    #titleScreen { background: radial-gradient(circle, #fef08a 0%, #fef3c7 100%); z-index: 90; display: none; }
+    #titleScreen h1 { 
+      color: #92400e; 
+      font-size: 38px; 
+      margin-bottom: 35px; 
+      text-shadow: 4px 4px 0px #ffffff, -1px -1px 0px #ffffff; 
+      line-height: 1.2; 
+      font-weight: 900; 
+      font-family: 'Fredoka', sans-serif;
+      animation: floatTitle 3s ease-in-out infinite;
+    }
+    
+    @keyframes floatTitle {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-8px) rotate(1deg); }
+    }
+    
+    /* Screen 3: Interactive Mission Instructions */
+    #instructionScreen { 
+      background: rgba(255, 255, 255, 0.96); 
+      z-index: 85; 
+      display: none; 
+      border: 8px solid #fde68a; 
+      border-radius: 40px; 
+      color: #1e293b; 
+    }
+    
+    /* Premium Fancy Rounded 3D Buttons */
+    .btn { 
+      background: linear-gradient(135deg, #facc15 0%, #eab308 100%); 
+      color: #78350f; 
+      border: 3px solid #854d0e; 
+      padding: 16px 42px; 
+      font-size: 22px; 
+      font-weight: 900; 
+      border-radius: 50px; 
+      cursor: pointer; 
+      box-shadow: 0 8px 0px #854d0e, 0 15px 20px rgba(234,179,8,0.25); 
+      text-transform: uppercase; 
+      transition: all 0.1s ease; 
+      margin-top: 30px; 
+      letter-spacing: 1px;
+      font-family: 'Fredoka', sans-serif;
+    }
+    .btn:active { box-shadow: 0 2px 0px #854d0e, 0 5px 10px rgba(234,179,8,0.25); transform: translateY(6px); }
+    
+    .big-bold-text { font-size: 18px; font-weight: 800; line-height: 1.5; margin-bottom: 14px; color: #334155; }
+    
+    /* HUD Top Dashboard Area Overlay */
+    #uiOverlay { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      padding: 20px 15px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      z-index: 20; 
+      pointer-events: none; 
+      display: none; 
+      align-items: center; 
+    }
+    #targetPrompt { 
+      font-size: 20px; 
+      font-weight: 900; 
+      color: #78350f; 
+      text-shadow: 3px 3px 0px #fff, -1px -1px 0px #fff; 
+      text-align: center; 
+      line-height: 1.3; 
+    }
+    #progressText { 
+      font-size: 14px; 
+      font-weight: 900; 
+      color: #92400e; 
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); 
+      padding: 6px 20px; 
+      border-radius: 25px; 
+      border: 3px solid #fbbf24; 
+      display: inline-block; 
+      box-shadow: 0 6px 12px rgba(217,119,6,0.15); 
+    }
+    
+    .hud-row { display: flex; justify-content: space-between; width: 100%; margin-top: 4px; pointer-events: none; }
+    .ui-element { background: rgba(255, 255, 255, 0.95); color: #78350f; padding: 8px 16px; border-radius: 25px; font-size: 14px; font-weight: 900; border: 3px solid #fef08a; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    
+    /* Completion Performance Card */
+    #completionScreen { background: radial-gradient(circle, #ffffff 0%, #fef3c7 100%); display: none; z-index: 80; color: #78350f; }
+  </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <!-- Pure blank white logo screen on loading -->
+    <div id="logoScreen" class="screen">
+        <img src="https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp21/assets/innovine-logo.png" alt="Innovine Logo" onerror="handleLogoFallback()">
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- Title Screen -->
+    <div id="titleScreen" class="screen">
+        <h1 class="game-title-font">HONEYBEE HARVEST! 🐝</h1>
+        <p style="font-size: 18px; font-weight:bold; color: #b45309; margin-top: -20px; margin-bottom: 20px;">Compound Words</p>
+        <button class="btn" onclick="showInstructions()">Go Gathering ➔</button>
+    </div>
+
+    <!-- Instruction Screen -->
+    <div id="instructionScreen" class="screen">
+        <div class="big-bold-text" style="color: #d97706; font-size: 34px; margin-bottom: 20px; font-weight: 900; font-family: 'Fredoka', sans-serif;">Keeper's Briefing! 🌻</div>
+        <div class="big-bold-text" style="font-size: 17px; background: #fffbeb; padding: 15px; border-radius: 20px; border: 3px dashed #fbbf24; color: #78350f;">Complete the compound word shown at the top!</div>
+        <div class="big-bold-text" style="margin-top: 15px;">📍 Watch the bees fly across. Tap a bee to run and catch it with your net!</div>
+        <div class="big-bold-text" style="color: #b45309;">🌾 Be careful! Don't catch the wrong trick-word bees.</div>
+        <button class="btn" style="background: linear-gradient(135deg, #facc15 0%, #eab308 100%); box-shadow: 0 8px 0px #854d0e; border-color: #854d0e;" onclick="startGame()">Start Catching! 🚀</button>
+    </div>
+
+    <!-- HUD dashboard panel -->
+    <div id="uiOverlay">
+        <div id="targetPrompt">LOADING MISSION...</div>
+        <div id="progressText">Harvest: 1 / 10</div>
+        <div class="hud-row">
+            <div id="scoreLabel" class="ui-element">Score: 0</div>
+            <div id="levelLabel" class="ui-element" style="color: #d97706; background: #fffdf5; border-color: #fde68a;">Level: 1</div>
+            <div id="heartsLabel" class="ui-element" style="color: #ef4444; background: #fee2e2; border-color: #fca5a5;">Hearts: ❤️❤️❤️</div>
+        </div>
+    </div>
+    
+    <!-- Game End Screen -->
+    <div id="completionScreen" class="screen">
+        <h1 id="completionTitle" style="font-size: 36px; margin-bottom: 15px; font-weight: 900; font-family: 'Fredoka', sans-serif;">🐝 HARVEST QUEEN! 👑</h1>
+        <p id="completionSubtitle" style="font-size: 18px; margin-bottom: 25px; font-weight: bold; color: #78350f;">Outstanding compound word match skills!</p>
+        <div class="ui-element" id="finalScore" style="font-size: 24px; padding: 12px 35px; border-color: #fbbf24; background: white; margin-bottom: 35px; font-weight: 900; color: #78350f;">Final Score: 0</div>
+        <button id="nextLevelBtn" class="btn" style="background: linear-gradient(135deg, #facc15 0%, #d97706 100%); box-shadow: 0 8px 0px #854d0e; border-color: #854d0e; margin-bottom: 12px;" onclick="advanceLevel()">Level 2 ➔</button>
+        <button class="btn" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #78350f; box-shadow: 0 8px 0px #d97706; border-color: #d97706;" onclick="restartGame()">Play Again 🔄</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Remote audio assets with paths from chp21 assets
+    const sndCorrect = new Audio('https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp21/assets/correct.mp3');
+    const sndWrong = new Audio('https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp21/assets/wrong.mp3');
+
+    let soundEnabled = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Trigger local synthesizer fallback for low connectivity
+    function triggerSynth(frequency, duration, type = "sine", gainVal = 0.08) {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn("Synth state: busy");
+      }
+    }
+
+    const sounds = {
+      correct: () => {
+        sndCorrect.play().catch(() => {
+          // Playful bee chime fallback
+          triggerSynth(523.25, 0.12, 'sine'); // C5
+          setTimeout(() => triggerSynth(659.25, 0.22, 'sine'), 80); // E5
+        });
+      },
+      wrong: () => {
+        sndWrong.play().catch(() => {
+          // Low buzzing fallback
+          triggerSynth(180, 0.25, 'triangle', 0.15);
+        });
+      },
+      swish: () => {
+        // Soft sweep sound of a net
+        triggerSynth(300, 0.15, 'triangle', 0.04);
+        setTimeout(() => triggerSynth(150, 0.15, 'triangle', 0.02), 50);
+      }
+    };
+
+    // Safe Backward-Compatible Rounded Rect Drawing Functions
+    function fillRoundedRect(context, x, y, width, height, radius) {
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.lineTo(x + width - radius, y);
+        context.quadraticCurveTo(x + width, y, x + width, y + radius);
+        context.lineTo(x + width, y + height - radius);
+        context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        context.lineTo(x + radius, y + height);
+        context.quadraticCurveTo(x, y + height, x, y + height - radius);
+        context.lineTo(x, y + radius);
+        context.quadraticCurveTo(x, y, x + radius, y);
+        context.closePath();
+        context.fill();
+    }
+
+    function strokeRoundedRect(context, x, y, width, height, radius) {
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.lineTo(x + width - radius, y);
+        context.quadraticCurveTo(x + width, y, x + width, y + radius);
+        context.lineTo(x + width, y + height - radius);
+        context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        context.lineTo(x + radius, y + height);
+        context.quadraticCurveTo(x, y + height, x, y + height - radius);
+        context.lineTo(x, y + radius);
+        context.quadraticCurveTo(x, y, x + radius, y);
+        context.closePath();
+        context.stroke();
+    }
+
+    // Responsive Canvas System
+    const BASE_WIDTH = 600;
+    const BASE_HEIGHT = 900;
+    let scaleFactor = 1;
+
+    function resize() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        scaleFactor = Math.min(canvas.width / BASE_WIDTH, canvas.height / BASE_HEIGHT);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 30 backend Grade 3 Compound Words database
+    const COMPOUND_WORDS_DB = [
+      // LEVEL 1 (15 items)
+      { stem: "Sun", suffixMode: true, q: "Sun + ______ = a bright yellow flower.", a: "flower", wrongs: ["plant", "light"], level: 1 },
+      { stem: "Rain", suffixMode: true, q: "Rain + ______ = a warm coat for wet weather.", a: "coat", wrongs: ["jacket", "vest"], level: 1 },
+      { stem: "Back", suffixMode: true, q: "Back + ______ = a bag we carry on our shoulders.", a: "pack", wrongs: ["box", "sack"], level: 1 },
+      { stem: "Basket", suffixMode: true, q: "Basket + ______ = a game where we shoot hoops.", a: "ball", wrongs: ["net", "hoop"], level: 1 },
+      { stem: "Cup", suffixMode: true, q: "Cup + ______ = a little cake baked in a cup.", a: "cake", wrongs: ["cookie", "bun"], level: 1 },
+      { stem: "Pan", suffixMode: true, q: "Pan + ______ = a flat cake eaten for breakfast.", a: "cake", wrongs: ["cookie", "bread"], level: 1 },
+      { stem: "Rain", suffixMode: true, q: "Rain + ______ = a colorful arch in the sky.", a: "bow", wrongs: ["line", "glow"], level: 1 },
+      { stem: "Snow", suffixMode: true, q: "Snow + ______ = a white figure built in winter.", a: "man", wrongs: ["boy", "doll"], level: 1 },
+      { stem: "Camp", suffixMode: true, q: "Camp + ______ = a cozy outdoor fire at night.", a: "fire", wrongs: ["wood", "light"], level: 1 },
+      { stem: "Play", suffixMode: true, q: "Play + ______ = an outdoor area with slides.", a: "ground", wrongs: ["yard", "house"], level: 1 },
+      { stem: "Bed", suffixMode: true, q: "Bed + ______ = a cozy room where we sleep.", a: "room", wrongs: ["house", "space"], level: 1 },
+      { stem: "Skate", suffixMode: true, q: "Skate + ______ = a rolling board on wheels.", a: "board", wrongs: ["plank", "deck"], level: 1 },
+      { stem: "Gold", suffixMode: true, q: "Gold + ______ = a tiny orange fish in a bowl.", a: "fish", wrongs: ["pet", "gill"], level: 1 },
+      { stem: "Sea", suffixMode: true, q: "Sea + ______ = a hard shell found on the beach.", a: "shell", wrongs: ["crust", "stone"], level: 1 },
+      { stem: "Ear", suffixMode: true, q: "Ear + ______ = pretty jewelry worn on ears.", a: "ring", wrongs: ["band", "stud"], level: 1 },
+
+      // LEVEL 2 (15 items)
+      { stem: "Tooth", suffixMode: true, q: "Tooth + ______ = a brush used to clean teeth.", a: "brush", wrongs: ["paste", "comb"], level: 2 },
+      { stem: "Dragon", suffixMode: true, q: "Dragon + ______ = a flying bug near water.", a: "fly", wrongs: ["bug", "bee"], level: 2 },
+      { stem: "Jelly", suffixMode: true, q: "Jelly + ______ = a soft wobbly sea animal.", a: "fish", wrongs: ["crab", "squid"], level: 2 },
+      { stem: "Star", suffixMode: true, q: "Star + ______ = a star-shaped sea creature.", a: "fish", wrongs: ["crab", "snail"], level: 2 },
+      { stem: "Light", suffixMode: true, q: "Light + ______ = a tall tower to guide ships.", a: "house", wrongs: ["post", "pole"], level: 2 },
+      { stem: "Hand", suffixMode: true, q: "Hand + ______ = a small bag for carrying items.", a: "bag", wrongs: ["box", "purse"], level: 2 },
+      { stem: "Foot", suffixMode: true, q: "Foot + ______ = a sport played by kicking a ball.", a: "ball", wrongs: ["game", "shoe"], level: 2 },
+      { stem: "Grass", suffixMode: true, q: "Grass + ______ = a leaping green bug in fields.", a: "hopper", wrongs: ["bug", "fly"], level: 2 },
+      { stem: "Fire", suffixMode: true, q: "Fire + ______ = a little beetle glowing at night.", a: "fly", wrongs: ["bug", "glow"], level: 2 },
+      { stem: "Straw", suffixMode: true, q: "Straw + ______ = a red berry with outer seeds.", a: "berry", wrongs: ["fruit", "apple"], level: 2 },
+      { stem: "Water", suffixMode: true, q: "Water + ______ = a huge melon that is pink inside.", a: "melon", wrongs: ["fruit", "berry"], level: 2 },
+      { stem: "Lady", suffixMode: true, q: "Lady + ______ = a red beetle with black spots.", a: "bug", wrongs: ["fly", "ant"], level: 2 },
+      { stem: "Pine", suffixMode: true, q: "Pine + ______ = a sweet, yellow tropical fruit.", a: "apple", wrongs: ["berry", "cone"], level: 2 },
+      { stem: "Key", suffixMode: true, q: "Key + ______ = a board of keys used to type on PCs.", a: "board", wrongs: ["box", "pad"], level: 2 },
+      { stem: "Mail", suffixMode: true, q: "Mail + ______ = a box where letters are delivered.", a: "box", wrongs: ["bag", "case"], level: 2 }
+    ];
+
+    // Game variables
+    let score = 0;
+    let hearts = 3;
+    let gameActive = false;
+    let freezeTimerActive = false;
+    let currentLevelIndex = 1; 
+    let activeQuestions = [];
+    let currentQuestionIdx = 0;
+    let activeBees = []; // Flying bees with placards
+    let poppedCount = 0;
+    let honeyParticles = [];
+    let flowerDecoration = [];
+
+    let speechBubble = { x: 0, y: 0, text: "", color: "#92400e", visible: false };
+
+    // New Beekeeper definition at bottom center
+    let beekeeper = {
+        x: BASE_WIDTH / 2,
+        y: BASE_HEIGHT - 130,
+        targetX: BASE_WIDTH / 2,
+        state: "idle", // "idle", "running", "swinging", "waiting", "returning"
+        swingTimer: 0,
+        targetAngle: 0,
+        currentAngle: 0,
+        frame: 0,
+        assignedBee: null
+    };
+
+    // Splash Loader sequence
+    setTimeout(() => {
+        document.getElementById('logoScreen').style.display = 'none';
+        document.getElementById('titleScreen').style.display = 'flex';
+    }, 5000);
+
+    function showInstructions() {
+        document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('instructionScreen').style.display = 'flex';
+    }
+
+    function startGame() {
+        document.getElementById('instructionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        score = 0;
+        hearts = 3;
+        currentLevelIndex = 1;
+        poppedCount = 0;
+        currentQuestionIdx = 0;
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+        honeyParticles = [];
+        
+        // Reset Beekeeper parameters
+        beekeeper.x = BASE_WIDTH / 2;
+        beekeeper.y = BASE_HEIGHT - 130;
+        beekeeper.targetX = BASE_WIDTH / 2;
+        beekeeper.state = "idle";
+        beekeeper.swingTimer = 0;
+        beekeeper.frame = 0;
+        beekeeper.assignedBee = null;
+
+        // Split database into levels and shuffle them
+        let level1Pool = COMPOUND_WORDS_DB.filter(x => x.level === 1).sort(() => Math.random() - 0.5);
+        let level2Pool = COMPOUND_WORDS_DB.filter(x => x.level === 2).sort(() => Math.random() - 0.5);
+        
+        // Take exactly 10 questions per level to make up 20 questions in all
+        activeQuestions = [...level1Pool.slice(0, 10), ...level2Pool.slice(0, 10)];
+
+        initQuestionRound();
+        gameActive = true;
+    }
+
+    function initQuestionRound() {
+        // Automatically update level indices
+        if (currentQuestionIdx >= 10 && currentLevelIndex === 1) {
+            currentLevelIndex = 2;
+        }
+
+        if (currentQuestionIdx >= 20) {
+            endGameSummary(true);
+            return;
+        }
+
+        activeBees = [];
+        const q = activeQuestions[currentQuestionIdx];
+
+        // Format prompt at the HUD
+        document.getElementById('targetPrompt').innerHTML = q.q.replace("______", "<span style='text-decoration: underline; color: #d97706;'>______</span>");
+
+        // Construct 3 choice bees
+        let choices = [
+            { text: q.a, isCorrect: true },
+            { text: q.wrongs[0], isCorrect: false },
+            { text: q.wrongs[1], isCorrect: false }
+        ].sort(() => Math.random() - 0.5);
+
+        // Highly separated vertical lanes to prevent overlapping
+        const heights = [200, 360, 520]; 
+        const directions = [1, -1, 1]; // Alternating directions
+        const startXPositions = [
+            -80,                     // Bee 0 starts left
+            BASE_WIDTH + 120,        // Bee 1 starts right
+            -260                     // Bee 2 starts far left (staggered)
+        ];
+
+        const softColors = ["#fef08a", "#fbcfe8", "#c084fc", "#fed7aa"];
+
+        choices.forEach((choice, idx) => {
+            const dir = directions[idx];
+            const startX = startXPositions[idx];
+            // REDUCED SPEED: (0.7 + Math.random() * 0.4) instead of (1.5 + Math.random() * 0.8)
+            const flySpeed = (0.7 + Math.random() * 0.4) * dir; 
+
+            activeBees.push({
+                x: startX,
+                y: heights[idx],
+                radius: 40,
+                color: softColors[idx % softColors.length],
+                text: choice.text,
+                isCorrect: choice.isCorrect,
+                speedX: flySpeed,
+                direction: dir,
+                isPopped: false,
+                shakeOffset: 0,
+                shakeTimer: 0,
+                bobOffset: Math.random() * 100
+            });
+        });
+
+        updateHUD();
+    }
+
+    function updateHUD() {
+        document.getElementById('scoreLabel').innerText = `Score: ${score}`;
+        document.getElementById('levelLabel').innerText = `Level: ${currentLevelIndex}`;
+        document.getElementById('progressText').innerText = `Harvest: ${(currentQuestionIdx % 10) + 1} / 10`;
+        let heartStr = "Hearts: ";
+        for(let i=0; i<3; i++) heartStr += (i < hearts) ? "❤️" : "🖤";
+        document.getElementById('heartsLabel').innerText = heartStr;
+    }
+
+    window.addEventListener('mousedown', (e) => { handleCoordinatesTap(e.clientX, e.clientY); });
+    window.addEventListener('touchstart', (e) => {
+        if(e.touches.length > 0) handleCoordinatesTap(e.touches[0].clientX, e.touches[0].clientY);
+    });
+
+    function handleCoordinatesTap(clientX, clientY) {
+        if (!gameActive || freezeTimerActive || beekeeper.state !== "idle") return;
+
+        const rect = canvas.getBoundingClientRect();
+        const currentOffsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        const tapX = ((clientX - rect.left) / scaleFactor) - currentOffsetX;
+        const tapY = (clientY - rect.top) / scaleFactor;
+
+        for (let i = 0; i < activeBees.length; i++) {
+            let b = activeBees[i];
+            if (b.isPopped) continue;
+
+            let dx = tapX - b.x;
+            let dy = tapY - b.y;
+            if (Math.sqrt(dx * dx + dy * dy) < b.radius + 20) { 
+                beekeeper.targetX = b.x;
+                beekeeper.state = "running";
+                beekeeper.assignedBee = b;
+                freezeTimerActive = true; 
+                break;
+            }
+        }
+    }
+
+    function processBalloonInteraction(b) {
+        // Trigger net swing state safely
+        beekeeper.state = "swinging";
+        beekeeper.swingTimer = 25;
+        sounds.swish();
+    }
+
+    function createHoneySplash(x, y, color) {
+        for (let i = 0; i < 15; i++) {
+            honeyParticles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                radius: Math.random() * 5 + 3,
+                color: color,
+                alpha: 1
+            });
+        }
+    }
+
+    function evaluateProgressionNextStep() {
+        freezeTimerActive = false;
+        
+        if (hearts <= 0) {
+            endGameSummary(false);
+            return;
+        }
+
+        // Advance to next compound word question
+        currentQuestionIdx++;
+        
+        // Level Transition point checks
+        if (currentQuestionIdx === 10 && currentLevelIndex === 1) {
+            endGameSummary(true);
+        } else {
+            initQuestionRound();
+        }
+    }
+
+    function endGameSummary(isWin) {
+        gameActive = false;
+        document.getElementById('uiOverlay').style.display = 'none';
+        document.getElementById('finalScore').innerText = `Final Score: ${score}`;
+        
+        const title = document.getElementById('completionTitle');
+        const subtitle = document.getElementById('completionSubtitle');
+        const nextBtn = document.getElementById('nextLevelBtn');
+
+        if (isWin) {
+            if (currentLevelIndex === 1) {
+                title.innerText = "Level 1 Clear! 🌻";
+                subtitle.innerText = "Fantastic! Get ready for Level 2!";
+                nextBtn.style.display = "inline-block";
+            } else {
+                title.innerText = "HARVEST QUEEN! 👑";
+                subtitle.innerText = "Amazing complete master over compound words!";
+                nextBtn.style.display = "none";
+            }
+        } else {
+            title.innerText = "Try Again! 👍";
+            subtitle.innerText = "Keep practicing to find the sweet honey.";
+            nextBtn.style.display = "none";
+        }
+        
+        document.getElementById('completionScreen').style.display = 'flex';
+    }
+
+    function advanceLevel() {
+        document.getElementById('completionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        currentLevelIndex = 2;
+        hearts = 3;
+        score = 0;
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+        honeyParticles = [];
+
+        initQuestionRound();
+        gameActive = true;
+    }
+
+    function restartGame() {
+        document.getElementById('completionScreen').style.display = 'none';
+        startGame();
+    }
+
+    function toggleMute() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('mute-btn').innerText = soundEnabled ? '🔊' : '🔇';
+    }
+
+    function handleLogoFallback() {
+        // Fallback placeholder vector
+        const parent = document.getElementById('logoScreen');
+        if (parent) {
+            parent.innerHTML = `
+                <div class="flex flex-col items-center gap-4">
+                  <svg class="w-24 h-24 text-amber-500 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" fill="#fde68a"></polygon>
+                    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="4.5" font-family="'Lexend', sans-serif" font-weight="bold" fill="#78350f">INNOVINE</text>
+                  </svg>
+                  <p class="text-xs text-amber-800 font-extrabold tracking-widest uppercase animate-pulse">Entering Hive...</p>
+                </div>
+            `;
+        }
+    }
+
+    function update() {
+        if (!gameActive) return;
+
+        beekeeper.frame += 0.1;
+
+        // Player beekeeper state engine - fully deterministic to eliminate freeze
+        if (beekeeper.state === "running") {
+            let dx = beekeeper.targetX - beekeeper.x;
+            if (Math.abs(dx) > 10) {
+                beekeeper.x += Math.sign(dx) * 12;
+            } else {
+                beekeeper.x = beekeeper.targetX;
+                processBalloonInteraction(beekeeper.assignedBee);
+            }
+        } else if (beekeeper.state === "swinging") {
+            beekeeper.swingTimer--;
+            
+            // Mid-swing hit resolution
+            if (beekeeper.swingTimer === 12) {
+                const b = beekeeper.assignedBee;
+                if(b.isCorrect) {
+                    b.isPopped = true;
+                    score += 10;
+                    poppedCount++;
+                    
+                    speechBubble.x = b.x;
+                    speechBubble.y = b.y;
+                    speechBubble.text = "Sweet Honey! 🍯";
+                    speechBubble.color = "#d97706";
+                    speechBubble.visible = true;
+
+                    sounds.correct();
+                    createHoneySplash(b.x, b.y, "#f59e0b");
+                } else {
+                    b.shakeTimer = 30;
+                    hearts--;
+                    
+                    speechBubble.x = b.x;
+                    speechBubble.y = b.y;
+                    speechBubble.text = "Sticky Mud! ❌";
+                    speechBubble.color = "#78350f";
+                    speechBubble.visible = true;
+
+                    sounds.wrong();
+                    createHoneySplash(b.x, b.y, "#92400e");
+                }
+                updateHUD();
+            }
+
+            if (beekeeper.swingTimer <= 0) {
+                beekeeper.state = "waiting";
+                // Show speech bubble briefly, then return to center
+                setTimeout(() => {
+                    speechBubble.visible = false;
+                    beekeeper.state = "returning";
+                }, 1200);
+            }
+        } else if (beekeeper.state === "returning") {
+            let dx = (BASE_WIDTH / 2) - beekeeper.x;
+            if (Math.abs(dx) > 10) {
+                beekeeper.x += Math.sign(dx) * 12;
+            } else {
+                beekeeper.x = BASE_WIDTH / 2;
+                beekeeper.state = "idle";
+                evaluateProgressionNextStep(); // Safe, non-looping round progression
+            }
+        }
+
+        // Horizontal Bee movement and screen wrapping
+        activeBees.forEach(b => {
+            if (b.isPopped) return;
+
+            b.x += b.speedX;
+
+            // Screen wrapping with offsets
+            if (b.speedX > 0 && b.x > BASE_WIDTH + 120) {
+                b.x = -120;
+            } else if (b.speedX < 0 && b.x < -120) {
+                b.x = BASE_WIDTH + 120;
+            }
+
+            if (b.shakeTimer > 0) {
+                b.shakeTimer--;
+                b.shakeOffset = Math.sin(b.shakeTimer * 0.8) * 6;
+            } else {
+                b.shakeOffset = 0;
+            }
+        });
+
+        // Update Honey Splash Particles
+        for (let i = honeyParticles.length - 1; i >= 0; i--) {
+            let p = honeyParticles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 0.03;
+            if (p.alpha <= 0) {
+                honeyParticles.splice(i, 1);
+            }
+        }
+    }
+
+    // --- NEW DETAILED BEE DESIGN DRAWING ---
+    function drawFlyingBee(ctx, b) {
+        if (b.isPopped) return;
+
+        ctx.save();
+        let bobY = Math.sin((beekeeper.frame * 0.4) + b.bobOffset) * 6;
+        ctx.translate(b.x + b.shakeOffset, b.y + bobY);
+
+        // Wings
+        ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        ctx.strokeStyle = "#451a03";
+        ctx.lineWidth = 2.5;
+        
+        ctx.save();
+        ctx.translate(-10, -18);
+        ctx.rotate(-Math.PI / 6 + Math.sin(beekeeper.frame * 0.8) * 0.3);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 8, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(10, -18);
+        ctx.rotate(Math.PI / 6 - Math.sin(beekeeper.frame * 0.8) * 0.3);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 8, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // Striped Body
+        ctx.fillStyle = "#fbbf24";
+        ctx.strokeStyle = "#78350f";
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 22, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(-6, -15, 3, 30);
+        ctx.fillRect(4, -15, 3, 30);
+
+        // Eyes
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(-8, -6, 6, 0, Math.PI * 2);
+        ctx.arc(6, -6, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(-7, -7, 2.5, 0, Math.PI * 2);
+        ctx.arc(7, -7, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Wooden placard with target text choice
+        ctx.fillStyle = b.color;
+        ctx.strokeStyle = "#451a03";
+        ctx.lineWidth = 4;
+        fillRoundedRect(ctx, -55, 20, 110, 32, 8);
+        strokeRoundedRect(ctx, -55, 20, 110, 32, 8);
+
+        ctx.fillStyle = "#451a03";
+        ctx.font = "900 15px 'Lexend'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(b.text, 0, 36);
+
+        ctx.restore();
+    }
+
+    // --- CUTE HIGH-DETAIL BEEKEEPER PLAYER WITH ANIMATED NET ---
+    function drawBeekeeperPlayer(ctx) {
+        ctx.save();
+        ctx.translate(beekeeper.x, beekeeper.y);
+
+        // 1. Soft Drop Shadow
+        ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.beginPath();
+        ctx.ellipse(0, 52, 22, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Chunky Wellington Boots (Yellow & Orange)
+        ctx.fillStyle = "#ea580c"; // Orange soles
+        ctx.fillRect(-18, 48, 14, 6);
+        ctx.fillRect(4, 48, 14, 6);
+        ctx.fillStyle = "#facc15"; // Yellow boots
+        fillRoundedRect(ctx, -17, 36, 12, 14, 3);
+        fillRoundedRect(ctx, 5, 36, 12, 14, 3);
+        ctx.strokeStyle = "#451a03";
+        ctx.lineWidth = 3;
+        strokeRoundedRect(ctx, -17, 36, 12, 14, 3);
+        strokeRoundedRect(ctx, 5, 36, 12, 14, 3);
+
+        // 3. Jumpsuit Body (Cream white with cute golden belt)
+        ctx.fillStyle = "#fffbeb";
+        fillRoundedRect(ctx, -18, 0, 36, 40, 8);
+        ctx.strokeStyle = "#451a03";
+        ctx.lineWidth = 4;
+        strokeRoundedRect(ctx, -18, 0, 36, 40, 8);
+
+        // Golden Belt
+        ctx.strokeStyle = "#f59e0b";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(-18, 24);
+        ctx.lineTo(18, 24);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#451a03"; // Belt buckle
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-6, 20, 12, 8);
+        ctx.fillStyle = "#facc15";
+        ctx.fillRect(-5, 21, 10, 6);
+
+        // Zipper Seam
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, 20);
+        ctx.stroke();
+
+        // 4. Arms & Hands holding the wooden pole
+        ctx.save();
+        let armAngle = -Math.PI / 6;
+        if (beekeeper.state === "swinging") {
+            armAngle = -Math.PI / 2 - (20 - beekeeper.swingTimer) * 0.15;
+        }
+        ctx.translate(-10, 12);
+        ctx.rotate(armAngle);
+
+        // Left Arm
+        ctx.fillStyle = "#fffbeb";
+        fillRoundedRect(ctx, -6, -2, 12, 28, 4);
+        strokeRoundedRect(ctx, -6, -2, 12, 28, 4);
+
+        // Left Glove (Chunky brown glove)
+        ctx.fillStyle = "#78350f";
+        fillRoundedRect(ctx, -7, 20, 14, 10, 3);
+        strokeRoundedRect(ctx, -7, 20, 14, 10, 3);
+        ctx.restore();
+
+        // Right Arm (reaches out to hold the handle)
+        ctx.save();
+        let rightArmAngle = Math.PI / 6;
+        if (beekeeper.state === "swinging") {
+            rightArmAngle = armAngle + 0.2;
+        }
+        ctx.translate(10, 12);
+        ctx.rotate(rightArmAngle);
+        ctx.fillStyle = "#fffbeb";
+        fillRoundedRect(ctx, -6, -2, 12, 28, 4);
+        strokeRoundedRect(ctx, -6, -2, 12, 28, 4);
+
+        // Right Glove
+        ctx.fillStyle = "#78350f";
+        fillRoundedRect(ctx, -7, 20, 14, 10, 3);
+        strokeRoundedRect(ctx, -7, 20, 14, 10, 3);
+        ctx.restore();
+
+        // 5. Detailed Beekeeping Protective Mask / Visor
+        ctx.fillStyle = "#fef08a"; // Cute yellow helmet
+        ctx.beginPath();
+        ctx.arc(0, -16, 22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#451a03";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Dark shiny screen shield
+        ctx.fillStyle = "#0f172a";
+        ctx.beginPath();
+        ctx.arc(0, -12, 14, 0, Math.PI, true);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Grid mesh patterns
+        ctx.strokeStyle = "rgba(251, 191, 36, 0.4)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let g = -10; g <= 10; g += 4) {
+            ctx.moveTo(g, -12);
+            ctx.lineTo(g, -26);
+            ctx.moveTo(-14, -12 - (g + 10)/2);
+            ctx.lineTo(14, -12 - (g + 10)/2);
+        }
+        ctx.stroke();
+
+        // Glass reflection shine
+        ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+        ctx.beginPath();
+        ctx.ellipse(-6, -18, 5, 2, -Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Helmet crest
+        ctx.strokeStyle = "#ca8a04";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, -38);
+        ctx.lineTo(0, -32);
+        ctx.stroke();
+
+        // 6. SWINGING NET ASSEMBLY
+        ctx.save();
+        let netAngle = -Math.PI / 4;
+        if (beekeeper.state === "swinging") {
+            netAngle = -Math.PI / 2 - (20 - beekeeper.swingTimer) * 0.15;
+        } else {
+            netAngle += Math.sin(beekeeper.frame * 0.15) * 0.05; // Gentle idle swaying
+        }
+        ctx.rotate(netAngle);
+
+        // Net Wooden Pole
+        ctx.strokeStyle = "#7c2d12"; // Mahogany wood
+        ctx.lineWidth = 6;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(0, 15);
+        ctx.lineTo(0, -95);
+        ctx.stroke();
+
+        // Gripper wraps
+        ctx.strokeStyle = "#f59e0b";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, 10); ctx.lineTo(0, 5);
+        ctx.moveTo(0, -10); ctx.lineTo(0, -15);
+        ctx.stroke();
+
+        // Net loop metal frame (Golden ring)
+        ctx.strokeStyle = "#fbbf24";
+        ctx.lineWidth = 5;
+        ctx.fillStyle = "rgba(254, 243, 199, 0.35)"; // translucent mesh
+        ctx.beginPath();
+        ctx.arc(0, -112, 26, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Net Mesh Bag (detailed cross-hatching)
+        ctx.save();
+        ctx.translate(0, -112);
+        ctx.strokeStyle = "rgba(217, 119, 6, 0.4)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-26, 0);
+        ctx.bezierCurveTo(-22, -60, 22, -60, 26, 0);
+        ctx.stroke();
+
+        for (let mesh = -20; mesh <= 20; mesh += 8) {
+            ctx.beginPath();
+            ctx.moveTo(mesh, 0);
+            ctx.lineTo(mesh / 2, -40);
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        ctx.restore(); // end of Net
+
+        ctx.restore(); // end of Beekeeper
+    }
+
+    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            let word = words[i];
+            let width = ctx.measureText(currentLine + " " + word).width;
+            if (width < maxWidth) {
+                currentLine += " " + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+
+        let totalHeight = lines.length * lineHeight;
+        let startY = y - (totalHeight / 2) + (lineHeight / 2);
+        
+        for (let j = 0; j < lines.length; j++) {
+            ctx.strokeText(lines[j], x, startY + (j * lineHeight));
+            ctx.fillText(lines[j], x, startY + (j * lineHeight));
+        }
+    }
+
+    function drawFeedbackBubble(bx, by, text, color) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 4;
+        
+        let bW = 250;
+        let bH = 55;
+        let tX = bx - bW / 2;
+        let tY = by - 130;
+
+        if (tX < 15) tX = 15;
+        if (tX + bW > BASE_WIDTH) tX = BASE_WIDTH - bW - 15;
+
+        fillRoundedRect(ctx, tX, tY, bW, bH, 18);
+        strokeRoundedRect(ctx, tX, tY, bW, bH, 18);
+
+        ctx.beginPath();
+        ctx.moveTo(bx, tY + bH);
+        ctx.lineTo(bx - 12, tY + bH + 12);
+        ctx.lineTo(bx + 12, tY + bH);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "900 16px 'Lexend'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, tX + bW / 2, tY + bH / 2);
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameActive) return;
+
+        ctx.save();
+        
+        let offsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        ctx.scale(scaleFactor, scaleFactor);
+        ctx.translate(offsetX, 0);
+
+        // Backdrop colors (Sunny garden fields)
+        let gardenBg = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
+        gardenBg.addColorStop(0, "#fffbeb");
+        gardenBg.addColorStop(0.6, "#fef3c7");
+        gardenBg.addColorStop(1, "#fde68a");
+        ctx.fillStyle = gardenBg;
+        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+        // Honeycomb background patterns
+        ctx.strokeStyle = "rgba(251,191,36,0.12)";
+        ctx.lineWidth = 4;
+        for (let i = 0; i < BASE_WIDTH; i += 80) {
+            for (let j = 0; j < BASE_HEIGHT; j += 80) {
+                ctx.beginPath();
+                ctx.moveTo(i, j);
+                ctx.lineTo(i + 20, j - 12);
+                ctx.lineTo(i + 40, j);
+                ctx.lineTo(i + 40, j + 24);
+                ctx.lineTo(i + 20, j + 36);
+                ctx.lineTo(i, j + 24);
+                ctx.closePath();
+                ctx.stroke();
+            }
+        }
+
+        // Draw flower decorations on the floor
+        ctx.fillStyle = "#fbcfe8";
+        ctx.beginPath();
+        ctx.arc(50, BASE_HEIGHT - 30, 20, 0, Math.PI * 2);
+        ctx.arc(120, BASE_HEIGHT - 20, 25, 0, Math.PI * 2);
+        ctx.arc(BASE_WIDTH - 60, BASE_HEIGHT - 40, 15, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Render Flying Choice Bees
+        activeBees.forEach(b => {
+            drawFlyingBee(ctx, b);
+        });
+
+        // Draw Splash Particles
+        honeyParticles.forEach(p => {
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        // Draw the Beekeeper
+        drawBeekeeperPlayer(ctx);
+
+        // Speech bubble popups
+        if (speechBubble.visible) {
+            drawFeedbackBubble(speechBubble.x, speechBubble.y, speechBubble.text, speechBubble.color);
+        }
+
+        ctx.restore();
+    }
+
+    function mainLoop() {
+        update();
+        render();
+        requestAnimationFrame(mainLoop);
+    }
+    
+    mainLoop();
+</script>
+</body>
+</html>
