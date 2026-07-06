@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Noun Star Catcher: Gender Quest</title>
+  <!-- Tailwind CSS for high-fidelity responsive design -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for Retro Arcade Style -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .retro-font {
+      font-family: 'Fredoka+One', cursive;
+    }
+    /* Pulsing animations */
+    @keyframes pulse-slow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .pulse-effect {
+      animation: pulse-slow 2s infinite ease-in-out;
+    }
+    /* Starfield Background Animation */
+    @keyframes scrollBg {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 100%; }
+    }
+    .animated-stars {
+      background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                        radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px);
+      background-size: 550px 550px, 350px 350px;
+      background-position: 0 0, 40px 60px;
+      animation: scrollBg 20s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-indigo-950 text-white min-h-screen flex items-center justify-center overflow-hidden p-2 md:p-4 select-none">
+
+  <!-- Splash Screen (Shown for exactly 5 seconds) -->
+  <div id="splash-screen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-all duration-500">
+    <div class="text-center px-4 max-w-sm">
+      <div class="relative w-48 h-48 mx-auto flex items-center justify-center mb-6">
+        <img id="logo-img" src="./assets/innovine-logo.png" alt="Innovine Logo" 
+             class="max-w-full max-h-full object-contain"
+             onerror="showFallbackLogo()">
+        <!-- Fallback modern placeholder inside logo container -->
+        <div id="logo-fallback" class="hidden absolute inset-0 flex flex-col items-center justify-center text-indigo-600">
+          <svg class="w-24 h-24 mb-2 animate-bounce text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+          </svg>
+          <span class="retro-font text-2xl tracking-widest text-indigo-800">INNOVINE</span>
+          <span class="text-xs text-indigo-400 font-bold uppercase tracking-wider">Learning Games</span>
+        </div>
+      </div>
+      
+      <!-- Progress Indicator -->
+      <div class="w-48 bg-gray-200 rounded-full h-2 mx-auto overflow-hidden">
+        <div id="splash-progress" class="bg-indigo-600 h-full w-0 transition-all duration-100 ease-out"></div>
+      </div>
+      <p class="text-gray-500 mt-3 text-xs font-semibold tracking-wider uppercase animate-pulse">Preparing Space Engines...</p>
+    </div>
+  </div>
+
+  <!-- Sound Fallbacks -->
+  <audio id="audio-correct" src="./assets/correct.mp3" preload="auto"></audio>
+  <audio id="audio-wrong" src="./assets/wrong.mp3" preload="auto"></audio>
+
+  <!-- Main Arcade Cabinet Container -->
+  <div id="game-container" class="hidden w-full max-w-md bg-indigo-900 rounded-3xl border-4 border-indigo-500 shadow-2xl overflow-hidden relative flex flex-col h-[92vh] max-h-[800px] min-h-[580px]">
+    
+    <!-- Top Status Bar -->
+    <div class="bg-indigo-950 px-4 py-2.5 border-b-4 border-indigo-500 flex justify-between items-center z-20">
+      <div class="flex items-center space-x-1.5">
+        <span class="text-yellow-400 text-lg font-bold retro-font">🏆 <span id="score-val">0</span></span>
+      </div>
+      <div class="text-center">
+        <span class="bg-indigo-800 text-[10px] md:text-xs px-2.5 py-1 rounded-full text-indigo-200 font-bold tracking-wider uppercase border border-indigo-600" id="current-level-badge">Level 1</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button id="sound-btn" class="text-indigo-300 hover:text-white focus:outline-none p-1 bg-indigo-800 rounded-lg border border-indigo-600">
+          <svg id="sound-on-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 18.75V5.25L7.75 9.5H4.5v5h3.25L12 18.75z"/></svg>
+          <svg id="sound-off-icon" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Area -->
+    <div class="flex-grow flex flex-col justify-between relative overflow-hidden" id="screen-holder">
+      
+      <!-- ================= START SCREEN ================= -->
+      <div id="screen-start" class="flex flex-col justify-between h-full p-5 z-10 space-y-4">
+        <div class="text-center my-auto space-y-4">
+          <div class="inline-block bg-yellow-500 text-indigo-950 text-xs px-3 py-1 rounded-full font-extrabold uppercase tracking-widest animate-bounce">Grade 3 Space Edition</div>
+          <h1 class="text-4xl font-extrabold tracking-tight retro-font text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-cyan-300 drop-shadow-md">
+            NOUN STAR<br>CATCHER
+          </h1>
+          <p class="text-indigo-200 text-xs px-4">
+            Steer your spaceship to catch the correct answer falling from space! Avoid the wrong noun crystals!
+          </p>
+        </div>
+
+        <div class="bg-indigo-950/75 p-3.5 rounded-2xl border border-indigo-700 space-y-2">
+          <h3 class="text-yellow-400 font-bold text-xs tracking-wide uppercase flex items-center">
+            <span class="mr-1.5">🚀</span> HOW TO CONTROL YOUR SHIP:
+          </h3>
+          <ul class="text-[11px] text-indigo-200 space-y-1.5 list-none">
+            <li class="flex items-center"><span class="text-yellow-400 mr-2">💻</span> <b>Desktop:</b> Use your <b class="text-white">Left & Right Arrow Keys</b>.</li>
+            <li class="flex items-center"><span class="text-pink-400 mr-2">📱</span> <b>Mobile / Tab:</b> Tap the <b class="text-white">Left/Right buttons</b> or directly <b class="text-white">Tap a column</b> to fly there!</li>
+            <li class="flex items-center"><span class="text-green-400 mr-2">💎</span> <b>Objective:</b> Match Masculine, Feminine, Common & Neuter nouns.</li>
+          </ul>
+        </div>
+
+        <button onclick="startGame()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-indigo-950 font-black rounded-2xl text-lg shadow-lg hover:brightness-110 active:scale-95 transition-all retro-font border-b-4 border-orange-700 tracking-wide">
+          LAUNCH SHIP 🚀
+        </button>
+      </div>
+
+      <!-- ================= ACTION PLAY SCREEN ================= -->
+      <div id="screen-play" class="hidden flex flex-col h-full relative z-10 select-none">
+        <!-- Top Quest Board -->
+        <div class="bg-indigo-950/90 p-3 border-b-2 border-indigo-700 flex flex-col space-y-2">
+          <div class="flex justify-between items-center text-[11px] md:text-xs font-bold text-indigo-300">
+            <div class="flex space-x-1" id="hearts-container">
+              <!-- Hearts go here -->
+            </div>
+            <span class="bg-indigo-800 text-indigo-200 px-2 py-0.5 rounded" id="question-type-badge">Analogy</span>
+            <span>Q: <span id="q-index" class="text-yellow-400">1</span>/10</span>
+          </div>
+          <!-- Question Question Banner -->
+          <div class="bg-indigo-900/60 p-2 rounded-xl border border-indigo-800 text-center">
+            <p id="question-text" class="text-xs md:text-sm font-bold leading-relaxed text-indigo-100">
+              Catch the correct gender matching crystal!
+            </p>
+          </div>
+        </div>
+
+        <!-- Dynamic Space Gameplay Area -->
+        <div id="space-field" class="flex-grow w-full relative animated-stars overflow-hidden bg-indigo-950/80">
+          <!-- Four distinct lanes visually outlined slightly for visual guidance -->
+          <div class="absolute inset-y-0 left-0 w-1/4 border-r border-indigo-900/30"></div>
+          <div class="absolute inset-y-0 left-1/4 w-1/4 border-r border-indigo-900/30"></div>
+          <div class="absolute inset-y-0 left-2/4 w-1/4 border-r border-indigo-900/30"></div>
+          <div class="absolute inset-y-0 left-3/4 w-1/4"></div>
+
+          <!-- Falling Crystals Container -->
+          <div id="falling-container" class="absolute inset-0 pointer-events-none"></div>
+
+          <!-- Spaceship (Player) -->
+          <div id="player-ship" class="absolute bottom-4 left-[37.5%] w-1/4 h-14 flex items-center justify-center transition-all duration-150 ease-out">
+            <div class="flex flex-col items-center">
+              <!-- Ship Thruster Flame -->
+              <span class="text-xs animate-bounce mb-[-4px]">🔥</span>
+              <!-- Beautiful SVG Vector Spaceship -->
+              <svg class="w-12 h-12 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.7)]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L8 8h3v8H8l4 6 4-6h-3V8h3L12 2z" />
+                <path d="M9 12l-3 4H4l2-6 3 2zm6 0l3 4h2l-2-6-3 2z" class="text-pink-400" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Big Touch Friendly Controls Area -->
+        <div class="bg-indigo-950 p-2 border-t-2 border-indigo-800 flex items-center justify-between space-x-2">
+          <button id="ctrl-left" class="flex-1 py-4 bg-indigo-800 hover:bg-indigo-700 active:bg-indigo-900 rounded-xl border-b-4 border-indigo-950 font-black text-2xl flex justify-center items-center select-none active:scale-95 transition-all">
+            ◀️
+          </button>
+          <div class="text-[10px] text-indigo-400 text-center px-1 font-bold leading-tight">
+            TAP SIDES OR KEYS TO MOVE
+          </div>
+          <button id="ctrl-right" class="flex-1 py-4 bg-indigo-800 hover:bg-indigo-700 active:bg-indigo-900 rounded-xl border-b-4 border-indigo-950 font-black text-2xl flex justify-center items-center select-none active:scale-95 transition-all">
+            ▶️
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= LEVEL CLEAR SCREEN ================= -->
+      <div id="screen-level-clear" class="hidden flex flex-col justify-between h-full text-center p-5 z-10 space-y-4">
+        <div class="space-y-4 my-auto">
+          <div class="text-6xl animate-bounce">🚀</div>
+          <h2 class="text-2xl font-extrabold retro-font text-yellow-400">LEVEL COMPLETED!</h2>
+          <p class="text-indigo-200 text-xs px-4" id="level-clear-message">
+            Super piloting skills! You caught the right grammatical space debris.
+          </p>
+
+          <!-- Score Summary Box -->
+          <div class="bg-indigo-950/80 p-4 rounded-2xl border border-indigo-700 inline-block mx-auto min-w-[200px]">
+            <div class="text-xs uppercase font-bold text-indigo-300">Level Accuracy</div>
+            <div class="text-xl font-black text-white" id="level-accuracy">10 / 10 Correct</div>
+            <div class="text-xs uppercase font-bold text-indigo-300 mt-2">Level Score</div>
+            <div class="text-2xl font-black text-yellow-400 retro-font" id="level-points">+1000 PTS</div>
+          </div>
+        </div>
+
+        <button id="next-level-btn" class="w-full py-4 bg-gradient-to-r from-emerald-400 to-teal-500 text-indigo-950 font-black rounded-2xl text-lg shadow-lg hover:brightness-110 active:scale-95 transition-all retro-font border-b-4 border-teal-700 tracking-wide">
+          CONTINUE TO LEVEL 2
+        </button>
+      </div>
+
+      <!-- ================= GAME OVER / CONGRATS SCREEN ================= -->
+      <div id="screen-game-over" class="hidden flex flex-col justify-between h-full text-center p-5 z-10 space-y-4">
+        <div class="space-y-3 my-auto">
+          <div id="finish-emoji" class="text-6xl animate-pulse">👑</div>
+          <h2 id="finish-title" class="text-2xl font-extrabold retro-font text-yellow-400">NOUN STAR CHAMPION!</h2>
+          <p id="finish-desc" class="text-indigo-200 text-xs px-4">
+            Congratulations, you piloted all paths to grammatical victory!
+          </p>
+
+          <div class="bg-indigo-950/80 p-4 rounded-2xl border-2 border-yellow-500/50 inline-block mx-auto min-w-[220px]">
+            <span class="text-[10px] uppercase font-bold text-indigo-300 tracking-widest block">GRAND SCORE</span>
+            <span class="text-3xl font-extrabold text-yellow-400 retro-font block mt-0.5" id="final-score">0</span>
+            <div id="stars-container" class="flex justify-center space-x-1 mt-2 text-xl text-yellow-400">
+              ⭐⭐⭐
+            </div>
+          </div>
+        </div>
+
+        <button onclick="resetGame()" class="w-full py-3.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black rounded-2xl text-lg shadow-lg hover:brightness-110 active:scale-95 transition-all retro-font border-b-4 border-rose-700 tracking-wide">
+          RE-LAUNCH GAME
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // System Config & Fallback
+    function showFallbackLogo() {
+      document.getElementById('logo-img').classList.add('hidden');
+      document.getElementById('logo-fallback').classList.remove('hidden');
+    }
+
+    // Audio Fallback Synth using Web Audio API (Highly low-connectivity friendly)
+    let isSoundOn = true;
+    let audioCtx = null;
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSynthSound(type) {
+      if (!isSoundOn) return;
+      try {
+        initAudioContext();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+          gainNode.gain.setValueAtTime(0.15, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(70, now + 0.3);
+          gainNode.gain.setValueAtTime(0.2, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        } else if (type === 'level_clear') {
+          const notes = [261.63, 329.63, 392.00, 523.25, 659.25]; 
+          notes.forEach((freq, index) => {
+            const stepOsc = audioCtx.createOscillator();
+            const stepGain = audioCtx.createGain();
+            stepOsc.connect(stepGain);
+            stepGain.connect(audioCtx.destination);
+            stepOsc.type = 'triangle';
+            stepOsc.frequency.setValueAtTime(freq, now + (index * 0.1));
+            stepGain.gain.setValueAtTime(0.1, now + (index * 0.1));
+            stepGain.gain.exponentialRampToValueAtTime(0.01, now + (index * 0.1) + 0.25);
+            stepOsc.start(now + (index * 0.1));
+            stepOsc.stop(now + (index * 0.1) + 0.3);
+          });
+        } else if (type === 'game_over') {
+          const notes = [440, 392, 349, 293]; 
+          notes.forEach((freq, index) => {
+            const stepOsc = audioCtx.createOscillator();
+            const stepGain = audioCtx.createGain();
+            stepOsc.connect(stepGain);
+            stepGain.connect(audioCtx.destination);
+            stepOsc.type = 'sawtooth';
+            stepOsc.frequency.setValueAtTime(freq, now + (index * 0.15));
+            stepGain.gain.setValueAtTime(0.1, now + (index * 0.15));
+            stepGain.gain.exponentialRampToValueAtTime(0.01, now + (index * 0.15) + 0.4);
+            stepOsc.start(now + (index * 0.15));
+            stepOsc.stop(now + (index * 0.15) + 0.45);
+          });
+        }
+      } catch (err) {
+        console.warn("Synth audio issue:", err);
+      }
+    }
+
+    function triggerAudio(soundId) {
+      if (!isSoundOn) return;
+      const audioElem = document.getElementById(`audio-${soundId}`);
+      if (audioElem && audioElem.readyState >= 2) {
+        audioElem.currentTime = 0;
+        audioElem.play().catch(() => playSynthSound(soundId));
+      } else {
+        playSynthSound(soundId);
+      }
+    }
+
+    // Toggle sound
+    document.getElementById('sound-btn').addEventListener('click', () => {
+      isSoundOn = !isSoundOn;
+      document.getElementById('sound-on-icon').classList.toggle('hidden', !isSoundOn);
+      document.getElementById('sound-off-icon').classList.toggle('hidden', isSoundOn);
+    });
+
+    // ================= QUESTION DATABASE (15 Per Level) =================
+    const levelOneQuestions = [
+      {
+        text: "Wizard is to Witch as Nephew is to...",
+        options: ["Niece", "Aunt", "Queen", "Sister"],
+        correct: "Niece",
+        badge: "Analogy"
+      },
+      {
+        text: "Which of these nouns is the odd Neuter noun?",
+        options: ["Computer", "Teacher", "Pilot", "Doctor"],
+        correct: "Computer",
+        badge: "Odd One Out"
+      },
+      {
+        text: "Find the Common Gender noun: 'The forest was full of deer, trees, and rangers.'",
+        options: ["rangers", "trees", "forest", "deer"],
+        correct: "rangers",
+        badge: "Identifier"
+      },
+      {
+        text: "In the sentence: 'The brave pilot flew high.' Pilot belongs to what gender?",
+        options: ["Common", "Neuter", "Masculine", "Feminine"],
+        correct: "Common",
+        badge: "Identifier"
+      },
+      {
+        text: "Which of these contains only NEUTER nouns (non-living)?",
+        options: ["Desk, River, Brick", "Baby, Toy, Box", "Doctor, Pencil, Hat", "King, Stone, Key"],
+        correct: "Desk, River, Brick",
+        badge: "Grouping"
+      },
+      {
+        text: "I can be your male cousin or female cousin. What gender class am I?",
+        options: ["Common", "Neuter", "Masculine", "Feminine"],
+        correct: "Common",
+        badge: "Riddle"
+      },
+      {
+        text: "Identify the word that is NOT a Feminine noun:",
+        options: ["Steward", "Duchess", "Heroine", "Empress"],
+        correct: "Steward",
+        badge: "Odd One Out"
+      },
+      {
+        text: "A spaceship zooms through space. What is the gender of 'spaceship'?",
+        options: ["Neuter", "Common", "Masculine", "Feminine"],
+        correct: "Neuter",
+        badge: "Identifier"
+      },
+      {
+        text: "If a male ruler is an Emperor, a female ruler is an...",
+        options: ["Empress", "Duchess", "Princess", "Queen"],
+        correct: "Empress",
+        badge: "Analogy"
+      },
+      {
+        text: "I am a queen bee. What gender category is 'queen'?",
+        options: ["Feminine", "Masculine", "Common", "Neuter"],
+        correct: "Feminine",
+        badge: "Riddle"
+      },
+      {
+        text: "The neighbor lent us a lawn mower. What gender noun is 'neighbor'?",
+        options: ["Common", "Neuter", "Masculine", "Feminine"],
+        correct: "Common",
+        badge: "Identifier"
+      },
+      {
+        text: "Which noun does NOT belong with these masculine words: Gander, Uncle, Actress, Bull?",
+        options: ["Actress", "Gander", "Uncle", "Bull"],
+        correct: "Actress",
+        badge: "Odd One Out"
+      },
+      {
+        text: "Complete the connection: King is to Queen as Duke is to...",
+        options: ["Duchess", "Princess", "Witch", "Goddess"],
+        correct: "Duchess",
+        badge: "Analogy"
+      },
+      {
+        text: "The giggling baby played with a block. What gender noun is 'baby'?",
+        options: ["Common", "Neuter", "Masculine", "Feminine"],
+        correct: "Common",
+        badge: "Identifier"
+      },
+      {
+        text: "The rooster crowed at sunrise. What gender noun is 'rooster'?",
+        options: ["Masculine", "Feminine", "Common", "Neuter"],
+        correct: "Masculine",
+        badge: "Identifier"
+      }
+    ];
+
+    const levelTwoQuestions = [
+      {
+        text: "Spot the gender mismatch: 'The duchess rode HIS horse.' How should we fix it?",
+        options: ["Change HIS to HER", "Change duchess to wizard", "Change HIS to ITS", "Leave it alone"],
+        correct: "Change HIS to HER",
+        badge: "Fix the Sentence"
+      },
+      {
+        text: "I treat sick animals! I can be male or female. What noun and gender am I?",
+        options: ["Veterinarian (Common)", "Dog (Masculine)", "Medicine (Neuter)", "Nurse (Feminine)"],
+        correct: "Veterinarian (Common)",
+        badge: "Riddle"
+      },
+      {
+        text: "Which of these sentences is free of gender matching errors?",
+        options: ["The bride wore her veil.", "The host welcomed her brother's party.", "The wizard stirred their cauldron.", "The king wore her crown."],
+        correct: "The bride wore her veil.",
+        badge: "Sentence Match"
+      },
+      {
+        text: "The chef cooked dinner on a stove. What genders are 'chef' and 'stove'?",
+        options: ["Common & Neuter", "Common & Feminine", "Masculine & Neuter", "Feminine & Common"],
+        correct: "Common & Neuter",
+        badge: "Match Up"
+      },
+      {
+        text: "If Sir is Masculine, its Feminine counterpart is...",
+        options: ["Madam", "Lady", "Mistress", "Princess"],
+        correct: "Madam",
+        badge: "Perfect Pairs"
+      },
+      {
+        text: "Find the list of: Neuter, Common, and Feminine nouns in that order!",
+        options: ["Book, Musician, Queen", "Pencil, Table, Mother", "Doctor, Toy, Aunt", "Sister, Friend, Stone"],
+        correct: "Book, Musician, Queen",
+        badge: "Sequence Match"
+      },
+      {
+        text: "Complete with the correct gender counterpart: 'The powerful stallion ran with the wild ___.'",
+        options: ["mares", "cows", "hens", "ducks"],
+        correct: "mares",
+        badge: "Sentence Completion"
+      },
+      {
+        text: "A male bird is a peacock. Its female companion is a peahen. Peahen belongs to:",
+        options: ["Feminine", "Masculine", "Common", "Neuter"],
+        correct: "Feminine",
+        badge: "Animal Kingdom"
+      },
+      {
+        text: "Find the Neuter noun: 'The detective searched the ancient temple.'",
+        options: ["temple", "detective", "clues", "ancient"],
+        correct: "temple",
+        badge: "Noun Finder"
+      },
+      {
+        text: "An author writes books. If we specifically refer to a female author, we use:",
+        options: ["Authoress", "Author-lady", "Hostess", "Heroine"],
+        correct: "Authoress",
+        badge: "Grammar Master"
+      },
+      {
+        text: "Which of these nouns is NOT a Common Gender noun?",
+        options: ["Toy", "Doctor", "Parent", "Infant"],
+        correct: "Toy",
+        badge: "Odd One Out"
+      },
+      {
+        text: "A male sheep is called a ram. What is a female sheep called?",
+        options: ["ewe", "doe", "vixen", "goose"],
+        correct: "ewe",
+        badge: "Animal Kingdom"
+      },
+      {
+        text: "Fix this mismatch: 'The witch flew on HIS broom.'",
+        options: ["Change HIS to HER", "Change witch to wizard", "Change broom to stick", "No change is needed"],
+        correct: "Change HIS to HER",
+        badge: "Fix the Sentence"
+      },
+      {
+        text: "'Every child has parents.' Parents is a Common Noun. What is singular 'parent'?",
+        options: ["Common Noun", "Masculine Noun", "Feminine Noun", "Neuter Noun"],
+        correct: "Common Noun",
+        badge: "Logic"
+      },
+      {
+        text: "I am made of stone, do not breathe, and hold royalty. What am I?",
+        options: ["Castle (Neuter)", "King (Masculine)", "Queen (Feminine)", "Guard (Common)"],
+        correct: "Castle (Neuter)",
+        badge: "Riddle"
+      }
+    ];
+
+    // Gameplay parameters
+    let currentLevel = 1;
+    let score = 0;
+    let lives = 3;
+    let questionIndex = 0;
+    let currentQuestionSet = [];
+    let currentQuestion = null;
+    let answersCorrectInLevel = 0;
+    
+    // Spaceship positional state
+    const lanesCount = 4;
+    let currentLane = 1; // Lanes index 0, 1, 2, 3
+
+    // Dynamic Game Loop properties
+    let gameActive = false;
+    let items = [];
+    let gameLoopInterval = null;
+    let spawnTimer = 0;
+
+    // Splash Screen Progress (5 seconds)
+    window.addEventListener('DOMContentLoaded', () => {
+      const splashProgress = document.getElementById('splash-progress');
+      const splashScreen = document.getElementById('splash-screen');
+      const gameContainer = document.getElementById('game-container');
+      
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 2;
+        if (splashProgress) splashProgress.style.width = `${progress}%`;
+        
+        if (progress >= 100) {
+          clearInterval(progressInterval);
+          splashScreen.classList.add('opacity-0');
+          setTimeout(() => {
+            splashScreen.classList.add('hidden');
+            gameContainer.classList.remove('hidden');
+            // Init audio elements
+            document.body.addEventListener('click', initAudioContext, { once: true });
+          }, 500);
+        }
+      }, 100);
+    });
+
+    // Start Game Initialization
+    function startGame() {
+      currentLevel = 1;
+      score = 0;
+      document.getElementById('score-val').innerText = score;
+      setupLevel(1);
+    }
+
+    // Lane positioning updater
+    function moveShipToLane(laneIdx) {
+      if (!gameActive) return;
+      currentLane = Math.max(0, Math.min(lanesCount - 1, laneIdx));
+      const ship = document.getElementById('player-ship');
+      
+      // Calculate percentage positions: 0% for lane 0, 25% for lane 1, 50% for lane 2, 75% for lane 3
+      const leftPercent = currentLane * 25;
+      ship.style.left = `${leftPercent}%`;
+    }
+
+    // Keyboard & UI Listeners
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        moveShipToLane(currentLane - 1);
+      } else if (e.key === 'ArrowRight') {
+        moveShipToLane(currentLane + 1);
+      }
+    });
+
+    document.getElementById('ctrl-left').addEventListener('click', () => {
+      moveShipToLane(currentLane - 1);
+    });
+    document.getElementById('ctrl-right').addEventListener('click', () => {
+      moveShipToLane(currentLane + 1);
+    });
+
+    // Direct Space Field Tap Lane Navigation
+    document.getElementById('space-field').addEventListener('click', (e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const computedLane = Math.floor((clickX / rect.width) * 4);
+      moveShipToLane(computedLane);
+    });
+
+    // Set up active Level
+    function setupLevel(lvl) {
+      currentLevel = lvl;
+      answersCorrectInLevel = 0;
+      lives = 3;
+      questionIndex = 0;
+
+      document.getElementById('current-level-badge').innerText = `Level ${lvl}`;
+      
+      const pool = lvl === 1 ? [...levelOneQuestions] : [...levelTwoQuestions];
+      currentQuestionSet = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+
+      showScreen('screen-play');
+      updateHeartsUI();
+      loadNextQuestion();
+    }
+
+    // Spawn falling items
+    function loadNextQuestion() {
+      if (questionIndex >= currentQuestionSet.length) {
+        stopGameLoop();
+        levelCleared();
+        return;
+      }
+
+      currentQuestion = currentQuestionSet[questionIndex];
+      document.getElementById('q-index').innerText = questionIndex + 1;
+      document.getElementById('question-type-badge').innerText = currentQuestion.badge;
+      document.getElementById('question-text').innerHTML = currentQuestion.text;
+
+      // Clear existing items
+      const container = document.getElementById('falling-container');
+      container.innerHTML = '';
+      items = [];
+
+      // Create falling crystals for options
+      const shuffledOptions = [...currentQuestion.options].sort(() => 0.5 - Math.random());
+      
+      // Ensure we place them across 4 different lanes
+      shuffledOptions.forEach((optText, laneIdx) => {
+        const itemEl = document.createElement('div');
+        // Visual Capsule styling
+        itemEl.className = "absolute p-2 rounded-2xl bg-indigo-950/90 border-2 border-cyan-400 text-center flex flex-col justify-center items-center shadow-[0_0_10px_rgba(34,211,238,0.4)] text-[11px] font-black tracking-wide leading-tight text-indigo-100 transition-transform duration-75 select-none";
+        itemEl.style.width = '23%'; // Safe sizing within lane
+        itemEl.style.left = `${(laneIdx * 25) + 1}%`;
+        
+        // Randomize initial offsets so they fall down at slightly staggered levels
+        const startY = -40 - (Math.random() * 40); 
+        itemEl.style.top = `${startY}px`;
+        
+        // Custom visual gem/icon inside element
+        itemEl.innerHTML = `
+          <span class="text-xs mb-0.5 animate-pulse">💎</span>
+          <span>${optText}</span>
+        `;
+        
+        container.appendChild(itemEl);
+
+        // Grade 3 Optimized Speeds: 
+        // Prev speed was ~1.4 to 1.8 pixels per frame. 
+        // We reduced it to 0.65 for Level 1 and 0.8 for Level 2 so students can comfortably read.
+        const calculatedSpeed = currentLevel === 1 ? 0.65 : 0.80;
+
+        items.push({
+          element: itemEl,
+          lane: laneIdx,
+          text: optText,
+          y: startY,
+          speed: calculatedSpeed
+        });
+      });
+
+      startGameLoop();
+    }
+
+    // Game loop orchestrator
+    function startGameLoop() {
+      if (gameLoopInterval) clearInterval(gameLoopInterval);
+      gameActive = true;
+      gameLoopInterval = setInterval(updatePhysics, 25);
+    }
+
+    function stopGameLoop() {
+      gameActive = false;
+      clearInterval(gameLoopInterval);
+    }
+
+    // Collision detection and positions
+    function updatePhysics() {
+      if (!gameActive) return;
+
+      const fieldHeight = document.getElementById('space-field').clientHeight;
+      const shipElement = document.getElementById('player-ship');
+      
+      // Spaceship bounds
+      const catchYThreshold = fieldHeight - 65; // Collision height zone
+
+      items.forEach((item, index) => {
+        item.y += item.speed;
+        item.element.style.top = `${item.y}px`;
+
+        // Check for Lane overlap / Catch condition
+        if (item.y >= catchYThreshold && item.y <= (fieldHeight - 15)) {
+          if (item.lane === currentLane) {
+            handleCatch(item);
+          }
+        }
+
+        // Check if item went completely off-screen
+        if (item.y > fieldHeight) {
+          // If the missed item was the CORRECT one, it counts as a miss!
+          if (item.text === currentQuestion.correct) {
+            handleMiss();
+          }
+          item.element.remove();
+          items.splice(index, 1);
+        }
+      });
+    }
+
+    // Handle Active Catch
+    function handleCatch(item) {
+      stopGameLoop();
+      
+      const isCorrect = item.text === currentQuestion.correct;
+      
+      if (isCorrect) {
+        triggerAudio('correct');
+        item.element.className = item.element.className.replace('border-cyan-400', 'border-emerald-400 bg-emerald-900 shadow-[0_0_15px_rgba(52,211,153,0.8)]');
+        item.element.innerHTML = `<span class="text-lg">✨</span><span class="text-white text-xs">PERFECT!</span>`;
+        
+        // Pop particles
+        createExplosion(item.lane);
+
+        score += 200;
+        document.getElementById('score-val').innerText = score;
+        answersCorrectInLevel++;
+      } else {
+        triggerAudio('wrong');
+        item.element.className = item.element.className.replace('border-cyan-400', 'border-rose-400 bg-rose-900 shadow-[0_0_15px_rgba(244,114,182,0.8)]');
+        item.element.innerHTML = `<span class="text-lg">❌</span><span class="text-white text-[10px]">Ouch!</span>`;
+        
+        // Shake ship visual effect
+        const ship = document.getElementById('player-ship');
+        ship.classList.add('animate-bounce');
+        setTimeout(() => ship.classList.remove('animate-bounce'), 500);
+
+        lives--;
+        updateHeartsUI();
+      }
+
+      // Transition
+      setTimeout(() => {
+        if (lives <= 0) {
+          gameOver(false);
+        } else {
+          questionIndex++;
+          loadNextQuestion();
+        }
+      }, 1500);
+    }
+
+    // Handle Missing the correct answer completely
+    function handleMiss() {
+      stopGameLoop();
+      triggerAudio('wrong');
+
+      lives--;
+      updateHeartsUI();
+
+      // Show temporary warning on screen
+      const banner = document.getElementById('question-text');
+      const originalText = banner.innerHTML;
+      banner.innerHTML = `<span class="text-red-400 font-extrabold uppercase">⚠️ MISSED THE CORRECT CRYSTAL!</span>`;
+
+      setTimeout(() => {
+        banner.innerHTML = originalText;
+        if (lives <= 0) {
+          gameOver(false);
+        } else {
+          questionIndex++;
+          loadNextQuestion();
+        }
+      }, 1500);
+    }
+
+    function updateHeartsUI() {
+      const container = document.getElementById('hearts-container');
+      container.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const heart = document.createElement('span');
+        heart.innerText = i < lives ? '❤️' : '🖤';
+        heart.className = i < lives ? 'text-red-500 text-sm animate-pulse' : 'text-gray-600 text-sm';
+        container.appendChild(heart);
+      }
+    }
+
+    // Burst Particle Generator for Successful Catches
+    function createExplosion(laneIdx) {
+      const field = document.getElementById('space-field');
+      const containerWidth = field.clientWidth;
+      const xOrigin = (laneIdx * (containerWidth / 4)) + (containerWidth / 8);
+      const yOrigin = field.clientHeight - 40;
+
+      const colors = ['#facc15', '#f472b6', '#22d3ee', '#34d399', '#fb923c'];
+
+      for (let i = 0; i < 15; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'absolute pointer-events-none z-30 rounded-full';
+        
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 30 + Math.random() * 50;
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        
+        sparkle.style.setProperty('--x', `${x}px`);
+        sparkle.style.setProperty('--y', `${y}px`);
+        sparkle.style.left = `${xOrigin}px`;
+        sparkle.style.top = `${yOrigin}px`;
+        
+        // CSS explosion trajectory animation
+        sparkle.style.animation = `explode 0.6s ease-out forwards`;
+        
+        const size = 6 + Math.random() * 8;
+        sparkle.style.width = `${size}px`;
+        sparkle.style.height = `${size}px`;
+        sparkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        field.appendChild(sparkle);
+        setTimeout(() => sparkle.remove(), 600);
+      }
+    }
+
+    // Level Clear Overlay Screen
+    function levelCleared() {
+      playSynthSound('level_clear');
+      
+      const accuracyText = document.getElementById('level-accuracy');
+      const pointsText = document.getElementById('level-points');
+      const messageText = document.getElementById('level-clear-message');
+
+      accuracyText.innerText = `${answersCorrectInLevel} / 10 Caught`;
+      pointsText.innerText = `+${answersCorrectInLevel * 150} PTS`;
+      
+      score += (answersCorrectInLevel * 150);
+      document.getElementById('score-val').innerText = score;
+
+      if (currentLevel === 1) {
+        messageText.innerHTML = "Fantastic piloting! You captured Level 1 nouns perfectly.<br><span class='text-yellow-400 font-bold'>Get ready for Level 2: Sentence Master Speed!</span>";
+        document.getElementById('next-level-btn').innerText = "PROCEED TO LEVEL 2";
+        document.getElementById('next-level-btn').onclick = () => setupLevel(2);
+        showScreen('screen-level-clear');
+      } else {
+        gameOver(true);
+      }
+    }
+
+    // Game Over Victory or Failure Status
+    function gameOver(isVictory) {
+      stopGameLoop();
+      showScreen('screen-game-over');
+
+      const emoji = document.getElementById('finish-emoji');
+      const title = document.getElementById('finish-title');
+      const desc = document.getElementById('finish-desc');
+      const stars = document.getElementById('stars-container');
+      const finalScoreText = document.getElementById('final-score');
+
+      finalScoreText.innerText = score;
+
+      if (isVictory) {
+        playSynthSound('level_clear');
+        emoji.innerText = '👑';
+        title.innerText = 'SPACE NOUN LEGEND!';
+        title.className = "text-2xl font-extrabold retro-font text-yellow-400";
+        desc.innerText = "Wow! You navigated all cosmic gender noun challenges like a real galactic scholar!";
+        
+        if (score >= 2500) {
+          stars.innerText = '⭐⭐⭐';
+        } else if (score >= 1500) {
+          stars.innerText = '⭐⭐';
+        } else {
+          stars.innerText = '⭐';
+        }
+      } else {
+        playSynthSound('game_over');
+        emoji.innerText = '👾';
+        title.innerText = 'SHUTDOWN IN SPACE';
+        title.className = "text-2xl font-extrabold retro-font text-red-500";
+        desc.innerText = "Your space shields ran out of power! Recalibrate your engines and try again!";
+        stars.innerText = '💔';
+      }
+    }
+
+    function resetGame() {
+      showScreen('screen-start');
+    }
+
+    // View Navigation Helper
+    function showScreen(screenId) {
+      const screens = ['screen-start', 'screen-play', 'screen-level-clear', 'screen-game-over'];
+      screens.forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(screenId).classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
