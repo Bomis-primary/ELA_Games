@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lilypad Leap: Prefixes & Suffixes!</title>
+  <!-- Google Fonts for Kids -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { 
+      width: 100%; 
+      height: 100%; 
+      overflow: hidden; 
+      background-color: #f0fdf4; 
+      font-family: 'Lexend', sans-serif;
+    }
+    
+    /* Premium Centered Game Container Shell */
+    #gameContainer { 
+      position: relative; 
+      width: 100%; 
+      height: 100%; 
+      max-width: 540px; 
+      max-height: 960px; 
+      margin: 0 auto; 
+      background: linear-gradient(to bottom, #ecfdf5 0%, #f0fdf4 100%); 
+      overflow: hidden; 
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12); 
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+    
+    /* Glassmorphism UI Screens */
+    .screen { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 10; 
+      padding: 30px; 
+      text-align: center; 
+      backdrop-filter: blur(8px);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* Screen 0: Brand Logo - Pure Premium White (True Full-Screen Blank Screen) */
+    #logoScreen { background-color: #ffffff; z-index: 100; }
+    #logoScreen img { max-width: 65%; max-height: 35%; object-fit: contain; }
+    
+    /* Loading Bar on Logo Screen */
+    .loading-bar-container {
+      width: 180px;
+      height: 6px;
+      background-color: #e2e8f0;
+      border-radius: 10px;
+      margin-top: 30px;
+      overflow: hidden;
+    }
+    .loading-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      width: 0%;
+      border-radius: 10px;
+      animation: loadProgress 5s linear forwards;
+    }
+    
+    @keyframes loadProgress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    
+    /* Screen 2: Game Title Splash Menu */
+    #titleScreen { background: radial-gradient(circle, #fef08a 0%, #ccfbf1 100%); z-index: 90; display: none; }
+    #titleScreen h1 { 
+      color: #047857; 
+      font-size: 38px; 
+      margin-bottom: 35px; 
+      text-shadow: 4px 4px 0px #ffffff, -1px -1px 0px #ffffff; 
+      line-height: 1.2; 
+      font-weight: 900; 
+      font-family: 'Fredoka', sans-serif;
+      animation: floatTitle 3s ease-in-out infinite;
+    }
+    
+    @keyframes floatTitle {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-8px) rotate(1deg); }
+    }
+    
+    /* Screen 3: Interactive Mission Instructions */
+    #instructionScreen { 
+      background: rgba(255, 255, 255, 0.96); 
+      z-index: 85; 
+      display: none; 
+      border: 8px solid #a7f3d0; 
+      border-radius: 40px; 
+      color: #1e293b; 
+    }
+    
+    /* Premium Fancy Rounded 3D Buttons */
+    .btn { 
+      background: linear-gradient(135deg, #34d399 0%, #059669 100%); 
+      color: #fff; 
+      border: 3px solid #065f46; 
+      padding: 16px 42px; 
+      font-size: 22px; 
+      font-weight: 900; 
+      border-radius: 50px; 
+      cursor: pointer; 
+      box-shadow: 0 8px 0px #065f46, 0 15px 20px rgba(5,150,105,0.25); 
+      text-transform: uppercase; 
+      transition: all 0.1s ease; 
+      margin-top: 30px; 
+      letter-spacing: 1px;
+      font-family: 'Fredoka', sans-serif;
+    }
+    .btn:active { box-shadow: 0 2px 0px #065f46, 0 5px 10px rgba(5,150,105,0.25); transform: translateY(6px); }
+    
+    .big-bold-text { font-size: 18px; font-weight: 800; line-height: 1.5; margin-bottom: 14px; color: #334155; }
+    
+    /* HUD Top Dashboard Area Overlay */
+    #uiOverlay { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      padding: 20px 15px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      z-index: 20; 
+      pointer-events: none; 
+      display: none; 
+      align-items: center; 
+    }
+    #targetPrompt { 
+      font-size: 22px; 
+      font-weight: 900; 
+      color: #065f46; 
+      text-shadow: 3px 3px 0px #fff, -1px -1px 0px #fff; 
+      text-align: center; 
+      line-height: 1.3; 
+    }
+    #progressText { 
+      font-size: 14px; 
+      font-weight: 900; 
+      color: #0f766e; 
+      background: linear-gradient(135deg, #e6fffa 0%, #ccfbf1 100%); 
+      padding: 6px 20px; 
+      border-radius: 25px; 
+      border: 3px solid #5eead4; 
+      display: inline-block; 
+      box-shadow: 0 6px 12px rgba(13,148,136,0.15); 
+    }
+    
+    .hud-row { display: flex; justify-content: space-between; width: 100%; margin-top: 4px; pointer-events: none; }
+    .ui-element { background: rgba(255, 255, 255, 0.95); color: #0f766e; padding: 8px 16px; border-radius: 25px; font-size: 14px; font-weight: 900; border: 3px solid #99f6e4; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    
+    /* Completion Performance Card */
+    #completionScreen { background: radial-gradient(circle, #ffffff 0%, #e6fffa 100%); display: none; z-index: 80; color: #115e59; }
+  </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <!-- Pure blank white logo screen on loading -->
+    <div id="logoScreen" class="screen">
+        <img src="https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp21/assets/innovine-logo.png" alt="Innovine Logo" onerror="handleLogoFallback()">
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- Title Screen -->
+    <div id="titleScreen" class="screen">
+        <h1 class="game-title-font">LILYPAD LEAP! 🐸</h1>
+        <p style="font-size: 18px; font-weight:bold; color: #047857; margin-top: -20px; margin-bottom: 20px;">Prefixes & Suffixes Adventure</p>
+        <button class="btn" onclick="showInstructions()">Start Safari ➔</button>
+    </div>
+
+    <!-- Instruction Screen -->
+    <div id="instructionScreen" class="screen">
+        <div class="big-bold-text" style="color: #059669; font-size: 34px; margin-bottom: 20px; font-weight: 900; font-family: 'Fredoka', sans-serif;">Froggy Briefing! 🌾</div>
+        <div class="big-bold-text" style="font-size: 17px; background: #f0fdf4; padding: 15px; border-radius: 20px; border: 3px dashed #34d399; color: #065f46;">Read the incomplete sentence at the top of the river!</div>
+        <div class="big-bold-text" style="margin-top: 15px;">📍 Tap the correct drifting lilypad to make the frog leap and splash!</div>
+        <div class="big-bold-text" style="color: #b45309;">🌿 Be quick! Don't let correct lilypads slide past.</div>
+        <button class="btn" style="background: linear-gradient(135deg, #34d399 0%, #059669 100%); box-shadow: 0 8px 0px #065f46; border-color: #065f46;" onclick="startGame()">Leap Now! 🚀</button>
+    </div>
+
+    <!-- HUD dashboard panel -->
+    <div id="uiOverlay">
+        <div id="targetPrompt">LOADING MISSION...</div>
+        <div id="progressText">Question: 1 / 20</div>
+        <div class="hud-row">
+            <div id="scoreLabel" class="ui-element">Score: 0</div>
+            <div id="levelLabel" class="ui-element" style="color: #0d9488; background: #f0fdfa; border-color: #99f6e4;">Level: 1</div>
+            <div id="heartsLabel" class="ui-element" style="color: #ef4444; background: #fee2e2; border-color: #fca5a5;">Hearts: ❤️❤️❤️</div>
+        </div>
+    </div>
+    
+    <!-- Game End Screen -->
+    <div id="completionScreen" class="screen">
+        <h1 id="completionTitle" style="font-size: 36px; margin-bottom: 15px; font-weight: 900; font-family: 'Fredoka', sans-serif;">🐸 WATER KING! 👑</h1>
+        <p id="completionSubtitle" style="font-size: 18px; margin-bottom: 25px; font-weight: bold; color: #475569;">Outstanding grammatical leaps!</p>
+        <div class="ui-element" id="finalScore" style="font-size: 24px; padding: 12px 35px; border-color: #0d9488; background: white; margin-bottom: 35px; font-weight: 900; color: #0f766e;">Final Score: 0</div>
+        <button id="nextLevelBtn" class="btn" style="background: linear-gradient(135deg, #34d399 0%, #0d9488 100%); box-shadow: 0 8px 0px #0f766e; border-color: #0f766e; margin-bottom: 12px;" onclick="advanceLevel()">Level 2 ➔</button>
+        <button class="btn" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #78350f; box-shadow: 0 8px 0px #d97706; border-color: #d97706;" onclick="restartGame()">Play Again 🔄</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Remote audio assets with custom paths from chp21 assets
+    const sndCorrect = new Audio('https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp21/assets/correct.mp3');
+    const sndWrong = new Audio('https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp21/assets/wrong.mp3');
+
+    let soundEnabled = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Trigger local synthesizer fallback for low connectivity
+    function triggerSynth(frequency, duration, type = "sine", gainVal = 0.08) {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn("Synth state: busy");
+      }
+    }
+
+    const sounds = {
+      correct: () => {
+        sndCorrect.play().catch(() => {
+          // Playful cartoon water-jump sound
+          triggerSynth(440, 0.12, 'sine');
+          setTimeout(() => triggerSynth(659.25, 0.22, 'sine'), 80);
+        });
+      },
+      wrong: () => {
+        sndWrong.play().catch(() => {
+          // Soft buzzing splash
+          triggerSynth(200, 0.25, 'triangle', 0.15);
+        });
+      }
+    };
+
+    // Responsive Canvas System
+    const BASE_WIDTH = 600;
+    const BASE_HEIGHT = 900;
+    let scaleFactor = 1;
+
+    function resize() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        scaleFactor = Math.min(canvas.width / BASE_WIDTH, canvas.height / BASE_HEIGHT);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 30 backend Grade 3 Prefixes & Suffixes database
+    const PREFIX_SUFFIX_DATABASE = [
+      // PREFIXES
+      { q: "I had to ______read the story to understand it.", a: "re", wrongs: ["un", "pre"] },
+      { q: "It is ______safe to cross the road without looking.", a: "un", wrongs: ["dis", "re"] },
+      { q: "I ______agree with you; I think cats are better.", a: "dis", wrongs: ["un", "re"] },
+      { q: "We must ______heat the oven before baking cupcakes.", a: "pre", wrongs: ["re", "dis"] },
+      { q: "To open the locked box, we must ______lock it.", a: "un", wrongs: ["re", "dis"] },
+      { q: "Please ______write your name neatly on the line.", a: "re", wrongs: ["pre", "un"] },
+      { q: "The magician made the coin ______appear in the air.", a: "dis", wrongs: ["un", "pre"] },
+      { q: "They scheduled a ______test before the final exam.", a: "pre", wrongs: ["re", "un"] },
+      { q: "My shoelaces became ______tied while I was running.", a: "un", wrongs: ["dis", "re"] },
+      { q: "We had to ______build the Lego tower after it fell.", a: "re", wrongs: ["un", "pre"] },
+      { q: "It is disrespectful to ______obey the school rules.", a: "dis", wrongs: ["un", "re"] },
+      { q: "They watched a ______view of the movie before release.", a: "pre", wrongs: ["re", "dis"] },
+      { q: "Leaving toys on the floor is ______organized.", a: "dis", wrongs: ["re", "pre"] },
+      { q: "She felt ______happy when she lost her blue pencil.", a: "un", wrongs: ["re", "pre"] },
+      { q: "I had to ______pack my bag to find my keys.", a: "un", wrongs: ["dis", "re"] },
+      
+      // SUFFIXES
+      { q: "The kind helper was very care______ with the cups.", a: "ful", wrongs: ["less", "ly"] },
+      { q: "A tiny baby is defense______ and needs parents.", a: "less", wrongs: ["ful", "able"] },
+      { q: "The turtles walked slow______ down the sandy beach.", a: "ly", wrongs: ["ful", "er"] },
+      { q: "A person who teaches is called a teach______.", a: "er", wrongs: ["est", "ful"] },
+      { q: "Of all the fast runners, Leo was the fast______.", a: "est", wrongs: ["er", "ly"] },
+      { q: "This soft feather pillow is very comfort______.", a: "able", wrongs: ["less", "ly"] },
+      { q: "The beautiful blooming flowers are color______.", a: "ful", wrongs: ["less", "y"] },
+      { q: "The sky was dark and shine______ because of clouds.", a: "less", wrongs: ["ful", "ly"] },
+      { q: "She smiled light______ and waved hello to us.", a: "ly", wrongs: ["er", "est"] },
+      { q: "A person who plays soccer is a play______.", a: "er", wrongs: ["est", "able"] },
+      { q: "This is the big______ apple in the whole garden!", a: "est", wrongs: ["er", "ful"] },
+      { q: "The clean water is drink______, so you can have some.", a: "able", wrongs: ["less", "ly"] },
+      { q: "Be play______ with the puppy, but be gentle too.", a: "ful", wrongs: ["less", "er"] },
+      { q: "Without any socks, his cold feet were shoe______.", a: "less", wrongs: ["ful", "able"] },
+      { q: "The happy children sang loud______ during music class.", a: "ly", wrongs: ["ful", "less"] }
+    ];
+
+    // Game stats
+    let score = 0;
+    let hearts = 3;
+    let gameActive = false;
+    let freezeTimerActive = false;
+    let currentLevelIndex = 1; 
+    let activeQuestions = [];
+    let currentQuestionIdx = 0;
+    let activeBalloons = []; // Floating lilypads
+    let poppedCount = 0;
+    let splashParticles = [];
+
+    let speechBubble = { x: 0, y: 0, text: "", color: "#10b981", visible: false };
+
+    // Mascot settings
+    let pinMascot = { 
+        homeX: BASE_WIDTH / 2, 
+        homeY: BASE_HEIGHT - 120, 
+        x: BASE_WIDTH / 2, 
+        y: BASE_HEIGHT - 120, 
+        targetX: BASE_WIDTH / 2, 
+        targetY: BASE_HEIGHT - 120, 
+        state: "idle", 
+        rotation: 0,
+        frame: 0,
+        assignedBalloon: null
+    };
+
+    // Splash Loader sequence
+    setTimeout(() => {
+        document.getElementById('logoScreen').style.display = 'none';
+        document.getElementById('titleScreen').style.display = 'flex';
+    }, 5000);
+
+    function showInstructions() {
+        document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('instructionScreen').style.display = 'flex';
+    }
+
+    function startGame() {
+        document.getElementById('instructionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        score = 0;
+        hearts = 3;
+        currentLevelIndex = 1;
+        poppedCount = 0;
+        currentQuestionIdx = 0;
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+        splashParticles = [];
+        
+        pinMascot.x = pinMascot.homeX;
+        pinMascot.y = pinMascot.homeY;
+        pinMascot.targetX = pinMascot.homeX;
+        pinMascot.targetY = pinMascot.homeY;
+        pinMascot.state = "idle";
+        pinMascot.rotation = 0;
+
+        // Shuffle backend database and pull 20 questions
+        let masterPool = [...PREFIX_SUFFIX_DATABASE].sort(() => Math.random() - 0.5);
+        activeQuestions = masterPool.slice(0, 20);
+
+        initQuestionRound();
+        gameActive = true;
+    }
+
+    function initQuestionRound() {
+        if (currentQuestionIdx >= 20) {
+            endGameSummary(true);
+            return;
+        }
+
+        activeBalloons = [];
+        const q = activeQuestions[currentQuestionIdx];
+
+        // Format prompt at the HUD
+        document.getElementById('targetPrompt').innerHTML = q.q.replace("______", "<span style='text-decoration: underline; color: #047857;'>______</span>");
+
+        // Construct 3 choice lilypads
+        let choices = [
+            { text: q.a, isCorrect: true },
+            { text: q.wrongs[0], isCorrect: false },
+            { text: q.wrongs[1], isCorrect: false }
+        ].sort(() => Math.random() - 0.5);
+
+        // Layout locations
+        const bRadius = 64; 
+        const coords = [
+            { x: 130, y: 350 },
+            { x: 300, y: 350 },
+            { x: 470, y: 350 }
+        ];
+
+        const softColors = ["#86efac", "#6ee7b7", "#a7f3d0", "#a5f3fc", "#c084fc", "#fed7aa"];
+
+        choices.forEach((choice, idx) => {
+            activeBalloons.push({
+                x: coords[idx].x,
+                y: coords[idx].y,
+                radius: bRadius,
+                color: softColors[idx % softColors.length],
+                text: choice.text,
+                isCorrect: choice.isCorrect,
+                isPopped: false,
+                shakeOffset: 0,
+                shakeTimer: 0,
+                bobOffset: Math.random() * 100
+            });
+        });
+
+        updateHUD();
+    }
+
+    function updateHUD() {
+        document.getElementById('scoreLabel').innerText = `Score: ${score}`;
+        document.getElementById('levelLabel').innerText = `Level: ${currentLevelIndex}`;
+        document.getElementById('progressText').innerText = `Progress: ${currentQuestionIdx + 1} / 20`;
+        let heartStr = "Hearts: ";
+        for(let i=0; i<3; i++) heartStr += (i < hearts) ? "❤️" : "🖤";
+        document.getElementById('heartsLabel').innerText = heartStr;
+    }
+
+    window.addEventListener('mousedown', (e) => { handleCoordinatesTap(e.clientX, e.clientY); });
+    window.addEventListener('touchstart', (e) => {
+        if(e.touches.length > 0) handleCoordinatesTap(e.touches[0].clientX, e.touches[0].clientY);
+    });
+
+    function handleCoordinatesTap(clientX, clientY) {
+        if (!gameActive || freezeTimerActive || pinMascot.state !== "idle") return;
+
+        const rect = canvas.getBoundingClientRect();
+        const currentOffsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        const tapX = ((clientX - rect.left) / scaleFactor) - currentOffsetX;
+        const tapY = (clientY - rect.top) / scaleFactor;
+
+        for (let i = 0; i < activeBalloons.length; i++) {
+            let b = activeBalloons[i];
+            if (b.isPopped) continue;
+
+            let dx = tapX - b.x;
+            let dy = tapY - b.y;
+            if (Math.sqrt(dx * dx + dy * dy) < b.radius + 15) { 
+                pinMascot.targetX = b.x;
+                pinMascot.targetY = b.y + 10; 
+                pinMascot.state = "flying";
+                pinMascot.assignedBalloon = b;
+                freezeTimerActive = true; 
+                break;
+            }
+        }
+    }
+
+    function processBalloonInteraction(b) {
+        if(b.isCorrect) {
+            b.isPopped = true;
+            score += 10;
+            poppedCount++;
+            
+            speechBubble.x = b.x;
+            speechBubble.y = b.y;
+            speechBubble.text = "Perfect Splash! 🐸";
+            speechBubble.color = "#059669";
+            speechBubble.visible = true;
+
+            sounds.correct();
+            createSplash(b.x, b.y, "#ffffff");
+        } else {
+            b.shakeTimer = 30;
+            hearts--;
+            
+            speechBubble.x = b.x;
+            speechBubble.y = b.y;
+            speechBubble.text = "Water Trap! ❌";
+            speechBubble.color = "#ea580c";
+            speechBubble.visible = true;
+
+            sounds.wrong();
+            createSplash(b.x, b.y, "#f87171");
+        }
+
+        updateHUD();
+
+        setTimeout(() => {
+            speechBubble.visible = false;
+            pinMascot.targetX = pinMascot.homeX;
+            pinMascot.targetY = pinMascot.homeY;
+            pinMascot.state = "returning";
+        }, 1400);
+    }
+
+    function createSplash(x, y, color) {
+        for (let i = 0; i < 15; i++) {
+            splashParticles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                radius: Math.random() * 4 + 2,
+                color: color,
+                alpha: 1
+            });
+        }
+    }
+
+    function evaluateProgressionNextStep() {
+        freezeTimerActive = false;
+        
+        if (hearts <= 0) {
+            endGameSummary(false);
+            return;
+        }
+
+        // Advance to next prefix/suffix card
+        currentQuestionIdx++;
+        initQuestionRound();
+    }
+
+    function endGameSummary(isWin) {
+        gameActive = false;
+        document.getElementById('uiOverlay').style.display = 'none';
+        document.getElementById('finalScore').innerText = `Final Score: ${score}`;
+        
+        const title = document.getElementById('completionTitle');
+        const subtitle = document.getElementById('completionSubtitle');
+        const nextBtn = document.getElementById('nextLevelBtn');
+
+        if (isWin) {
+            if (currentLevelIndex === 1) {
+                title.innerText = "Level 1 Cleared! 🎉";
+                subtitle.innerText = "You have unlocked Level 2!";
+                nextBtn.style.display = "inline-block";
+            } else {
+                title.innerText = "Word Safari Master! 👑";
+                subtitle.innerText = "Awesome master over prefixes and suffixes!";
+                nextBtn.style.display = "none";
+            }
+        } else {
+            title.innerText = "Try Again! 👍";
+            subtitle.innerText = "Keep practicing to master all words.";
+            nextBtn.style.display = "none";
+        }
+        
+        document.getElementById('completionScreen').style.display = 'flex';
+    }
+
+    function advanceLevel() {
+        document.getElementById('completionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        currentLevelIndex = 2;
+        currentQuestionIdx = 0;
+        hearts = 3;
+        score = 0;
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+        splashParticles = [];
+
+        // Shuffle backend database and pull a new batch of 20 questions
+        let masterPool = [...PREFIX_SUFFIX_DATABASE].sort(() => Math.random() - 0.5);
+        activeQuestions = masterPool.slice(0, 20);
+
+        initQuestionRound();
+        gameActive = true;
+    }
+
+    function restartGame() {
+        document.getElementById('completionScreen').style.display = 'none';
+        startGame();
+    }
+
+    function toggleMute() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('mute-btn').innerText = soundEnabled ? '🔊' : '🔇';
+    }
+
+    function handleLogoFallback() {
+        // Fallback placeholder vector
+        const parent = document.getElementById('logoScreen');
+        if (parent) {
+            parent.innerHTML = `
+                <div class="flex flex-col items-center gap-4">
+                  <svg class="w-24 h-24 text-teal-600 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <ellipse cx="12" cy="12" rx="10" ry="7" fill="#a7f3d0"></ellipse>
+                    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="5" font-family="'Lexend', sans-serif" font-weight="bold" fill="#065f46">INNOVINE</text>
+                  </svg>
+                  <p class="text-xs text-emerald-800 font-extrabold tracking-widest uppercase animate-pulse">Entering Safari...</p>
+                </div>
+            `;
+        }
+    }
+
+    function update() {
+        if (!gameActive) return;
+
+        pinMascot.frame += 0.06;
+
+        if (pinMascot.state === "flying") {
+            let dx = pinMascot.targetX - pinMascot.x;
+            let dy = pinMascot.targetY - pinMascot.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            
+            pinMascot.rotation = Math.atan2(dy, dx) + Math.PI/2;
+
+            if (dist > 15) {
+                pinMascot.x += dx * 0.25;
+                pinMascot.y += dy * 0.25;
+            } else {
+                pinMascot.x = pinMascot.targetX;
+                pinMascot.y = pinMascot.targetY;
+                pinMascot.state = "popping";
+                processBalloonInteraction(pinMascot.assignedBalloon);
+            }
+        } else if (pinMascot.state === "returning") {
+            let dx = pinMascot.targetX - pinMascot.x;
+            let dy = pinMascot.targetY - pinMascot.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            
+            pinMascot.rotation = Math.atan2(dy, dx) + Math.PI/2;
+
+            if (dist > 15) {
+                pinMascot.x += dx * 0.20;
+                pinMascot.y += dy * 0.20;
+            } else {
+                pinMascot.x = pinMascot.homeX;
+                pinMascot.y = pinMascot.homeY;
+                pinMascot.rotation = 0;
+                pinMascot.state = "idle";
+                evaluateProgressionNextStep();
+            }
+        } else if (pinMascot.state === "idle") {
+            pinMascot.rotation = 0;
+            pinMascot.x += (pinMascot.homeX - pinMascot.x) * 0.12;
+            pinMascot.y += (pinMascot.homeY - pinMascot.y) * 0.12;
+        }
+
+        activeBalloons.forEach(b => {
+            if (b.shakeTimer > 0) {
+                b.shakeTimer--;
+                b.shakeOffset = Math.sin(b.shakeTimer * 0.8) * 6;
+            } else {
+                b.shakeOffset = 0;
+            }
+        });
+
+        // Update Splash Particles
+        for (let i = splashParticles.length - 1; i >= 0; i--) {
+            let p = splashParticles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 0.03;
+            if (p.alpha <= 0) {
+                splashParticles.splice(i, 1);
+            }
+        }
+    }
+
+    // --- COZY BRAND NEW WATER ANIMATED FROG MASCOT ---
+    function drawFrogMascot(ctx, mx, my, rotation) {
+        ctx.save();
+        ctx.translate(mx, my);
+        ctx.rotate(rotation);
+        
+        let hoverY = (pinMascot.state === "idle") ? Math.sin(pinMascot.frame) * 4 : 0;
+        ctx.translate(0, hoverY);
+        
+        // Water Ripple Shadow under frog
+        ctx.fillStyle = "rgba(4,120,87,0.12)";
+        ctx.beginPath();
+        ctx.ellipse(0, 20, 24, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Frog Green Body Outline
+        ctx.fillStyle = "#34d399";
+        ctx.strokeStyle = "#064e3b";
+        ctx.lineWidth = 4;
+        
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 28, 20, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Frog Leg Left
+        ctx.beginPath();
+        ctx.ellipse(-24, 6, 12, 16, Math.PI/6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Frog Leg Right
+        ctx.beginPath();
+        ctx.ellipse(24, 6, 12, 16, -Math.PI/6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Frog big friendly eyes
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(-12, -18, 9, 0, Math.PI * 2);
+        ctx.arc(12, -18, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Animated pupils looking at targets
+        ctx.fillStyle = "#064e3b";
+        ctx.beginPath();
+        ctx.arc(-11, -19, 4.5, 0, Math.PI * 2);
+        ctx.arc(11, -19, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Happy mouth line
+        ctx.strokeStyle = "#064e3b";
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.arc(0, -2, 8, 0, Math.PI);
+        ctx.stroke();
+
+        // Cheerful rosy pink cheeks
+        ctx.fillStyle = "rgba(251,113,133,0.7)";
+        ctx.beginPath();
+        ctx.arc(-18, -4, 4.5, 0, Math.PI * 2);
+        ctx.arc(18, -4, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            let word = words[i];
+            let width = ctx.measureText(currentLine + " " + word).width;
+            if (width < maxWidth) {
+                currentLine += " " + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+
+        let totalHeight = lines.length * lineHeight;
+        let startY = y - (totalHeight / 2) + (lineHeight / 2);
+        
+        for (let j = 0; j < lines.length; j++) {
+            ctx.strokeText(lines[j], x, startY + (j * lineHeight));
+            ctx.fillText(lines[j], x, startY + (j * lineHeight));
+        }
+    }
+
+    function drawFeedbackBubble(bx, by, text, color) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 4;
+        
+        let bW = 250;
+        let bH = 55;
+        let tX = bx - bW / 2;
+        let tY = by - 130;
+
+        if (tX < 15) tX = 15;
+        if (tX + bW > BASE_WIDTH) tX = BASE_WIDTH - bW - 15;
+
+        ctx.beginPath();
+        ctx.roundRect(tX, tY, bW, bH, 18);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(bx, tY + bH);
+        ctx.lineTo(bx - 12, tY + bH + 12);
+        ctx.lineTo(bx + 12, tY + bH);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "900 16px 'Lexend'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, tX + bW / 2, tY + bH / 2);
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameActive) return;
+
+        ctx.save();
+        
+        let offsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        ctx.scale(scaleFactor, scaleFactor);
+        ctx.translate(offsetX, 0);
+
+        // Backdrop colors (Water streams & water ripple lines)
+        let riverBg = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
+        riverBg.addColorStop(0, "#ccfbf1");
+        riverBg.addColorStop(0.6, "#99f6e4");
+        riverBg.addColorStop(1, "#2dd4bf");
+        ctx.fillStyle = riverBg;
+        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+        // Gentle River Waves
+        ctx.fillStyle = "rgba(45,212,191,0.15)";
+        ctx.beginPath();
+        ctx.ellipse(120, BASE_HEIGHT - 300, 320, 200, 0, 0, Math.PI * 2);
+        ctx.ellipse(BASE_WIDTH - 80, BASE_HEIGHT - 600, 310, 180, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Render Lilypads
+        activeBalloons.forEach(b => {
+            if (b.isPopped) return;
+
+            ctx.save();
+            let currentBob = Math.sin((pinMascot.frame * 0.4) + b.bobOffset) * 6;
+            ctx.translate(b.x + b.shakeOffset, b.y + currentBob);
+
+            // Shaded string tails (Underwater stems)
+            ctx.strokeStyle = "rgba(5,150,105, 0.25)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, 20);
+            ctx.bezierCurveTo(-5, b.radius+20, 5, b.radius+35, 0, b.radius+60);
+            ctx.stroke();
+
+            // Drifting Lilypad Green Base Leaf
+            ctx.fillStyle = b.color;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, b.radius * 1.1, b.radius * 0.88, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = "#064e3b";
+            ctx.lineWidth = 4.5;
+            ctx.stroke();
+
+            // Lilypad leaf cleft line (v-cutout shape)
+            ctx.fillStyle = riverBg;
+            ctx.beginPath();
+            ctx.moveTo(b.radius * 1.05, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(b.radius * 0.8, b.radius * 0.5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = "#064e3b";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(b.radius * 1.05, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(b.radius * 0.8, b.radius * 0.5);
+            ctx.stroke();
+
+            // High contrast text inside leaf
+            ctx.fillStyle = "#042f1a";
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 5.5; 
+            ctx.lineJoin = "round";
+            
+            ctx.font = "900 17px 'Lexend'"; 
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            
+            drawWrappedText(ctx, b.text, 0, -4, b.radius * 1.4, 20);
+
+            ctx.restore();
+        });
+
+        // Draw Splash Particles
+        splashParticles.forEach(p => {
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        // Draw Frog Mascot
+        drawFrogMascot(ctx, pinMascot.x, pinMascot.y, pinMascot.rotation);
+
+        // Speech bubble popups
+        if (speechBubble.visible) {
+            drawFeedbackBubble(speechBubble.x, speechBubble.y, speechBubble.text, speechBubble.color);
+        }
+
+        ctx.restore();
+    }
+
+    function mainLoop() {
+        update();
+        render();
+        requestAnimationFrame(mainLoop);
+    }
+    
+    mainLoop();
+</script>
+</body>
+</html>
