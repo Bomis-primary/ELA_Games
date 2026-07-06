@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Quest Arcade: Grade 3 Homophones & Homonyms</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for retro/playful feel -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Lexend:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Lexend', sans-serif;
+    }
+    .title-font {
+      font-family: 'Fredoka One', cursive;
+    }
+    .retro-font {
+      font-family: 'Press Start 2P', monospace;
+    }
+    /* Simple pixel-style shadow utility */
+    .pixel-shadow {
+      box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.85);
+    }
+    .pixel-shadow-sm {
+      box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.85);
+    }
+    /* CRT Scanline styling */
+    .scanlines {
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.25) 50%
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+    /* Custom keyframes for splash screen progress */
+    @keyframes loadProgress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    .animate-progress {
+      animation: loadProgress 5s linear forwards;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 text-white min-h-screen flex flex-col justify-between overflow-x-hidden select-none">
+
+  <!-- TOP HEADER -->
+  <header class="w-full bg-black/40 backdrop-blur-md border-b-4 border-yellow-400 p-4 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <!-- Interactive GitHub Loaded Logo with SVG Fallback -->
+        <div id="logo-container" class="w-16 h-16 flex items-center justify-center bg-yellow-400 rounded-xl border-2 border-black rotate-[-3deg] shadow-lg overflow-hidden">
+          <img id="game-logo" src="https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp22/assets/innovine-logo.png" alt="Word Quest Logo" class="w-full h-full object-contain" onerror="handleLogoFallback('game-logo')">
+        </div>
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-yellow-300 title-font tracking-wide drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+            WORD QUEST ARCADE
+          </h1>
+          <p class="text-xs text-pink-300 tracking-wider font-semibold uppercase">Grade 3 Homophones & Homonyms</p>
+        </div>
+      </div>
+      
+      <!-- NAV NAVIGATION -->
+      <nav id="nav-controls" class="flex items-center gap-3 invisible">
+        <button onclick="switchScreen('menu')" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 rounded-lg text-sm font-bold border-2 border-black pixel-shadow-sm transition active:translate-y-1">
+          🎮 Play Menu
+        </button>
+        <button onclick="switchScreen('study')" class="px-4 py-2 bg-yellow-400 text-purple-950 hover:bg-yellow-300 rounded-lg text-sm font-bold border-2 border-black pixel-shadow-sm transition active:translate-y-1">
+          📚 Learning Zone
+        </button>
+        <button onclick="toggleMute()" id="mute-btn" class="p-2 bg-purple-700 hover:bg-purple-600 rounded-lg border-2 border-black pixel-shadow-sm text-lg transition">
+          🔊
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="flex-grow flex items-center justify-center p-4">
+
+    <!-- SCREEN 0: 5-SECOND SPLASH SCREEN -->
+    <div id="screen-splash" class="w-full max-w-4xl bg-slate-950/95 backdrop-blur-md p-10 rounded-2xl border-4 border-yellow-400 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center gap-8 min-h-[450px]">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/50 via-transparent to-transparent pointer-events-none"></div>
+      
+      <!-- Prominent Splash Logo with loading bounce -->
+      <div class="relative z-10 flex flex-col items-center gap-4 animate-bounce">
+        <div id="splash-logo-container" class="w-32 h-32 md:w-40 md:h-40 bg-yellow-400 rounded-3xl border-4 border-black shadow-2xl overflow-hidden flex items-center justify-center rotate-[2deg]">
+          <img id="splash-logo" src="https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp22/assets/innovine-logo.png" alt="Innovine Logo" class="w-full h-full object-contain" onerror="handleLogoFallback('splash-logo')">
+        </div>
+      </div>
+
+      <div class="text-center relative z-10 max-w-md">
+        <h2 class="text-2xl sm:text-3xl font-black text-yellow-300 title-font tracking-wider mb-2 drop-shadow-[0_2px_0_rgba(0,0,0,0.9)] uppercase">
+          Innovine Academy Presents
+        </h2>
+        <p class="text-xs retro-font text-pink-400 tracking-widest animate-pulse">LOADING WORD QUEST...</p>
+      </div>
+
+      <!-- Retro Loading Bar and Countdown -->
+      <div class="w-full max-w-md bg-purple-950 rounded-full h-6 border-2 border-black relative overflow-hidden z-10 pixel-shadow-sm">
+        <div class="bg-gradient-to-r from-pink-500 to-yellow-400 h-full animate-progress rounded-full"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span id="splash-timer" class="text-[10px] retro-font text-white drop-shadow-[0_1px_1px_rgba(0,0,0,1)]">Starting in 5s</span>
+        </div>
+      </div>
+
+      <!-- Skip button for quick testing/replays -->
+      <button onclick="endSplashScreen()" class="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px] retro-font text-gray-400 border border-gray-600 transition z-10">
+        Skip Loading [Space]
+      </button>
+    </div>
+    
+    <!-- SCREEN 1: MAIN MENU -->
+    <div id="screen-menu" class="w-full max-w-4xl bg-purple-950/85 backdrop-blur-md p-6 sm:p-10 rounded-2xl border-4 border-pink-500 shadow-2xl relative overflow-hidden flex flex-col gap-8 hidden">
+      
+      <!-- Graphic Background overlay -->
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/40 via-transparent to-transparent pointer-events-none"></div>
+
+      <!-- Header intro -->
+      <div class="text-center relative z-10">
+        <div class="inline-block bg-pink-500 text-white text-xs px-3 py-1 rounded-full uppercase tracking-widest font-bold mb-2">
+          Special Phonics & Vocabulary Edition
+        </div>
+        <h2 class="text-3xl sm:text-5xl font-black text-yellow-300 title-font tracking-tight mb-3 drop-shadow-[0_3px_0_rgba(0,0,0,0.9)]">
+          BECOME A WORD HERO!
+        </h2>
+        <p class="text-gray-200 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+          Master tricky "twin" words! Pop floating word bubbles, secure correct matches, and score 10 out of 10 points on each level.
+        </p>
+      </div>
+
+      <!-- INSTRUCTIONS BLOCK -->
+      <div class="bg-black/40 border border-indigo-500/50 p-4 rounded-xl text-center relative z-10">
+        <h3 class="text-yellow-400 font-extrabold text-sm uppercase tracking-wider mb-1">How to Play:</h3>
+        <p class="text-xs text-gray-300 leading-relaxed max-w-2xl mx-auto">
+          Read the sentence prompt at the top of the screen. Look at the bubbles rising up. 
+          <strong class="text-pink-300">Tap/Click any correct bubble</strong> to score! Don't let correct bubbles float past, and avoid popping incorrect options.
+        </p>
+      </div>
+
+      <!-- GAME LEVEL SELECTOR -->
+      <div class="grid md:grid-cols-2 gap-6 relative z-10">
+        <!-- LEVEL 1: HOMOPHONES -->
+        <div class="bg-gradient-to-b from-indigo-800 to-indigo-950 p-6 rounded-xl border-4 border-indigo-400 hover:border-indigo-300 transition-all transform hover:-translate-y-1 flex flex-col justify-between gap-4 shadow-xl">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-3xl">🎈</span>
+              <span class="bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded">LEVEL 1</span>
+            </div>
+            <h3 class="text-2xl font-black text-indigo-200 title-font">Homophone Pop!</h3>
+            <p class="text-sm text-indigo-100 mt-2 leading-relaxed">
+              Words that <strong class="text-yellow-300">sound identical</strong> but have completely different spellings & meanings.
+            </p>
+            <div class="mt-4 bg-indigo-900/60 p-3 rounded-lg border border-indigo-700/50">
+              <p class="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">Example Case:</p>
+              <p class="text-xs italic mt-1 text-gray-200">"The wind <span class="text-pink-400 font-bold underline">blew</span> the blue balloon away."</p>
+            </div>
+          </div>
+          <button onclick="startGame(1)" class="w-full py-3 bg-yellow-400 text-indigo-950 hover:bg-yellow-300 font-black text-base sm:text-lg rounded-xl border-2 border-black pixel-shadow transition active:translate-y-0.5">
+            PLAY LEVEL 1 🚀
+          </button>
+        </div>
+
+        <!-- LEVEL 2: HOMONYMS -->
+        <div class="bg-gradient-to-b from-pink-800 to-pink-950 p-6 rounded-xl border-4 border-pink-400 hover:border-pink-300 transition-all transform hover:-translate-y-1 flex flex-col justify-between gap-4 shadow-xl">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-3xl">🎯</span>
+              <span class="bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded">LEVEL 2</span>
+            </div>
+            <h3 class="text-2xl font-black text-pink-200 title-font">Homonym Targets!</h3>
+            <p class="text-sm text-pink-100 mt-2 leading-relaxed">
+              Words that are <strong class="text-yellow-300">spelled and pronounced the same</strong>, but have multiple meanings.
+            </p>
+            <div class="mt-4 bg-pink-900/60 p-3 rounded-lg border border-pink-700/50">
+              <p class="text-[10px] text-pink-300 font-bold uppercase tracking-widest">Example Case:</p>
+              <p class="text-xs italic mt-1 text-gray-200">"A dog's loud <span class="text-yellow-300 font-bold underline">bark</span>" versus "Rough tree <span class="text-yellow-300 font-bold underline">bark</span>".</p>
+            </div>
+          </div>
+          <button onclick="startGame(2)" class="w-full py-3 bg-yellow-400 text-pink-950 hover:bg-yellow-300 font-black text-base sm:text-lg rounded-xl border-2 border-black pixel-shadow transition active:translate-y-0.5">
+            PLAY LEVEL 2 🎯
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SCREEN 2: LEARN ZONE / STUDY BOARD -->
+    <div id="screen-study" class="w-full max-w-4xl bg-slate-900/95 backdrop-blur-md p-6 sm:p-10 rounded-2xl border-4 border-yellow-400 shadow-2xl flex flex-col gap-6 hidden">
+      <div class="flex items-center gap-3 border-b-2 border-slate-700 pb-4">
+        <span class="text-4xl">📚</span>
+        <div>
+          <h2 class="text-3xl font-black text-yellow-300 title-font">Homophone vs. Homonym Academy</h2>
+          <p class="text-sm text-slate-300">Short, simple lessons to achieve that 10/10 perfect score!</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Homophone Lesson -->
+        <div class="bg-indigo-950/70 p-5 rounded-xl border border-indigo-800">
+          <div class="flex items-center gap-2 text-indigo-300 font-extrabold text-lg mb-3">
+            <span>🎈</span>
+            <h3>Homophones (Sound Alike)</h3>
+          </div>
+          <p class="text-xs text-gray-200 leading-relaxed mb-4">
+            These words <strong class="text-yellow-300">sound exactly the same</strong> when spoken, but they are written with different spellings and mean different things!
+          </p>
+          <ul class="space-y-3 text-xs text-gray-300 bg-black/40 p-4 rounded-lg">
+            <li>👂 <strong>hear</strong> (using your ears) vs. 📍 <strong>here</strong> (in this spot)</li>
+            <li>🌾 <strong>flour</strong> (baking ingredient) vs. 🌸 <strong>flower</strong> (blooming plant)</li>
+            <li>📖 <strong>tale</strong> (imaginary story) vs. 🐕 <strong>tail</strong> (part of an animal's body)</li>
+          </ul>
+        </div>
+
+        <!-- Homonym Lesson -->
+        <div class="bg-pink-950/70 p-5 rounded-xl border border-pink-900">
+          <div class="flex items-center gap-2 text-pink-300 font-extrabold text-lg mb-3">
+            <span>🎯</span>
+            <h3>Homonyms (Spelled Alike)</h3>
+          </div>
+          <p class="text-xs text-gray-200 leading-relaxed mb-4">
+            These words are <strong class="text-yellow-300">spelled and sounded identically</strong>, but their definitions shift completely based on the sentence.
+          </p>
+          <ul class="space-y-3 text-xs text-gray-300 bg-black/40 p-4 rounded-lg">
+            <li>🦇 <strong>bat</strong> (a little flying animal) vs. ⚾ <strong>bat</strong> (wooden sports stick)</li>
+            <li>🌲 <strong>bark</strong> (exterior layer of a tree) vs. 🐕 <strong>bark</strong> (sound made by dogs)</li>
+            <li>⌚ <strong>watch</strong> (wrist clock) vs. 👀 <strong>watch</strong> (to view with attention)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-4">
+        <button onclick="switchScreen('menu')" class="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-bold transition">
+          Return to Menu
+        </button>
+        <button onclick="startGame(1)" class="px-6 py-2.5 bg-pink-600 hover:bg-pink-500 text-white font-extrabold rounded-lg pixel-shadow-sm border-2 border-black transition active:translate-y-0.5">
+          Start Level 1! 🚀
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: ACTIVE ARCADE CABINET VIEWPORT -->
+    <div id="screen-game" class="w-full max-w-4xl flex flex-col items-center justify-center hidden">
+      
+      <!-- Score & Life bar (HUD) -->
+      <div class="w-full bg-slate-900 rounded-t-2xl border-t-4 border-x-4 border-pink-500 p-4 flex flex-wrap justify-between items-center gap-4 z-10 shadow-lg">
+        <div class="flex items-center gap-4">
+          <!-- Game Status Progress tracker -->
+          <div class="bg-black/60 px-3 py-1.5 rounded-lg border border-purple-800 flex flex-col">
+            <span class="text-[9px] text-pink-300 font-bold uppercase tracking-wider">PROGRESS</span>
+            <span id="hud-progress" class="text-sm font-bold text-yellow-300">Question 1/10</span>
+          </div>
+          <div class="bg-black/60 px-3 py-1.5 rounded-lg border border-purple-800 flex flex-col">
+            <span class="text-[9px] text-pink-300 font-bold uppercase tracking-wider">SCORE</span>
+            <span id="hud-score" class="retro-font text-yellow-300 text-sm">0000</span>
+          </div>
+        </div>
+
+        <!-- CURRENT SENTENCE / QUESTION BOX -->
+        <div class="flex-grow max-w-md bg-purple-950 p-2.5 rounded-xl border-2 border-yellow-300 flex flex-col justify-center text-center">
+          <span id="prompt-label" class="text-[9px] text-yellow-300 font-bold tracking-widest uppercase mb-1">Fill the Blank:</span>
+          <p id="game-prompt" class="text-sm sm:text-base font-extrabold tracking-wide text-white leading-tight">
+            Loading...
+          </p>
+        </div>
+
+        <!-- LIVES CONTAINER -->
+        <div class="flex items-center gap-1 bg-black/60 px-3 py-1.5 rounded-lg border border-purple-800">
+          <span class="text-xs text-pink-300 font-bold mr-1">LIVES:</span>
+          <div id="hud-lives" class="flex items-center gap-1">
+            <!-- Hearts rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE STAGE -->
+      <div class="w-full bg-purple-950 border-x-4 border-b-4 border-pink-500 relative flex flex-col overflow-hidden shadow-2xl aspect-[4/3] max-h-[480px]">
+        <!-- CRT Overlay effect for authentic game retro texture -->
+        <div class="absolute inset-0 scanlines pointer-events-none z-30"></div>
+
+        <!-- Render Target Canvas -->
+        <canvas id="gameCanvas" class="w-full h-full block cursor-pointer z-10 bg-gradient-to-b from-indigo-950 via-purple-950 to-slate-900"></canvas>
+
+        <!-- GAME RESULT & END OVERLAYS -->
+        <div id="canvas-overlay" class="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-6 text-center z-40 hidden">
+          <!-- Game Over Modal -->
+          <div id="overlay-gameover" class="hidden flex flex-col items-center gap-4">
+            <div class="w-20 h-20 bg-red-600 rounded-full border-4 border-white flex items-center justify-center text-4xl shadow-lg animate-bounce">
+              👾
+            </div>
+            <h2 class="text-4xl font-black text-red-500 title-font tracking-wider">GAME OVER</h2>
+            <p class="text-gray-300 text-sm max-w-sm">
+              Keep practicing! You can review lessons in the Academy and try again.
+            </p>
+            <div class="flex gap-3 mt-2">
+              <button onclick="switchScreen('menu')" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-bold border border-black transition">
+                Home
+              </button>
+              <button onclick="restartGame()" class="px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-purple-950 rounded-lg text-sm font-bold border-2 border-black pixel-shadow-sm transition active:translate-y-0.5">
+                Play Again 🔄
+              </button>
+            </div>
+          </div>
+
+          <!-- Level Completed / Victory Modal -->
+          <div id="overlay-victory" class="hidden flex flex-col items-center gap-4">
+            <div class="w-20 h-20 bg-yellow-400 text-purple-950 rounded-full border-4 border-black flex items-center justify-center text-4xl shadow-lg animate-bounce">
+              👑
+            </div>
+            <h2 class="text-4xl font-black text-yellow-300 title-font tracking-wider">LEVEL CLEAR!</h2>
+            <p id="victory-commentary" class="text-gray-300 text-sm max-w-sm">
+              Brilliant! You scored a perfect 10/10!
+            </p>
+            <div class="bg-indigo-900/80 px-6 py-3 rounded-lg border-2 border-yellow-300 flex flex-col items-center">
+              <span class="text-xs text-indigo-300">FINAL SCORE</span>
+              <span id="overlay-final-score" class="retro-font text-2xl text-green-300 mt-1">0000</span>
+            </div>
+            <div class="flex gap-3 mt-2">
+              <button onclick="switchScreen('menu')" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-bold border border-black transition">
+                Home Menu
+              </button>
+              <button id="next-level-btn" onclick="nextLevel()" class="px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-purple-950 rounded-lg text-sm font-bold border-2 border-black pixel-shadow-sm transition active:translate-y-0.5">
+                Play Level 2 ➡️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- In-game pop feedback overlay -->
+        <div id="game-notif" class="absolute top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-purple-950 px-4 py-2 rounded-lg border-2 border-black pixel-shadow-sm font-black text-sm z-20 flex items-center gap-2 transform translate-y-[-100px] transition-transform duration-300">
+          <span id="notif-emoji">✨</span>
+          <span id="notif-text">Brilliant Pop!</span>
+        </div>
+      </div>
+
+      <!-- Touch Assistive Help -->
+      <p class="text-center text-xs text-purple-300 mt-4 max-w-md">
+        💡 <strong>Tap directly on the rising bubbles</strong> containing the correct word to pop them!
+      </p>
+    </div>
+
+  </main>
+
+  <!-- LOW INTERNET SYNC / PERSISTENCE TRIGGER FOOTER -->
+  <footer class="w-full bg-black/60 p-4 border-t-2 border-purple-950 text-center text-xs text-gray-400 flex flex-col sm:flex-row items-center justify-between max-w-6xl mx-auto gap-4">
+    <p>© 2026 Word Quest Arcade. Optimized for Chrome, Safari, and classroom tablets.</p>
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 animate-ping"></span>
+      <span class="text-gray-300">Low-band mode active (Auto fallback audio enabled)</span>
+    </div>
+  </footer>
+
+  <!-- CORE SCRIPTS AND ASSETS SETUP -->
+  <script>
+    // --- GRADE 3 PEDAGOGICAL CONTENT (Exactly 10 items per Level) ---
+    const LEVEL_1_HOMOPHONES = [
+      { q: "I can ______ the birds singing outside.", a: "hear", choices: ["hear", "here"] },
+      { q: "Please sit over ______ until class begins.", a: "here", choices: ["hear", "here"] },
+      { q: "The baker needs some ______ to bake bread.", a: "flour", choices: ["flour", "flower"] },
+      { q: "The yellow ______ grew beautifully in the garden.", a: "flower", choices: ["flour", "flower"] },
+      { q: "The happy puppy wagged its fluffy ______.", a: "tail", choices: ["tail", "tale"] },
+      { q: "Our library teacher read an exciting ______.", a: "tale", choices: ["tail", "tale"] },
+      { q: "The little rabbit hopped into a deep ______.", a: "hole", choices: ["hole", "whole"] },
+      { q: "I spent my ______ afternoon reading my new book.", a: "whole", choices: ["hole", "whole"] },
+      { q: "Her favorite winter jacket is colored ______.", a: "blue", choices: ["blue", "blew"] },
+      { q: "A strong wind ______ the colorful leaves off the tree.", a: "blew", choices: ["blue", "blew"] }
+    ];
+
+    const LEVEL_2_HOMONYMS = [
+      { q: "The loud ______ of the dog woke us up.", a: "bark", choices: ["bark", "bat", "wave"] },
+      { q: "The rough ______ on the tree trunk is brown.", a: "bark", choices: ["bark", "watch", "ring"] },
+      { q: "Mom wears a shiny silver ______ on her finger.", a: "ring", choices: ["ring", "wave", "bat"] },
+      { q: "We heard the telephone ______ twice.", a: "ring", choices: ["ring", "bark", "watch"] },
+      { q: "The tiny insect-eating ______ flew inside the dark cave.", a: "bat", choices: ["bat", "ring", "wave"] },
+      { q: "He swung the wooden baseball ______ to hit a home run.", a: "bat", choices: ["bat", "bark", "watch"] },
+      { q: "The ocean ______ crashed against the sandy beach.", a: "wave", choices: ["wave", "ring", "bat"] },
+      { q: "We gave a friendly ______ with our hand.", a: "wave", choices: ["wave", "bark", "watch"] },
+      { q: "I looked at my wrist ______ to see if it was noon.", a: "watch", choices: ["watch", "bat", "ring"] },
+      { q: "We love to ______ the birds fly high in the sky.", a: "watch", choices: ["watch", "bark", "wave"] }
+    ];
+
+    // --- GAME CONTROL SYSTEM ---
+    let score = 0;
+    let lives = 3;
+    let currentLevel = 1; 
+    let currentQuestionIdx = 0;
+    let soundEnabled = true;
+    let activeQuestions = [];
+    
+    // Canvas dimensions & render
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let animationId = null;
+    let bubbles = [];
+    let particles = [];
+    let bubbleTimer = 0;
+
+    // --- SOUND ENGINE WITH EXCELLENT DYNAMIC FALLBACK ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Remote URLs matching your attached path
+    const audioAssets = {
+      correct: new Audio("https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp22/assets/correct.mp3"),
+      wrong: new Audio("https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp22/assets/wrong.mp3")
+    };
+
+    // Pre-load audio configurations
+    Object.keys(audioAssets).forEach(key => {
+      audioAssets[key].load();
+    });
+
+    // Native Synth fallback function for immediate play & low-connectivity support
+    function triggerSynth(freq, duration, type = "sine") {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn("Audio Context synth interrupted:", e);
+      }
+    }
+
+    // Comprehensive audio dispatch
+    const sounds = {
+      correct: () => {
+        audioAssets.correct.play().catch(() => {
+          // Fallback synthesized chime
+          triggerSynth(523.25, 0.15, 'triangle'); // C5
+          setTimeout(() => triggerSynth(659.25, 0.15, 'triangle'), 100); // E5
+          setTimeout(() => triggerSynth(783.99, 0.25, 'triangle'), 200); // G5
+        });
+      },
+      wrong: () => {
+        audioAssets.wrong.play().catch(() => {
+          // Fallback synthesized buzz
+          triggerSynth(220, 0.2, 'sawtooth');
+          setTimeout(() => triggerSynth(180, 0.25, 'sawtooth'), 150);
+        });
+      },
+      pop: () => {
+        triggerSynth(400, 0.08, 'sine');
+      }
+    };
+
+    function toggleMute() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('mute-btn').innerText = soundEnabled ? '🔊' : '🔇';
+    }
+
+    // --- RECOVERY LOGO SVG FALLBACK ---
+    function handleLogoFallback(elementId) {
+      const imgElement = document.getElementById(elementId);
+      if (!imgElement) return;
+      const parent = imgElement.parentElement;
+      if (!parent) return;
+      
+      // Replace image with clean beautiful vector icon if image fails loading
+      parent.innerHTML = `
+        <svg class="w-12 h-12 text-purple-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <path d="M2 17l10 5 10-5"></path>
+          <path d="M2 12l10 5 10-5"></path>
+        </svg>
+      `;
+    }
+
+    // --- 5-SECOND SPLASH SCREEN TIMER ENGINE ---
+    let splashTimeLeft = 5;
+    let splashInterval = null;
+
+    function startSplashScreenTimer() {
+      const countdownSpan = document.getElementById('splash-timer');
+      splashInterval = setInterval(() => {
+        splashTimeLeft--;
+        if (countdownSpan) {
+          countdownSpan.innerText = `Starting in ${splashTimeLeft}s`;
+        }
+        if (splashTimeLeft <= 0) {
+          endSplashScreen();
+        }
+      }, 1000);
+    }
+
+    function endSplashScreen() {
+      if (splashInterval) {
+        clearInterval(splashInterval);
+        splashInterval = null;
+      }
+      // Hide Splash screen and show the Play Menu & Navigation bar
+      document.getElementById('screen-splash').classList.add('hidden');
+      document.getElementById('screen-menu').classList.remove('hidden');
+      document.getElementById('nav-controls').classList.remove('invisible');
+    }
+
+    // Run Splash on initial DOM Load
+    window.addEventListener('DOMContentLoaded', () => {
+      startSplashScreenTimer();
+    });
+
+    // Handle spacebar to skip splash screen
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !document.getElementById('screen-splash').classList.contains('hidden')) {
+        e.preventDefault();
+        endSplashScreen();
+      }
+    });
+
+    // --- NAVIGATION CONTROLLER ---
+    function switchScreen(screenId) {
+      document.getElementById('screen-menu').classList.add('hidden');
+      document.getElementById('screen-study').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      
+      document.getElementById('screen-' + screenId).classList.remove('hidden');
+
+      if (screenId !== 'game') {
+        stopGameLoop();
+      }
+    }
+
+    // --- INTERACTIVE BUBBLE ARCHITECTURE ---
+    class Bubble {
+      constructor(x, y, text, isCorrect, slotIdx) {
+        this.x = x;
+        this.y = y;
+        this.radius = 48; // Large tap target size
+        this.text = text;
+        this.isCorrect = isCorrect;
+        
+        // Dynamic speed based on index
+        this.speedY = 0.85 + (Math.random() * 0.4);
+        this.oscillationSpeed = 0.015 + Math.random() * 0.02;
+        this.oscillationWidth = 15 + Math.random() * 15;
+        this.angle = Math.random() * Math.PI;
+        this.baseX = x;
+
+        // Playful Grade 3 colors
+        const colors = ['#E11D48', '#2563EB', '#059669', '#7C3AED'];
+        this.color = colors[slotIdx % colors.length];
+      }
+
+      update() {
+        this.y -= this.speedY;
+        this.angle += this.oscillationSpeed;
+        this.x = this.baseX + Math.sin(this.angle) * this.oscillationWidth;
+      }
+
+      draw() {
+        ctx.save();
+        
+        // Outer dimensional gradient
+        let grad = ctx.createRadialGradient(this.x - 12, this.y - 12, 6, this.x, this.y, this.radius);
+        grad.addColorStop(0, '#FFFFFF');
+        grad.addColorStop(0.3, this.color);
+        grad.addColorStop(1, '#0F172A');
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.shadowColor = 'rgba(0,0,0,0.35)';
+        ctx.shadowBlur = 6;
+        ctx.fill();
+
+        // High gloss highlight
+        ctx.beginPath();
+        ctx.arc(this.x - this.radius*0.35, this.y - this.radius*0.35, this.radius*0.18, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+        ctx.fill();
+
+        // Text title
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowBlur = 3;
+        ctx.shadowColor = '#000000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold 18px Lexend';
+        ctx.fillText(this.text, this.x, this.y);
+        
+        ctx.restore();
+      }
+    }
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.radius = Math.random() * 4 + 2;
+        this.vx = (Math.random() - 0.5) * 6;
+        this.vy = (Math.random() - 0.5) * 6;
+        this.color = color;
+        this.alpha = 1;
+        this.decay = 0.02 + Math.random() * 0.02;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= this.decay;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // --- GAMEPLAY FLOW CONTROLLERS ---
+    function startGame(levelNum) {
+      currentLevel = levelNum;
+      score = 0;
+      lives = 3;
+      currentQuestionIdx = 0;
+      bubbles = [];
+      particles = [];
+
+      // Select and SHUFFLE the exact pool of 10 level questions
+      let pool = currentLevel === 1 ? LEVEL_1_HOMOPHONES : LEVEL_2_HOMONYMS;
+      activeQuestions = [...pool].sort(() => Math.random() - 0.5);
+
+      document.getElementById('hud-score').innerText = "0000";
+      document.getElementById('next-level-btn').innerText = currentLevel === 1 ? "Play Level 2 ➡️" : "Play Level 1 Again 🔄";
+
+      switchScreen('game');
+      resizeCanvas();
+      
+      document.getElementById('canvas-overlay').classList.add('hidden');
+      document.getElementById('overlay-gameover').classList.add('hidden');
+      document.getElementById('overlay-victory').classList.add('hidden');
+
+      loadQuestion();
+      setupMainLoop();
+    }
+
+    function restartGame() {
+      startGame(currentLevel);
+    }
+
+    function nextLevel() {
+      if (currentLevel === 1) {
+        startGame(2);
+      } else {
+        startGame(1);
+      }
+    }
+
+    // Native support for both width and height fluid properties
+    function resizeCanvas() {
+      const parent = canvas.parentElement;
+      canvas.width = parent.clientWidth;
+      canvas.height = parent.clientHeight;
+    }
+
+    window.addEventListener('resize', () => {
+      if (!document.getElementById('screen-game').classList.contains('hidden')) {
+        resizeCanvas();
+      }
+    });
+
+    function loadQuestion() {
+      const q = activeQuestions[currentQuestionIdx];
+      document.getElementById('hud-progress').innerText = `Question ${currentQuestionIdx + 1}/10`;
+      
+      // Setup dynamic presentation based on Type
+      if (currentLevel === 1) {
+        document.getElementById('prompt-label').innerText = "Level 1 • Fill the Blank:";
+        document.getElementById('game-prompt').innerHTML = q.q.replace("______", "<span class='text-yellow-400 underline font-black'>______</span>");
+      } else {
+        document.getElementById('prompt-label').innerText = "Level 2 • Choose the homonym word that fits:";
+        document.getElementById('game-prompt').innerText = q.q;
+      }
+
+      bubbles = [];
+      
+      // Spawn standard choices
+      q.choices.forEach((choice, idx) => {
+        const spacing = canvas.width / (q.choices.length + 1);
+        const startX = spacing * (idx + 1);
+        const startY = canvas.height + 60 + (idx * 25); // staggered start for comfort
+        const isCorrect = (choice === q.a);
+        
+        bubbles.push(new Bubble(startX, startY, choice, isCorrect, idx));
+      });
+    }
+
+    // Show dynamic feedback popup overlays
+    function showBannerFeedback(emoji, msg) {
+      const banner = document.getElementById('game-notif');
+      document.getElementById('notif-emoji').innerText = emoji;
+      document.getElementById('notif-text').innerText = msg;
+      banner.classList.remove('translate-y-[-100px]');
+      banner.classList.add('translate-y-0');
+
+      setTimeout(() => {
+        banner.classList.remove('translate-y-0');
+        banner.classList.add('translate-y-[-100px]');
+      }, 1500);
+    }
+
+    // Capture simple tactile actions (Clicks or Touch Taps)
+    canvas.addEventListener('click', (e) => {
+      handleUserInteraction(e);
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (e.touches.length > 0) {
+        handleUserInteraction(e.touches[0]);
+      }
+    }, { passive: false });
+
+    function handleUserInteraction(point) {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = point.clientX - rect.left;
+      const clickY = point.clientY - rect.top;
+
+      // Scan active bubbles
+      for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        const dist = Math.hypot(clickX - b.x, clickY - b.y);
+        
+        if (dist <= b.radius + 10) { // slightly generous tap radius
+          // POP ACTION!
+          sounds.pop();
+          spawnBurstParticles(b.x, b.y, b.color);
+
+          if (b.isCorrect) {
+            sounds.correct();
+            score += 100;
+            showBannerFeedback("🎉", "Correct! +100 Points");
+            
+            // Advance to next question immediately
+            setTimeout(() => {
+              currentQuestionIdx++;
+              if (currentQuestionIdx >= 10) {
+                triggerVictory();
+              } else {
+                loadQuestion();
+              }
+            }, 600);
+          } else {
+            sounds.wrong();
+            lives--;
+            showBannerFeedback("❌", `Oops! The answer was "${activeQuestions[currentQuestionIdx].a}"`);
+            
+            // Trigger screen dynamic vibration shake
+            canvas.classList.add('translate-x-2');
+            setTimeout(() => canvas.classList.remove('translate-x-2'), 100);
+
+            if (lives <= 0) {
+              triggerGameOver();
+            } else {
+              setTimeout(() => {
+                currentQuestionIdx++;
+                if (currentQuestionIdx >= 10) {
+                  triggerVictory();
+                } else {
+                  loadQuestion();
+                }
+              }, 1200);
+            }
+          }
+
+          bubbles.splice(i, 1);
+          break;
+        }
+      }
+    }
+
+    function spawnBurstParticles(x, y, color) {
+      for (let i = 0; i < 18; i++) {
+        particles.push(new Particle(x, y, color));
+      }
+    }
+
+    function triggerGameOver() {
+      stopGameLoop();
+      document.getElementById('canvas-overlay').classList.remove('hidden');
+      document.getElementById('overlay-gameover').classList.remove('hidden');
+    }
+
+    function triggerVictory() {
+      stopGameLoop();
+      const scoreStr = String(score).padStart(4, '0');
+      document.getElementById('overlay-final-score').innerText = scoreStr;
+      
+      // Change commentary text
+      const commentary = document.getElementById('victory-commentary');
+      if (score >= 1000) {
+        commentary.innerText = "Wow! You got a PERFECT 10/10 Score!";
+      } else if (score >= 800) {
+        commentary.innerText = "Terrific Job! You got a solid 8/10 or better!";
+      } else {
+        commentary.innerText = "Keep on trying! Great effort mastering Grade 3 words!";
+      }
+
+      document.getElementById('canvas-overlay').classList.remove('hidden');
+      document.getElementById('overlay-victory').classList.remove('hidden');
+    }
+
+    function stopGameLoop() {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    }
+
+    // --- MAIN ENGINE HEARTBEAT ---
+    function setupMainLoop() {
+      function tick() {
+        if (document.getElementById('screen-game').classList.contains('hidden')) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw arcade visual grid
+        ctx.strokeStyle = 'rgba(219, 39, 119, 0.12)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.stroke();
+        }
+
+        // 1. UPDATE AND DRAW BUBBLES
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+          const b = bubbles[i];
+          b.update();
+          b.draw();
+
+          // Float off-screen handler
+          if (b.y < -b.radius) {
+            if (b.isCorrect) {
+              // Missed correct option penalties
+              sounds.wrong();
+              lives--;
+              showBannerFeedback("⏰", "Correct word bubble floated away!");
+              
+              if (lives <= 0) {
+                triggerGameOver();
+                return;
+              } else {
+                setTimeout(() => {
+                  currentQuestionIdx++;
+                  if (currentQuestionIdx >= 10) {
+                    triggerVictory();
+                  } else {
+                    loadQuestion();
+                  }
+                }, 1000);
+              }
+            }
+            bubbles.splice(i, 1);
+          }
+        }
+
+        // Auto respawn safety check
+        if (bubbles.length === 0 && currentQuestionIdx < 10) {
+          loadQuestion();
+        }
+
+        // 2. PARTICLES SYSTEM
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.update();
+          p.draw();
+          if (p.alpha <= 0) {
+            particles.splice(i, 1);
+          }
+        }
+
+        // 3. RE-RENDER METRICS
+        updateHUD();
+
+        animationId = requestAnimationFrame(tick);
+      }
+      animationId = requestAnimationFrame(tick);
+    }
+
+    function updateHUD() {
+      document.getElementById('hud-score').innerText = String(score).padStart(4, '0');
+      
+      const livesBlock = document.getElementById('hud-lives');
+      livesBlock.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const heart = document.createElement('span');
+        heart.className = 'text-base transition-all duration-300';
+        heart.innerText = i < lives ? '❤️' : '🖤';
+        if (i >= lives) heart.classList.add('opacity-40');
+        livesBlock.appendChild(heart);
+      }
+    }
+  </script>
+</body>
+</html>
