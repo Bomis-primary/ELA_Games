@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cozy Leaf Catcher: Singular & Plural Nouns!</title>
+  <!-- Google Fonts for Kids -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { 
+      width: 100%; 
+      height: 100%; 
+      overflow: hidden; 
+      background-color: #fdf6e2; 
+      font-family: 'Lexend', sans-serif;
+    }
+    
+    /* Centered Game Container Shell */
+    #gameContainer { 
+      position: relative; 
+      width: 100%; 
+      height: 100%; 
+      max-width: 540px; 
+      max-height: 960px; 
+      margin: 0 auto; 
+      background: linear-gradient(to bottom, #fef3c7 0%, #fffbeb 100%); 
+      overflow: hidden; 
+      box-shadow: 0 20px 50px rgba(120, 53, 4, 0.15); 
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+    
+    /* Glassmorphism UI Screens */
+    .screen { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 10; 
+      padding: 30px; 
+      text-align: center; 
+      backdrop-filter: blur(8px);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* Brand Logo Screen (Solid white) */
+    #logoScreen { background-color: #ffffff; z-index: 100; }
+    #logoScreen img { max-width: 65%; max-height: 35%; object-fit: contain; }
+    
+    /* Loading Bar on Logo Screen */
+    .loading-bar-container {
+      width: 180px;
+      height: 6px;
+      background-color: #e2e8f0;
+      border-radius: 10px;
+      margin-top: 30px;
+      overflow: hidden;
+    }
+    .loading-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #fb923c 0%, #d97706 100%);
+      width: 0%;
+      border-radius: 10px;
+      animation: loadProgress 5s linear forwards;
+    }
+    
+    @keyframes loadProgress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    
+    /* Title Screen */
+    #titleScreen { background: radial-gradient(circle, #fef08a 0%, #fef3c7 100%); z-index: 90; display: none; }
+    #titleScreen h1 { 
+      color: #7c2d12; 
+      font-size: 38px; 
+      margin-bottom: 35px; 
+      line-height: 1.2; 
+      font-weight: 900; 
+      font-family: 'Fredoka', sans-serif;
+      animation: floatTitle 3s ease-in-out infinite;
+    }
+    
+    @keyframes floatTitle {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-8px) rotate(1deg); }
+    }
+    
+    /* Mission Instructions */
+    #instructionScreen { 
+      background: rgba(255, 255, 255, 0.96); 
+      z-index: 85; 
+      display: none; 
+      border: 8px solid #fef3c7; 
+      border-radius: 40px; 
+      color: #1e293b; 
+    }
+    
+    /* Premium Fancy Rounded Buttons */
+    .btn { 
+      background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%); 
+      color: #78350f; 
+      border: 3px solid #7c2d12; 
+      padding: 16px 42px; 
+      font-size: 22px; 
+      font-weight: 900; 
+      border-radius: 50px; 
+      cursor: pointer; 
+      box-shadow: 0 8px 0px #7c2d12, 0 15px 20px rgba(245,158,11,0.25); 
+      text-transform: uppercase; 
+      transition: all 0.1s ease; 
+      margin-top: 30px; 
+      letter-spacing: 1px;
+      font-family: 'Fredoka', sans-serif;
+    }
+    .btn:active { box-shadow: 0 2px 0px #7c2d12, 0 5px 10px rgba(245,158,11,0.25); transform: translateY(6px); }
+    
+    .big-bold-text { font-size: 18px; font-weight: 800; line-height: 1.5; margin-bottom: 14px; color: #475569; }
+    
+    /* HUD Dashboard Overlay */
+    #uiOverlay { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      padding: 20px 15px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      z-index: 20; 
+      pointer-events: none; 
+      display: none; 
+      align-items: center; 
+    }
+    #targetPrompt { 
+      font-size: 18px; 
+      font-weight: 900; 
+      color: #7c2d12; 
+      text-align: center; 
+      line-height: 1.35; 
+    }
+    #progressText { 
+      font-size: 14px; 
+      font-weight: 900; 
+      color: #b45309; 
+      background: linear-gradient(135deg, #fffdf5 0%, #fef3c7 100%); 
+      padding: 6px 20px; 
+      border-radius: 25px; 
+      border: 3px solid #fde68a; 
+      display: inline-block; 
+      box-shadow: 0 6px 12px rgba(180,83,9,0.15); 
+    }
+    
+    .hud-row { display: flex; justify-content: space-between; width: 100%; margin-top: 4px; pointer-events: none; }
+    .ui-element { background: rgba(255, 255, 255, 0.95); color: #7c2d12; padding: 8px 16px; border-radius: 25px; font-size: 14px; font-weight: 900; border: 3px solid #fef3c7; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    
+    /* End Game Screen Overlay */
+    #completionScreen { background: radial-gradient(circle, #ffffff 0%, #fffbeb 100%); display: none; z-index: 80; color: #7c2d12; }
+  </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <!-- Pure blank white logo screen on loading -->
+    <div id="logoScreen" class="screen">
+        <img src="https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp2/assets/innovine-logo.png" alt="Innovine Logo" onerror="handleLogoFallback()">
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- Title Screen -->
+    <div id="titleScreen" class="screen">
+        <h1 class="game-title-font">COZY LEAF CATCHER! 🍁</h1>
+        <p style="font-size: 18px; font-weight:bold; color: #b45309; margin-top: -20px; margin-bottom: 20px;">Singular & Plural Expedition</p>
+        <button class="btn" onclick="showInstructions()">Start Expedition ➔</button>
+    </div>
+
+    <!-- Instruction Screen -->
+    <div id="instructionScreen" class="screen">
+        <div class="big-bold-text" style="color: #7c2d12; font-size: 34px; margin-bottom: 20px; font-weight: 900; font-family: 'Fredoka', sans-serif;">Canopy Briefing! 🍂</div>
+        <div class="big-bold-text" style="font-size: 17px; background: #fffbeb; padding: 15px; border-radius: 20px; border: 3px dashed #fcd34d; color: #78350f;">Read the real-life question at the top of the canopy!</div>
+        <div class="big-bold-text" style="margin-top: 15px;">📍 Move the wicker basket left and right to catch the correct falling word leaf!</div>
+        <div class="big-bold-text" style="color: #ea580c;">🍁 Watch out! Catching the wrong leaf or letting the correct leaf slip past will cost a heart!</div>
+        <button class="btn" style="background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%); box-shadow: 0 8px 0px #7c2d12; border-color: #7c2d12;" onclick="startGame()">Begin 🚀</button>
+    </div>
+
+    <!-- HUD dashboard panel -->
+    <div id="uiOverlay">
+        <div id="targetPrompt">LOADING MISSION...</div>
+        <div id="progressText">Expedition: 1 / 10</div>
+        <div class="hud-row">
+            <div id="scoreLabel" class="ui-element">Score: 0</div>
+            <div id="levelLabel" class="ui-element" style="color: #b45309; background: #fffdf5; border-color: #fde68a;">Level: 1</div>
+            <div id="heartsLabel" class="ui-element" style="color: #ef4444; background: #fee2e2; border-color: #fca5a5;">Hearts: ❤️❤️❤️</div>
+        </div>
+    </div>
+    
+    <!-- Game End Screen -->
+    <div id="completionScreen" class="screen">
+        <h1 id="completionTitle" style="font-size: 36px; margin-bottom: 15px; font-weight: 900; font-family: 'Fredoka', sans-serif;">🐿️ Canopy Master! 👑</h1>
+        <p id="completionSubtitle" style="font-size: 18px; margin-bottom: 25px; font-weight: bold; color: #4b5563;">Superb singular & plural sorting skills!</p>
+        <div class="ui-element" id="finalScore" style="font-size: 24px; padding: 12px 35px; border-color: #fde68a; background: white; margin-bottom: 35px; font-weight: 900; color: #7c2d12;">Final Score: 0</div>
+        <button id="nextLevelBtn" class="btn" style="background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%); box-shadow: 0 8px 0px #7c2d12; border-color: #7c2d12; margin-bottom: 12px;" onclick="advanceLevel()">Level 2 ➔</button>
+        <button class="btn" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #78350f; box-shadow: 0 8px 0px #d97706; border-color: #d97706;" onclick="restartGame()">Play Again 🔄</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Remote audio assets with paths from chp2 assets (Singular & Plural)
+    const sndCorrect = new Audio('https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp2/assets/correct.mp3');
+    const sndWrong = new Audio('https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp2/assets/wrong.mp3');
+
+    let soundEnabled = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Trigger local synthesizer fallback for low connectivity
+    function triggerSynth(frequency, duration, type = "sine", gainVal = 0.08) {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn("Synth state: busy");
+      }
+    }
+
+    const sounds = {
+      correct: () => {
+        sndCorrect.play().catch(() => {
+          // Playful harvest chime fallback
+          triggerSynth(523.25, 0.12, 'sine'); // C5
+          setTimeout(() => triggerSynth(659.25, 0.22, 'sine'), 80); // E5
+        });
+      },
+      wrong: () => {
+        sndWrong.play().catch(() => {
+          // Buzz fallback
+          triggerSynth(180, 0.25, 'triangle', 0.15);
+        });
+      },
+      catch: () => {
+        // Rustle crunch sound
+        triggerSynth(350, 0.12, 'sine', 0.05);
+        setTimeout(() => triggerSynth(150, 0.12, 'sine', 0.02), 50);
+      }
+    };
+
+    // Safe Backward-Compatible Rounded Rect Drawing Functions
+    function fillRoundedRect(context, x, y, width, height, radius) {
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.lineTo(x + width - radius, y);
+        context.quadraticCurveTo(x + width, y, x + width, y + radius);
+        context.lineTo(x + width, y + height - radius);
+        context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        context.lineTo(x + radius, y + height);
+        context.quadraticCurveTo(x, y + height, x, y + height - radius);
+        context.lineTo(x, y + radius);
+        context.quadraticCurveTo(x, y, x + radius, y);
+        context.closePath();
+        context.fill();
+    }
+
+    function strokeRoundedRect(context, x, y, width, height, radius) {
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.lineTo(x + width - radius, y);
+        context.quadraticCurveTo(x + width, y, x + width, y + radius);
+        context.lineTo(x + width, y + height - radius);
+        context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        context.lineTo(x + radius, y + height);
+        context.quadraticCurveTo(x, y + height, x, y + height - radius);
+        context.lineTo(x, y + radius);
+        context.quadraticCurveTo(x, y, x + radius, y);
+        context.closePath();
+        context.stroke();
+    }
+
+    // Responsive Canvas System
+    const BASE_WIDTH = 600;
+    const BASE_HEIGHT = 900;
+    let scaleFactor = 1;
+
+    function resize() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        scaleFactor = Math.min(canvas.width / BASE_WIDTH, canvas.height / BASE_HEIGHT);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 30 Backend Questions on Singular and Plural Nouns (Apply/Analyze real-life connects)
+    const NOUNS_DATABASE = [
+      // Level 1: Regular Plurals adding -s, -es, -ies (15 Questions)
+      { q: "We saw two fluffy ______ hopping under the garden bush.", a: "rabbits", wrongs: ["rabbit", "rabbites"], lvl: 1 },
+      { q: "Dad bought three wooden ______ of red strawberries.", a: "boxes", wrongs: ["box", "boxs"], lvl: 1 },
+      { q: "The happy ______ flew south to find warm weather.", a: "birds", wrongs: ["bird", "birdes"], lvl: 1 },
+      { q: "Mom sliced the fresh oranges into sweet ______.", a: "slices", wrongs: ["slice", "slicese"], lvl: 1 },
+      { q: "All the story ______ in our classroom have yellow covers.", a: "books", wrongs: ["book", "bookes"], lvl: 1 },
+      { q: "Three little ______ crawled out of the ripe red apple.", a: "worms", wrongs: ["worm", "wormes"], lvl: 1 },
+      { q: "We placed all the glass ______ carefully on the high shelf.", a: "dishes", wrongs: ["dish", "dishs"], lvl: 1 },
+      { q: "The garden had beautiful blooming red ______ in spring.", a: "roses", wrongs: ["rose", "rosese"], lvl: 1 },
+      { q: "The baker baked ten sweet ______ for our class party.", a: "cookies", wrongs: ["cookie", "cookys"], lvl: 1 },
+      { q: "He made three ______ to find his lost winter socks.", a: "attempts", wrongs: ["attempt", "attemptes"], lvl: 1 },
+      { q: "We watched the bright ______ light up the night sky.", a: "cities", wrongs: ["city", "citys"], lvl: 1 },
+      { q: "All the busy ______ were working on their computers.", a: "offices", wrongs: ["office", "officese"], lvl: 1 },
+      { q: "She blew out all ten ______ on her birthday cake.", a: "candles", wrongs: ["candle", "candiles"], lvl: 1 },
+      { q: "We filled the wooden ______ with playground toys.", a: "baskets", wrongs: ["basket", "basketes"], lvl: 1 },
+      { q: "He organized all the plastic ______ on the shelf.", a: "bottles", wrongs: ["bottle", "bottlese"], lvl: 1 },
+
+      // Level 2: Irregular Plurals f->ves, vowel changes, invariant plurals (15 Questions)
+      { q: "The shepherd watched a large flock of ______ on the hill.", a: "sheep", wrongs: ["sheeps", "sheepes"], lvl: 2 },
+      { q: "My shoes were tight, so my ______ started to hurt.", a: "feet", wrongs: ["foots", "feetes"], lvl: 2 },
+      { q: "The children saw three wild ______ running in the grass.", a: "mice", wrongs: ["mouses", "mices"], lvl: 2 },
+      { q: "All the ______ in the library listened to the story.", a: "children", wrongs: ["childs", "childrens"], lvl: 2 },
+      { q: "The dentist checked all of my ______ carefully.", a: "teeth", wrongs: ["tooths", "teethes"], lvl: 2 },
+      { q: "The woodcutter gathered dry branches with sharp ______.", a: "knives", wrongs: ["knifes", "knivese"], lvl: 2 },
+      { q: "Two wild ______ bounded across the quiet forest highway.", a: "deer", wrongs: ["deers", "deeres"], lvl: 2 },
+      { q: "We cut the apple in half to get two equal ______.", a: "halves", wrongs: ["halfs", "halvese"], lvl: 2 },
+      { q: "Several ______ worked hard to build the new school gym.", a: "men", wrongs: ["mans", "mens"], lvl: 2 },
+      { q: "The farmer raised a gaggle of ______ near the farm pond.", a: "geese", wrongs: ["gooses", "geeses"], lvl: 2 },
+      { q: "The scientist studied the behavior of deep-sea ______.", a: "fish", wrongs: ["fishes", "fishs"], lvl: 2 },
+      { q: "Many ______ are organizing a community cleanup day.", a: "women", wrongs: ["womans", "womens"], lvl: 2 },
+      { q: "The kitchen chef chopped up five ______ of fresh bread.", a: "loaves", wrongs: ["loafs", "loavese"], lvl: 2 },
+      { q: "The brave ______ saved the little kitten from the tall tree.", a: "heroes", wrongs: ["heros", "heroese"], lvl: 2 },
+      { q: "We spotted three busy ______ pulling the wooden cart.", a: "oxen", wrongs: ["oxes", "oxens"], lvl: 2 }
+    ];
+
+    // Game states
+    let score = 0;
+    let hearts = 3;
+    let gameActive = false;
+    let freezeTimerActive = false;
+    let currentLevelIndex = 1;
+    let activeQuestions = [];
+    let currentQuestionIdx = 0;
+    let activeLeaves = []; // Falling leaf word options
+    let leafParticles = [];
+    let decorativeFoliage = [];
+
+    // Drag-and-drop state parameters
+    let isDraggingBasket = false;
+    let touchStartX = 0;
+
+    let speechBubble = { x: 0, y: 0, text: "", color: "#7c2d12", visible: false };
+
+    // Catching Basket Object at bottom
+    let basket = {
+        x: BASE_WIDTH / 2,
+        y: BASE_HEIGHT - 130,
+        width: 140,
+        height: 65,
+        targetX: BASE_WIDTH / 2,
+        frame: 0
+    };
+
+    // Splash Loader sequence
+    setTimeout(() => {
+        document.getElementById('logoScreen').style.display = 'none';
+        document.getElementById('titleScreen').style.display = 'flex';
+    }, 5000);
+
+    function showInstructions() {
+        document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('instructionScreen').style.display = 'flex';
+    }
+
+    function startGame() {
+        document.getElementById('instructionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        score = 0;
+        hearts = 3;
+        currentLevelIndex = 1;
+        currentQuestionIdx = 0;
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+        leafParticles = [];
+        isDraggingBasket = false;
+        
+        // Reset Basket parameters
+        basket.x = BASE_WIDTH / 2;
+        basket.targetX = BASE_WIDTH / 2;
+        basket.frame = 0;
+
+        // Split database into levels and shuffle them
+        let level1Pool = NOUNS_DATABASE.filter(x => x.lvl === 1).sort(() => Math.random() - 0.5);
+        let level2Pool = NOUNS_DATABASE.filter(x => x.lvl === 2).sort(() => Math.random() - 0.5);
+        
+        // Take exactly 10 questions per level to make up 20 questions in all
+        activeQuestions = [...level1Pool.slice(0, 10), ...level2Pool.slice(0, 10)];
+
+        initQuestionRound();
+        gameActive = true;
+    }
+
+    function initQuestionRound() {
+        if (currentQuestionIdx >= 10 && currentLevelIndex === 1) {
+            currentLevelIndex = 2;
+        }
+
+        if (currentQuestionIdx >= 20) {
+            endGameSummary(true);
+            return;
+        }
+
+        activeLeaves = [];
+        const q = activeQuestions[currentQuestionIdx];
+
+        // Format prompt at the HUD
+        document.getElementById('targetPrompt').innerHTML = q.q;
+
+        // Construct 3 choice falling leaves
+        let choices = [
+            { text: q.a, isCorrect: true },
+            { text: q.wrongs[0], isCorrect: false },
+            { text: q.wrongs[1], isCorrect: false }
+        ].sort(() => Math.random() - 0.5);
+
+        // Highly separated starting positions and falling heights
+        // Spaced out horizontally (Column 0, 1, 2)
+        const columnsX = [120, 300, 480]; 
+        const leafHeights = [-100, -280, -460]; // Staggered starting heights so they fall sequentially
+
+        const softColors = ["#f97316", "#eab308", "#fb7185", "#38bdf8"];
+
+        choices.forEach((choice, idx) => {
+            activeLeaves.push({
+                x: columnsX[idx],
+                y: leafHeights[idx],
+                radius: 42,
+                color: softColors[idx % softColors.length],
+                text: choice.text,
+                isCorrect: choice.isCorrect,
+                speedY: 1.4 + Math.random() * 0.5, // Slow child-friendly falling speed
+                isPopped: false,
+                shakeOffset: 0,
+                shakeTimer: 0,
+                bobOffset: Math.random() * 100
+            });
+        });
+
+        updateHUD();
+    }
+
+    function updateHUD() {
+        document.getElementById('scoreLabel').innerText = `Score: ${score}`;
+        document.getElementById('levelLabel').innerText = `Level: ${currentLevelIndex}`;
+        document.getElementById('progressText').innerText = `Progress: ${(currentQuestionIdx % 10) + 1} / 10`;
+        let heartStr = "Hearts: ";
+        for(let i=0; i<3; i++) heartStr += (i < hearts) ? "❤️" : "🖤";
+        document.getElementById('heartsLabel').innerText = heartStr;
+    }
+
+    // Mapping coordinates to high precision virtual resolution
+    function getVirtualCoords(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const currentOffsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        const virtualX = ((clientX - rect.left) / scaleFactor) - currentOffsetX;
+        const virtualY = (clientY - rect.top) / scaleFactor;
+        return { x: virtualX, y: virtualY };
+    }
+
+    // Basket Slide controllers
+    function handleDragStart(clientX, clientY) {
+        if (!gameActive || freezeTimerActive) return;
+        const coords = getVirtualCoords(clientX, clientY);
+        
+        // Touch horizontal drag region checking
+        if (coords.y > BASE_HEIGHT - 250) { 
+            isDraggingBasket = true;
+            touchStartX = coords.x - basket.x;
+        }
+    }
+
+    function handleDragMove(clientX, clientY) {
+        if (!isDraggingBasket || !gameActive || freezeTimerActive) return;
+        const coords = getVirtualCoords(clientX, clientY);
+        
+        // Bounded horizontal move
+        basket.x = Math.max(basket.width/2, Math.min(BASE_WIDTH - basket.width/2, coords.x - touchStartX));
+    }
+
+    function handleDragEnd() {
+        isDraggingBasket = false;
+    }
+
+    // Check if leaf catches
+    function checkLeafCollisions() {
+        if (freezeTimerActive) return;
+        
+        for (let i = 0; i < activeLeaves.length; i++) {
+            let b = activeLeaves[i];
+            if (b.isPopped) continue;
+            
+            // Checking if leaf falls near the basket rim opening
+            let dy = Math.abs(b.y - (basket.y - 10));
+            let dx = Math.abs(b.x - basket.x);
+
+            if (dy < 20 && dx < basket.width / 2 + 10) { 
+                b.isPopped = true;
+                processLeafCatch(b);
+                break;
+            }
+        }
+    }
+
+    // Bind touch / mouse drag events
+    window.addEventListener('mousedown', (e) => { handleDragStart(e.clientX, e.clientY); });
+    window.addEventListener('mousemove', (e) => { handleDragMove(e.clientX, e.clientY); });
+    window.addEventListener('mouseup', handleDragEnd);
+
+    window.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
+    window.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+            e.preventDefault(); // Stop mobile scroll pull-to-refresh
+            handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: false });
+    window.addEventListener('touchend', handleDragEnd);
+
+    function processLeafCatch(b) {
+        freezeTimerActive = true;
+        sounds.catch();
+
+        if(b.isCorrect) {
+            score += 10;
+            
+            speechBubble.x = basket.x;
+            speechBubble.y = basket.y - 50;
+            speechBubble.text = "Caught Correct! 🍁";
+            speechBubble.color = "#15803d";
+            speechBubble.visible = true;
+
+            sounds.correct();
+            createLeafSplash(b.x, b.y, b.color);
+        } else {
+            hearts--;
+            
+            speechBubble.x = basket.x;
+            speechBubble.y = basket.y - 50;
+            speechBubble.text = "Oops! Trick Leaf! ❌";
+            speechBubble.color = "#b91c1c";
+            speechBubble.visible = true;
+
+            sounds.wrong();
+            createLeafSplash(b.x, b.y, "#fca5a5");
+        }
+        updateHUD();
+
+        setTimeout(() => {
+            speechBubble.visible = false;
+            evaluateProgressionNextStep();
+        }, 1400);
+    }
+
+    function createLeafSplash(x, y, color) {
+        for (let i = 0; i < 20; i++) {
+            leafParticles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                radius: Math.random() * 5 + 2,
+                color: color,
+                alpha: 1
+            });
+        }
+    }
+
+    function evaluateProgressionNextStep() {
+        freezeTimerActive = false;
+        
+        if (hearts <= 0) {
+            endGameSummary(false);
+            return;
+        }
+
+        // Advance to next noun question
+        currentQuestionIdx++;
+        
+        // Level Transition checks
+        if (currentQuestionIdx === 10 && currentLevelIndex === 1) {
+            endGameSummary(true);
+        } else {
+            initQuestionRound();
+        }
+    }
+
+    function endGameSummary(isWin) {
+        gameActive = false;
+        document.getElementById('uiOverlay').style.display = 'none';
+        document.getElementById('finalScore').innerText = `Final Score: ${score}`;
+        
+        const title = document.getElementById('completionTitle');
+        const subtitle = document.getElementById('completionSubtitle');
+        const nextBtn = document.getElementById('nextLevelBtn');
+
+        if (isWin) {
+            if (currentLevelIndex === 1) {
+                title.innerText = "Level 1 Clear! 🐿️";
+                subtitle.innerText = "Super Catching! Get ready for Level 2!";
+                nextBtn.style.display = "inline-block";
+            } else {
+                title.innerText = "Expedition Master! 👑";
+                subtitle.innerText = "Amazing master over Singular & Plural Nouns!";
+                nextBtn.style.display = "none";
+            }
+        } else {
+            title.innerText = "Try Again! 👍";
+            subtitle.innerText = "Keep practicing to find the correct forest treasures.";
+            nextBtn.style.display = "none";
+        }
+        
+        document.getElementById('completionScreen').style.display = 'flex';
+    }
+
+    function advanceLevel() {
+        document.getElementById('completionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        currentLevelIndex = 2;
+        hearts = 3;
+        score = 0;
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+        leafParticles = [];
+
+        initQuestionRound();
+        gameActive = true;
+    }
+
+    function restartGame() {
+        document.getElementById('completionScreen').style.display = 'none';
+        startGame();
+    }
+
+    function toggleMute() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('mute-btn').innerText = soundEnabled ? '🔊' : '🔇';
+    }
+
+    function handleLogoFallback() {
+        const parent = document.getElementById('logoScreen');
+        if (parent) {
+            parent.innerHTML = `
+                <div class="flex flex-col items-center gap-4">
+                  <svg class="w-24 h-24 text-amber-600 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#fef3c7"></path>
+                    <path d="M2 17l10 5 10-5" fill="#fde68a"></path>
+                    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="4.5" font-family="'Lexend', sans-serif" font-weight="bold" fill="#7c2d12">INNOVINE</text>
+                  </svg>
+                  <p class="text-xs text-amber-800 font-extrabold tracking-widest uppercase animate-pulse">Entering Canopy...</p>
+                </div>
+            `;
+        }
+    }
+
+    // --- DECORATIVE FOREST CANOPY FLOWERS / LEAVES ---
+    function setupForestScenery() {
+        decorativeFoliage = [];
+        for (let i = 0; i < 6; i++) {
+            decorativeFoliage.push({
+                x: Math.random() * BASE_WIDTH,
+                y: 50 + Math.random() * 100,
+                size: 20 + Math.random() * 15,
+                angle: Math.random() * Math.PI,
+                speedY: 0.1 + Math.random() * 0.1
+            });
+        }
+    }
+    setupForestScenery();
+
+    function update() {
+        if (!gameActive) return;
+
+        basket.frame += 0.05;
+
+        // Leaf descent and out of bounds check
+        if (!freezeTimerActive) {
+            activeLeaves.forEach(b => {
+                if (b.isPopped) return;
+                b.y += b.speedY;
+
+                // Soft left/right sway
+                b.x += Math.sin((basket.frame * 0.8) + b.bobOffset) * 0.6;
+
+                // Missed check (if correct leaf falls off screen completely)
+                if (b.y > BASE_HEIGHT - 60) {
+                    b.isPopped = true;
+                    if (b.isCorrect) {
+                        hearts--;
+                        sounds.wrong();
+                        
+                        speechBubble.x = basket.x;
+                        speechBubble.y = basket.y - 50;
+                        speechBubble.text = "Missed correct leaf! ❌";
+                        speechBubble.color = "#b91c1c";
+                        speechBubble.visible = true;
+                        
+                        updateHUD();
+                        freezeTimerActive = true;
+                        setTimeout(() => {
+                            speechBubble.visible = false;
+                            evaluateProgressionNextStep();
+                        }, 1400);
+                    } else {
+                        // Wrong leaf fell off safely, check if all leaves popped to trigger reload
+                        const activeUnpopped = activeLeaves.filter(x => !x.isPopped);
+                        if (activeUnpopped.length === 0) {
+                            initQuestionRound();
+                        }
+                    }
+                }
+            });
+
+            checkLeafCollisions();
+        }
+
+        // Update decorative backdrop leaf movements
+        decorativeFoliage.forEach(p => {
+            p.y += p.speedY;
+            if (p.y > BASE_HEIGHT) p.y = -20;
+        });
+
+        // Update leaf particles
+        for (let i = leafParticles.length - 1; i >= 0; i--) {
+            let p = leafParticles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 0.03;
+            if (p.alpha <= 0) {
+                leafParticles.splice(i, 1);
+            }
+        }
+    }
+
+    // --- DRAW VECTOR CHUNKY FALLING LEAF SHAPE (No Shadows, Flat High Contrast) ---
+    function drawFallingLeaf(ctx, b) {
+        if (b.isPopped) return;
+
+        ctx.save();
+        let bobRotation = Math.sin((basket.frame * 0.5) + b.bobOffset) * 0.15;
+        ctx.translate(b.x, b.y);
+        ctx.rotate(bobRotation);
+
+        // Maple/Oak Inspired Leaf Vector Path
+        ctx.fillStyle = b.color;
+        ctx.strokeStyle = "#451a03";
+        ctx.lineWidth = 4;
+        
+        ctx.beginPath();
+        ctx.moveTo(0, -28); // Tip
+        ctx.quadraticCurveTo(10, -15, 24, -10);
+        ctx.quadraticCurveTo(15, 2, 28, 12);
+        ctx.quadraticCurveTo(10, 8, 4, 28); // bottom right lobe
+        ctx.lineTo(0, 18); // stem junction
+        ctx.lineTo(-4, 28); // bottom left lobe
+        ctx.quadraticCurveTo(-10, 8, -28, 12);
+        ctx.quadraticCurveTo(-15, 2, -24, -10);
+        ctx.quadraticCurveTo(-10, -15, 0, -28);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Leaf stem line
+        ctx.strokeStyle = "#451a03";
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(0, 18);
+        ctx.lineTo(0, 36);
+        ctx.stroke();
+
+        // Leaf inner veins
+        ctx.beginPath();
+        ctx.moveTo(0, -20);
+        ctx.lineTo(0, 18);
+        ctx.moveTo(0, -8); ctx.lineTo(10, -16);
+        ctx.moveTo(0, -8); ctx.lineTo(-10, -16);
+        ctx.moveTo(0, 5);  ctx.lineTo(14, 0);
+        ctx.moveTo(0, 5);  ctx.lineTo(-14, 0);
+        ctx.stroke();
+
+        // Flat word choices (no shadows)
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#7c2d12";
+        ctx.lineWidth = 3.5;
+        fillRoundedRect(ctx, -60, -48, 120, 30, 8);
+        strokeRoundedRect(ctx, -60, -48, 120, 30, 8);
+
+        ctx.fillStyle = "#7c2d12";
+        ctx.font = "900 14px 'Lexend'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(b.text, 0, -32);
+
+        ctx.restore();
+    }
+
+    // --- CUTE COZY WICKER CATCHING BASKET ---
+    function drawWickerBasket(ctx) {
+        ctx.save();
+        ctx.translate(basket.x, basket.y);
+
+        // Basket handle
+        ctx.strokeStyle = "#7c2d12";
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.arc(0, -5, basket.width / 2.3, Math.PI, 0);
+        ctx.stroke();
+
+        // Inner shadow space inside basket
+        ctx.fillStyle = "#451a03";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, basket.width / 2, basket.height / 3.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Basket body base (Wicker cross-hatched style)
+        ctx.fillStyle = "#d97706";
+        ctx.strokeStyle = "#451a03";
+        ctx.lineWidth = 4.5;
+        
+        ctx.beginPath();
+        ctx.moveTo(-basket.width / 2, 0);
+        ctx.lineTo(-basket.width / 2.5, basket.height);
+        ctx.lineTo(basket.width / 2.5, basket.height);
+        ctx.lineTo(basket.width / 2, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw cross-hatched wicker texture lines
+        ctx.strokeStyle = "rgba(124, 45, 18, 0.4)";
+        ctx.lineWidth = 2.5;
+        for (let i = -basket.width/2.2; i <= basket.width/2.2; i += 18) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i * 0.8, basket.height);
+            ctx.stroke();
+        }
+        for (let j = 10; j < basket.height; j += 15) {
+            ctx.beginPath();
+            ctx.moveTo(-basket.width/2 + j * 0.1, j);
+            ctx.lineTo(basket.width/2 - j * 0.1, j);
+            ctx.stroke();
+        }
+
+        // Rim border of basket opening
+        ctx.fillStyle = "#b45309";
+        ctx.strokeStyle = "#451a03";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, basket.width / 2 + 3, basket.height / 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameActive) return;
+
+        ctx.save();
+        
+        let offsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        ctx.scale(scaleFactor, scaleFactor);
+        ctx.translate(offsetX, 0);
+
+        // Backdrop colors (Autumn forest canopy)
+        let forestBg = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
+        forestBg.addColorStop(0, "#fef3c7"); // Warm amber
+        forestBg.addColorStop(0.6, "#fdf6e2");
+        forestBg.addColorStop(1, "#fde68a");
+        ctx.fillStyle = forestBg;
+        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+        // Draw decorative foliage leaves on background
+        ctx.fillStyle = "rgba(251, 146, 60, 0.15)";
+        decorativeFoliage.forEach(f => {
+            ctx.save();
+            ctx.translate(f.x, f.y);
+            ctx.rotate(f.angle);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, f.size, f.size * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        // Render Falling Leaves
+        activeLeaves.forEach(b => {
+            drawFallingLeaf(ctx, b);
+        });
+
+        // Draw Splash Particles
+        leafParticles.forEach(p => {
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        // Draw the Catching Basket
+        drawWickerBasket(ctx);
+
+        // Speech bubble popups
+        if (speechBubble.visible) {
+            drawFeedbackBubble(speechBubble.x, speechBubble.y, speechBubble.text, speechBubble.color);
+        }
+
+        ctx.restore();
+    }
+
+    function mainLoop() {
+        update();
+        render();
+        requestAnimationFrame(mainLoop);
+    }
+    
+    mainLoop();
+</script>
+</body>
+</html>
