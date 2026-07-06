@@ -1,0 +1,341 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+// --- QUESTION BANKS (15 per level) ---
+// Level 1: Applying knowledge to identify complete subjects and predicates in varied sentences
+const level1Bank = [
+  { q: 'In the sentence "The tiny green frog hopped across the lily pad," what is the complete subject?', options: ['The tiny green frog', 'hopped across', 'the lily pad', 'green frog hopped'], ans: 'The tiny green frog' },
+  { q: 'Identify the complete predicate: "My older brother bakes delicious chocolate chip cookies."', options: ['bakes delicious chocolate chip cookies', 'My older brother', 'delicious chocolate', 'brother bakes'], ans: 'bakes delicious chocolate chip cookies' },
+  { q: 'Which part is the complete subject? "Under the bed, the scared kitten hid."', options: ['the scared kitten', 'Under the bed', 'kitten hid', 'hid'], ans: 'the scared kitten' },
+  { q: 'Identify the complete predicate: "The roaring lion scared the tourists."', options: ['scared the tourists', 'The roaring lion', 'lion scared', 'the tourists'], ans: 'scared the tourists' },
+  { q: 'What is the complete subject? "Three bright stars shined in the night sky."', options: ['Three bright stars', 'shined in the night', 'the night sky', 'stars shined'], ans: 'Three bright stars' },
+  { q: 'Identify the complete predicate: "The old wooden door creaked loudly in the wind."', options: ['creaked loudly in the wind', 'The old wooden door', 'door creaked', 'loudly in the wind'], ans: 'creaked loudly in the wind' },
+  { q: 'What is the complete subject? "Our school\'s basketball team won the championship."', options: ['Our school\'s basketball team', 'won the championship', 'school\'s basketball', 'the championship'], ans: 'Our school\'s basketball team' },
+  { q: 'Identify the complete predicate: "A swarm of angry bees chased the bear."', options: ['chased the bear', 'A swarm of angry bees', 'swarm of angry', 'bees chased'], ans: 'chased the bear' },
+  { q: 'What is the complete subject? "The fluffy white clouds floated by slowly."', options: ['The fluffy white clouds', 'floated by slowly', 'white clouds floated', 'by slowly'], ans: 'The fluffy white clouds' },
+  { q: 'Identify the complete predicate: "My best friend Sarah plays the violin beautifully."', options: ['plays the violin beautifully', 'My best friend Sarah', 'friend Sarah plays', 'the violin'], ans: 'plays the violin beautifully' },
+  { q: 'What is the complete subject? "A shiny new bicycle sat in the driveway."', options: ['A shiny new bicycle', 'sat in the driveway', 'new bicycle sat', 'in the driveway'], ans: 'A shiny new bicycle' },
+  { q: 'Identify the complete predicate: "The hungry caterpillars ate all the green leaves."', options: ['ate all the green leaves', 'The hungry caterpillars', 'caterpillars ate', 'all the green'], ans: 'ate all the green leaves' },
+  { q: 'What is the complete subject? "The brave firefighter rescued the cat from the tree."', options: ['The brave firefighter', 'rescued the cat', 'firefighter rescued', 'from the tree'], ans: 'The brave firefighter' },
+  { q: 'Identify the complete predicate: "A loud thunderstorm woke me up in the middle of the night."', options: ['woke me up in the middle of the night', 'A loud thunderstorm', 'thunderstorm woke', 'middle of the night'], ans: 'woke me up in the middle of the night' },
+  { q: 'What is the complete subject? "The mysterious old map led to a hidden treasure."', options: ['The mysterious old map', 'led to a hidden treasure', 'old map led', 'a hidden treasure'], ans: 'The mysterious old map' },
+];
+
+// Level 2: Logical matching, compound subjects/predicates, and identifying fragments (beyond basic recall)
+const level2Bank = [
+  { q: 'Which predicate makes the most logical sense for the subject "The boiling water"?', options: ['bubbled and steamed on the stove.', 'slept quietly in the basket.', 'barked at the mailman.', 'flew south for the winter.'], ans: 'bubbled and steamed on the stove.' },
+  { q: 'Which subject makes the most sense for the predicate "melted quickly in the hot sun"?', options: ['The double-scoop ice cream cone', 'The heavy winter coat', 'The rock solid brick', 'The loud music'], ans: 'The double-scoop ice cream cone' },
+  { q: 'Identify the compound subject: "The dog and the cat slept peacefully on the rug."', options: ['The dog and the cat', 'slept peacefully', 'on the rug', 'dog and the cat slept'], ans: 'The dog and the cat' },
+  { q: 'Identify the compound predicate: "The children ran outside and played in the snow."', options: ['ran outside and played in the snow.', 'The children', 'ran outside', 'played in the snow.'], ans: 'ran outside and played in the snow.' },
+  { q: 'Which of these is a fragment because it is MISSING a subject?', options: ['Ran as fast as possible to the finish line.', 'The little boy ran.', 'She smiled at me.', 'The heavy rain fell.'], ans: 'Ran as fast as possible to the finish line.' },
+  { q: 'Which of these is a fragment because it is MISSING a predicate?', options: ['The giant oak tree in the front yard.', 'The tree fell down.', 'Birds sing.', 'I am happy.'], ans: 'The giant oak tree in the front yard.' },
+  { q: 'Complete the sentence logically: "The fierce, green dragon..."', options: ['guarded the shiny gold in the cave.', 'was baked in the oven.', 'grew on the apple tree.', 'drove the school bus.'], ans: 'guarded the shiny gold in the cave.' },
+  { q: 'Complete the sentence logically: "...soared high above the fluffy clouds."', options: ['The silver airplane', 'The heavy bowling ball', 'The underground worm', 'The deep ocean'], ans: 'The silver airplane' },
+  { q: 'Identify the compound subject: "Apples and bananas are my favorite fruits."', options: ['Apples and bananas', 'are my favorite fruits', 'my favorite fruits', 'Apples are'], ans: 'Apples and bananas' },
+  { q: 'Identify the compound predicate: "The monkey swung from the branch and grabbed a banana."', options: ['swung from the branch and grabbed a banana.', 'The monkey', 'swung from the branch', 'grabbed a banana.'], ans: 'swung from the branch and grabbed a banana.' },
+  { q: 'Which option is a COMPLETE sentence (has both a subject and a working predicate)?', options: ['The wind blew fiercely all night.', 'A bowl of hot, delicious soup.', 'Jumping over the tall fence.', 'The large, friendly golden retriever.'], ans: 'The wind blew fiercely all night.' },
+  { q: 'Which option is NOT a complete sentence?', options: ['A bright shooting star.', 'The dog barked.', 'We won the game!', 'She laughed.'], ans: 'A bright shooting star.' },
+  { q: 'Find the complete subject: "Both of my parents work at the city hospital."', options: ['Both of my parents', 'work at the city hospital', 'parents work', 'at the city hospital'], ans: 'Both of my parents' },
+  { q: 'Find the complete predicate: "The sneaky raccoon dug through our trash can."', options: ['dug through our trash can.', 'The sneaky raccoon', 'raccoon dug', 'our trash can.'], ans: 'dug through our trash can.' },
+  { q: 'Which predicate fits best? "The rusty old robot..."', options: ['clanked and sputtered as it walked.', 'swam beautifully in the ocean.', 'purred softly on my lap.', 'bloomed in the spring.'], ans: 'clanked and sputtered as it walked.' },
+];
+
+// Helper: Shuffle array and return a specific number of items
+const getShuffledQuestions = (bank, count) => {
+  const shuffled = [...bank].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
+
+// Helper: Shuffle options for a question
+const shuffleOptions = (options) => {
+  return [...options].sort(() => 0.5 - Math.random());
+};
+
+export default function App() {
+  const [gameState, setGameState] = useState('splash'); // splash, menu, transition, playing, gameover
+  const [currentLevel, setCurrentLevel] = useState(1);
+  const [score, setScore] = useState(0);
+  const [questions, setQuestions] = useState([]);
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(15);
+  const [shuffledCurrentOptions, setShuffledCurrentOptions] = useState([]);
+  const [feedback, setFeedback] = useState(null); // 'correct', 'wrong', null
+  
+  const timerRef = useRef(null);
+
+  // Audio elements
+  const playSound = (type) => {
+    try {
+      const audioPath = type === 'correct' ? 'assets/correct.mp3' : 'assets/wrong.mp3';
+      const audio = new Audio(audioPath);
+      audio.play().catch(e => console.log("Audio play prevented by browser, waiting for user interaction."));
+    } catch (error) {
+      console.log("Audio failed to load", error);
+    }
+  };
+
+  // Splash Screen Logic
+  useEffect(() => {
+    if (gameState === 'splash') {
+      const timer = setTimeout(() => {
+        setGameState('menu');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState]);
+
+  // Timer logic during gameplay
+  useEffect(() => {
+    if (gameState === 'playing' && feedback === null) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current);
+            handleAnswerTimeout();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [gameState, feedback, currentQIndex]);
+
+  const startGame = () => {
+    setScore(0);
+    startLevel(1);
+  };
+
+  const startLevel = (level) => {
+    setCurrentLevel(level);
+    const bank = level === 1 ? level1Bank : level2Bank;
+    const selectedQs = getShuffledQuestions(bank, 10); // Select 10 out of 15
+    setQuestions(selectedQs);
+    setCurrentQIndex(0);
+    setGameState('transition');
+    
+    setTimeout(() => {
+      prepareQuestion(selectedQs[0]);
+      setGameState('playing');
+    }, 2500); // 2.5s transition screen
+  };
+
+  const prepareQuestion = (question) => {
+    setShuffledCurrentOptions(shuffleOptions(question.options));
+    setTimeLeft(15);
+    setFeedback(null);
+  };
+
+  const handleAnswerTimeout = () => {
+    playSound('wrong');
+    setFeedback('wrong');
+    setTimeout(() => advanceQuestion(), 1500);
+  };
+
+  const handleAnswerClick = (selectedOption) => {
+    if (feedback !== null) return; // Prevent multiple clicks
+    
+    const currentQ = questions[currentQIndex];
+    const isCorrect = selectedOption === currentQ.ans;
+
+    if (isCorrect) {
+      playSound('correct');
+      setScore(prev => prev + (timeLeft * 10) + 100); // Bonus for fast answers
+      setFeedback('correct');
+    } else {
+      playSound('wrong');
+      setFeedback('wrong');
+    }
+
+    clearInterval(timerRef.current);
+    setTimeout(() => advanceQuestion(), 1500);
+  };
+
+  const advanceQuestion = () => {
+    if (currentQIndex + 1 < questions.length) {
+      const nextIndex = currentQIndex + 1;
+      setCurrentQIndex(nextIndex);
+      prepareQuestion(questions[nextIndex]);
+    } else {
+      // Level complete
+      if (currentLevel === 1) {
+        startLevel(2);
+      } else {
+        setGameState('gameover');
+      }
+    }
+  };
+
+  // --- RENDERERS ---
+
+  if (gameState === 'splash') {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center bg-white transition-opacity duration-1000">
+        <img 
+          src="assets/innovine-logo.png" 
+          alt="Innovine Logo" 
+          className="max-w-[80%] max-h-[50vh] object-contain animate-pulse"
+          onError={(e) => {
+            // Fallback just in case the path is missing in preview environment
+            e.target.style.display = 'none';
+            e.target.insertAdjacentHTML('afterend', '<h1 class="text-4xl font-bold text-blue-600">INNOVINE GAMES</h1>');
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full min-h-screen bg-slate-900 text-white font-sans selection:bg-cyan-500 flex flex-col items-center justify-center p-4 overflow-hidden relative">
+      
+      {/* Background Starfield Effect (CSS based to save bandwidth) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+        {[...Array(20)].map((_, i) => (
+          <div key={i} className="absolute bg-white rounded-full animate-ping" 
+               style={{
+                 width: Math.random() * 4 + 'px', 
+                 height: Math.random() * 4 + 'px', 
+                 top: Math.random() * 100 + '%', 
+                 left: Math.random() * 100 + '%',
+                 animationDuration: (Math.random() * 3 + 2) + 's',
+                 animationDelay: Math.random() * 2 + 's'
+               }}>
+          </div>
+        ))}
+      </div>
+
+      {/* Main Menu */}
+      {gameState === 'menu' && (
+        <div className="z-10 flex flex-col items-center text-center max-w-2xl bg-slate-800 p-8 rounded-3xl border-4 border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.6)]">
+          <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 mb-4 drop-shadow-md">
+            GALACTIC GRAMMAR
+          </h1>
+          <h2 className="text-xl md:text-2xl text-cyan-200 mb-8 font-semibold tracking-wide">
+            Subject & Predicate Rescue
+          </h2>
+          
+          <div className="bg-slate-700 p-4 rounded-xl mb-8 text-left text-sm md:text-base border border-slate-600">
+            <p className="mb-2">👨‍🚀 <strong className="text-fuchsia-400">Commander:</strong> "We need your help to fix broken communications!"</p>
+            <ul className="list-disc pl-5 space-y-2 text-slate-300">
+              <li><strong>Level 1:</strong> Identify the missing Subject or Predicate to restore the signal.</li>
+              <li><strong>Level 2:</strong> Solve advanced grammar anomalies to save the galaxy.</li>
+              <li>Answer quickly for hyper-speed bonus points!</li>
+            </ul>
+          </div>
+
+          <button 
+            onClick={startGame}
+            className="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xl rounded-full transform transition hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.8)]"
+          >
+            START MISSION
+          </button>
+        </div>
+      )}
+
+      {/* Level Transition */}
+      {gameState === 'transition' && (
+        <div className="z-10 flex flex-col items-center animate-bounce">
+          <h2 className="text-5xl md:text-7xl font-black text-fuchsia-400 drop-shadow-[0_0_15px_rgba(232,121,249,0.8)]">
+            LEVEL {currentLevel}
+          </h2>
+          <p className="text-xl mt-4 text-cyan-300">
+            {currentLevel === 1 ? "Target Identification" : "Advanced Logic Systems"}
+          </p>
+          <div className="mt-8 text-slate-400 animate-pulse">Entering sector...</div>
+        </div>
+      )}
+
+      {/* Gameplay */}
+      {gameState === 'playing' && questions.length > 0 && (
+        <div className="z-10 w-full max-w-3xl flex flex-col h-full">
+          {/* Top HUD */}
+          <div className="flex justify-between items-center bg-slate-800/80 p-4 rounded-2xl border-2 border-slate-700 mb-6 backdrop-blur-sm">
+            <div className="flex flex-col">
+              <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Level {currentLevel}</span>
+              <span className="text-cyan-400 font-bold text-lg">Mission {currentQIndex + 1}/10</span>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Score</span>
+              <span className="text-fuchsia-400 font-black text-2xl">{score}</span>
+            </div>
+          </div>
+
+          {/* Timer Bar */}
+          <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden mb-6 border border-slate-700">
+            <div 
+              className={`h-full transition-all duration-1000 ease-linear ${timeLeft > 5 ? 'bg-cyan-500' : 'bg-red-500 animate-pulse'}`}
+              style={{ width: `${(timeLeft / 15) * 100}%` }}
+            ></div>
+          </div>
+
+          {/* Question Box */}
+          <div className="bg-slate-800 border-2 border-cyan-500 rounded-3xl p-6 md:p-8 mb-6 shadow-[0_0_20px_rgba(6,182,212,0.2)] text-center relative min-h-[150px] flex items-center justify-center">
+            <h3 className="text-xl md:text-2xl font-semibold leading-relaxed">
+              {questions[currentQIndex].q}
+            </h3>
+            
+            {/* Feedback Overlay */}
+            {feedback && (
+              <div className={`absolute inset-0 flex items-center justify-center rounded-3xl backdrop-blur-sm ${feedback === 'correct' ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                <span className={`text-4xl md:text-6xl font-black ${feedback === 'correct' ? 'text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,1)]' : 'text-red-400 drop-shadow-[0_0_10px_rgba(248,113,113,1)]'}`}>
+                  {feedback === 'correct' ? 'EXCELLENT!' : 'SYSTEM ERROR'}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Options Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {shuffledCurrentOptions.map((option, idx) => {
+              // Determine button styling based on state
+              let btnClass = "bg-slate-700 border-2 border-slate-600 hover:border-cyan-400 hover:bg-slate-600 text-slate-100";
+              if (feedback !== null) {
+                if (option === questions[currentQIndex].ans) {
+                  btnClass = "bg-green-600 border-2 border-green-400 text-white shadow-[0_0_15px_rgba(74,222,128,0.5)]"; // Highlight correct answer
+                } else if (feedback === 'wrong') {
+                  btnClass = "bg-slate-800 border-2 border-slate-700 text-slate-500 opacity-50"; // Dim others
+                }
+              }
+
+              return (
+                <button
+                  key={idx}
+                  disabled={feedback !== null}
+                  onClick={() => handleAnswerClick(option)}
+                  className={`p-4 md:p-6 rounded-2xl font-medium text-lg text-left transition-all duration-200 flex items-center min-h-[80px] ${btnClass}`}
+                >
+                  <span className="mr-3 text-cyan-500 font-black text-xl">{['A','B','C','D'][idx]}</span>
+                  <span>{option}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Game Over Screen */}
+      {gameState === 'gameover' && (
+        <div className="z-10 flex flex-col items-center text-center max-w-2xl bg-slate-800 p-8 rounded-3xl border-4 border-fuchsia-500 shadow-[0_0_30px_rgba(232,121,249,0.5)]">
+          <h2 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400 mb-2">
+            MISSION ACCOMPLISHED
+          </h2>
+          <p className="text-xl text-slate-300 mb-8">The grammar galaxy is safe thanks to you!</p>
+          
+          <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl p-6 mb-8 w-full">
+            <p className="text-sm text-cyan-400 font-bold uppercase tracking-widest mb-1">Final Score</p>
+            <p className="text-6xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+              {score}
+            </p>
+          </div>
+
+          <button 
+            onClick={startGame}
+            className="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-bold text-xl rounded-full transform transition hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(232,121,249,0.8)]"
+          >
+            PLAY AGAIN
+          </button>
+        </div>
+      )}
+
+    </div>
+  );
+}
