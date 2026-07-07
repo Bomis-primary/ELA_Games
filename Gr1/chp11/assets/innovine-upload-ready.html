@@ -1,0 +1,1094 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Magic Punctuation Show</title>
+    <!-- Google Fonts for playful, energetic typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #1e1b4b; /* Deep magic indigo */
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .playful-font {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .hidden { display: none !important; }
+        .block { display: block; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .fixed { position: fixed; }
+        .absolute { position: absolute; }
+        .relative { position: relative; }
+        .inset-0 { inset: 0; }
+        .top-1\/2 { top: 50%; }
+        .left-1\/2 { left: 50%; }
+        .z-10 { z-index: 10; }
+        .z-20 { z-index: 20; }
+        .z-25 { z-index: 25; }
+        .z-50 { z-index: 50; }
+        .flex-col { flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+        .flex-grow { flex-grow: 1; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .gap-2 { gap: .5rem; }
+        .gap-3 { gap: .75rem; }
+        .gap-4 { gap: 1rem; }
+        .w-full { width: 100%; }
+        .w-16 { width: 4rem; }
+        .w-\[260px\] { width: 260px; }
+        .h-full { height: 100%; }
+        .h-auto { height: auto; }
+        .h-14 { height: 3.5rem; }
+        .h-\[50vh\] { height: 50vh; }
+        .h-\[95vh\] { height: 95vh; }
+        .min-h-screen { min-height: 100vh; }
+        .min-h-\[350px\] { min-height: 350px; }
+        .max-w-md { max-width: 28rem; }
+        .max-w-5xl { max-width: 64rem; }
+        .max-w-\[75vw\] { max-width: 75vw; }
+        .object-contain { object-fit: contain; }
+        .overflow-hidden { overflow: hidden; }
+        .pointer-events-none { pointer-events: none; }
+        .select-none { user-select: none; -webkit-user-select: none; }
+        .p-2 { padding: .5rem; }
+        .p-3 { padding: .75rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
+        .px-2\.5 { padding-left: .625rem; padding-right: .625rem; }
+        .px-3 { padding-left: .75rem; padding-right: .75rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-1 { padding-top: .25rem; padding-bottom: .25rem; }
+        .py-1\.5 { padding-top: .375rem; padding-bottom: .375rem; }
+        .py-3 { padding-top: .75rem; padding-bottom: .75rem; }
+        .py-3\.5 { padding-top: .875rem; padding-bottom: .875rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .mb-1 { margin-bottom: .25rem; }
+        .mb-2 { margin-bottom: .5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .ml-4 { margin-left: 1rem; }
+        .rounded-md { border-radius: .375rem; }
+        .rounded-lg { border-radius: .5rem; }
+        .rounded-xl { border-radius: .75rem; }
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-3xl { border-radius: 1.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .border { border-width: 1px; border-style: solid; }
+        .border-2 { border-width: 2px; border-style: solid; }
+        .border-4 { border-width: 4px; border-style: solid; }
+        .border-b { border-bottom-width: 1px; border-bottom-style: solid; }
+        .border-b-2 { border-bottom-width: 2px; border-bottom-style: solid; }
+        .border-t { border-top-width: 1px; border-top-style: solid; }
+        .border-fuchsia-400 { border-color: #e879f9; }
+        .border-fuchsia-500\/30 { border-color: rgba(217, 70, 239, .3); }
+        .border-fuchsia-500\/40 { border-color: rgba(217, 70, 239, .4); }
+        .border-cyan-400\/40 { border-color: rgba(34, 211, 238, .4); }
+        .border-purple-700 { border-color: #7e22ce; }
+        .border-purple-800 { border-color: #6b21a8; }
+        .border-purple-900\/60 { border-color: rgba(88, 28, 135, .6); }
+        .bg-white { background: #fff; }
+        .bg-indigo-950 { background: #1e1b4b; }
+        .bg-indigo-900\/50 { background: rgba(49, 46, 129, .5); }
+        .bg-indigo-950\/70 { background: rgba(30, 27, 75, .7); }
+        .bg-indigo-950\/80 { background: rgba(30, 27, 75, .8); }
+        .bg-indigo-950\/95 { background: rgba(30, 27, 75, .95); }
+        .bg-purple-900 { background: #581c87; }
+        .bg-purple-950\/90 { background: rgba(59, 7, 100, .9); }
+        .bg-purple-950\/95 { background: rgba(59, 7, 100, .95); }
+        .bg-gradient-to-r { background-image: linear-gradient(to right, var(--from, transparent), var(--via, var(--to, transparent)), var(--to, transparent)); }
+        .from-purple-900 { --from: #581c87; }
+        .via-indigo-955 { --via: #1e1b4b; }
+        .via-purple-200 { --via: #e9d5ff; }
+        .from-fuchsia-300 { --from: #f0abfc; }
+        .from-fuchsia-400 { --from: #e879f9; }
+        .from-fuchsia-500 { --from: #d946ef; }
+        .from-cyan-400 { --from: #22d3ee; }
+        .to-purple-900 { --to: #581c87; }
+        .to-purple-600 { --to: #9333ea; }
+        .to-cyan-200 { --to: #a5f3fc; }
+        .to-blue-600 { --to: #2563eb; }
+        .bg-clip-text { -webkit-background-clip: text; background-clip: text; }
+        .text-transparent { color: transparent; }
+        .text-white { color: #fff; }
+        .text-fuchsia-200 { color: #f5d0fe; }
+        .text-fuchsia-300 { color: #f0abfc; }
+        .text-fuchsia-400 { color: #e879f9; }
+        .text-cyan-200 { color: #a5f3fc; }
+        .text-cyan-300 { color: #67e8f9; }
+        .text-amber-300 { color: #fcd34d; }
+        .text-purple-100 { color: #f3e8ff; }
+        .text-purple-100\/80 { color: rgba(243, 232, 255, .8); }
+        .text-purple-200 { color: #e9d5ff; }
+        .text-purple-300 { color: #d8b4fe; }
+        .text-purple-400 { color: #c084fc; }
+        .text-xs { font-size: .75rem; line-height: 1rem; }
+        .text-sm { font-size: .875rem; line-height: 1.25rem; }
+        .text-md { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-5xl { font-size: 3rem; line-height: 1; }
+        .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .font-extrabold { font-weight: 800; }
+        .font-black { font-weight: 900; }
+        .italic { font-style: italic; }
+        .uppercase { text-transform: uppercase; }
+        .text-center { text-align: center; }
+        .leading-relaxed { line-height: 1.625; }
+        .tracking-wide { letter-spacing: .025em; }
+        .tracking-wider { letter-spacing: .05em; }
+        .tracking-widest { letter-spacing: .1em; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1); }
+        .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,.25); }
+        .shadow-fuchsia-500\/10 { box-shadow: 0 25px 50px -12px rgba(217,70,239,.1); }
+        .shadow-fuchsia-500\/20 { box-shadow: 0 10px 15px -3px rgba(217,70,239,.2), 0 4px 6px -4px rgba(217,70,239,.2); }
+        .shadow-cyan-500\/20 { box-shadow: 0 10px 15px -3px rgba(6,182,212,.2), 0 4px 6px -4px rgba(6,182,212,.2); }
+        .drop-shadow-\[0_4px_12px_rgba\(0\,0\,0\,0\.8\)\] { filter: drop-shadow(0 4px 12px rgba(0,0,0,.8)); }
+        .backdrop-blur-md { backdrop-filter: blur(12px); }
+        .transform { transform: translate(var(--tw-translate-x, 0), var(--tw-translate-y, 0)) scale(var(--tw-scale-x, 1), var(--tw-scale-y, 1)); }
+        .-translate-x-1\/2 { --tw-translate-x: -50%; }
+        .-translate-y-1\/2 { --tw-translate-y: -50%; }
+        .scale-75 { --tw-scale-x: .75; --tw-scale-y: .75; }
+        .transition { transition: color .15s ease, background-color .15s ease, border-color .15s ease, transform .15s ease, opacity .15s ease; }
+        .transition-all { transition: all .3s ease; }
+        .transition-opacity { transition: opacity 1s ease; }
+        .duration-300 { transition-duration: .3s; }
+        .duration-1000 { transition-duration: 1s; }
+        .opacity-0 { opacity: 0; }
+        .hover\:bg-purple-800:hover { background: #6b21a8; }
+        .hover\:from-fuchsia-300:hover { --from: #f0abfc; }
+        .hover\:from-cyan-300:hover { --from: #67e8f9; }
+        .hover\:to-purple-500:hover { --to: #a855f7; }
+        .hover\:to-blue-500:hover { --to: #3b82f6; }
+        .active\:scale-95:active { transform: scale(.95); }
+        .active\:bg-fuchsia-600:active { background: #c026d3; }
+        .active\:border-fuchsia-400:active { border-color: #e879f9; }
+        .active\:from-fuchsia-400:active { --from: #e879f9; }
+        .active\:to-purple-500:active { --to: #a855f7; }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-10%); animation-timing-function: cubic-bezier(.8,0,1,1); }
+            50% { transform: none; animation-timing-function: cubic-bezier(0,0,.2,1); }
+        }
+
+        .animate-bounce { animation: bounce 1s infinite; }
+
+        @media (min-width: 640px) {
+            .sm\:hidden { display: none !important; }
+            .sm\:flex { display: flex; }
+            .sm\:w-auto { width: auto; }
+        }
+
+        @media (max-width: 639px) {
+            .sm\:flex { display: none !important; }
+        }
+
+        @media (min-width: 768px) {
+            .md\:flex-row { flex-direction: row; }
+            .md\:h-auto { height: auto; }
+            .md\:h-\[500px\] { height: 500px; }
+            .md\:p-6 { padding: 1.5rem; }
+            .md\:text-base { font-size: 1rem; line-height: 1.5rem; }
+            .md\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
+            .md\:text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+            .md\:text-7xl { font-size: 4.5rem; line-height: 1; }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-6 text-white">
+
+    <!-- 5-Second Brand Intro Splash Screen -->
+    <div id="logo-screen" class="fixed inset-0 bg-white flex items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+        <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Solutions Logo" class="w-[260px] max-w-[75vw] h-auto object-contain">
+    </div>
+
+    <!-- Main Game Frame -->
+    <div class="relative w-full max-w-5xl bg-indigo-950 rounded-3xl border-4 border-fuchsia-400 shadow-2xl shadow-fuchsia-500/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
+        
+        <!-- Header / Dashboard HUD -->
+        <header class="bg-gradient-to-r from-purple-900 via-indigo-955 to-purple-900 px-4 py-3 border-b-2 border-fuchsia-400 flex flex-wrap justify-between items-center gap-2 z-10">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-bounce">Magic</span>
+                <h1 class="text-lg md:text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-purple-200 to-cyan-200 playful-font">
+                    PUNCTUATION MAGIC SHOW
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-3 text-sm md:text-base font-semibold">
+                <div class="bg-indigo-950/80 px-3 py-1 rounded-full border border-purple-700">
+                    Question: <span id="question-index" class="text-fuchsia-300 font-bold">1/15</span>
+                </div>
+                <div class="bg-indigo-950/80 px-3 py-1 rounded-full border border-purple-700">
+                    Score: <span id="score" class="text-amber-300 font-bold">0</span>
+                </div>
+                <div class="bg-indigo-950/80 px-3 py-1 rounded-full border border-purple-700">
+                    Streak: <span id="streak" class="text-cyan-300 font-bold">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Current Question Board -->
+        <section class="bg-indigo-950 p-4 border-b border-purple-900/60 flex flex-col items-center justify-center text-center z-10">
+            <p class="text-xs uppercase tracking-widest text-fuchsia-400 font-bold mb-1">Aim and shoot the spell at the correct punctuation hat!</p>
+            <h2 id="question-text" class="text-xl md:text-3xl font-bold text-white tracking-wide leading-relaxed px-4 py-1.5 bg-indigo-900/50 rounded-xl border border-fuchsia-500/30 playful-font">
+                Loading Sentence...
+            </h2>
+        </section>
+
+        <!-- Stage/Canvas Play Zone -->
+        <main class="relative flex-grow bg-indigo-950 overflow-hidden min-h-[350px] h-[50vh] md:h-[500px]">
+            <!-- Interactive Canvas -->
+            <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+            
+
+            <!-- Start Menu Splash Screen -->
+            <div id="start-screen" class="absolute inset-0 bg-indigo-950/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden">
+                <div class="max-w-md bg-purple-950/90 p-8 rounded-2xl border-2 border-fuchsia-500/40 backdrop-blur-md shadow-2xl">
+                    <div class="text-5xl mb-4 playful-font text-fuchsia-200">?</div>
+                    <h2 class="text-3xl font-extrabold text-fuchsia-300 mb-2 playful-font">MAGIC PUNCTUATION</h2>
+                    <h3 class="text-md text-purple-200 font-semibold mb-4">Grade 1 Sentence Ending Challenge</h3>
+                    <p class="text-sm text-purple-100/80 mb-6 leading-relaxed">
+                        Use the touch buttons on your phone or tablet screen. Tap <strong class="text-fuchsia-300">&larr;</strong> and <strong class="text-fuchsia-300">&rarr;</strong> to move the Magician. Tap <strong class="text-fuchsia-300">Cast Spell</strong> to launch a magic star spell up into the correct punctuation hat!
+                    </p>
+                    <button id="start-btn" class="w-full bg-gradient-to-r from-fuchsia-400 to-purple-600 hover:from-fuchsia-300 hover:to-purple-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-fuchsia-500/20 transform transition active:scale-95 text-lg playful-font">
+                        Begin Magic Show
+                    </button>
+                </div>
+            </div>
+
+            <!-- Session Victory / Game Over Overlay -->
+            <div id="gameover-screen" class="absolute inset-0 bg-indigo-950/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden">
+                <div class="max-w-md bg-purple-950/90 p-8 rounded-2xl border-2 border-cyan-400/40 backdrop-blur-md shadow-2xl">
+                    <div class="text-5xl mb-4 playful-font text-cyan-200">!</div>
+                    <h2 class="text-3xl font-extrabold text-cyan-300 mb-1 playful-font">Spectacular Show!</h2>
+                    <p class="text-purple-200 text-sm mb-6">You successfully corrected the sentences.</p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-indigo-950/70 p-3 rounded-lg border border-purple-800">
+                            <span class="block text-xs text-purple-400 font-bold uppercase">Final Score</span>
+                            <span id="final-score" class="text-2xl font-black text-amber-300">0</span>
+                        </div>
+                        <div class="bg-indigo-950/70 p-3 rounded-lg border border-purple-800">
+                            <span class="block text-xs text-purple-400 font-bold uppercase">Accuracy</span>
+                            <span id="final-accuracy" class="text-2xl font-black text-fuchsia-300">0%</span>
+                        </div>
+                    </div>
+
+                    <p id="performance-message" class="text-purple-100 italic mb-6 font-semibold"></p>
+
+                    <button id="restart-btn" class="w-full bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-cyan-500/20 transform transition active:scale-95 text-lg playful-font">
+                        Play Again
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive HUD Action Alert Banner -->
+            <div id="hit-notification" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
+                <div id="hud-text" class="text-5xl md:text-7xl font-black tracking-wider drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font">
+                    MAGICAL!
+                </div>
+            </div>
+        </main>
+
+        <!-- On-Screen Controller / Footer Area -->
+        <footer class="bg-purple-950/95 border-t border-purple-900/60 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
+            <!-- PC Nav Instructions -->
+            <div class="hidden sm:flex items-center gap-3 text-purple-300 text-xs">
+                <span class="bg-purple-900 px-2.5 py-1.5 rounded-md border border-purple-700 font-mono">&larr;</span>
+                <span class="bg-purple-900 px-2.5 py-1.5 rounded-md border border-purple-700 font-mono">&rarr;</span>
+                <span>Move Magician</span>
+                <span class="bg-purple-900 px-6 py-1.5 rounded-md border border-purple-700 font-mono ml-4">SPACEBAR</span>
+                <span>Cast Magic Spell</span>
+            </div>
+
+            <!-- Highly Touch-Responsive Buttons for Tablets and Mobile Phones -->
+            <div class="flex items-center justify-between w-full sm:w-auto gap-4 sm:hidden">
+                <div class="flex gap-2">
+                    <button id="btn-left" class="w-16 h-14 bg-purple-900 hover:bg-purple-800 border border-purple-700 rounded-xl active:bg-fuchsia-600 active:border-fuchsia-400 flex items-center justify-center text-white text-2xl transition shadow-lg select-none">
+                        &larr;
+                    </button>
+                    <button id="btn-right" class="w-16 h-14 bg-purple-900 hover:bg-purple-800 border border-purple-700 rounded-xl active:bg-fuchsia-600 active:border-fuchsia-400 flex items-center justify-center text-white text-2xl transition shadow-lg select-none">
+                        &rarr;
+                    </button>
+                </div>
+                <button id="btn-shoot" class="flex-grow px-6 py-4 bg-gradient-to-r from-fuchsia-500 to-purple-600 active:from-fuchsia-400 active:to-purple-500 text-white font-black rounded-xl active:scale-95 transition shadow-lg text-md tracking-wider uppercase select-none">
+                    Cast Spell
+                </button>
+            </div>
+            
+            <div class="text-xs text-center text-purple-400">
+                Punctuation Magic &bull; Grade 1 Learning Center
+            </div>
+        </footer>
+    </div>
+
+    <!-- Gameplay Script -->
+    <script>
+        // Set up references to the exact MP3 sound assets
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3')
+        };
+
+        // Web Audio API Synthesizer fallback system
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            // Preload the Audio files on initial tap
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => {
+                    playSynthFallback('correct');
+                });
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => {
+                    playSynthFallback('wrong');
+                });
+            } else if (type === 'win') {
+                audioAssets.correct.play().catch(() => {
+                    playSynthFallback('win');
+                });
+            }
+        }
+
+        // Web Audio Synthesizer fallback for offline or slow local setups
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Magic chime high chord
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(1000, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    // Sad buzzing noise
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(90, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'win') {
+                    // Upbeat arpeggio major chords
+                    const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+                        noteGain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.08);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.08 + 0.3);
+                        noteOsc.start(audioCtx.currentTime + idx * 0.08);
+                        noteOsc.stop(audioCtx.currentTime + idx * 0.08 + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.warn("Synth failed: ", e);
+            }
+        }
+
+        // 20 Simple Grade 1 Punctuation Questions Database (ending punctuation focused on ., ?, and !)
+        const allQuestions = [
+            { question: "Where is my little puppy ___", answer: "?" },
+            { question: "The cat sleeps on the mat ___", answer: "." },
+            { question: "Look at that super big balloon ___", answer: "!" },
+            { question: "What is your favorite toy ___", answer: "?" },
+            { question: "I like to eat red apples ___", answer: "." },
+            { question: "Can you play soccer with me ___", answer: "?" },
+            { question: "Wow, that is amazing ___", answer: "!" },
+            { question: "This is a fast red car ___", answer: "." },
+            { question: "Where are we going today ___", answer: "?" },
+            { question: "The sun is hot and yellow ___", answer: "." },
+            { question: "Watch out for that mud ___", answer: "!" },
+            { question: "Do you like to swim ___", answer: "?" },
+            { question: "The yellow bird can fly ___", answer: "." },
+            { question: "Stop that runner ___", answer: "!" },
+            { question: "How old are you today ___", answer: "?" },
+            { question: "I love my family so much ___", answer: "." },
+            { question: "Oh no, it fell on the floor ___", answer: "!" },
+            { question: "Are you happy to play ___", answer: "?" },
+            { question: "The green grass looks pretty ___", answer: "." },
+            { question: "Yay, we won the grand prize ___", answer: "!" }
+        ];
+
+        let sessionQuestions = [];
+        let currentQuestionIndex = 0;
+
+        // Canvas Settings
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // UI Element Hooks
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+        const hitNotification = document.getElementById("hit-notification");
+        const hudText = document.getElementById("hud-text");
+
+        // Stats Display Elements
+        const questionIndexEl = document.getElementById("question-index");
+        const scoreEl = document.getElementById("score");
+        const streakEl = document.getElementById("streak");
+        const finalScoreEl = document.getElementById("final-score");
+        const finalAccuracyEl = document.getElementById("final-accuracy");
+        const performanceMessageEl = document.getElementById("performance-message");
+        const questionTextEl = document.getElementById("question-text");
+
+        // Main State Loop Variables
+        let gameState = 'INTRO'; // INTRO, START, PLAYING, GAMEOVER
+        let score = 0;
+        let streak = 0;
+        let correctHits = 0;
+        const totalQuestionsCount = 15;
+        let currentCorrectAnswer = "";
+
+        // Magician variables
+        const magician = {
+            x: 0,
+            y: 0,
+            width: 80,
+            height: 90,
+            speed: 10,
+            isMovingLeft: false,
+            isMovingRight: false,
+            shootCooldown: 0
+        };
+
+        // Flying magic spell stars launched by the Magician
+        let activeSpells = [];
+
+        // Three magic hat targets: Left, Center, Right
+        let hats = [];
+
+        // Decorative / Celebratory background sparkles and leaves
+        let particles = [];
+
+        // Multi-device scale factor
+        let scaleFactor = 1;
+
+        function prepareSession() {
+            // Shuffle and pick exactly 15 questions
+            const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+            sessionQuestions = shuffled.slice(0, totalQuestionsCount);
+            currentQuestionIndex = 0;
+        }
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
+            scaleFactor = Math.min(1, canvas.width / 800);
+            
+            // Adjust Magician geometry & speed
+            magician.width = 90 * scaleFactor;
+            magician.height = 100 * scaleFactor;
+            magician.speed = 12 * scaleFactor;
+            magician.y = canvas.height - magician.height - 15;
+            
+            if (magician.x === 0) {
+                magician.x = canvas.width / 2 - magician.width / 2;
+            } else if (magician.x > canvas.width - magician.width) {
+                magician.x = canvas.width - magician.width;
+            }
+
+            // Distribute three floating magic hats on the stage table coordinates
+            const spacing = canvas.width / 4;
+            const hatY = 120 * scaleFactor;
+            const radius = 45 * scaleFactor;
+
+            hats = [
+                { id: ".", label: "Full Stop ( . )", x: spacing, y: hatY, r: radius, color: '#f472b6' }, // Pink
+                { id: "?", label: "Question ( ? )", x: spacing * 2, y: hatY, r: radius, color: '#38bdf8' }, // Cyan
+                { id: "!", label: "Excited ( ! )", x: spacing * 3, y: hatY, r: radius, color: '#fbbf24' } // Gold
+            ];
+        }
+
+        function initGame() {
+            score = 0;
+            streak = 0;
+            correctHits = 0;
+            activeSpells = [];
+            particles = [];
+            magician.shootCooldown = 0;
+            
+            scoreEl.textContent = score;
+            streakEl.textContent = streak;
+            
+            prepareSession();
+            loadQuestion();
+            resizeCanvas();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= totalQuestionsCount) {
+                endGameSession();
+                return;
+            }
+
+            questionIndexEl.textContent = `${currentQuestionIndex + 1}/${totalQuestionsCount}`;
+            
+            const currentQ = sessionQuestions[currentQuestionIndex];
+            currentCorrectAnswer = currentQ.answer;
+
+            // Display question text beautifully
+            questionTextEl.innerHTML = currentQ.question.replace("___", "<span class='text-fuchsia-300 underline font-black decoration-2 decoration-wavy'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+        }
+
+        function triggerHUDNotification(text, isCorrect) {
+            hudText.textContent = text;
+            if (isCorrect) {
+                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-green-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font";
+            } else {
+                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-rose-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font";
+            }
+
+            hitNotification.style.opacity = "1";
+            hitNotification.style.transform = "translate(-50%, -50%) scale(1.1)";
+            
+            setTimeout(() => {
+                hitNotification.style.opacity = "0";
+                hitNotification.style.transform = "translate(-50%, -50%) scale(0.75)";
+            }, 1100);
+        }
+
+        function spawnMagicParticles(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 1,
+                    r: Math.random() * 6 + 2,
+                    color: color,
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        function castSpell() {
+            if (gameState !== 'PLAYING' || magician.shootCooldown > 0) return;
+
+            initAudio();
+            magician.shootCooldown = 25; // Simple cooldown buffer
+
+            // Create a magic spell star emitted from magician's wand tip
+            const tipX = magician.x + magician.width * 0.65;
+            const tipY = magician.y + 10;
+            
+            activeSpells.push({
+                x: tipX,
+                y: tipY,
+                vy: -9 * scaleFactor,
+                r: 12 * scaleFactor,
+                angle: 0
+            });
+
+            // Minor puff at launching point
+            spawnMagicParticles(tipX, tipY, '#d946ef');
+        }
+
+        function handleTargetHit(hitHat) {
+            const isCorrect = (hitHat.id === currentCorrectAnswer);
+            spawnMagicParticles(hitHat.x, hitHat.y + 10, hitHat.color);
+
+            if (isCorrect) {
+                score += 10 + Math.floor(streak / 3) * 5;
+                streak++;
+                correctHits++;
+                playSound('correct');
+                triggerHUDNotification("MAGICAL!", true);
+            } else {
+                streak = 0;
+                playSound('wrong');
+                triggerHUDNotification("TRY AGAIN!", false);
+            }
+
+            scoreEl.textContent = score;
+            streakEl.textContent = streak;
+
+            // Move onto next sentence card
+            activeSpells = [];
+            currentQuestionIndex++;
+            setTimeout(loadQuestion, 1200);
+        }
+
+        function endGameSession() {
+            gameState = 'GAMEOVER';
+            gameoverScreen.classList.remove("hidden");
+            playSound('win');
+
+            finalScoreEl.textContent = score;
+            const accuracy = Math.round((correctHits / totalQuestionsCount) * 100);
+            finalAccuracyEl.textContent = accuracy + "%";
+
+            let msg = "";
+            if (accuracy >= 85) {
+                msg = "Legendary Magician! Your punctuation skills are super amazing!";
+            } else if (accuracy >= 60) {
+                msg = "Fantastic Performance! You put on a highly spectacular show!";
+            } else {
+                msg = "Practice builds wisdom! Let's wave our magic wands and try again!";
+            }
+            performanceMessageEl.textContent = msg;
+        }
+
+        // On-screen Input triggers
+        window.addEventListener('keydown', (e) => {
+            if (gameState !== 'PLAYING') return;
+            if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                magician.isMovingLeft = true;
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+                magician.isMovingRight = true;
+                e.preventDefault();
+            } else if (e.key === ' ' || e.key === 'Spacebar') {
+                castSpell();
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                magician.isMovingLeft = false;
+            } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+                magician.isMovingRight = false;
+            }
+        });
+
+        // Mobile touch navigation binds
+        const btnLeft = document.getElementById("btn-left");
+        const btnRight = document.getElementById("btn-right");
+        const btnShoot = document.getElementById("btn-shoot");
+
+        function setMoveLeft(state) {
+            if (gameState === 'PLAYING') magician.isMovingLeft = state;
+        }
+
+        function setMoveRight(state) {
+            if (gameState === 'PLAYING') magician.isMovingRight = state;
+        }
+
+        btnLeft.addEventListener('touchstart', (e) => { setMoveLeft(true); e.preventDefault(); }, {passive: false});
+        btnLeft.addEventListener('touchend', () => { setMoveLeft(false); });
+        btnLeft.addEventListener('mousedown', () => { setMoveLeft(true); });
+        btnLeft.addEventListener('mouseup', () => { setMoveLeft(false); });
+        btnLeft.addEventListener('mouseleave', () => { setMoveLeft(false); });
+
+        btnRight.addEventListener('touchstart', (e) => { setMoveRight(true); e.preventDefault(); }, {passive: false});
+        btnRight.addEventListener('touchend', () => { setMoveRight(false); });
+        btnRight.addEventListener('mousedown', () => { setMoveRight(true); });
+        btnRight.addEventListener('mouseup', () => { setMoveRight(false); });
+        btnRight.addEventListener('mouseleave', () => { setMoveRight(false); });
+
+        btnShoot.addEventListener('click', () => {
+            castSpell();
+        });
+
+        // Intro & End Control Action events
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+
+        // Drawing Helpers
+        function drawBackground() {
+            // Stage Backdrop Gradient
+            const stageGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            stageGrad.addColorStop(0, '#120e2e'); // Deep night purple
+            stageGrad.addColorStop(1, '#2e1065'); // Warm magenta glow base
+            ctx.fillStyle = stageGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Spotlight beams converging on center
+            ctx.fillStyle = 'rgba(217, 70, 239, 0.04)'; // Subtle fuchsia spotlights
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(canvas.width / 2 - 150, canvas.height);
+            ctx.lineTo(canvas.width / 2 + 150, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.04)'; // Light blue spotlights
+            ctx.beginPath();
+            ctx.moveTo(canvas.width, 0);
+            ctx.lineTo(canvas.width / 2 - 200, canvas.height);
+            ctx.lineTo(canvas.width / 2 + 200, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // Premium Magic Theater Curtains (Drawn left and right)
+            ctx.fillStyle = '#4c0519'; // Deep burgundy
+            ctx.fillRect(0, 0, 45 * scaleFactor, canvas.height);
+            ctx.fillRect(canvas.width - 45 * scaleFactor, 0, 45 * scaleFactor, canvas.height);
+
+            // Gold trim line for curtains
+            ctx.strokeStyle = '#eab308';
+            ctx.lineWidth = 3 * scaleFactor;
+            ctx.beginPath();
+            ctx.moveTo(45 * scaleFactor, 0);
+            ctx.lineTo(45 * scaleFactor, canvas.height);
+            ctx.moveTo(canvas.width - 45 * scaleFactor, 0);
+            ctx.lineTo(canvas.width - 45 * scaleFactor, canvas.height);
+            ctx.stroke();
+
+            // Theater golden stage top border line
+            ctx.beginPath();
+            ctx.moveTo(0, 15 * scaleFactor);
+            ctx.lineTo(canvas.width, 15 * scaleFactor);
+            ctx.stroke();
+        }
+
+        function drawMagician() {
+            ctx.save();
+            ctx.translate(magician.x, magician.y);
+
+            // Wizard Robe (Cone base shape)
+            ctx.fillStyle = '#6b21a8'; // Purple robe
+            ctx.strokeStyle = '#c084fc';
+            ctx.lineWidth = 2 * scaleFactor;
+            ctx.beginPath();
+            ctx.moveTo(magician.width / 2, 25 * scaleFactor);
+            ctx.lineTo(10 * scaleFactor, magician.height);
+            ctx.lineTo(magician.width - 10 * scaleFactor, magician.height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Head / Hair
+            ctx.fillStyle = '#ffedd5'; // Fair face skin
+            ctx.beginPath();
+            ctx.arc(magician.width / 2, 35 * scaleFactor, 15 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Magician Eyes / Smile
+            ctx.fillStyle = '#1e1b4b';
+            ctx.beginPath();
+            ctx.arc(magician.width / 2 - 5 * scaleFactor, 33 * scaleFactor, 2.5 * scaleFactor, 0, Math.PI * 2);
+            ctx.arc(magician.width / 2 + 5 * scaleFactor, 33 * scaleFactor, 2.5 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+            // Smiling mouth
+            ctx.strokeStyle = '#9d174d';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(magician.width / 2, 39 * scaleFactor, 5 * scaleFactor, 0, Math.PI);
+            ctx.stroke();
+
+            // Wizard Cone Hat with golden rim
+            ctx.fillStyle = '#4c1d95'; // Darker purple hat
+            ctx.beginPath();
+            ctx.moveTo(magician.width / 2, 0);
+            ctx.lineTo(magician.width / 2 - 18 * scaleFactor, 22 * scaleFactor);
+            ctx.lineTo(magician.width / 2 + 18 * scaleFactor, 22 * scaleFactor);
+            ctx.closePath();
+            ctx.fill();
+
+            // Hat rim
+            ctx.strokeStyle = '#eab308';
+            ctx.lineWidth = 4 * scaleFactor;
+            ctx.beginPath();
+            ctx.moveTo(magician.width / 2 - 22 * scaleFactor, 22 * scaleFactor);
+            ctx.lineTo(magician.width / 2 + 22 * scaleFactor, 22 * scaleFactor);
+            ctx.stroke();
+
+            // Wizard Cape details
+            ctx.fillStyle = '#dc2626'; // Red cape
+            ctx.beginPath();
+            ctx.moveTo(magician.width / 2 - 10 * scaleFactor, 48 * scaleFactor);
+            ctx.lineTo(5 * scaleFactor, magician.height - 15 * scaleFactor);
+            ctx.lineTo(magician.width / 2 - 15 * scaleFactor, magician.height);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(magician.width / 2 + 10 * scaleFactor, 48 * scaleFactor);
+            ctx.lineTo(magician.width - 5 * scaleFactor, magician.height - 15 * scaleFactor);
+            ctx.lineTo(magician.width / 2 + 15 * scaleFactor, magician.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // Magic Wand being waved on right side
+            ctx.strokeStyle = '#78350f'; // Wooden wand
+            ctx.lineWidth = 4 * scaleFactor;
+            ctx.beginPath();
+            ctx.moveTo(magician.width * 0.65, 50 * scaleFactor);
+            ctx.lineTo(magician.width * 0.75, 12 * scaleFactor);
+            ctx.stroke();
+
+            // Shiny star on wand tip
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(magician.width * 0.75, 12 * scaleFactor, 6 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawHats() {
+            hats.forEach(hat => {
+                ctx.save();
+                
+                // Outer shadow glow
+                ctx.shadowColor = hat.color;
+                ctx.shadowBlur = 10;
+                
+                // Magician Top Hat Body (upside down magic style)
+                ctx.fillStyle = '#1e1b4b'; // Sleek dark body
+                ctx.strokeStyle = hat.color;
+                ctx.lineWidth = 2.5 * scaleFactor;
+                ctx.beginPath();
+                ctx.roundRect(
+                    hat.x - 30 * scaleFactor, 
+                    hat.y - 20 * scaleFactor, 
+                    60 * scaleFactor, 
+                    45 * scaleFactor, 
+                    4 * scaleFactor
+                );
+                ctx.fill();
+                ctx.stroke();
+
+                // Hat colorful rim
+                ctx.fillStyle = hat.color;
+                ctx.beginPath();
+                ctx.roundRect(
+                    hat.x - 44 * scaleFactor, 
+                    hat.y + 20 * scaleFactor, 
+                    88 * scaleFactor, 
+                    8 * scaleFactor, 
+                    3 * scaleFactor
+                );
+                ctx.fill();
+
+                // Ribbon on hat base
+                ctx.fillStyle = '#dc2626'; // Red Ribbon
+                ctx.fillRect(hat.x - 30 * scaleFactor, hat.y + 12 * scaleFactor, 60 * scaleFactor, 8 * scaleFactor);
+
+                ctx.shadowColor = 'transparent';
+
+                // Golden sparkling star rising from magic hat
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.arc(hat.x, hat.y - 45 * scaleFactor, 16 * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw punctuation label on the glowing golden star
+                ctx.fillStyle = '#1e1b4b';
+                ctx.font = `bold ${Math.floor(25 * scaleFactor)}px "Fredoka One", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(hat.id, hat.x, hat.y - 43 * scaleFactor);
+
+                // Small title tag label beneath hat
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `bold ${Math.floor(11 * scaleFactor)}px "Outfit", sans-serif`;
+                ctx.fillText(hat.label, hat.x, hat.y + 44 * scaleFactor);
+
+                ctx.restore();
+            });
+        }
+
+        function drawSpells() {
+            activeSpells.forEach(spell => {
+                ctx.save();
+                
+                // Draw rotating glowing magical star spell
+                ctx.translate(spell.x, spell.y);
+                ctx.rotate(spell.angle);
+
+                ctx.shadowColor = '#d946ef';
+                ctx.shadowBlur = 12;
+
+                ctx.fillStyle = '#f472b6'; // Vibrant pink sparkler core
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * spell.r,
+                               Math.sin((18 + i * 72) * Math.PI / 180) * spell.r);
+                    ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (spell.r / 2.5),
+                               Math.sin((54 + i * 72) * Math.PI / 180) * (spell.r / 2.5));
+                }
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.restore();
+            });
+        }
+
+        function drawParticles() {
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(idx, 1);
+                    return;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+
+        // Update Game Frame updates
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            // Handle horizontal sliding logic
+            if (magician.isMovingLeft) {
+                magician.x -= magician.speed;
+                if (magician.x < 45 * scaleFactor) magician.x = 45 * scaleFactor;
+            }
+            if (magician.isMovingRight) {
+                magician.x += magician.speed;
+                if (magician.x > canvas.width - magician.width - (45 * scaleFactor)) {
+                    magician.x = canvas.width - magician.width - (45 * scaleFactor);
+                }
+            }
+
+            if (magician.shootCooldown > 0) magician.shootCooldown--;
+
+            // Move spell bullets and check punctuation magic hat collisions
+            for (let s = activeSpells.length - 1; s >= 0; s--) {
+                const spell = activeSpells[s];
+                spell.y += spell.vy;
+                spell.angle += 0.1; // Simple spin angle
+
+                // Check collision with the floating punctuation targets
+                for (let h = 0; h < hats.length; h++) {
+                    const hat = hats[h];
+                    
+                    // Simple radial intersection
+                    const targetX = hat.x;
+                    const targetY = hat.y - 45 * scaleFactor; // Targeting the floating punctuation circle
+                    const dx = spell.x - targetX;
+                    const dy = spell.y - targetY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < hat.r + spell.r) {
+                        handleTargetHit(hat);
+                        return; // Halt update to safeguard thread state transition
+                    }
+                }
+
+                // Destroy out-of-bounds spell elements
+                if (spell.y < 0) {
+                    activeSpells.splice(s, 1);
+                    
+                    // Misssed target reset
+                    streak = 0;
+                    streakEl.textContent = streak;
+                    playSound('wrong');
+                    triggerHUDNotification("MISSED HAT!", false);
+
+                    currentQuestionIndex++;
+                    setTimeout(loadQuestion, 1200);
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            drawHats();
+            
+            if (gameState === 'PLAYING') {
+                drawMagician();
+            }
+            
+            drawSpells();
+            drawParticles();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize 5-Second Brand Logo Intro
+        window.onload = function() {
+            resizeCanvas();
+            requestAnimationFrame(gameLoop);
+
+            // Play the intro segment for exactly 5 seconds
+            setTimeout(() => {
+                logoScreen.classList.add("opacity-0");
+                setTimeout(() => {
+                    logoScreen.classList.add("hidden");
+                    startScreen.classList.remove("hidden");
+                    gameState = 'START';
+                }, 1000);
+            }, 5000);
+        };
+    </script>
+</body>
+</html>
+
+
+
