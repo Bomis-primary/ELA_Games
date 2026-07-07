@@ -1,0 +1,1096 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Magic Punctuation Show</title>
+    <!-- Google Fonts for playful, energetic typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #1e1b4b; /* Deep magic indigo */
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .playful-font {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .hidden { display: none !important; }
+        .block { display: block; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .fixed { position: fixed; }
+        .absolute { position: absolute; }
+        .relative { position: relative; }
+        .inset-0 { inset: 0; }
+        .top-1\/2 { top: 50%; }
+        .left-1\/2 { left: 50%; }
+        .z-10 { z-index: 10; }
+        .z-20 { z-index: 20; }
+        .z-25 { z-index: 25; }
+        .z-50 { z-index: 50; }
+        .flex-col { flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+        .flex-grow { flex-grow: 1; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .gap-2 { gap: .5rem; }
+        .gap-3 { gap: .75rem; }
+        .gap-4 { gap: 1rem; }
+        .w-full { width: 100%; }
+        .w-16 { width: 4rem; }
+        .w-\[260px\] { width: 260px; }
+        .h-full { height: 100%; }
+        .h-auto { height: auto; }
+        .h-14 { height: 3.5rem; }
+        .h-\[50vh\] { height: 50vh; }
+        .h-\[95vh\] { height: 95vh; }
+        .min-h-screen { min-height: 100vh; }
+        .min-h-\[350px\] { min-height: 350px; }
+        .max-w-md { max-width: 28rem; }
+        .max-w-5xl { max-width: 64rem; }
+        .max-w-\[75vw\] { max-width: 75vw; }
+        .object-contain { object-fit: contain; }
+        .overflow-hidden { overflow: hidden; }
+        .pointer-events-none { pointer-events: none; }
+        .select-none { user-select: none; -webkit-user-select: none; }
+        .p-2 { padding: .5rem; }
+        .p-3 { padding: .75rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
+        .px-2\.5 { padding-left: .625rem; padding-right: .625rem; }
+        .px-3 { padding-left: .75rem; padding-right: .75rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-1 { padding-top: .25rem; padding-bottom: .25rem; }
+        .py-1\.5 { padding-top: .375rem; padding-bottom: .375rem; }
+        .py-3 { padding-top: .75rem; padding-bottom: .75rem; }
+        .py-3\.5 { padding-top: .875rem; padding-bottom: .875rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .mb-1 { margin-bottom: .25rem; }
+        .mb-2 { margin-bottom: .5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .ml-4 { margin-left: 1rem; }
+        .rounded-md { border-radius: .375rem; }
+        .rounded-lg { border-radius: .5rem; }
+        .rounded-xl { border-radius: .75rem; }
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-3xl { border-radius: 1.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .border { border-width: 1px; border-style: solid; }
+        .border-2 { border-width: 2px; border-style: solid; }
+        .border-4 { border-width: 4px; border-style: solid; }
+        .border-b { border-bottom-width: 1px; border-bottom-style: solid; }
+        .border-b-2 { border-bottom-width: 2px; border-bottom-style: solid; }
+        .border-t { border-top-width: 1px; border-top-style: solid; }
+        .border-fuchsia-400 { border-color: #e879f9; }
+        .border-fuchsia-500\/30 { border-color: rgba(217, 70, 239, .3); }
+        .border-fuchsia-500\/40 { border-color: rgba(217, 70, 239, .4); }
+        .border-cyan-400\/40 { border-color: rgba(34, 211, 238, .4); }
+        .border-purple-700 { border-color: #7e22ce; }
+        .border-purple-800 { border-color: #6b21a8; }
+        .border-purple-900\/60 { border-color: rgba(88, 28, 135, .6); }
+        .bg-white { background: #fff; }
+        .bg-indigo-950 { background: #1e1b4b; }
+        .bg-indigo-900\/50 { background: rgba(49, 46, 129, .5); }
+        .bg-indigo-950\/70 { background: rgba(30, 27, 75, .7); }
+        .bg-indigo-950\/80 { background: rgba(30, 27, 75, .8); }
+        .bg-indigo-950\/95 { background: rgba(30, 27, 75, .95); }
+        .bg-purple-900 { background: #581c87; }
+        .bg-purple-950\/90 { background: rgba(59, 7, 100, .9); }
+        .bg-purple-950\/95 { background: rgba(59, 7, 100, .95); }
+        .bg-gradient-to-r { background-image: linear-gradient(to right, var(--from, transparent), var(--via, var(--to, transparent)), var(--to, transparent)); }
+        .from-purple-900 { --from: #581c87; }
+        .via-indigo-955 { --via: #1e1b4b; }
+        .via-purple-200 { --via: #e9d5ff; }
+        .from-fuchsia-300 { --from: #f0abfc; }
+        .from-fuchsia-400 { --from: #e879f9; }
+        .from-fuchsia-500 { --from: #d946ef; }
+        .from-cyan-400 { --from: #22d3ee; }
+        .to-purple-900 { --to: #581c87; }
+        .to-purple-600 { --to: #9333ea; }
+        .to-cyan-200 { --to: #a5f3fc; }
+        .to-blue-600 { --to: #2563eb; }
+        .bg-clip-text { -webkit-background-clip: text; background-clip: text; }
+        .text-transparent { color: transparent; }
+        .text-white { color: #fff; }
+        .text-fuchsia-200 { color: #f5d0fe; }
+        .text-fuchsia-300 { color: #f0abfc; }
+        .text-fuchsia-400 { color: #e879f9; }
+        .text-cyan-200 { color: #a5f3fc; }
+        .text-cyan-300 { color: #67e8f9; }
+        .text-amber-300 { color: #fcd34d; }
+        .text-purple-100 { color: #f3e8ff; }
+        .text-purple-100\/80 { color: rgba(243, 232, 255, .8); }
+        .text-purple-200 { color: #e9d5ff; }
+        .text-purple-300 { color: #d8b4fe; }
+        .text-purple-400 { color: #c084fc; }
+        .text-xs { font-size: .75rem; line-height: 1rem; }
+        .text-sm { font-size: .875rem; line-height: 1.25rem; }
+        .text-md { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-5xl { font-size: 3rem; line-height: 1; }
+        .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .font-extrabold { font-weight: 800; }
+        .font-black { font-weight: 900; }
+        .italic { font-style: italic; }
+        .uppercase { text-transform: uppercase; }
+        .text-center { text-align: center; }
+        .leading-relaxed { line-height: 1.625; }
+        .tracking-wide { letter-spacing: .025em; }
+        .tracking-wider { letter-spacing: .05em; }
+        .tracking-widest { letter-spacing: .1em; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1); }
+        .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,.25); }
+        .shadow-fuchsia-500\/10 { box-shadow: 0 25px 50px -12px rgba(217,70,239,.1); }
+        .shadow-fuchsia-500\/20 { box-shadow: 0 10px 15px -3px rgba(217,70,239,.2), 0 4px 6px -4px rgba(217,70,239,.2); }
+        .shadow-cyan-500\/20 { box-shadow: 0 10px 15px -3px rgba(6,182,212,.2), 0 4px 6px -4px rgba(6,182,212,.2); }
+        .drop-shadow-\[0_4px_12px_rgba\(0\,0\,0\,0\.8\)\] { filter: drop-shadow(0 4px 12px rgba(0,0,0,.8)); }
+        .backdrop-blur-md { backdrop-filter: blur(12px); }
+        .transform { transform: translate(var(--tw-translate-x, 0), var(--tw-translate-y, 0)) scale(var(--tw-scale-x, 1), var(--tw-scale-y, 1)); }
+        .-translate-x-1\/2 { --tw-translate-x: -50%; }
+        .-translate-y-1\/2 { --tw-translate-y: -50%; }
+        .scale-75 { --tw-scale-x: .75; --tw-scale-y: .75; }
+        .transition { transition: color .15s ease, background-color .15s ease, border-color .15s ease, transform .15s ease, opacity .15s ease; }
+        .transition-all { transition: all .3s ease; }
+        .transition-opacity { transition: opacity 1s ease; }
+        .duration-300 { transition-duration: .3s; }
+        .duration-1000 { transition-duration: 1s; }
+        .opacity-0 { opacity: 0; }
+        .hover\:bg-purple-800:hover { background: #6b21a8; }
+        .hover\:from-fuchsia-300:hover { --from: #f0abfc; }
+        .hover\:from-cyan-300:hover { --from: #67e8f9; }
+        .hover\:to-purple-500:hover { --to: #a855f7; }
+        .hover\:to-blue-500:hover { --to: #3b82f6; }
+        .active\:scale-95:active { transform: scale(.95); }
+        .active\:bg-fuchsia-600:active { background: #c026d3; }
+        .active\:border-fuchsia-400:active { border-color: #e879f9; }
+        .active\:from-fuchsia-400:active { --from: #e879f9; }
+        .active\:to-purple-500:active { --to: #a855f7; }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-10%); animation-timing-function: cubic-bezier(.8,0,1,1); }
+            50% { transform: none; animation-timing-function: cubic-bezier(0,0,.2,1); }
+        }
+
+        .animate-bounce { animation: bounce 1s infinite; }
+
+        @media (min-width: 640px) {
+            .sm\:hidden { display: none !important; }
+            .sm\:flex { display: flex; }
+            .sm\:w-auto { width: auto; }
+        }
+
+        @media (max-width: 639px) {
+            .sm\:flex { display: none !important; }
+        }
+
+        @media (min-width: 768px) {
+            .md\:flex-row { flex-direction: row; }
+            .md\:h-auto { height: auto; }
+            .md\:h-\[500px\] { height: 500px; }
+            .md\:p-6 { padding: 1.5rem; }
+            .md\:text-base { font-size: 1rem; line-height: 1.5rem; }
+            .md\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
+            .md\:text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+            .md\:text-7xl { font-size: 4.5rem; line-height: 1; }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-6 text-white">
+
+    <!-- 5-Second Brand Intro Splash Screen -->
+    <div id="logo-screen" class="fixed inset-0 bg-white flex items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+        <img id="intro-logo" src="data:image/png;base64,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QgghJEMopoQQQkiGUEwJIYSQDKGYEkIIIRlCMSWEEEIyhGJKCCGEZAjFlBBCCMkQiikhhBCSIRRTQgghJEMopoQQQkiGUEwJIYSQDKGYEkIIIRlCMSWEEEIyhGJKCCGEZAjFlBBCCMkQiikhhBCSIRRTQgghJEMopoQQQkiGUEwJIYSQDKGYEkIIIRlCMSWEEEIyhGJKCCGEZAjFlBBCCMkQiikhhBCSIRRTQgghJEMopoQQQkiGUEwJIYSQDKGYEkIIIRlCMSWEEEIyhGJKCCGEZAjFlBBCCMkQiikhhBCSIRRTQgghJEMopoQQQkiGUEwJIYSQDKGYEkIIIRlCMSWEEEIyhGJKCCGEZAjFlBBCCMkQiikhhBCSIRRTQgghJEMopoQQQkiGUEwJIYSQDKGYEkIIIRlCMSWEEEIyhGJKCCGEZAjFlBBCCMkQiikhhBCSIRRTQgghJEMopoQQQkiGUEwJIYSQDKGYEkIIIRlCMSWEEEIyhGJKCCGEZAjFlBBCCMkQiikhhBCSIRRTQgghJEMopoQQQkiGUEwJIYSQDKGYEkIIIRlCMSWEEEIyhGJKCCGEZAjFlBBCCMkI4P8BpDPUuygyTGkAAAAASUVORK5CYII=" alt="Innovine Solutions Logo" class="w-[260px] max-w-[75vw] h-auto object-contain">
+    </div>
+
+    <!-- Main Game Frame -->
+    <div class="relative w-full max-w-5xl bg-indigo-950 rounded-3xl border-4 border-fuchsia-400 shadow-2xl shadow-fuchsia-500/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
+        
+        <!-- Header / Dashboard HUD -->
+        <header class="bg-gradient-to-r from-purple-900 via-indigo-955 to-purple-900 px-4 py-3 border-b-2 border-fuchsia-400 flex flex-wrap justify-between items-center gap-2 z-10">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-bounce">Magic</span>
+                <h1 class="text-lg md:text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-purple-200 to-cyan-200 playful-font">
+                    PUNCTUATION MAGIC SHOW
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-3 text-sm md:text-base font-semibold">
+                <div class="bg-indigo-950/80 px-3 py-1 rounded-full border border-purple-700">
+                    Question: <span id="question-index" class="text-fuchsia-300 font-bold">1/15</span>
+                </div>
+                <div class="bg-indigo-950/80 px-3 py-1 rounded-full border border-purple-700">
+                    Score: <span id="score" class="text-amber-300 font-bold">0</span>
+                </div>
+                <div class="bg-indigo-950/80 px-3 py-1 rounded-full border border-purple-700">
+                    Streak: <span id="streak" class="text-cyan-300 font-bold">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Current Question Board -->
+        <section class="bg-indigo-950 p-4 border-b border-purple-900/60 flex flex-col items-center justify-center text-center z-10">
+            <p class="text-xs uppercase tracking-widest text-fuchsia-400 font-bold mb-1">Aim and shoot the spell at the correct punctuation hat!</p>
+            <h2 id="question-text" class="text-xl md:text-3xl font-bold text-white tracking-wide leading-relaxed px-4 py-1.5 bg-indigo-900/50 rounded-xl border border-fuchsia-500/30 playful-font">
+                Loading Sentence...
+            </h2>
+        </section>
+
+        <!-- Stage/Canvas Play Zone -->
+        <main class="relative flex-grow bg-indigo-950 overflow-hidden min-h-[350px] h-[50vh] md:h-[500px]">
+            <!-- Interactive Canvas -->
+            <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+            
+
+            <!-- Start Menu Splash Screen -->
+            <div id="start-screen" class="absolute inset-0 bg-indigo-950/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden">
+                <div class="max-w-md bg-purple-950/90 p-8 rounded-2xl border-2 border-fuchsia-500/40 backdrop-blur-md shadow-2xl">
+                    <div class="text-5xl mb-4 playful-font text-fuchsia-200">?</div>
+                    <h2 class="text-3xl font-extrabold text-fuchsia-300 mb-2 playful-font">MAGIC PUNCTUATION</h2>
+                    <h3 class="text-md text-purple-200 font-semibold mb-4">Grade 1 Sentence Ending Challenge</h3>
+                    <p class="text-sm text-purple-100/80 mb-6 leading-relaxed">
+                        Use the touch buttons on your phone or tablet screen. Tap <strong class="text-fuchsia-300">&larr;</strong> and <strong class="text-fuchsia-300">&rarr;</strong> to move the Magician. Tap <strong class="text-fuchsia-300">Cast Spell</strong> to launch a magic star spell up into the correct punctuation hat!
+                    </p>
+                    <button id="start-btn" class="w-full bg-gradient-to-r from-fuchsia-400 to-purple-600 hover:from-fuchsia-300 hover:to-purple-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-fuchsia-500/20 transform transition active:scale-95 text-lg playful-font">
+                        Begin Magic Show
+                    </button>
+                </div>
+            </div>
+
+            <!-- Session Victory / Game Over Overlay -->
+            <div id="gameover-screen" class="absolute inset-0 bg-indigo-950/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden">
+                <div class="max-w-md bg-purple-950/90 p-8 rounded-2xl border-2 border-cyan-400/40 backdrop-blur-md shadow-2xl">
+                    <div class="text-5xl mb-4 playful-font text-cyan-200">!</div>
+                    <h2 class="text-3xl font-extrabold text-cyan-300 mb-1 playful-font">Spectacular Show!</h2>
+                    <p class="text-purple-200 text-sm mb-6">You successfully corrected the sentences.</p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-indigo-950/70 p-3 rounded-lg border border-purple-800">
+                            <span class="block text-xs text-purple-400 font-bold uppercase">Final Score</span>
+                            <span id="final-score" class="text-2xl font-black text-amber-300">0</span>
+                        </div>
+                        <div class="bg-indigo-950/70 p-3 rounded-lg border border-purple-800">
+                            <span class="block text-xs text-purple-400 font-bold uppercase">Accuracy</span>
+                            <span id="final-accuracy" class="text-2xl font-black text-fuchsia-300">0%</span>
+                        </div>
+                    </div>
+
+                    <p id="performance-message" class="text-purple-100 italic mb-6 font-semibold"></p>
+
+                    <button id="restart-btn" class="w-full bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-cyan-500/20 transform transition active:scale-95 text-lg playful-font">
+                        Play Again
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive HUD Action Alert Banner -->
+            <div id="hit-notification" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
+                <div id="hud-text" class="text-5xl md:text-7xl font-black tracking-wider drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font">
+                    MAGICAL!
+                </div>
+            </div>
+        </main>
+
+        <!-- On-Screen Controller / Footer Area -->
+        <footer class="bg-purple-950/95 border-t border-purple-900/60 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
+            <!-- PC Nav Instructions -->
+            <div class="hidden sm:flex items-center gap-3 text-purple-300 text-xs">
+                <span class="bg-purple-900 px-2.5 py-1.5 rounded-md border border-purple-700 font-mono">&larr;</span>
+                <span class="bg-purple-900 px-2.5 py-1.5 rounded-md border border-purple-700 font-mono">&rarr;</span>
+                <span>Move Magician</span>
+                <span class="bg-purple-900 px-6 py-1.5 rounded-md border border-purple-700 font-mono ml-4">SPACEBAR</span>
+                <span>Cast Magic Spell</span>
+            </div>
+
+            <!-- Highly Touch-Responsive Buttons for Tablets and Mobile Phones -->
+            <div class="flex items-center justify-between w-full sm:w-auto gap-4 sm:hidden">
+                <div class="flex gap-2">
+                    <button id="btn-left" class="w-16 h-14 bg-purple-900 hover:bg-purple-800 border border-purple-700 rounded-xl active:bg-fuchsia-600 active:border-fuchsia-400 flex items-center justify-center text-white text-2xl transition shadow-lg select-none">
+                        &larr;
+                    </button>
+                    <button id="btn-right" class="w-16 h-14 bg-purple-900 hover:bg-purple-800 border border-purple-700 rounded-xl active:bg-fuchsia-600 active:border-fuchsia-400 flex items-center justify-center text-white text-2xl transition shadow-lg select-none">
+                        &rarr;
+                    </button>
+                </div>
+                <button id="btn-shoot" class="flex-grow px-6 py-4 bg-gradient-to-r from-fuchsia-500 to-purple-600 active:from-fuchsia-400 active:to-purple-500 text-white font-black rounded-xl active:scale-95 transition shadow-lg text-md tracking-wider uppercase select-none">
+                    Cast Spell
+                </button>
+            </div>
+            
+            <div class="text-xs text-center text-purple-400">
+                Punctuation Magic &bull; Grade 1 Learning Center
+            </div>
+        </footer>
+    </div>
+
+    <!-- Gameplay Script -->
+    <script>
+        // Set up references to the exact MP3 sound assets
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3'),
+            clapping: new Audio('assets/clapping.mp3')
+        };
+
+        // Web Audio API Synthesizer fallback system
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            // Preload the Audio files on initial tap
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => {
+                    playSynthFallback('correct');
+                });
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => {
+                    playSynthFallback('wrong');
+                });
+            } else if (type === 'win') {
+                audioAssets.clapping.play().catch(() => {
+                    audioAssets.correct.play().catch(() => {
+                        playSynthFallback('win');
+                    });
+                });
+            }
+        }
+
+        // Web Audio Synthesizer fallback for offline or slow local setups
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Magic chime high chord
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(1000, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    // Sad buzzing noise
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(90, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'win') {
+                    // Upbeat arpeggio major chords
+                    const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+                        noteGain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.08);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.08 + 0.3);
+                        noteOsc.start(audioCtx.currentTime + idx * 0.08);
+                        noteOsc.stop(audioCtx.currentTime + idx * 0.08 + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.warn("Synth failed: ", e);
+            }
+        }
+
+        // 20 Simple Grade 1 Punctuation Questions Database (ending punctuation focused on ., ?, and !)
+        const allQuestions = [
+            { question: "Where is my little puppy ___", answer: "?" },
+            { question: "The cat sleeps on the mat ___", answer: "." },
+            { question: "Look at that super big balloon ___", answer: "!" },
+            { question: "What is your favorite toy ___", answer: "?" },
+            { question: "I like to eat red apples ___", answer: "." },
+            { question: "Can you play soccer with me ___", answer: "?" },
+            { question: "Wow, that is amazing ___", answer: "!" },
+            { question: "This is a fast red car ___", answer: "." },
+            { question: "Where are we going today ___", answer: "?" },
+            { question: "The sun is hot and yellow ___", answer: "." },
+            { question: "Watch out for that mud ___", answer: "!" },
+            { question: "Do you like to swim ___", answer: "?" },
+            { question: "The yellow bird can fly ___", answer: "." },
+            { question: "Stop that runner ___", answer: "!" },
+            { question: "How old are you today ___", answer: "?" },
+            { question: "I love my family so much ___", answer: "." },
+            { question: "Oh no, it fell on the floor ___", answer: "!" },
+            { question: "Are you happy to play ___", answer: "?" },
+            { question: "The green grass looks pretty ___", answer: "." },
+            { question: "Yay, we won the grand prize ___", answer: "!" }
+        ];
+
+        let sessionQuestions = [];
+        let currentQuestionIndex = 0;
+
+        // Canvas Settings
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // UI Element Hooks
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+        const hitNotification = document.getElementById("hit-notification");
+        const hudText = document.getElementById("hud-text");
+
+        // Stats Display Elements
+        const questionIndexEl = document.getElementById("question-index");
+        const scoreEl = document.getElementById("score");
+        const streakEl = document.getElementById("streak");
+        const finalScoreEl = document.getElementById("final-score");
+        const finalAccuracyEl = document.getElementById("final-accuracy");
+        const performanceMessageEl = document.getElementById("performance-message");
+        const questionTextEl = document.getElementById("question-text");
+
+        // Main State Loop Variables
+        let gameState = 'INTRO'; // INTRO, START, PLAYING, GAMEOVER
+        let score = 0;
+        let streak = 0;
+        let correctHits = 0;
+        const totalQuestionsCount = 15;
+        let currentCorrectAnswer = "";
+
+        // Magician variables
+        const magician = {
+            x: 0,
+            y: 0,
+            width: 80,
+            height: 90,
+            speed: 10,
+            isMovingLeft: false,
+            isMovingRight: false,
+            shootCooldown: 0
+        };
+
+        // Flying magic spell stars launched by the Magician
+        let activeSpells = [];
+
+        // Three magic hat targets: Left, Center, Right
+        let hats = [];
+
+        // Decorative / Celebratory background sparkles and leaves
+        let particles = [];
+
+        // Multi-device scale factor
+        let scaleFactor = 1;
+
+        function prepareSession() {
+            // Shuffle and pick exactly 15 questions
+            const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+            sessionQuestions = shuffled.slice(0, totalQuestionsCount);
+            currentQuestionIndex = 0;
+        }
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
+            scaleFactor = Math.min(1, canvas.width / 800);
+            
+            // Adjust Magician geometry & speed
+            magician.width = 90 * scaleFactor;
+            magician.height = 100 * scaleFactor;
+            magician.speed = 12 * scaleFactor;
+            magician.y = canvas.height - magician.height - 15;
+            
+            if (magician.x === 0) {
+                magician.x = canvas.width / 2 - magician.width / 2;
+            } else if (magician.x > canvas.width - magician.width) {
+                magician.x = canvas.width - magician.width;
+            }
+
+            // Distribute three floating magic hats on the stage table coordinates
+            const spacing = canvas.width / 4;
+            const hatY = 120 * scaleFactor;
+            const radius = 45 * scaleFactor;
+
+            hats = [
+                { id: ".", label: "Full Stop ( . )", x: spacing, y: hatY, r: radius, color: '#f472b6' }, // Pink
+                { id: "?", label: "Question ( ? )", x: spacing * 2, y: hatY, r: radius, color: '#38bdf8' }, // Cyan
+                { id: "!", label: "Excited ( ! )", x: spacing * 3, y: hatY, r: radius, color: '#fbbf24' } // Gold
+            ];
+        }
+
+        function initGame() {
+            score = 0;
+            streak = 0;
+            correctHits = 0;
+            activeSpells = [];
+            particles = [];
+            magician.shootCooldown = 0;
+            
+            scoreEl.textContent = score;
+            streakEl.textContent = streak;
+            
+            prepareSession();
+            loadQuestion();
+            resizeCanvas();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= totalQuestionsCount) {
+                endGameSession();
+                return;
+            }
+
+            questionIndexEl.textContent = `${currentQuestionIndex + 1}/${totalQuestionsCount}`;
+            
+            const currentQ = sessionQuestions[currentQuestionIndex];
+            currentCorrectAnswer = currentQ.answer;
+
+            // Display question text beautifully
+            questionTextEl.innerHTML = currentQ.question.replace("___", "<span class='text-fuchsia-300 underline font-black decoration-2 decoration-wavy'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+        }
+
+        function triggerHUDNotification(text, isCorrect) {
+            hudText.textContent = text;
+            if (isCorrect) {
+                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-green-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font";
+            } else {
+                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-rose-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font";
+            }
+
+            hitNotification.style.opacity = "1";
+            hitNotification.style.transform = "translate(-50%, -50%) scale(1.1)";
+            
+            setTimeout(() => {
+                hitNotification.style.opacity = "0";
+                hitNotification.style.transform = "translate(-50%, -50%) scale(0.75)";
+            }, 1100);
+        }
+
+        function spawnMagicParticles(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 1,
+                    r: Math.random() * 6 + 2,
+                    color: color,
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        function castSpell() {
+            if (gameState !== 'PLAYING' || magician.shootCooldown > 0) return;
+
+            initAudio();
+            magician.shootCooldown = 25; // Simple cooldown buffer
+
+            // Create a magic spell star emitted from magician's wand tip
+            const tipX = magician.x + magician.width * 0.65;
+            const tipY = magician.y + 10;
+            
+            activeSpells.push({
+                x: tipX,
+                y: tipY,
+                vy: -9 * scaleFactor,
+                r: 12 * scaleFactor,
+                angle: 0
+            });
+
+            // Minor puff at launching point
+            spawnMagicParticles(tipX, tipY, '#d946ef');
+        }
+
+        function handleTargetHit(hitHat) {
+            const isCorrect = (hitHat.id === currentCorrectAnswer);
+            spawnMagicParticles(hitHat.x, hitHat.y + 10, hitHat.color);
+
+            if (isCorrect) {
+                score += 10 + Math.floor(streak / 3) * 5;
+                streak++;
+                correctHits++;
+                playSound('correct');
+                triggerHUDNotification("MAGICAL!", true);
+            } else {
+                streak = 0;
+                playSound('wrong');
+                triggerHUDNotification("TRY AGAIN!", false);
+            }
+
+            scoreEl.textContent = score;
+            streakEl.textContent = streak;
+
+            // Move onto next sentence card
+            activeSpells = [];
+            currentQuestionIndex++;
+            setTimeout(loadQuestion, 1200);
+        }
+
+        function endGameSession() {
+            gameState = 'GAMEOVER';
+            gameoverScreen.classList.remove("hidden");
+            playSound('win');
+
+            finalScoreEl.textContent = score;
+            const accuracy = Math.round((correctHits / totalQuestionsCount) * 100);
+            finalAccuracyEl.textContent = accuracy + "%";
+
+            let msg = "";
+            if (accuracy >= 85) {
+                msg = "Legendary Magician! Your punctuation skills are super amazing!";
+            } else if (accuracy >= 60) {
+                msg = "Fantastic Performance! You put on a highly spectacular show!";
+            } else {
+                msg = "Practice builds wisdom! Let's wave our magic wands and try again!";
+            }
+            performanceMessageEl.textContent = msg;
+        }
+
+        // On-screen Input triggers
+        window.addEventListener('keydown', (e) => {
+            if (gameState !== 'PLAYING') return;
+            if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                magician.isMovingLeft = true;
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+                magician.isMovingRight = true;
+                e.preventDefault();
+            } else if (e.key === ' ' || e.key === 'Spacebar') {
+                castSpell();
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                magician.isMovingLeft = false;
+            } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+                magician.isMovingRight = false;
+            }
+        });
+
+        // Mobile touch navigation binds
+        const btnLeft = document.getElementById("btn-left");
+        const btnRight = document.getElementById("btn-right");
+        const btnShoot = document.getElementById("btn-shoot");
+
+        function setMoveLeft(state) {
+            if (gameState === 'PLAYING') magician.isMovingLeft = state;
+        }
+
+        function setMoveRight(state) {
+            if (gameState === 'PLAYING') magician.isMovingRight = state;
+        }
+
+        btnLeft.addEventListener('touchstart', (e) => { setMoveLeft(true); e.preventDefault(); }, {passive: false});
+        btnLeft.addEventListener('touchend', () => { setMoveLeft(false); });
+        btnLeft.addEventListener('mousedown', () => { setMoveLeft(true); });
+        btnLeft.addEventListener('mouseup', () => { setMoveLeft(false); });
+        btnLeft.addEventListener('mouseleave', () => { setMoveLeft(false); });
+
+        btnRight.addEventListener('touchstart', (e) => { setMoveRight(true); e.preventDefault(); }, {passive: false});
+        btnRight.addEventListener('touchend', () => { setMoveRight(false); });
+        btnRight.addEventListener('mousedown', () => { setMoveRight(true); });
+        btnRight.addEventListener('mouseup', () => { setMoveRight(false); });
+        btnRight.addEventListener('mouseleave', () => { setMoveRight(false); });
+
+        btnShoot.addEventListener('click', () => {
+            castSpell();
+        });
+
+        // Intro & End Control Action events
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+
+        // Drawing Helpers
+        function drawBackground() {
+            // Stage Backdrop Gradient
+            const stageGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            stageGrad.addColorStop(0, '#120e2e'); // Deep night purple
+            stageGrad.addColorStop(1, '#2e1065'); // Warm magenta glow base
+            ctx.fillStyle = stageGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Spotlight beams converging on center
+            ctx.fillStyle = 'rgba(217, 70, 239, 0.04)'; // Subtle fuchsia spotlights
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(canvas.width / 2 - 150, canvas.height);
+            ctx.lineTo(canvas.width / 2 + 150, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.04)'; // Light blue spotlights
+            ctx.beginPath();
+            ctx.moveTo(canvas.width, 0);
+            ctx.lineTo(canvas.width / 2 - 200, canvas.height);
+            ctx.lineTo(canvas.width / 2 + 200, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // Premium Magic Theater Curtains (Drawn left and right)
+            ctx.fillStyle = '#4c0519'; // Deep burgundy
+            ctx.fillRect(0, 0, 45 * scaleFactor, canvas.height);
+            ctx.fillRect(canvas.width - 45 * scaleFactor, 0, 45 * scaleFactor, canvas.height);
+
+            // Gold trim line for curtains
+            ctx.strokeStyle = '#eab308';
+            ctx.lineWidth = 3 * scaleFactor;
+            ctx.beginPath();
+            ctx.moveTo(45 * scaleFactor, 0);
+            ctx.lineTo(45 * scaleFactor, canvas.height);
+            ctx.moveTo(canvas.width - 45 * scaleFactor, 0);
+            ctx.lineTo(canvas.width - 45 * scaleFactor, canvas.height);
+            ctx.stroke();
+
+            // Theater golden stage top border line
+            ctx.beginPath();
+            ctx.moveTo(0, 15 * scaleFactor);
+            ctx.lineTo(canvas.width, 15 * scaleFactor);
+            ctx.stroke();
+        }
+
+        function drawMagician() {
+            ctx.save();
+            ctx.translate(magician.x, magician.y);
+
+            // Wizard Robe (Cone base shape)
+            ctx.fillStyle = '#6b21a8'; // Purple robe
+            ctx.strokeStyle = '#c084fc';
+            ctx.lineWidth = 2 * scaleFactor;
+            ctx.beginPath();
+            ctx.moveTo(magician.width / 2, 25 * scaleFactor);
+            ctx.lineTo(10 * scaleFactor, magician.height);
+            ctx.lineTo(magician.width - 10 * scaleFactor, magician.height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Head / Hair
+            ctx.fillStyle = '#ffedd5'; // Fair face skin
+            ctx.beginPath();
+            ctx.arc(magician.width / 2, 35 * scaleFactor, 15 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Magician Eyes / Smile
+            ctx.fillStyle = '#1e1b4b';
+            ctx.beginPath();
+            ctx.arc(magician.width / 2 - 5 * scaleFactor, 33 * scaleFactor, 2.5 * scaleFactor, 0, Math.PI * 2);
+            ctx.arc(magician.width / 2 + 5 * scaleFactor, 33 * scaleFactor, 2.5 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+            // Smiling mouth
+            ctx.strokeStyle = '#9d174d';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(magician.width / 2, 39 * scaleFactor, 5 * scaleFactor, 0, Math.PI);
+            ctx.stroke();
+
+            // Wizard Cone Hat with golden rim
+            ctx.fillStyle = '#4c1d95'; // Darker purple hat
+            ctx.beginPath();
+            ctx.moveTo(magician.width / 2, 0);
+            ctx.lineTo(magician.width / 2 - 18 * scaleFactor, 22 * scaleFactor);
+            ctx.lineTo(magician.width / 2 + 18 * scaleFactor, 22 * scaleFactor);
+            ctx.closePath();
+            ctx.fill();
+
+            // Hat rim
+            ctx.strokeStyle = '#eab308';
+            ctx.lineWidth = 4 * scaleFactor;
+            ctx.beginPath();
+            ctx.moveTo(magician.width / 2 - 22 * scaleFactor, 22 * scaleFactor);
+            ctx.lineTo(magician.width / 2 + 22 * scaleFactor, 22 * scaleFactor);
+            ctx.stroke();
+
+            // Wizard Cape details
+            ctx.fillStyle = '#dc2626'; // Red cape
+            ctx.beginPath();
+            ctx.moveTo(magician.width / 2 - 10 * scaleFactor, 48 * scaleFactor);
+            ctx.lineTo(5 * scaleFactor, magician.height - 15 * scaleFactor);
+            ctx.lineTo(magician.width / 2 - 15 * scaleFactor, magician.height);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(magician.width / 2 + 10 * scaleFactor, 48 * scaleFactor);
+            ctx.lineTo(magician.width - 5 * scaleFactor, magician.height - 15 * scaleFactor);
+            ctx.lineTo(magician.width / 2 + 15 * scaleFactor, magician.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // Magic Wand being waved on right side
+            ctx.strokeStyle = '#78350f'; // Wooden wand
+            ctx.lineWidth = 4 * scaleFactor;
+            ctx.beginPath();
+            ctx.moveTo(magician.width * 0.65, 50 * scaleFactor);
+            ctx.lineTo(magician.width * 0.75, 12 * scaleFactor);
+            ctx.stroke();
+
+            // Shiny star on wand tip
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(magician.width * 0.75, 12 * scaleFactor, 6 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawHats() {
+            hats.forEach(hat => {
+                ctx.save();
+                
+                // Outer shadow glow
+                ctx.shadowColor = hat.color;
+                ctx.shadowBlur = 10;
+                
+                // Magician Top Hat Body (upside down magic style)
+                ctx.fillStyle = '#1e1b4b'; // Sleek dark body
+                ctx.strokeStyle = hat.color;
+                ctx.lineWidth = 2.5 * scaleFactor;
+                ctx.beginPath();
+                ctx.roundRect(
+                    hat.x - 30 * scaleFactor, 
+                    hat.y - 20 * scaleFactor, 
+                    60 * scaleFactor, 
+                    45 * scaleFactor, 
+                    4 * scaleFactor
+                );
+                ctx.fill();
+                ctx.stroke();
+
+                // Hat colorful rim
+                ctx.fillStyle = hat.color;
+                ctx.beginPath();
+                ctx.roundRect(
+                    hat.x - 44 * scaleFactor, 
+                    hat.y + 20 * scaleFactor, 
+                    88 * scaleFactor, 
+                    8 * scaleFactor, 
+                    3 * scaleFactor
+                );
+                ctx.fill();
+
+                // Ribbon on hat base
+                ctx.fillStyle = '#dc2626'; // Red Ribbon
+                ctx.fillRect(hat.x - 30 * scaleFactor, hat.y + 12 * scaleFactor, 60 * scaleFactor, 8 * scaleFactor);
+
+                ctx.shadowColor = 'transparent';
+
+                // Golden sparkling star rising from magic hat
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.arc(hat.x, hat.y - 45 * scaleFactor, 16 * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw punctuation label on the glowing golden star
+                ctx.fillStyle = '#1e1b4b';
+                ctx.font = `bold ${Math.floor(25 * scaleFactor)}px "Fredoka One", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(hat.id, hat.x, hat.y - 43 * scaleFactor);
+
+                // Small title tag label beneath hat
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `bold ${Math.floor(11 * scaleFactor)}px "Outfit", sans-serif`;
+                ctx.fillText(hat.label, hat.x, hat.y + 44 * scaleFactor);
+
+                ctx.restore();
+            });
+        }
+
+        function drawSpells() {
+            activeSpells.forEach(spell => {
+                ctx.save();
+                
+                // Draw rotating glowing magical star spell
+                ctx.translate(spell.x, spell.y);
+                ctx.rotate(spell.angle);
+
+                ctx.shadowColor = '#d946ef';
+                ctx.shadowBlur = 12;
+
+                ctx.fillStyle = '#f472b6'; // Vibrant pink sparkler core
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * spell.r,
+                               Math.sin((18 + i * 72) * Math.PI / 180) * spell.r);
+                    ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (spell.r / 2.5),
+                               Math.sin((54 + i * 72) * Math.PI / 180) * (spell.r / 2.5));
+                }
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.restore();
+            });
+        }
+
+        function drawParticles() {
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(idx, 1);
+                    return;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+
+        // Update Game Frame updates
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            // Handle horizontal sliding logic
+            if (magician.isMovingLeft) {
+                magician.x -= magician.speed;
+                if (magician.x < 45 * scaleFactor) magician.x = 45 * scaleFactor;
+            }
+            if (magician.isMovingRight) {
+                magician.x += magician.speed;
+                if (magician.x > canvas.width - magician.width - (45 * scaleFactor)) {
+                    magician.x = canvas.width - magician.width - (45 * scaleFactor);
+                }
+            }
+
+            if (magician.shootCooldown > 0) magician.shootCooldown--;
+
+            // Move spell bullets and check punctuation magic hat collisions
+            for (let s = activeSpells.length - 1; s >= 0; s--) {
+                const spell = activeSpells[s];
+                spell.y += spell.vy;
+                spell.angle += 0.1; // Simple spin angle
+
+                // Check collision with the floating punctuation targets
+                for (let h = 0; h < hats.length; h++) {
+                    const hat = hats[h];
+                    
+                    // Simple radial intersection
+                    const targetX = hat.x;
+                    const targetY = hat.y - 45 * scaleFactor; // Targeting the floating punctuation circle
+                    const dx = spell.x - targetX;
+                    const dy = spell.y - targetY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < hat.r + spell.r) {
+                        handleTargetHit(hat);
+                        return; // Halt update to safeguard thread state transition
+                    }
+                }
+
+                // Destroy out-of-bounds spell elements
+                if (spell.y < 0) {
+                    activeSpells.splice(s, 1);
+                    
+                    // Misssed target reset
+                    streak = 0;
+                    streakEl.textContent = streak;
+                    playSound('wrong');
+                    triggerHUDNotification("MISSED HAT!", false);
+
+                    currentQuestionIndex++;
+                    setTimeout(loadQuestion, 1200);
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            drawHats();
+            
+            if (gameState === 'PLAYING') {
+                drawMagician();
+            }
+            
+            drawSpells();
+            drawParticles();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize 5-Second Brand Logo Intro
+        window.onload = function() {
+            resizeCanvas();
+            requestAnimationFrame(gameLoop);
+
+            // Play the intro segment for exactly 5 seconds
+            setTimeout(() => {
+                logoScreen.classList.add("opacity-0");
+                setTimeout(() => {
+                    logoScreen.classList.add("hidden");
+                    startScreen.classList.remove("hidden");
+                    gameState = 'START';
+                }, 1000);
+            }, 5000);
+        };
+    </script>
+</body>
+</html>
+
+
