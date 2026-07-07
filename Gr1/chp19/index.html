@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhyming Words Game</title>
+
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial;
+    background: linear-gradient(135deg,#f3e5f5,#fce4ec);
+    min-height: 100vh;
+}
+
+/* LOGO */
+#logo-screen {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* START SCREEN */
+#start-screen {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 20;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+/* GAME */
+#game-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 10px;
+}
+
+/* TOP BAR */
+#top-bar {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    padding: 10px;
+}
+
+/* GRID */
+#grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    justify-content: center;
+    align-content: center;
+}
+
+.tile {
+    min-height: 92px;
+    background: linear-gradient(135deg,#7e57c2,#ec407a);
+    color: transparent;
+    padding: 20px;
+    text-align: center;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 18px rgba(126,87,194,0.25);
+    transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.tile::before {
+    content: "?";
+    color: white;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+.tile.revealed {
+    background: white;
+    color: #6a1b9a;
+    border: 3px solid #ce93d8;
+    transform: scale(1.05);
+}
+
+.tile.revealed::before,
+.tile.correct::before {
+    content: "";
+}
+
+.tile.correct {
+    background: #bdbdbd;
+    color: white;
+    border: 3px solid #9e9e9e;
+    cursor: default;
+    transform: scale(1);
+    box-shadow: none;
+}
+
+@media (max-width: 700px) {
+    #grid {
+        grid-template-columns: repeat(4, minmax(64px, 1fr));
+        gap: 10px;
+    }
+
+    .tile {
+        min-height: 72px;
+        font-size: 18px;
+        padding: 12px;
+    }
+}
+
+/* END SCREEN */
+#end-screen {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 50;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin-top: 15px;
+    border: none;
+    background: #ce93d8;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGO -->
+<div id="logo-screen">
+    <img src="assets/innovine-logo.png" style="max-width:200px;">
+</div>
+
+<!-- START SCREEN -->
+<div id="start-screen">
+    <h1>🎈 Rhyming Balloon Match</h1>
+    <p>Match words that rhyme together</p>
+    <button id="startBtn">Start Game</button>
+</div>
+
+<!-- GAME -->
+<div id="game-container">
+
+<div id="top-bar">
+    <div>Pairs: <span id="pairs">0</span></div>
+    <div>Time: <span id="time">0</span>s</div>
+</div>
+
+<div id="grid"></div>
+
+</div>
+
+<!-- END SCREEN -->
+<div id="end-screen">
+    <h1>🎉 Game Completed!</h1>
+
+    <div id="score-board" style="font-size:16px; margin-top:10px;"></div>
+
+    <button onclick="location.reload()">Play Again</button>
+</div>
+
+<audio id="correct-sound" src="assets/correct.mp3"></audio>
+<audio id="wrong-sound" src="assets/wrong.mp3"></audio>
+<audio id="clap-sound" src="assets/clapping.mp3"></audio>
+
+<script>
+
+/* WORDS */
+const words = [
+"cat","hat","dog","log","pen","hen","sun","run",
+"pig","dig","fish","dish","tree","bee","clap","tap"
+];
+
+const pairs = [
+["cat","hat"],["dog","log"],["pen","hen"],["sun","run"],
+["pig","dig"],["fish","dish"],["tree","bee"],["clap","tap"]
+];
+
+let firstTile=null;
+let matches=0;
+let boardLocked=false;
+
+/* SCORE TRACKING */
+let firstAttempt=0;
+let secondAttempt=0;
+let attemptMap={};
+
+let time=0;
+let timer;
+
+/* LOGO → START SCREEN */
+setTimeout(()=>{
+document.getElementById("logo-screen").style.display="none";
+document.getElementById("start-screen").style.display="flex";
+},5000);
+
+/* START */
+document.getElementById("startBtn").onclick=()=>{
+document.getElementById("start-screen").style.display="none";
+document.getElementById("game-container").style.display="flex";
+createGrid();
+startTimer();
+};
+
+/* TIMER */
+function startTimer(){
+timer=setInterval(()=>{
+time++;
+document.getElementById("time").innerText=time;
+},1000);
+}
+
+/* GRID */
+function createGrid(){
+const grid=document.getElementById("grid");
+grid.innerHTML="";
+
+words.sort(()=>Math.random()-0.5).forEach(word=>{
+let div=document.createElement("div");
+div.className="tile";
+div.innerText=word;
+div.onclick=()=>select(div,word);
+grid.appendChild(div);
+});
+}
+
+/* SELECT */
+function select(tile,word){
+
+if(boardLocked) return;
+if(tile.classList.contains("correct")) return;
+if(tile.classList.contains("revealed")) return;
+
+tile.classList.add("revealed");
+
+if(!firstTile){
+firstTile={tile,word,attempt:matches+1};
+return;
+}
+
+if(tile===firstTile.tile) return;
+
+check(firstTile, {tile,word});
+firstTile=null;
+}
+
+/* CHECK */
+function check(a,b){
+
+let isPair = pairs.some(p=>p.includes(a.word)&&p.includes(b.word)&&a.word!==b.word);
+
+let attemptType = (a.attempt===matches+1) ? "first" : "second";
+
+if(isPair){
+
+a.tile.classList.add("correct");
+b.tile.classList.add("correct");
+
+document.getElementById("correct-sound").play();
+document.getElementById("clap-sound").play();
+
+matches++;
+document.getElementById("pairs").innerText=matches;
+
+/* TRACK ATTEMPT */
+if(attemptType==="first") firstAttempt++;
+else secondAttempt++;
+
+if(matches===8){
+endGame();
+}
+
+}else{
+document.getElementById("wrong-sound").play();
+boardLocked=true;
+setTimeout(()=>{
+a.tile.classList.remove("revealed");
+b.tile.classList.remove("revealed");
+boardLocked=false;
+},900);
+}
+}
+
+/* END GAME */
+function endGame(){
+
+clearInterval(timer);
+
+document.getElementById("game-container").style.display="none";
+document.getElementById("end-screen").style.display="flex";
+
+let remark="";
+if(firstAttempt>=6) remark="🌟 Excellent Work!";
+else if(firstAttempt>=4) remark="👍 Good Job!";
+else remark="💪 Keep Practicing!";
+
+document.getElementById("score-board").innerHTML=`
+<p><b>First Attempt Pairs:</b> ${firstAttempt}</p>
+<p><b>Second Attempt Pairs:</b> ${secondAttempt}</p>
+<p><b>Total Time:</b> ${time} sec</p>
+<p><b>Remark:</b> ${remark}</p>
+`;
+
+}
+
+</script>
+
+</body>
+</html>
