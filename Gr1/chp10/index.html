@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Word Blast Shooter FINAL FIXED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    overflow:hidden;
+    background:linear-gradient(to bottom,#c8e6c9,#bbdefb);
+}
+
+/* ================= SPLASH ================= */
+#splash{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+#splash img{
+    max-width:260px;
+    width:70%;
+    height:auto;
+    display:block;
+}
+
+/* ================= INSTRUCTIONS ================= */
+#instructions{
+    display:none;
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:#fff8e1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:30px;
+    box-sizing:border-box;
+    z-index:9998;
+}
+
+#instructions h1{font-size:32px;}
+#instructions p{font-size:20px;font-weight:bold;}
+
+#startBtn{
+    display:none;
+    padding:15px 25px;
+    font-size:20px;
+    background:#444;
+    color:white;
+    border:none;
+    border-radius:10px;
+    margin-top:20px;
+}
+
+/* ================= TOP BAR ================= */
+#topBar{
+    position:absolute;
+    top:0;
+    width:100%;
+    background:#607d8b;
+    color:white;
+    text-align:center;
+    padding:8px;
+    font-weight:bold;
+    display:none;
+}
+
+/* ================= HUD ================= */
+#hud{
+    position:absolute;
+    top:40px;
+    width:100%;
+    display:none;
+    justify-content:space-between;
+    align-items:center;
+    background:#eceff1;
+    padding:8px 15px;
+    font-weight:bold;
+    box-sizing:border-box;
+}
+
+#progress{
+    font-size:18px;
+}
+
+/* ================= GAME AREA ================= */
+#game{
+    position:absolute;
+    top:90px;
+    width:100%;
+    height:calc(100% - 90px);
+    overflow:hidden;
+    display:none;
+}
+
+/* ================= QUESTION CENTER FIX ================= */
+#target{
+    width:100%;
+    text-align:center;
+    font-size:34px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+/* ================= WORD ================= */
+.word{
+    position:absolute;
+    padding:14px 20px;
+    font-size:20px;
+    background:#fff176;
+    border-radius:20px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* ================= BLAST ================= */
+.blast{
+    animation: explode 0.4s ease-out forwards;
+}
+
+@keyframes explode{
+    0%{
+        transform:scale(1);
+        opacity:1;
+    }
+    50%{
+        transform:scale(2);
+        opacity:1;
+        filter:brightness(2);
+    }
+    100%{
+        transform:scale(2.5);
+        opacity:0;
+    }
+}
+
+/* ================= CANNON ================= */
+#cannon{
+    position:absolute;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:80px;
+    transition:0.3s;
+}
+
+/* ================= END ================= */
+#end{
+    display:none;
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:#fff8e1;
+    text-align:center;
+    padding-top:80px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+    <img src="assets/innovine-logo.png">
+</div>
+
+<!-- INSTRUCTIONS -->
+<div id="instructions">
+    <h1>🎯 Word Blast Shooter</h1>
+    <p>Shoot the correct describing word!</p>
+    <button id="startBtn">START GAME</button>
+</div>
+
+<!-- TOP BAR -->
+<div id="topBar">🎯 Tap word → aim → blast!</div>
+
+<!-- HUD -->
+<div id="hud">
+<div id="progress">0/15</div>
+</div>
+
+<!-- GAME -->
+<div id="game">
+<div id="target"></div>
+<div id="cannon">🔫</div>
+</div>
+
+<!-- END -->
+<div id="end">
+<h1>🎉 Great Job!</h1>
+<p id="finalScore"></p>
+<button onclick="location.reload()">Play Again</button>
+</div>
+
+<audio id="correct" src="assets/correct.mp3"></audio>
+<audio id="wrong" src="assets/wrong.mp3"></audio>
+<audio id="clap" src="assets/clapping.mp3"></audio>
+
+<script>
+
+/* ================= DATA ================= */
+const questions=[
+{obj:"🐱 Cat",prompt:"Which word describes a cat?",ans:"furry",wrong:["sour","square","frozen"]},
+{obj:"🚗 Car",prompt:"Which word describes a car that moves quickly?",ans:"fast",wrong:["furry","salty","sleepy"]},
+{obj:"🌳 Tree",prompt:"Which word describes a grown tree?",ans:"tall",wrong:["spicy","noisy","soft"]},
+{obj:"🐶 Dog",prompt:"Which word describes a kind pet dog?",ans:"friendly",wrong:["icy","square","sour"]},
+{obj:"🍎 Apple",prompt:"Which word describes this apple?",ans:"red",wrong:["loud","furry","sleepy"]},
+
+{obj:"🚌 Bus",prompt:"Which word describes a bus?",ans:"big",wrong:["spicy","sticky","sharp"]},
+{obj:"🌙 Moon",prompt:"Which word describes the moon at night?",ans:"bright",wrong:["furry","juicy","square"]},
+{obj:"🐟 Fish",prompt:"Which word describes a wet fish?",ans:"slippery",wrong:["wooden","dry","loud"]},
+{obj:"🏠 House",prompt:"Which word describes this house?",ans:"large",wrong:["sour","furry","juicy"]},
+{obj:"🦋 Butterfly",prompt:"Which word describes a butterfly's wings?",ans:"colorful",wrong:["salty","square","heavy"]},
+
+{obj:"🦁 Lion",prompt:"Which word describes a lion?",ans:"strong",wrong:["icy","round","sticky"]},
+{obj:"❄️ Ice",prompt:"Which word describes ice?",ans:"cold",wrong:["hot","furry","soft"]},
+{obj:"☀️ Sun",prompt:"Which word describes the sun?",ans:"hot",wrong:["cold","wet","furry"]},
+{obj:"🌊 Water",prompt:"Which word describes water?",ans:"wet",wrong:["dry","furry","sharp"]},
+{obj:"🎈 Balloon",prompt:"Which word describes a balloon filled with air?",ans:"light",wrong:["spicy","wet","sharp"]}
+];
+
+let questionIndex=0;
+let correctCount=0;
+let words=[];
+let frozen=false;
+let lastTime=0;
+
+/* ================= PREVENT DOUBLE RENDER ISSUE ================= */
+let gameStarted = false;
+
+/* ================= START FLOW ================= */
+setTimeout(()=>{
+document.getElementById("splash").style.display="none";
+document.getElementById("instructions").style.display="flex";
+
+setTimeout(()=>{
+document.getElementById("startBtn").style.display="inline-block";
+},3000);
+},5000);
+
+/* ================= START ================= */
+document.getElementById("startBtn").onclick=()=>{
+if(gameStarted) return;
+gameStarted = true;
+
+document.getElementById("instructions").style.display="none";
+document.getElementById("topBar").style.display="block";
+document.getElementById("hud").style.display="flex";
+document.getElementById("game").style.display="block";
+
+questions.sort(()=>Math.random()-0.5);
+load();
+requestAnimationFrame(fall);
+};
+
+/* ================= LOAD ================= */
+function load(){
+
+document.querySelectorAll(".word").forEach(w=>w.remove());
+words=[];
+
+let q = questions[questionIndex];
+
+// FIX: CLEAN TARGET (NO DOUBLE TEXT ISSUE)
+let target = document.getElementById("target");
+target.innerHTML = "";
+target.innerHTML = `<div>${q.obj}</div><div style="font-size:24px;margin-top:8px;">${q.prompt}</div>`;
+
+let options=[q.ans,...q.wrong].sort(()=>Math.random()-0.5);
+
+options.forEach((w,i)=>{
+let div=document.createElement("div");
+div.className="word";
+div.innerText=w;
+
+div.style.left=(15+i*20)+"%";
+div.style.top="120px";
+
+div.speed = 0.4;
+
+div.onclick=()=>handleClick(div,w,q.ans);
+
+game.appendChild(div);
+words.push(div);
+});
+}
+
+/* ================= FALL ================= */
+function fall(timestamp){
+if(!lastTime) lastTime = timestamp;
+let delta = (timestamp - lastTime)/16;
+lastTime = timestamp;
+
+if(!frozen){
+words.forEach(w=>{
+let top=parseFloat(w.style.top);
+top += 0.4 * delta;
+if(top > game.clientHeight + 40){
+top = 120;
+w.style.left = (12 + Math.random() * 72) + "%";
+}
+w.style.top = top + "px";
+});
+}
+
+requestAnimationFrame(fall);
+}
+
+/* ================= CLICK ================= */
+function handleClick(el,word,ans){
+
+if(frozen) return;
+frozen=true;
+
+let cannon=document.getElementById("cannon");
+cannon.style.transform="translateX(-50%) rotate(20deg)";
+
+setTimeout(()=>{
+
+if(word===ans){
+correctCount++;
+document.getElementById("progress").innerText = correctCount + "/15";
+correct.play();
+el.classList.add("blast");
+setTimeout(()=>el.remove(),400);
+}else{
+wrong.play();
+}
+
+cannon.style.transform="translateX(-50%) rotate(0deg)";
+
+setTimeout(()=>{
+next();
+frozen=false;
+},600);
+
+},1000);
+}
+
+/* ================= NEXT ================= */
+function next(){
+questionIndex++;
+
+if(questionIndex>=15){
+end();
+return;
+}
+
+load();
+}
+
+/* ================= END ================= */
+function end(){
+document.getElementById("game").style.display="none";
+document.getElementById("end").style.display="block";
+document.getElementById("finalScore").innerText =
+"Correct Answers: " + correctCount + "/15";
+
+clap.play();
+}
+
+</script>
+
+</body>
+</html>
