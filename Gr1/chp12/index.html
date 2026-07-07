@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Playground Position Words</title>
+    <!-- Tailwind CSS for modern premium layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for playful, friendly typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #022c22; /* Deep playground forest green */
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .playful-font {
+            font-family: 'Fredoka One', cursive;
+        }
+        .answer-choice.selected {
+            background: linear-gradient(135deg, #fde047, #f59e0b);
+            color: #022c22;
+            border-color: #fef08a;
+            transform: translateY(-1px);
+        }
+        .answer-choice.wrong-choice {
+            background: #be123c;
+            color: white;
+            border-color: #fb7185;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-6 text-white">
+
+    <!-- Main Game Container -->
+    <div class="relative w-full max-w-5xl bg-emerald-950 rounded-3xl border-4 border-yellow-400 shadow-2xl shadow-yellow-500/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
+        
+        <!-- Header / Stats Dashboard HUD -->
+        <header class="bg-gradient-to-r from-emerald-800 via-green-900 to-emerald-800 px-4 py-3 border-b-2 border-yellow-400 flex flex-wrap justify-between items-center gap-2 z-10">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-bounce">🛝</span>
+                <h1 class="text-lg md:text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-emerald-200 to-cyan-200 playful-font">
+                    PLAYGROUND POSITIONS
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-3 text-sm md:text-base font-semibold">
+                <div class="bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-700">
+                    Question: <span id="question-index" class="text-yellow-300 font-bold">1/15</span>
+                </div>
+                <div class="bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-700">
+                    Score: <span id="score" class="text-amber-300 font-bold">0</span>
+                </div>
+                <div class="bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-700">
+                    Streak: <span id="streak" class="text-cyan-300 font-bold">🔥 0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Current Question Display Board -->
+        <section class="bg-emerald-950 p-4 border-b border-emerald-800 flex flex-col items-center justify-center text-center z-10">
+            <p class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-1">Move the object to the correct spot on the playground!</p>
+            <h2 id="question-text" class="text-2xl md:text-4xl font-extrabold text-white tracking-wide leading-relaxed px-4 py-1.5 bg-emerald-900/50 rounded-xl border border-yellow-500/30 playful-font">
+                Loading Sentence...
+            </h2>
+            <div id="answer-options" class="mt-3 grid grid-cols-3 gap-2 w-full max-w-lg"></div>
+        </section>
+
+        <!-- Stage/Canvas Play Zone -->
+        <main class="relative flex-grow bg-emerald-950 overflow-hidden min-h-[360px] h-[50vh] md:h-[500px]">
+            <!-- Interactive Canvas -->
+            <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+            
+            <!-- 5-Second Brand Intro Splash Screen -->
+            <div id="logo-screen" class="fixed inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+                <div class="flex flex-col items-center justify-center space-y-4 max-w-sm">
+                    <!-- Dynamic logo with offline rescue fallback -->
+                    <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[240px] h-auto object-contain transition-all duration-300" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+                    <!-- Safe fallback typography layout -->
+                    <div id="logo-fallback" class="hidden text-center">
+                        <div class="text-5xl font-extrabold tracking-wider text-emerald-800 playful-font">INNOVINE</div>
+                        <div class="text-xs text-emerald-600 uppercase tracking-widest font-semibold mt-1">Learning Games</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Start Menu Splash Screen -->
+            <div id="start-screen" class="absolute inset-0 bg-emerald-950/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden">
+                <div class="max-w-md bg-emerald-900/90 p-8 rounded-2xl border-2 border-yellow-500/40 backdrop-blur-md shadow-2xl">
+                    <div class="text-6xl mb-4">🎈🎨</div>
+                    <h2 class="text-3xl font-extrabold text-yellow-300 mb-2 playful-font">PLAYGROUND POSITIONS</h2>
+                    <h3 class="text-md text-emerald-200 font-semibold mb-4">Grade 1 Position Words Game</h3>
+                    <p class="text-sm text-emerald-100/80 mb-6 leading-relaxed">
+                        Read the sentence at the top. Tap the best word for the blank, then use the buttons to move the character to the matching place.
+                    </p>
+                    <button id="start-btn" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-emerald-950 font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-yellow-500/20 transform transition active:scale-95 text-lg playful-font">
+                        Let's Play!
+                    </button>
+                </div>
+            </div>
+
+            <!-- Session Victory / Game Over Overlay -->
+            <div id="gameover-screen" class="absolute inset-0 bg-emerald-950/95 flex flex-col items-center justify-center p-6 text-center z-25 hidden">
+                <div class="max-w-md bg-emerald-900/90 p-8 rounded-2xl border-2 border-cyan-400/40 backdrop-blur-md shadow-2xl">
+                    <div class="text-6xl mb-4">🌟🏆</div>
+                    <h2 class="text-3xl font-extrabold text-cyan-300 mb-1 playful-font">Great Job!</h2>
+                    <p class="text-emerald-200 text-sm mb-6">You successfully found all position words!</p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-emerald-950/70 p-3 rounded-lg border border-emerald-800">
+                            <span class="block text-xs text-emerald-400 font-bold uppercase">Final Score</span>
+                            <span id="final-score" class="text-2xl font-black text-amber-300">0</span>
+                        </div>
+                        <div class="bg-emerald-950/70 p-3 rounded-lg border border-emerald-800">
+                            <span class="block text-xs text-emerald-400 font-bold uppercase">Accuracy</span>
+                            <span id="final-accuracy" class="text-2xl font-black text-yellow-300">0%</span>
+                        </div>
+                    </div>
+
+                    <p id="performance-message" class="text-emerald-100 italic mb-6 font-semibold"></p>
+
+                    <button id="restart-btn" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-emerald-950 font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-yellow-500/20 transform transition active:scale-95 text-lg playful-font">
+                        Play Again
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive HUD Action Alert Banner -->
+            <div id="hit-notification" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
+                <div id="hud-text" class="text-5xl md:text-7xl font-black tracking-wider drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font">
+                    CORRECT!
+                </div>
+            </div>
+        </main>
+
+        <!-- On-Screen D-Pad Controller / Footer Area -->
+        <footer class="bg-emerald-950 border-t border-emerald-800 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
+            <div class="hidden items-center gap-3 text-emerald-300 text-xs">
+                <span class="bg-emerald-900 px-2.5 py-1.5 rounded-md border border-emerald-700 font-mono">◀</span>
+                <span class="bg-emerald-900 px-2.5 py-1.5 rounded-md border border-emerald-700 font-mono font-bold">▲</span>
+                <span class="bg-emerald-900 px-2.5 py-1.5 rounded-md border border-emerald-700 font-mono font-bold">▼</span>
+                <span class="bg-emerald-900 px-2.5 py-1.5 rounded-md border border-emerald-700 font-mono">▶</span>
+                <span>Move Character on Playground</span>
+            </div>
+
+            <!-- On-screen movement buttons -->
+            <div class="flex items-center justify-center w-full py-2">
+                <div class="grid grid-cols-3 gap-2 w-48">
+                    <div></div>
+                    <button id="btn-up" class="w-14 h-14 bg-emerald-800 border border-emerald-600 rounded-xl active:bg-yellow-500 active:border-yellow-300 flex items-center justify-center text-white text-2xl transition shadow-lg select-none">▲</button>
+                    <div></div>
+                    
+                    <button id="btn-left" class="w-14 h-14 bg-emerald-800 border border-emerald-600 rounded-xl active:bg-yellow-500 active:border-yellow-300 flex items-center justify-center text-white text-2xl transition shadow-lg select-none">◀</button>
+                    <div id="character-pad-icon" class="w-14 h-14 bg-emerald-950 flex items-center justify-center text-2xl playful-font">⭐</div>
+                    <button id="btn-right" class="w-14 h-14 bg-emerald-800 border border-emerald-600 rounded-xl active:bg-yellow-500 active:border-yellow-300 flex items-center justify-center text-white text-2xl transition shadow-lg select-none">▶</button>
+                    
+                    <div></div>
+                    <button id="btn-down" class="w-14 h-14 bg-emerald-800 border border-emerald-600 rounded-xl active:bg-yellow-500 active:border-yellow-300 flex items-center justify-center text-white text-2xl transition shadow-lg select-none">▼</button>
+                    <div></div>
+                </div>
+            </div>
+            
+            <div class="text-xs text-center text-emerald-400">
+                Playground Positions &bull; Grade 1 Learning Center
+            </div>
+        </footer>
+    </div>
+
+    <!-- Gameplay Script -->
+    <script>
+        // Set up references to the exact playground theme MP3 sound assets
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3'),
+            clapping: new Audio('assets/clapping.mp3')
+        };
+
+        // Web Audio API Synthesizer fallback system for zero delay
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            // Preload the Audio files on initial tap
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => {
+                    playSynthFallback('correct');
+                });
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => {
+                    playSynthFallback('wrong');
+                });
+            } else if (type === 'win') {
+                audioAssets.clapping.play().catch(() => {
+                    audioAssets.correct.play().catch(() => {
+                        playSynthFallback('win');
+                    });
+                });
+            }
+        }
+
+        // Web Audio Synthesizer fallback for offline or slow local setups
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Sweet happy ring tone
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    // Boing/error feedback sound
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(90, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'win') {
+                    // Upbeat arpeggio major chords
+                    const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+                        noteGain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.08);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.08 + 0.3);
+                        noteOsc.start(audioCtx.currentTime + idx * 0.08);
+                        noteOsc.stop(audioCtx.currentTime + idx * 0.08 + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.warn("Synth failed: ", e);
+            }
+        }
+
+        // 20 Simple Grade 1 Position Word Sentences with dynamic avatars for slide, tree, swing, and sandbox
+        const allQuestions = [
+            // --- SLIDE QUESTIONS ---
+            { question: "I like to go fast ___ the slide.", targetId: "slide", displayWord: "ON", charType: "boy", emoji: "👦" },
+            { question: "My yellow sun hat fell ___ the slide.", targetId: "slide", displayWord: "ON", charType: "hat", emoji: "👒" },
+            { question: "The kids stand and wait ___ the slide.", targetId: "slide", displayWord: "NEAR", charType: "girl", emoji: "👧" },
+            { question: "My green ball rolled ___ the slide.", targetId: "slide", displayWord: "UNDER", charType: "ball", emoji: "⚽" },
+            { question: "We can sit and read a book ___ the slide.", targetId: "slide", displayWord: "UNDER", charType: "book", emoji: "📖" },
+
+            // --- TREE QUESTIONS ---
+            { question: "Let's sit down and rest ___ the tree.", targetId: "tree", displayWord: "UNDER", charType: "boy", emoji: "👦" },
+            { question: "A delicious red apple fell ___ the tree.", targetId: "tree", displayWord: "UNDER", charType: "apple", emoji: "🍎" },
+            { question: "A lovely bird is singing ___ the tree.", targetId: "tree", displayWord: "ON", charType: "bird", emoji: "🐦" },
+            { question: "A brown dog is waiting ___ the tree.", targetId: "tree", displayWord: "NEAR", charType: "puppy", emoji: "🐶" },
+            { question: "We can park our bicycle ___ the tree.", targetId: "tree", displayWord: "NEAR", charType: "bike", emoji: "🚲" },
+
+            // --- SWING QUESTIONS ---
+            { question: "The happy little boy is ___ the swing.", targetId: "swing", displayWord: "ON", charType: "boy", emoji: "👦" },
+            { question: "I love to fly high ___ the swing.", targetId: "swing", displayWord: "ON", charType: "girl", emoji: "👧" },
+            { question: "My shiny water bottle is kept ___ the swing.", targetId: "swing", displayWord: "NEAR", charType: "bottle", emoji: "🍼" },
+            { question: "A little puppy is waiting ___ the swing.", targetId: "swing", displayWord: "NEAR", charType: "puppy", emoji: "🐶" },
+            { question: "A soft toy bear fell down ___ the swing.", targetId: "swing", displayWord: "UNDER", charType: "bear", emoji: "🧸" },
+
+            // --- SANDBOX QUESTIONS ---
+            { question: "The puppy wants to dig a hole ___ the sandbox.", targetId: "sandbox", displayWord: "IN", charType: "puppy", emoji: "🐶" },
+            { question: "The gold spade is buried ___ the sand.", targetId: "sandbox", displayWord: "UNDER", charType: "spade", emoji: "🥄" },
+            { question: "The blue bucket sits ___ the sand.", targetId: "sandbox", displayWord: "ON", charType: "bucket", emoji: "🪣" },
+            { question: "The orange toy truck is playing ___ the sand.", targetId: "sandbox", displayWord: "IN", charType: "truck", emoji: "🚚" },
+            { question: "The pretty red flowers grow ___ the sandbox.", targetId: "sandbox", displayWord: "NEAR", charType: "flower", emoji: "🌸" }
+        ];
+
+        let sessionQuestions = [];
+        let currentQuestionIndex = 0;
+
+        // Canvas Setup
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // UI Element Hooks
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+        const hitNotification = document.getElementById("hit-notification");
+        const hudText = document.getElementById("hud-text");
+        const characterPadIcon = document.getElementById("character-pad-icon");
+
+        // Stats Display Elements
+        const questionIndexEl = document.getElementById("question-index");
+        const scoreEl = document.getElementById("score");
+        const streakEl = document.getElementById("streak");
+        const finalScoreEl = document.getElementById("final-score");
+        const finalAccuracyEl = document.getElementById("final-accuracy");
+        const performanceMessageEl = document.getElementById("performance-message");
+        const questionTextEl = document.getElementById("question-text");
+        const answerOptionsEl = document.getElementById("answer-options");
+
+        // Main State Loop Variables
+        let gameState = 'INTRO'; // INTRO, START, PLAYING, GAMEOVER
+        let score = 0;
+        let streak = 0;
+        let correctAnswers = 0;
+        const totalQuestionsCount = 15;
+        let currentCorrectAnswer = "";
+        let currentDisplayWord = "";
+        let currentCharacterType = "puppy";
+        let hasChosenCorrectWord = false;
+
+        // Character object variables
+        const charObj = {
+            x: 0,
+            y: 0,
+            width: 50,
+            height: 50,
+            speed: 6,
+            isMovingLeft: false,
+            isMovingRight: false,
+            isMovingUp: false,
+            isMovingDown: false,
+            animationTimer: 0,
+            facingRight: true
+        };
+
+        // Interactive zones configuration
+        let interactiveZones = [];
+
+        // Decorative park particles
+        let particles = [];
+
+        // Multi-device responsive scale factor
+        let scaleFactor = 1;
+
+        function prepareSession() {
+            // Shuffle and slice exactly 15 questions
+            const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+            sessionQuestions = shuffled.slice(0, totalQuestionsCount);
+            currentQuestionIndex = 0;
+        }
+
+        function buildAnswerOptions(correctWord) {
+            const allWords = ["IN", "ON", "UNDER", "NEAR"];
+            const distractors = allWords.filter(word => word !== correctWord).sort(() => 0.5 - Math.random()).slice(0, 2);
+            return [correctWord, ...distractors].sort(() => 0.5 - Math.random());
+        }
+
+        function renderAnswerOptions(correctWord) {
+            answerOptionsEl.innerHTML = "";
+            buildAnswerOptions(correctWord).forEach(word => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.textContent = word;
+                button.className = "answer-choice rounded-xl border-2 border-emerald-700 bg-emerald-900 px-3 py-2 text-sm md:text-base font-black text-emerald-50 shadow-lg transition active:scale-95 playful-font";
+                button.addEventListener("click", () => chooseAnswerWord(button, word, correctWord));
+                answerOptionsEl.appendChild(button);
+            });
+        }
+
+        function chooseAnswerWord(button, selectedWord, correctWord) {
+            if (selectedWord !== correctWord) {
+                button.classList.add("wrong-choice");
+                playSound('wrong');
+                triggerHUDNotification("TRY AGAIN!", false);
+                streak = 0;
+                streakEl.textContent = "ðŸ”¥ " + streak;
+                setTimeout(() => button.classList.remove("wrong-choice"), 700);
+                return;
+            }
+
+            hasChosenCorrectWord = true;
+            [...answerOptionsEl.children].forEach(option => {
+                option.classList.toggle("selected", option === button);
+                option.disabled = true;
+            });
+            const currentQ = sessionQuestions[currentQuestionIndex];
+            const selectedText = currentQ.question.replace("___", `<span class='text-yellow-300 underline font-black decoration-2 decoration-wavy px-1'>${correctWord}</span>`);
+            questionTextEl.innerHTML = selectedText;
+            playSound('correct');
+            triggerHUDNotification("WORD READY!", true);
+        }
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
+            scaleFactor = Math.min(1, canvas.width / 800);
+            
+            // Adjust Character dimensions
+            charObj.width = 65 * scaleFactor;
+            charObj.height = 55 * scaleFactor;
+            charObj.speed = 6.5 * scaleFactor;
+            
+            // Re-center character on first load or maintain boundary
+            if (charObj.x === 0 && charObj.y === 0) {
+                charObj.x = canvas.width / 2 - charObj.width / 2;
+                charObj.y = canvas.height / 2 + 30;
+            } else {
+                charObj.x = Math.max(0, Math.min(canvas.width - charObj.width, charObj.x));
+                charObj.y = Math.max(0, Math.min(canvas.height - charObj.height, charObj.y));
+            }
+
+            // Distribute 4 interactive zones clearly across the playground coordinates
+            const marginX = 140 * scaleFactor;
+            const topY = canvas.height * 0.33; // Planted firmly on the grass field!
+            const bottomY = canvas.height - 110 * scaleFactor;
+            const radius = 85 * scaleFactor;
+
+            interactiveZones = [
+                // Top-Left: Slide
+                { id: "slide", label: "SLIDE", x: marginX, y: topY, r: radius, color: '#f59e0b', bgShape: 'slide' },
+                // Top-Right: Tree
+                { id: "tree", label: "TREE", x: canvas.width - marginX, y: topY, r: radius, color: '#10b981', bgShape: 'tree' },
+                // Bottom-Left: Swing
+                { id: "swing", label: "SWING", x: marginX, y: bottomY, r: radius, color: '#06b6d4', bgShape: 'swing' },
+                // Bottom-Right: Sandbox
+                { id: "sandbox", label: "SANDBOX", x: canvas.width - marginX, y: bottomY, r: radius, color: '#ec4899', bgShape: 'sandbox' }
+            ];
+        }
+
+        function initGame() {
+            score = 0;
+            streak = 0;
+            correctAnswers = 0;
+            particles = [];
+            charObj.x = canvas.width / 2 - charObj.width / 2;
+            charObj.y = canvas.height / 2 + 30;
+            
+            scoreEl.textContent = score;
+            streakEl.textContent = "🔥 " + streak;
+            
+            prepareSession();
+            loadQuestion();
+            resizeCanvas();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= totalQuestionsCount) {
+                endGameSession();
+                return;
+            }
+
+            questionIndexEl.textContent = `${currentQuestionIndex + 1}/${totalQuestionsCount}`;
+            
+            const currentQ = sessionQuestions[currentQuestionIndex];
+            currentCorrectAnswer = currentQ.targetId;
+            currentDisplayWord = currentQ.displayWord;
+            currentCharacterType = currentQ.charType;
+            hasChosenCorrectWord = false;
+
+            const blankText = currentQ.question.replace("___", `<span class='text-yellow-300 underline font-black decoration-2 decoration-wavy px-2'>___</span>`);
+            questionTextEl.innerHTML = blankText;
+            renderAnswerOptions(currentDisplayWord);
+
+            // Update mobile D-pad central icon to show the current character's emoji
+            if (characterPadIcon) {
+                characterPadIcon.textContent = currentQ.emoji || "⭐";
+            }
+        }
+
+        function triggerHUDNotification(text, isCorrect) {
+            hudText.textContent = text;
+            if (isCorrect) {
+                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-green-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font";
+            } else {
+                hudText.className = "text-5xl md:text-7xl font-black tracking-wider text-rose-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font";
+            }
+
+            hitNotification.style.opacity = "1";
+            hitNotification.style.transform = "translate(-50%, -50%) scale(1.1)";
+            
+            setTimeout(() => {
+                hitNotification.style.opacity = "0";
+                hitNotification.style.transform = "translate(-50%, -50%) scale(0.75)";
+            }, 1200);
+        }
+
+        function spawnMagicParticles(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 1,
+                    r: Math.random() * 6 + 2,
+                    color: color,
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        function handleZoneEntry(hitZone) {
+            if (!hasChosenCorrectWord) {
+                playSound('wrong');
+                triggerHUDNotification("PICK A WORD!", false);
+                const dx = canvas.width/2 - charObj.x;
+                const dy = canvas.height/2 - charObj.y;
+                charObj.x += (dx * 0.25);
+                charObj.y += (dy * 0.25);
+                return;
+            }
+
+            const isCorrect = (hitZone.id === currentCorrectAnswer);
+            spawnMagicParticles(charObj.x + charObj.width/2, charObj.y + charObj.height/2, hitZone.color);
+
+            if (isCorrect) {
+                score += 10 + Math.floor(streak / 3) * 5;
+                streak++;
+                correctAnswers++;
+                playSound('correct');
+                triggerHUDNotification("AWESOME!", true);
+                
+                // Return character to center gracefully for next round
+                charObj.x = canvas.width / 2 - charObj.width / 2;
+                charObj.y = canvas.height / 2 + 30;
+
+                currentQuestionIndex++;
+                setTimeout(loadQuestion, 1200);
+            } else {
+                // Wrong zone warning feedback
+                playSound('wrong');
+                triggerHUDNotification("WRONG SPOT!", false);
+                
+                // Gently bounce the character back toward center to let them try again
+                const dx = canvas.width/2 - charObj.x;
+                const dy = canvas.height/2 - charObj.y;
+                charObj.x += (dx * 0.25);
+                charObj.y += (dy * 0.25);
+                
+                streak = 0;
+                streakEl.textContent = "🔥 " + streak;
+            }
+        }
+
+        function endGameSession() {
+            gameState = 'GAMEOVER';
+            gameoverScreen.classList.remove("hidden");
+            playSound('win');
+
+            finalScoreEl.textContent = score;
+            const accuracy = Math.round((correctAnswers / totalQuestionsCount) * 100);
+            finalAccuracyEl.textContent = accuracy + "%";
+
+            let msg = "";
+            if (accuracy >= 85) {
+                msg = "🏆 Playground Champion! You know all your prepositions perfectly!";
+            } else if (accuracy >= 60) {
+                msg = "🥈 Great Effort! You explored the playground beautifully!";
+            } else {
+                msg = "🐶 Practice makes perfect! Keep playing with the objects to learn!";
+            }
+            performanceMessageEl.textContent = msg;
+        }
+
+        // Keyboard navigation hook controllers
+        window.addEventListener('keydown', (e) => {
+            if (gameState !== 'PLAYING') return;
+            if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                charObj.isMovingLeft = true;
+                charObj.facingRight = false;
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+                charObj.isMovingRight = true;
+                charObj.facingRight = true;
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp' || e.key === 'Up') {
+                charObj.isMovingUp = true;
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown' || e.key === 'Down') {
+                charObj.isMovingDown = true;
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'Left') charObj.isMovingLeft = false;
+            if (e.key === 'ArrowRight' || e.key === 'Right') charObj.isMovingRight = false;
+            if (e.key === 'ArrowUp' || e.key === 'Up') charObj.isMovingUp = false;
+            if (e.key === 'ArrowDown' || e.key === 'Down') charObj.isMovingDown = false;
+        });
+
+        // Mobile D-Pad touch handlers
+        const btnUp = document.getElementById("btn-up");
+        const btnDown = document.getElementById("btn-down");
+        const btnLeft = document.getElementById("btn-left");
+        const btnRight = document.getElementById("btn-right");
+
+        function setMoveUp(state) { if (gameState === 'PLAYING') charObj.isMovingUp = state; }
+        function setMoveDown(state) { if (gameState === 'PLAYING') charObj.isMovingDown = state; }
+        function setMoveLeft(state) { if (gameState === 'PLAYING') { charObj.isMovingLeft = state; charObj.facingRight = false; } }
+        function setMoveRight(state) { if (gameState === 'PLAYING') { charObj.isMovingRight = state; charObj.facingRight = true; } }
+
+        btnUp.addEventListener('touchstart', (e) => { setMoveUp(true); e.preventDefault(); }, {passive: false});
+        btnUp.addEventListener('touchend', () => { setMoveUp(false); });
+        btnUp.addEventListener('mousedown', () => { setMoveUp(true); });
+        btnUp.addEventListener('mouseup', () => { setMoveUp(false); });
+
+        btnDown.addEventListener('touchstart', (e) => { setMoveDown(true); e.preventDefault(); }, {passive: false});
+        btnDown.addEventListener('touchend', () => { setMoveDown(false); });
+        btnDown.addEventListener('mousedown', () => { setMoveDown(true); });
+        btnDown.addEventListener('mouseup', () => { setMoveDown(false); });
+
+        btnLeft.addEventListener('touchstart', (e) => { setMoveLeft(true); e.preventDefault(); }, {passive: false});
+        btnLeft.addEventListener('touchend', () => { setMoveLeft(false); });
+        btnLeft.addEventListener('mousedown', () => { setMoveLeft(true); });
+        btnLeft.addEventListener('mouseup', () => { setMoveLeft(false); });
+
+        btnRight.addEventListener('touchstart', (e) => { setMoveRight(true); e.preventDefault(); }, {passive: false});
+        btnRight.addEventListener('touchend', () => { setMoveRight(false); });
+        btnRight.addEventListener('mousedown', () => { setMoveRight(true); });
+        btnRight.addEventListener('mouseup', () => { setMoveRight(false); });
+
+        // Splash control event actions
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            gameState = 'PLAYING';
+            initGame();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+
+        // Canvas Visual Designers
+        function drawBackground() {
+            // Sunny blue sky
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGrad.addColorStop(0, '#7dd3fc'); // sky-300
+            skyGrad.addColorStop(0.4, '#bae6fd'); // sky-200
+            skyGrad.addColorStop(1, '#fef08a'); // horizon yellow
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Radiant sun in upper corner
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, -20, 100 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Lush green rolling grass pasture
+            ctx.fillStyle = '#4ade80'; // grass-400
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height * 0.3);
+            ctx.quadraticCurveTo(canvas.width / 2, canvas.height * 0.2, canvas.width, canvas.height * 0.3);
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.fill();
+
+            // Distant purple hills
+            ctx.fillStyle = '#86efac'; // soft secondary hill
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height * 0.28);
+            ctx.quadraticCurveTo(canvas.width * 0.3, canvas.height * 0.18, canvas.width * 0.6, canvas.height * 0.26);
+            ctx.quadraticCurveTo(canvas.width * 0.8, canvas.height * 0.2, canvas.width, canvas.height * 0.28);
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.fill();
+        }
+
+        function drawPlaygroundZones() {
+            interactiveZones.forEach(zone => {
+                ctx.save();
+                
+                // Draw dynamic neon pulse ring guides on floor
+                const pulse = 1 + Math.sin(Date.now() * 0.005) * 0.06;
+                const radius = zone.r * pulse;
+
+                // Transparent glowing pedestal
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                ctx.beginPath();
+                ctx.ellipse(zone.x, zone.y + 10 * scaleFactor, radius, radius * 0.4, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = zone.color;
+                ctx.lineWidth = 4 * scaleFactor;
+                ctx.beginPath();
+                ctx.ellipse(zone.x, zone.y + 10 * scaleFactor, radius, radius * 0.4, 0, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Vector draw playground structures based on type
+                if (zone.bgShape === 'tree') {
+                    // Tree trunk
+                    ctx.fillStyle = '#78350f';
+                    ctx.fillRect(zone.x - 12 * scaleFactor, zone.y - 75 * scaleFactor, 24 * scaleFactor, 75 * scaleFactor);
+                    // Green leaves dome
+                    ctx.fillStyle = '#047857';
+                    ctx.beginPath();
+                    ctx.arc(zone.x, zone.y - 80 * scaleFactor, 45 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(zone.x - 25 * scaleFactor, zone.y - 70 * scaleFactor, 32 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(zone.x + 25 * scaleFactor, zone.y - 70 * scaleFactor, 32 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Fallen apples under tree
+                    ctx.fillStyle = '#ef4444';
+                    ctx.beginPath();
+                    ctx.arc(zone.x - 20 * scaleFactor, zone.y + 5 * scaleFactor, 5 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(zone.x + 15 * scaleFactor, zone.y + 12 * scaleFactor, 5 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                } else if (zone.bgShape === 'slide') {
+                    // Ladder legs
+                    ctx.strokeStyle = '#94a3b8';
+                    ctx.lineWidth = 4 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(zone.x - 25 * scaleFactor, zone.y + 10 * scaleFactor);
+                    ctx.lineTo(zone.x - 15 * scaleFactor, zone.y - 50 * scaleFactor);
+                    ctx.stroke();
+                    // Slide slope
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.lineWidth = 8 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(zone.x - 15 * scaleFactor, zone.y - 50 * scaleFactor);
+                    ctx.quadraticCurveTo(zone.x + 10 * scaleFactor, zone.y - 30 * scaleFactor, zone.x + 35 * scaleFactor, zone.y + 15 * scaleFactor);
+                    ctx.stroke();
+                    // Golden railings
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.lineWidth = 3 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.arc(zone.x - 15 * scaleFactor, zone.y - 52 * scaleFactor, 8 * scaleFactor, Math.PI, 0);
+                    ctx.stroke();
+
+                } else if (zone.bgShape === 'sandbox') {
+                    // Wooden container frame
+                    ctx.fillStyle = '#b45309'; // warm brown rim
+                    ctx.beginPath();
+                    ctx.roundRect(zone.x - 48 * scaleFactor, zone.y - 20 * scaleFactor, 96 * scaleFactor, 45 * scaleFactor, 6 * scaleFactor);
+                    ctx.fill();
+                    // Inner sand bed
+                    ctx.fillStyle = '#fef08a'; // golden yellow sand
+                    ctx.beginPath();
+                    ctx.roundRect(zone.x - 42 * scaleFactor, zone.y - 15 * scaleFactor, 84 * scaleFactor, 35 * scaleFactor, 4 * scaleFactor);
+                    ctx.fill();
+                    // Little blue spade toy
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.beginPath();
+                    ctx.roundRect(zone.x - 15 * scaleFactor, zone.y - 5 * scaleFactor, 15 * scaleFactor, 8 * scaleFactor, 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#1e3a8a';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(zone.x - 5 * scaleFactor, zone.y + 3 * scaleFactor);
+                    ctx.lineTo(zone.x + 5 * scaleFactor, zone.y + 8 * scaleFactor);
+                    ctx.stroke();
+
+                } else if (zone.bgShape === 'swing') {
+                    // Metal frame structure
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 5 * scaleFactor;
+                    ctx.beginPath();
+                    // Left leg
+                    ctx.moveTo(zone.x - 35 * scaleFactor, zone.y + 15 * scaleFactor);
+                    ctx.lineTo(zone.x - 20 * scaleFactor, zone.y - 65 * scaleFactor);
+                    // Right leg
+                    ctx.lineTo(zone.x + 20 * scaleFactor, zone.y - 65 * scaleFactor);
+                    ctx.lineTo(zone.x + 35 * scaleFactor, zone.y + 15 * scaleFactor);
+                    ctx.stroke();
+                    // Swings ropes & red board seats
+                    ctx.strokeStyle = '#94a3b8';
+                    ctx.lineWidth = 2 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(zone.x - 10 * scaleFactor, zone.y - 65 * scaleFactor);
+                    ctx.lineTo(zone.x - 10 * scaleFactor, zone.y - 15 * scaleFactor);
+                    ctx.moveTo(zone.x + 10 * scaleFactor, zone.y - 65 * scaleFactor);
+                    ctx.lineTo(zone.x + 10 * scaleFactor, zone.y - 15 * scaleFactor);
+                    ctx.stroke();
+                    // Seat board
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(zone.x - 15 * scaleFactor, zone.y - 15 * scaleFactor, 30 * scaleFactor, 5 * scaleFactor);
+                }
+
+                // Transparent tag board
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+                ctx.beginPath();
+                ctx.roundRect(zone.x - 65 * scaleFactor, zone.y + 24 * scaleFactor, 130 * scaleFactor, 22 * scaleFactor, 5 * scaleFactor);
+                ctx.fill();
+                ctx.lineWidth = 1.5 * scaleFactor;
+                ctx.strokeStyle = zone.color;
+                ctx.stroke();
+
+                // Simplified Playground Object Label Text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `bold ${Math.floor(12 * scaleFactor)}px "Outfit", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(zone.label, zone.x, zone.y + 35 * scaleFactor);
+
+                ctx.restore();
+            });
+        }
+
+        // Draw the dynamically selected character model on canvas based on active sentence context
+        function drawActiveCharacter() {
+            ctx.save();
+            ctx.translate(charObj.x, charObj.y);
+
+            // Flip character horizontally based on walking vector
+            if (!charObj.facingRight) {
+                ctx.scale(-1, 1);
+                ctx.translate(-charObj.width, 0);
+            }
+
+            // Animated walking stride bounce using sine waves
+            let bounceY = 0;
+            if (charObj.isMovingLeft || charObj.isMovingRight || charObj.isMovingUp || charObj.isMovingDown) {
+                charObj.animationTimer += 0.25;
+                bounceY = Math.sin(charObj.animationTimer) * 4 * scaleFactor;
+            }
+
+            const w = charObj.width;
+            const h = charObj.height;
+
+            switch(currentCharacterType) {
+                case "puppy":
+                    // Caramel brown floppy puppy
+                    ctx.fillStyle = '#b45309'; 
+                    ctx.beginPath();
+                    ctx.roundRect(10 * scaleFactor, 18 * scaleFactor + bounceY, 40 * scaleFactor, 26 * scaleFactor, 12 * scaleFactor);
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(42 * scaleFactor, 16 * scaleFactor + bounceY, 15 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#78350f'; 
+                    ctx.beginPath();
+                    ctx.roundRect(32 * scaleFactor, 14 * scaleFactor + bounceY, 7 * scaleFactor, 18 * scaleFactor, 3 * scaleFactor);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#fed7aa'; 
+                    ctx.beginPath();
+                    ctx.arc(51 * scaleFactor, 18 * scaleFactor + bounceY, 6 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#000000';
+                    ctx.beginPath();
+                    ctx.arc(54 * scaleFactor, 16 * scaleFactor + bounceY, 3 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#000000';
+                    ctx.beginPath();
+                    ctx.arc(45 * scaleFactor, 12 * scaleFactor + bounceY, 2.5 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.lineWidth = 4 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(35 * scaleFactor, 24 * scaleFactor + bounceY);
+                    ctx.lineTo(44 * scaleFactor, 27 * scaleFactor + bounceY);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.beginPath();
+                    ctx.arc(41 * scaleFactor, 30 * scaleFactor + bounceY, 3.5 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#78350f';
+                    const legStride = Math.sin(charObj.animationTimer) * 6 * scaleFactor;
+                    ctx.fillRect(36 * scaleFactor, 42 * scaleFactor + bounceY + legStride, 6 * scaleFactor, 11 * scaleFactor);
+                    ctx.fillRect(16 * scaleFactor, 42 * scaleFactor + bounceY - legStride, 6 * scaleFactor, 11 * scaleFactor);
+
+                    ctx.save();
+                    ctx.translate(10 * scaleFactor, 24 * scaleFactor + bounceY);
+                    ctx.rotate(Math.sin(Date.now() * 0.012) * 0.3 - Math.PI / 4);
+                    ctx.fillStyle = '#b45309';
+                    ctx.fillRect(-15 * scaleFactor, -3 * scaleFactor, 15 * scaleFactor, 6 * scaleFactor);
+                    ctx.restore();
+                    break;
+
+                case "boy":
+                    // Cute cartoon boy
+                    ctx.fillStyle = '#3b82f6'; // Blue Shirt
+                    ctx.beginPath();
+                    ctx.roundRect(15 * scaleFactor, 22 * scaleFactor + bounceY, 35 * scaleFactor, 26 * scaleFactor, 8 * scaleFactor);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ffedd5'; // Face
+                    ctx.beginPath();
+                    ctx.arc(32 * scaleFactor, 12 * scaleFactor + bounceY, 13 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#78350f'; // Hair
+                    ctx.beginPath();
+                    ctx.arc(32 * scaleFactor, 9 * scaleFactor + bounceY, 14 * scaleFactor, Math.PI, 0);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#000000'; // Eyes
+                    ctx.beginPath();
+                    ctx.arc(28 * scaleFactor, 11 * scaleFactor + bounceY, 2 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(36 * scaleFactor, 11 * scaleFactor + bounceY, 2 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#1e3a8a'; // Blue Shorts
+                    const strideL = Math.sin(charObj.animationTimer) * 5 * scaleFactor;
+                    ctx.fillRect(18 * scaleFactor, 46 * scaleFactor + bounceY, 11 * scaleFactor, 8 * scaleFactor + strideL);
+                    ctx.fillRect(34 * scaleFactor, 46 * scaleFactor + bounceY, 11 * scaleFactor, 8 * scaleFactor - strideL);
+                    break;
+
+                case "girl":
+                    // Cute cartoon girl
+                    ctx.fillStyle = '#ec4899'; // Pink Dress
+                    ctx.beginPath();
+                    ctx.moveTo(15 * scaleFactor, 46 * scaleFactor + bounceY);
+                    ctx.lineTo(32 * scaleFactor, 20 * scaleFactor + bounceY);
+                    ctx.lineTo(50 * scaleFactor, 46 * scaleFactor + bounceY);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ffedd5'; // Face
+                    ctx.beginPath();
+                    ctx.arc(32 * scaleFactor, 12 * scaleFactor + bounceY, 13 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#f59e0b'; // Orange Hair/Pigtails
+                    ctx.beginPath();
+                    ctx.arc(18 * scaleFactor, 10 * scaleFactor + bounceY, 6 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(46 * scaleFactor, 10 * scaleFactor + bounceY, 6 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(32 * scaleFactor, 8 * scaleFactor + bounceY, 14 * scaleFactor, Math.PI, 0);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#000000'; // Eyes
+                    ctx.beginPath();
+                    ctx.arc(28 * scaleFactor, 12 * scaleFactor + bounceY, 2 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(36 * scaleFactor, 12 * scaleFactor + bounceY, 2 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ffedd5'; // Legs
+                    const legS = Math.sin(charObj.animationTimer) * 5 * scaleFactor;
+                    ctx.fillRect(23 * scaleFactor, 46 * scaleFactor + bounceY, 5 * scaleFactor, 8 * scaleFactor + legS);
+                    ctx.fillRect(38 * scaleFactor, 46 * scaleFactor + bounceY, 5 * scaleFactor, 8 * scaleFactor - legS);
+                    break;
+
+                case "ball":
+                    // Colorful rolling beach ball
+                    ctx.save();
+                    ctx.translate(32 * scaleFactor, 26 * scaleFactor + bounceY);
+                    ctx.rotate(charObj.animationTimer * 0.4);
+
+                    const r = 24 * scaleFactor;
+                    ctx.fillStyle = '#3b82f6'; // Blue
+                    ctx.beginPath();
+                    ctx.arc(0, 0, r, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#fbbf24'; // Yellow stripe
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.arc(0, 0, r, -Math.PI / 3, Math.PI / 3);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ef4444'; // Red stripe
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.arc(0, 0, r, Math.PI * 0.7, Math.PI * 1.3);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Center white dot
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 6 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                    break;
+
+                case "hat":
+                    // Yellow Sun Hat with Ribbon
+                    ctx.fillStyle = '#fef08a'; // Straw yellow
+                    ctx.beginPath();
+                    ctx.ellipse(32 * scaleFactor, 34 * scaleFactor + bounceY, 28 * scaleFactor, 10 * scaleFactor, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.beginPath(); // Crown
+                    ctx.arc(32 * scaleFactor, 30 * scaleFactor + bounceY, 15 * scaleFactor, Math.PI, 0);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ef4444'; // Red Ribbon band
+                    ctx.fillRect(18 * scaleFactor, 28 * scaleFactor + bounceY, 28 * scaleFactor, 4 * scaleFactor);
+                    break;
+
+                case "truck":
+                    // Orange Toy dump truck
+                    ctx.fillStyle = '#f97316'; // Orange cab
+                    ctx.beginPath();
+                    ctx.roundRect(32 * scaleFactor, 18 * scaleFactor + bounceY, 22 * scaleFactor, 20 * scaleFactor, 4 * scaleFactor);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#fbbf24'; // Yellow bed
+                    ctx.beginPath();
+                    ctx.roundRect(10 * scaleFactor, 14 * scaleFactor + bounceY, 22 * scaleFactor, 20 * scaleFactor, 3 * scaleFactor);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#e2e8f0'; // Windshield
+                    ctx.fillRect(44 * scaleFactor, 20 * scaleFactor + bounceY, 8 * scaleFactor, 8 * scaleFactor);
+
+                    ctx.fillStyle = '#1e293b'; // Black Wheels
+                    ctx.beginPath();
+                    ctx.arc(18 * scaleFactor, 38 * scaleFactor + bounceY, 8 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(42 * scaleFactor, 38 * scaleFactor + bounceY, 8 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "bucket":
+                    // Cute blue toy bucket
+                    ctx.fillStyle = '#3b82f6'; // Blue bucket
+                    ctx.beginPath();
+                    ctx.moveTo(18 * scaleFactor, 14 * scaleFactor + bounceY);
+                    ctx.lineTo(46 * scaleFactor, 14 * scaleFactor + bounceY);
+                    ctx.lineTo(40 * scaleFactor, 42 * scaleFactor + bounceY);
+                    ctx.lineTo(24 * scaleFactor, 42 * scaleFactor + bounceY);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Metal wire handle
+                    ctx.strokeStyle = '#94a3b8';
+                    ctx.lineWidth = 2.5 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.arc(32 * scaleFactor, 14 * scaleFactor + bounceY, 14 * scaleFactor, Math.PI, 0);
+                    ctx.stroke();
+                    break;
+
+                case "spade":
+                    // Shiny Gold Spade / Shovel
+                    ctx.strokeStyle = '#64748b'; // Metal shaft
+                    ctx.lineWidth = 4 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(32 * scaleFactor, 10 * scaleFactor + bounceY);
+                    ctx.lineTo(32 * scaleFactor, 32 * scaleFactor + bounceY);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#fbbf24'; // Gold blade
+                    ctx.beginPath();
+                    ctx.moveTo(20 * scaleFactor, 32 * scaleFactor + bounceY);
+                    ctx.lineTo(44 * scaleFactor, 32 * scaleFactor + bounceY);
+                    ctx.lineTo(38 * scaleFactor, 48 * scaleFactor + bounceY);
+                    ctx.lineTo(32 * scaleFactor, 52 * scaleFactor + bounceY);
+                    ctx.lineTo(26 * scaleFactor, 48 * scaleFactor + bounceY);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#475569'; // Grey handle loop
+                    ctx.beginPath();
+                    ctx.arc(32 * scaleFactor, 10 * scaleFactor + bounceY, 6 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "bear":
+                    // Sweet brown fuzzy teddy bear
+                    ctx.fillStyle = '#92400e'; // Brown body
+                    ctx.beginPath();
+                    ctx.roundRect(16 * scaleFactor, 22 * scaleFactor + bounceY, 32 * scaleFactor, 26 * scaleFactor, 12 * scaleFactor);
+                    ctx.fill();
+
+                    ctx.beginPath(); // Head
+                    ctx.arc(32 * scaleFactor, 18 * scaleFactor + bounceY, 14 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.beginPath(); // Left/Right ears
+                    ctx.arc(20 * scaleFactor, 8 * scaleFactor + bounceY, 6 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(44 * scaleFactor, 8 * scaleFactor + bounceY, 6 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#fde047'; // Inner ears
+                    ctx.beginPath();
+                    ctx.arc(20 * scaleFactor, 8 * scaleFactor + bounceY, 3 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(44 * scaleFactor, 8 * scaleFactor + bounceY, 3 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#fed7aa'; // Snout
+                    ctx.beginPath();
+                    ctx.arc(32 * scaleFactor, 21 * scaleFactor + bounceY, 5 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#000000'; // Nose
+                    ctx.beginPath();
+                    ctx.arc(32 * scaleFactor, 19 * scaleFactor + bounceY, 2 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#000000'; // Eyes
+                    ctx.beginPath();
+                    ctx.arc(27 * scaleFactor, 15 * scaleFactor + bounceY, 1.5 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(37 * scaleFactor, 15 * scaleFactor + bounceY, 1.5 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ef4444'; // Red bow tie
+                    ctx.beginPath();
+                    ctx.moveTo(27 * scaleFactor, 30 * scaleFactor + bounceY);
+                    ctx.lineTo(37 * scaleFactor, 34 * scaleFactor + bounceY);
+                    ctx.lineTo(37 * scaleFactor, 26 * scaleFactor + bounceY);
+                    ctx.lineTo(27 * scaleFactor, 30 * scaleFactor + bounceY);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+
+                case "apple":
+                    // Shiny Red Apple
+                    ctx.fillStyle = '#ef4444'; // Red skin
+                    ctx.beginPath();
+                    ctx.arc(26 * scaleFactor, 26 * scaleFactor + bounceY, 16 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(38 * scaleFactor, 26 * scaleFactor + bounceY, 16 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#78350f'; // Stem
+                    ctx.lineWidth = 3 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(32 * scaleFactor, 16 * scaleFactor + bounceY);
+                    ctx.quadraticCurveTo(28 * scaleFactor, 6 * scaleFactor + bounceY, 34 * scaleFactor, 4 * scaleFactor + bounceY);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#22c55e'; // Green leaf
+                    ctx.beginPath();
+                    ctx.ellipse(35 * scaleFactor, 9 * scaleFactor + bounceY, 4 * scaleFactor, 8 * scaleFactor, Math.PI / 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "bird":
+                    // Cute little blue bird
+                    ctx.fillStyle = '#38bdf8'; // Blue body
+                    ctx.beginPath();
+                    ctx.ellipse(32 * scaleFactor, 24 * scaleFactor + bounceY, 20 * scaleFactor, 16 * scaleFactor, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.beginPath(); // Head
+                    ctx.arc(42 * scaleFactor, 16 * scaleFactor + bounceY, 11 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#fbbf24'; // Orange beak
+                    ctx.beginPath();
+                    ctx.moveTo(52 * scaleFactor, 14 * scaleFactor + bounceY);
+                    ctx.lineTo(58 * scaleFactor, 18 * scaleFactor + bounceY);
+                    ctx.lineTo(50 * scaleFactor, 20 * scaleFactor + bounceY);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#000000'; // Eye
+                    ctx.beginPath();
+                    ctx.arc(44 * scaleFactor, 13 * scaleFactor + bounceY, 2 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#0284c7'; // Darker wing
+                    ctx.beginPath();
+                    ctx.ellipse(22 * scaleFactor, 26 * scaleFactor + bounceY, 10 * scaleFactor, 6 * scaleFactor, Math.PI / 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "bike":
+                    // Simple green bicycle
+                    ctx.strokeStyle = '#10b981'; // Green frame
+                    ctx.lineWidth = 4 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(18 * scaleFactor, 36 * scaleFactor + bounceY);
+                    ctx.lineTo(32 * scaleFactor, 20 * scaleFactor + bounceY);
+                    ctx.lineTo(44 * scaleFactor, 36 * scaleFactor + bounceY);
+                    ctx.moveTo(32 * scaleFactor, 20 * scaleFactor + bounceY);
+                    ctx.lineTo(24 * scaleFactor, 36 * scaleFactor + bounceY);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#1e293b'; // Two black wheels
+                    ctx.beginPath();
+                    ctx.arc(18 * scaleFactor, 36 * scaleFactor + bounceY, 12 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(44 * scaleFactor, 36 * scaleFactor + bounceY, 12 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff'; // Hub caps
+                    ctx.beginPath();
+                    ctx.arc(18 * scaleFactor, 36 * scaleFactor + bounceY, 4 * scaleFactor, 0, Math.PI * 2);
+                    ctx.arc(44 * scaleFactor, 36 * scaleFactor + bounceY, 4 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "bottle":
+                    // Sporty blue water bottle
+                    ctx.fillStyle = '#06b6d4'; // Cyan bottle
+                    ctx.beginPath();
+                    ctx.roundRect(22 * scaleFactor, 16 * scaleFactor + bounceY, 20 * scaleFactor, 34 * scaleFactor, 4 * scaleFactor);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#334155'; // Dark cap
+                    ctx.fillRect(26 * scaleFactor, 10 * scaleFactor + bounceY, 12 * scaleFactor, 6 * scaleFactor);
+                    break;
+
+                case "flower":
+                    // Pink flower in small terracotta pot
+                    ctx.fillStyle = '#ca8a04'; // Terracotta pot
+                    ctx.beginPath();
+                    ctx.moveTo(22 * scaleFactor, 34 * scaleFactor + bounceY);
+                    ctx.lineTo(42 * scaleFactor, 34 * scaleFactor + bounceY);
+                    ctx.lineTo(38 * scaleFactor, 50 * scaleFactor + bounceY);
+                    ctx.lineTo(26 * scaleFactor, 50 * scaleFactor + bounceY);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#15803d'; // Green stem
+                    ctx.lineWidth = 4 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(32 * scaleFactor, 34 * scaleFactor + bounceY);
+                    ctx.lineTo(32 * scaleFactor, 18 * scaleFactor + bounceY);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#ec4899'; // Pink petals
+                    const petSize = 6 * scaleFactor;
+                    const cX = 32 * scaleFactor;
+                    const cY = 18 * scaleFactor + bounceY;
+                    ctx.beginPath();
+                    ctx.arc(cX - petSize, cY, petSize, 0, Math.PI * 2);
+                    ctx.arc(cX + petSize, cY, petSize, 0, Math.PI * 2);
+                    ctx.arc(cX, cY - petSize, petSize, 0, Math.PI * 2);
+                    ctx.arc(cX, cY + petSize, petSize, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#fbbf24'; // Yellow flower center
+                    ctx.beginPath();
+                    ctx.arc(cX, cY, petSize * 0.7, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "book":
+                    // Open storybook
+                    ctx.fillStyle = '#f8fafc'; // Left white page
+                    ctx.beginPath();
+                    ctx.roundRect(14 * scaleFactor, 18 * scaleFactor + bounceY, 17 * scaleFactor, 24 * scaleFactor, 2 * scaleFactor);
+                    ctx.fill();
+
+                    ctx.beginPath(); // Right white page
+                    ctx.roundRect(33 * scaleFactor, 18 * scaleFactor + bounceY, 17 * scaleFactor, 24 * scaleFactor, 2 * scaleFactor);
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#9d174d'; // Red book cover rim backing
+                    ctx.lineWidth = 2 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(12 * scaleFactor, 43 * scaleFactor + bounceY);
+                    ctx.lineTo(52 * scaleFactor, 43 * scaleFactor + bounceY);
+                    ctx.stroke();
+
+                    ctx.strokeStyle = '#94a3b8'; // Small pencil text lines
+                    ctx.lineWidth = 1.5 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(18 * scaleFactor, 24 * scaleFactor + bounceY);
+                    ctx.lineTo(27 * scaleFactor, 24 * scaleFactor + bounceY);
+                    ctx.moveTo(18 * scaleFactor, 30 * scaleFactor + bounceY);
+                    ctx.lineTo(25 * scaleFactor, 30 * scaleFactor + bounceY);
+                    ctx.moveTo(37 * scaleFactor, 24 * scaleFactor + bounceY);
+                    ctx.lineTo(46 * scaleFactor, 24 * scaleFactor + bounceY);
+                    ctx.moveTo(37 * scaleFactor, 30 * scaleFactor + bounceY);
+                    ctx.lineTo(44 * scaleFactor, 30 * scaleFactor + bounceY);
+                    ctx.stroke();
+                    break;
+            }
+
+            ctx.restore();
+        }
+
+        function drawParticles() {
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(idx, 1);
+                    return;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+
+        // Game engine math update logic
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            // Handle directional character walks with bounds detection
+            if (charObj.isMovingLeft) {
+                charObj.x -= charObj.speed;
+                if (charObj.x < 10) charObj.x = 10;
+            }
+            if (charObj.isMovingRight) {
+                charObj.x += charObj.speed;
+                if (charObj.x > canvas.width - charObj.width - 10) {
+                    charObj.x = canvas.width - charObj.width - 10;
+                }
+            }
+            if (charObj.isMovingUp) {
+                charObj.y -= charObj.speed;
+                // Eased bounds to allow character to overlap top slide and tree zones completely!
+                if (charObj.y < canvas.height * 0.25) charObj.y = canvas.height * 0.25;
+            }
+            if (charObj.isMovingDown) {
+                charObj.y += charObj.speed;
+                if (charObj.y > canvas.height - charObj.height - 10) {
+                    charObj.y = canvas.height - charObj.height - 10;
+                }
+            }
+
+            // Radial collision / overlap checks with playground zones
+            for (let i = 0; i < interactiveZones.length; i++) {
+                const zone = interactiveZones[i];
+                
+                const charCenterX = charObj.x + charObj.width / 2;
+                const charCenterY = charObj.y + charObj.height / 2;
+
+                const dx = charCenterX - zone.x;
+                const dy = charCenterY - zone.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                // If character steps into a target guide zone
+                if (distance < zone.r * 0.6) {
+                    handleZoneEntry(zone);
+                    break;
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            drawPlaygroundZones();
+            
+            if (gameState === 'PLAYING') {
+                drawActiveCharacter();
+            }
+            
+            drawParticles();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize 5-Second Brand Logo Intro
+        window.onload = function() {
+            resizeCanvas();
+            requestAnimationFrame(gameLoop);
+
+            // Intro logo screen runs for exactly 5 seconds
+            setTimeout(() => {
+                logoScreen.classList.add("opacity-0");
+                setTimeout(() => {
+                    logoScreen.classList.add("hidden");
+                    startScreen.classList.remove("hidden");
+                    gameState = 'START';
+                }, 1000);
+            }, 5000);
+        };
+    </script>
+</body>
+</html>
