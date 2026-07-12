@@ -1,1 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Grammar Pool Academy: Shot Masters!</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        h1 { margin: 5px 0 2px 0; font-size: 1.4rem; color: #4caf50; text-align: center; }
+        #status { font-size: 0.95rem; margin-bottom: 5px; font-weight: bold; height: auto; text-align: center; max-width: 98%; color: #ffb300; }
+        
+        /* Layout Maximizer Engine */
+        #viewport-scaler {
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
 
+        #game-container { 
+            position: relative; 
+            width: 1000px;
+            height: 500px;
+            transform-origin: center center;
+        }
+        
+        canvas {
+            width: 1000px;
+            height: 500px;
+            display: block;
+            border: 8px solid #5c3a21;
+            border-radius: 14px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+            background: #2e7d32;
+            cursor: crosshair;
+            box-sizing: border-box;
+        }
+        
+        /* Overlay Panel Engine (Splash, Instructions, Scoreboard) */
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #111111;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        #splash-screen img {
+            max-width: 240px;
+            width: 60%;
+            height: auto;
+        }
+
+        /* Instructions Screen UI */
+        #instruction-screen h2 { color: #4caf50; font-size: 1.8rem; margin-bottom: 10px; }
+        #instruction-screen ul { text-align: left; max-width: 550px; font-size: 1rem; line-height: 1.5; margin-bottom: 20px; padding-left: 20px; }
+        #instruction-screen li { margin-bottom: 8px; }
+
+        /* Trophy & Scoreboard Panels */
+        .pop-animation {
+            animation: popEffect 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative;
+            z-index: 10;
+        }
+        @keyframes popEffect {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .trophy-icon { font-size: 3.5rem; margin-bottom: 5px; animation: bounce 2s infinite ease-in-out; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .award-banner { background: #ffb300; color: #111; font-weight: bold; padding: 8px 25px; border-radius: 35px; font-size: 1.4rem; margin-bottom: 15px; display: inline-block; box-shadow: 0 5px 15px rgba(255,179,0,0.4); text-transform: uppercase; }
+        .score-box { background: #222; border: 3px solid #444; padding: 15px 25px; border-radius: 15px; font-size: 1.1rem; margin-bottom: 15px; text-align: left; min-width: 250px; }
+
+        /* Confetti Streamer Engines */
+        .confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
+        .confetti-piece { position: absolute; width: 10px; height: 20px; background: #ffeb3b; top: -20px; opacity: 0.8; animation: fall 4s infinite linear; }
+        @keyframes fall {
+            0% { top: -20px; transform: translateX(0) rotate(0deg); }
+            100% { top: 105vh; transform: translateX(120px) rotate(720deg); }
+        }
+
+        /* Kid-Friendly Light Grey Quiz Overlay */
+        #quiz-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            box-sizing: border-box;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        .hidden { display: none !important; }
+        
+        #question-box {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            width: 94%;
+            line-height: 1.3;
+            color: #222222;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        
+        /* Default Layout: Grid for standard landscape/PC displays */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 94%;
+            max-width: 850px;
+        }
+        
+        /* Unified Action Buttons */
+        .action-btn {
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 35px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(76,175,80,0.5);
+            transition: transform 0.2s, background 0.2s;
+        }
+        .action-btn:hover { transform: scale(1.05); background: #43a047; }
+
+        /* Friendly Colorful Buttons for Quiz Options */
+        button.quiz-btn {
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: white;
+            color: #222222;
+            border: 3px solid #4caf50;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: background 0.2s, color 0.2s, transform 0.1s;
+        }
+        button.quiz-btn:hover { 
+            background: #4caf50; 
+            color: white;
+        }
+
+        /* Portrait Smart Detection Banner */
+        #orientation-warning {
+            display: none;
+            background: #111111;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: bold;
+            padding: 20px;
+        }
+
+        /* Mobile Layout Adjustments (Optimized Landscape Mode Formats) */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.1rem; margin: 2px 0; }
+            #status { font-size: 0.85rem; margin-bottom: 2px; }
+            
+            #question-box {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+                padding: 8px 15px;
+            }
+            /* One option below the other layout engine */
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                width: 96%;
+            }
+            button.quiz-btn {
+                padding: 10px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Dynamic Visual Prompt if phone is held upright in Portrait Mode */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            #orientation-warning {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                position: fixed;
+                top: 0; left: 0; width: 100vw; height: 100vh;
+                z-index: 100000;
+                background: #1a1a1a;
+                text-align: center;
+            }
+            .turn-phone-icon {
+                font-size: 4rem;
+                margin-bottom: 15px;
+                animation: rotateDevice 2s infinite ease-in-out;
+            }
+            @keyframes rotateDevice {
+                0% { transform: rotate(0deg); }
+                50% { transform: rotate(-90deg); }
+                100% { transform: rotate(-90deg); }
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="orientation-warning">
+        <div class="turn-phone-icon">🔄📱</div>
+        Please turn your phone sideways<br>to play in Landscape Mode!
+    </div>
+
+    <!-- DYNAMIC RELATIVE LOGO IMAGE ROUTING -->
+    <div id="splash-screen" class="fullscreen-overlay">
+        <img src="assets/logo.png" alt="Game Logo">
+    </div>
+
+    <div id="instruction-screen" class="fullscreen-overlay hidden">
+        <h2>🎱 Grammar Pool Academy:<br>Shot Masters!</h2>
+        <ul>
+            <li>💡 Answer the Grade 4 Idiom questions correctly to earn your shot at the game.</li>
+            <li>🟢 <strong>If you are correct:</strong> You get a chance to take a shot!</li>
+            <li>🤖 <strong>If you are wrong:</strong> The chance to shoot goes to the computer system.</li>
+            <li>🏆 Clear out the pool table and try to pocket as many coloured balls as possible in 15 rounds!</li>
+        </ul>
+        <button class="action-btn" onclick="startGameSession()">Start Game</button>
+    </div>
+
+    <div id="end-screen" class="fullscreen-overlay hidden">
+        <div class="confetti-container" id="confetti-holder"></div>
+        <div class="pop-animation">
+            <div class="trophy-icon">🏆</div>
+            <div id="award-title" class="award-banner">WINNER!</div>
+            <div class="score-box">
+                <p style="margin: 6px 0;">📝 Quiz Score: <span id="final-answers-score" style="color:#4caf50; font-weight:bold;">0</span> / 15</p>
+                <p style="margin: 6px 0;">🟢 Player Pockets: <span id="final-player-pocket" style="color:#ffb300; font-weight:bold;">0</span></p>
+                <p style="margin: 6px 0;">🤖 Computer Pockets: <span id="final-computer-pocket" style="color:#e53935; font-weight:bold;">0</span></p>
+                <p style="margin: 6px 0;">⏱️ Total Time Taken: <span id="final-time" style="color:#1e88e5; font-weight:bold;">0s</span></p>
+            </div>
+            <button class="action-btn" onclick="window.location.reload();">Play Again</button>
+        </div>
+    </div>
+
+    <h1>🎱 Grammar Pool Academy</h1>
+    <div id="status">Loading game graphics context...</div>
+
+    <div id="viewport-scaler">
+        <div id="game-container">
+            <canvas id="poolCanvas" width="1000" height="500"></canvas>
+            
+            <div id="quiz-overlay" class="hidden">
+                <div id="question-box">Question Loading...</div>
+                <div class="options-container" id="options-box"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+const canvas = document.getElementById('poolCanvas');
+const ctx = canvas.getContext('2d');
+const statusDiv = document.getElementById('status');
+const quizOverlay = document.getElementById('quiz-overlay');
+const questionBox = document.getElementById('question-box');
+const optionsBox = document.getElementById('options-box');
+const gameContainer = document.getElementById('game-container');
+const viewportScaler = document.getElementById('viewport-scaler');
+
+const splashScreen = document.getElementById('splash-screen');
+const instructionScreen = document.getElementById('instruction-screen');
+const endScreen = document.getElementById('end-screen');
+const awardTitle = document.getElementById('award-title');
+const finalAnswersScore = document.getElementById('final-answers-score');
+const finalPlayerPocket = document.getElementById('final-player-pocket');
+const finalComputerPocket = document.getElementById('final-computer-pocket');
+const finalTime = document.getElementById('final-time');
+const confettiHolder = document.getElementById('confetti-holder');
+
+// --- DYNAMIC AUDIO ASSET ROUTING CONTEXT (RELATIVE PATHS) ---
+const correctSound = new Audio('assets/correct.mp3');
+const wrongSound = new Audio('assets/wrong.mp3');
+const clappingSound = new Audio('assets/freesound_community-claps-44774.mp3');
+
+// --- GAME CONFIG & STATE ---
+const FRICTION = 0.985;
+let currentTurn = 'player_quiz'; 
+let isAiming = false;
+let aimAngle = 0;
+let isMovingState = false;
+
+let correctAnswersCount = 0;
+let totalPlayerPocketed = 0;
+let totalComputerPocketed = 0;
+let matchStartTime = 0;
+
+// Grade 4 Idioms Pool (20 Questions - Scrambled Option Indexes)
+const questionBank = [
+    { q: "Before Sarah went on stage for her piano recital, her teacher smiled and said, 'Break a leg!' What did her teacher mean?", a: ["Be careful not to fall", "Good luck!", "Play as loud as you can", "Take a long break"], correct: 1 },
+    { q: "Leo was feeling a bit 'under the weather' on Monday morning. How was Leo feeling?", a: ["Hot and sweaty", "Excited for rain", "Slightly sick or unwell", "Happy to go outside"], correct: 2 },
+    { q: "We were trying to keep the birthday party a secret, but Max accidentally 'let the cat out of the bag.' What did Max do?", a: ["He lost his pet cat", "He brought a cat to the party", "He told the secret by accident", "He opened a big backpack"], correct: 2 },
+    { q: "Math homework used to be tough for Maya, but now she says it's a 'piece of cake.' What does she mean?", a: ["It is very delicious", "It is very easy to do", "It takes a long time", "It requires baking skills"], correct: 1 },
+    { q: "Jake's dad told him to stop 'pulling his leg' when Jake said he saw a spaceship. What was Jake doing?", a: ["Tripping his dad", "Telling a funny joke or teasing", "Running away quickly", "Stretching his muscles"], correct: 1 },
+    { q: "The new playground structure cost an 'arm and a leg' for the school to build. What does this mean?", a: ["It was very expensive", "It was made of plastic bones", "It was built by hand", "It was free to use"], correct: 0 },
+    { q: "Mia was nervous about the spelling bee, but her mom told her to 'hold her horses.' What did her mom want her to do?", a: ["Go buy a horse", "Be patient and slow down", "Speak much louder", "Start running"], correct: 1 },
+    { q: "Our teacher told us to 'hit the books' because we have a big science quiz tomorrow. What should the class do?", a: ["Stack the books neatly", "Drop their backpacks", "Start studying hard", "Close all their folders"], correct: 2 },
+    { q: "Grandma told Liam he was the 'apple of her eye.' How does Grandma feel about Liam?", a: ["She thinks he looks like fruit", "She is very proud and loves him dearly", "She needs him to buy groceries", "She thinks he is acting silly"], correct: 1 },
+    { q: "When the coach asked who wanted to play goalie, Emily was 'on the fence.' How did Emily feel?", a: ["She was climbing a wall", "She had already decided", "She was undecided and unsure", "She was angry at the team"], correct: 2 },
+    { q: "Ben thought he would hate art class, but he decided not to 'judge a book by its cover.' What did Ben do?", a: ["He read the first page", "He didn't form an opinion before trying it", "He chose a book with no pictures", "He looked at the drawing closely"], correct: 1 },
+    { q: "The soccer championship is 'down to the wire' with only thirty seconds left on the clock. What does this mean?", a: ["The game is being filmed", "The players are tired", "The game is extremely close to the very end", "The field has a fence around it"], correct: 2 },
+    { q: "When Chloe got a perfect score on her project, she was 'on cloud nine.' How was Chloe feeling?", a: ["Extremely happy and joyful", "Confused and sleepy", "High up in an airplane", "Scared of the storm"], correct: 0 },
+    { q: "If you want to pass the level, you have to follow the rules. Don't 'cut corners.' What does 'cutting corners' mean?", a: ["Using scissors carefully", "Doing a job quickly and badly to save effort", "Turning around in circles", "Taking a shortcut home"], correct: 1 },
+    { q: "Tyler was nervous about speaking in front of the class, but he decided to 'bite the bullet' and walk up to the board. What did Tyler do?", a: ["He chewed on something hard", "He faced a difficult situation bravely", "He asked to go to the nurse", "He began to cry"], correct: 1 },
+    { q: "We wanted to go to the park, but it started 'raining cats and dogs.' What was the weather like?", a: ["Animals were falling from the sky", "It was raining very heavily", "It was just a light sprinkle", "It was sunny and windy"], correct: 1 },
+    { q: "Principal Evans told the students that they are all 'in the same boat' when it comes to learning online. What did he mean?", a: ["They are going on a field trip", "They are in a floating ship", "They are sharing the exact same situation", "They need to wear life jackets"], correct: 2 },
+    { q: "When Lily saw her brother break the kitchen vase, she decided to 'turn a blind eye.' What did Lily do?", a: ["She closed both her eyes", "She chose to ignore it and pretend she didn't see", "She told her mom immediately", "She helped him clean it up"], correct: 1 },
+    { q: "Don't worry about making a small mistake on the first drawing—just 'go back to the drawing board.' What does this mean?", a: ["Clean the chalkboard", "Sit at a different desk", "Start over from the beginning", "Give up on the project"], correct: 2 },
+    { q: "Lucas was so close to guessing the riddle! The answer was right 'on the tip of his tongue.' What does this mean?", a: ["He had a bad taste in his mouth", "He forgot how to speak", "He knew it but couldn't quite remember the word", "He swallowed a piece of candy"], correct: 2 }
+];
+
+let activeQuestions = [];
+let questionIndex = 0;
+
+class Ball {
+    constructor(x, y, radius, color, isCue = false) {
+        this.x = x; this.y = y;
+        this.radius = radius; this.color = color;
+        this.isCue = isCue;
+        this.vx = 0; this.vy = 0;
+        this.active = true;
+    }
+    draw() {
+        if (!this.active) return;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+    }
+    update() {
+        if (!this.active) return;
+        this.x += this.vx; this.y += this.vy;
+        this.vx *= FRICTION; this.vy *= FRICTION;
+        if (Math.abs(this.vx) < 0.1) this.vx = 0;
+        if (Math.abs(this.vy) < 0.1) this.vy = 0;
+        this.bounceWalls();
+    }
+    bounceWalls() {
+        if (this.x - this.radius < 0) { this.x = this.radius; this.vx *= -1; }
+        if (this.x + this.radius > canvas.width) { this.x = canvas.width - this.radius; this.vx *= -1; }
+        if (this.y - this.radius < 0) { this.y = this.radius; this.vy *= -1; }
+        if (this.y + this.radius > canvas.height) { this.y = canvas.height - this.radius; this.vy *= -1; }
+    }
+}
+
+const pockets = [
+    {x: 0, y: 0}, {x: canvas.width/2, y: 0}, {x: canvas.width, y: 0},
+    {x: 0, y: canvas.height}, {x: canvas.width/2, y: canvas.height}, {x: canvas.width, y: canvas.height}
+];
+
+let balls = [];
+function initGame() {
+    balls = [];
+    balls.push(new Ball(180, canvas.height / 2, 14, 'white', true));
+    let startX = 680, startY = canvas.height / 2;
+    let colors = ['#e53935', '#ffb300', '#1e88e5', '#8e24aa', '#3949ab'];
+    let index = 0;
+    for (let col = 0; col < 3; col++) {
+        for (let row = 0; row <= col; row++) {
+            let bx = startX + col * 26;
+            let by = startY + (row - col / 2) * 28;
+            balls.push(new Ball(bx, by, 14, colors[index % colors.length]));
+            index++;
+        }
+    }
+    
+    activeQuestions = [...questionBank].sort(() => 0.5 - Math.random()).slice(0, 15);
+    questionIndex = 0;
+
+    resizeViewport();
+    window.addEventListener('resize', resizeViewport);
+
+    setTimeout(() => {
+        splashScreen.classList.add('hidden');
+        instructionScreen.classList.remove('hidden');
+    }, 5000);
+}
+
+function resizeViewport() {
+    let containerWidth = window.innerWidth;
+    let containerHeight = window.innerHeight;
+
+    let paddingWidth = containerWidth < 768 ? 10 : 30; 
+    let maxGameWidth = containerWidth - paddingWidth;
+    
+    let scale = Math.min(maxGameWidth / 1000, 1);
+    
+    if ((500 * scale) > (containerHeight - 80)) {
+        scale = Math.max((containerHeight - 80) / 500, 0.3);
+    }
+
+    gameContainer.style.transform = `scale(${scale})`;
+    viewportScaler.style.height = `${500 * scale}px`;
+}
+
+function startGameSession() {
+    [correctSound, wrongSound, clappingSound].forEach(sound => {
+        sound.play().then(() => {
+            sound.pause();
+            sound.currentTime = 0;
+        }).catch(() => {});
+    });
+    
+    instructionScreen.classList.add('hidden');
+    matchStartTime = Date.now();
+    triggerNextQuiz();
+}
+
+// --- GAME LOGIC LOOP ---
+function update() {
+    let ballsMoving = false;
+    
+    balls.forEach(ball => {
+        ball.update();
+        if (ball.vx !== 0 || ball.vy !== 0) ballsMoving = true;
+    });
+
+    for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+            handleCollision(balls[i], balls[j]);
+        }
+    }
+
+    balls.forEach(ball => {
+        if (!ball.active) return;
+        pockets.forEach(pocket => {
+            let dist = Math.hypot(ball.x - pocket.x, ball.y - pocket.y);
+            if (dist < 26) {
+                ball.active = false;
+                clappingSound.play().catch(e => {});
+                if (!ball.isCue) {
+                    if (currentTurn === 'player_shoot' || currentTurn === 'player_aiming') {
+                        totalPlayerPocketed++;
+                    } else if (currentTurn === 'computer') {
+                        totalComputerPocketed++;
+                    }
+                } else { 
+                    setTimeout(() => { ball.x = 180; ball.y = canvas.height/2; ball.vx=0; ball.vy=0; ball.active=true; }, 1000);
+                }
+            }
+        });
+    });
+
+    if (ballsMoving) {
+        isMovingState = true;
+    }
+
+    if (!ballsMoving && isMovingState) {
+        isMovingState = false;
+        if (currentTurn === 'player_shoot' || currentTurn === 'computer') {
+            if (questionIndex >= activeQuestions.length) {
+                endMatchGame();
+            } else {
+                setTimeout(triggerNextQuiz, 300);
+            }
+        }
+    }
+    
+    render();
+    requestAnimationFrame(update);
+}
+
+function handleCollision(b1, b2) {
+    if (!b1.active || !b2.active) return;
+    let dist = Math.hypot(b2.x - b1.x, b2.y - b1.y);
+    if (dist < b1.radius + b2.radius) {
+        let overlap = (b1.radius + b2.radius) - dist;
+        let nx = (b2.x - b1.x) / dist;
+        let ny = (b2.y - b1.y) / dist;
+        b1.x -= nx * overlap / 2; b1.y -= ny * overlap / 2;
+        b2.x += nx * overlap / 2; b2.y += ny * overlap / 2;
+        let kx = b1.vx - b2.vx; let ky = b1.vy - b2.vy;
+        let p = 2 * (nx * kx + ny * ky) / 2;
+        b1.vx -= p * nx; b1.vy -= p * ny;
+        b2.vx += p * nx; b2.vy += p * ny;
+    }
+}
+
+/* Render Pointer Path Tracking Rules */
+function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    pockets.forEach(p => {
+        ctx.beginPath(); ctx.arc(p.x, p.y, 26, 0, Math.PI * 2);
+        ctx.fillStyle = '#111'; ctx.fill(); ctx.closePath();
+    });
+
+    balls.forEach(ball => ball.draw());
+
+    if (currentTurn === 'player_shoot' && balls[0].active) {
+        ctx.beginPath();
+        ctx.moveTo(balls[0].x, balls[0].y);
+        ctx.lineTo(balls[0].x + Math.cos(aimAngle) * 120, balls[0].y + Math.sin(aimAngle) * 120);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([6, 6]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.closePath();
+    }
+}
+
+// --- QUIZ MECHANICS ---
+function triggerNextQuiz() {
+    if (questionIndex >= activeQuestions.length) {
+        endMatchGame();
+        return;
+    }
+
+    currentTurn = 'player_quiz';
+    statusDiv.innerHTML = `💡 Question ${questionIndex + 1}/15: Get it right to shoot!`;
+    quizOverlay.classList.remove('hidden');
+    
+    let currentQ = activeQuestions[questionIndex];
+    questionBox.innerText = currentQ.q;
+    optionsBox.innerHTML = '';
+    
+    currentQ.a.forEach((option, idx) => {
+        let btn = document.createElement('button');
+        btn.className = "quiz-btn";
+        btn.innerText = option;
+        btn.onclick = () => handleAnswer(idx === currentQ.correct);
+        optionsBox.appendChild(btn);
+    });
+}
+
+function handleAnswer(isCorrect) {
+    quizOverlay.classList.add('hidden');
+    questionIndex++; 
+    
+    if (isCorrect) {
+        correctAnswersCount++;
+        correctSound.play().catch(e => {});
+        statusDiv.innerHTML = "✅ Correct! Tap/Click on the table to aim & shoot!";
+        currentTurn = 'player_shoot';
+        isAiming = true; 
+    } else {
+        wrongSound.play().catch(e => {});
+        statusDiv.innerHTML = "❌ Wrong! Computer gets to shoot this turn.";
+        currentTurn = 'computer';
+        setTimeout(executeComputerTurn, 400);
+    }
+}
+
+// --- AI COMPUTER TURN ---
+function executeComputerTurn() {
+    let cue = balls[0];
+    let target = balls.find(b => !b.isCue && b.active);
+    
+    if (!target) {
+        endMatchGame();
+        return;
+    }
+
+    let angle = Math.atan2(target.y - cue.y, target.x - cue.x) + (Math.random() * 0.2 - 0.1);
+    let power = 15 + Math.random() * 5;
+
+    isMovingState = true;
+    cue.vx = Math.cos(angle) * power;
+    cue.vy = Math.sin(angle) * power;
+    statusDiv.innerHTML = "🤖 Computer Shot!";
+}
+
+// --- SCOREBOARD TERMINATION PANELS ---
+function endMatchGame() {
+    statusDiv.innerHTML = "🏁 Match Completed!";
+    
+    let remark = "EXCELLENT!";
+    if (correctAnswersCount < 12) remark = "GREAT JOB!";
+    if (correctAnswersCount < 8) remark = "WINNER!";
+    awardTitle.innerText = remark;
+    
+    let timeSpent = Math.floor((Date.now() - matchStartTime) / 1000);
+    
+    finalAnswersScore.innerText = correctAnswersCount;
+    finalPlayerPocket.innerText = totalPlayerPocketed;
+    finalComputerPocket.innerText = totalComputerPocketed;
+    finalTime.innerText = timeSpent + "s";
+    
+    confettiHolder.innerHTML = '';
+    const confettiColors = ['#ffeb3b', '#e91e63', '#2196f3', '#4caf50', '#ff9800', '#9c27b0'];
+    for (let i = 0; i < 40; i++) {
+        let piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+        piece.style.animationDelay = (Math.random() * 3) + 's';
+        piece.style.width = (Math.random() * 8 + 8) + 'px';
+        piece.style.height = (Math.random() * 15 + 15) + 'px';
+        confettiHolder.appendChild(piece);
+    }
+    
+    endScreen.classList.remove('hidden');
+}
+
+// --- UNIVERSAL MOUSE & TOUCH TRANSFORMATION CONTROLS ---
+function getCanvasCoords(e) {
+    let rect = canvas.getBoundingClientRect();
+    let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    let x = (clientX - rect.left) * (canvas.width / rect.width);
+    let y = (clientY - rect.top) * (canvas.height / rect.height);
+    return { x, y };
+}
+
+function handlePointerMove(e) {
+    if (currentTurn !== 'player_shoot' || !isAiming) return;
+    let coords = getCanvasCoords(e);
+    aimAngle = Math.atan2(coords.y - balls[0].y, coords.x - balls[0].x);
+}
+
+function handlePointerClick(e) {
+    if (currentTurn !== 'player_shoot' || !isAiming) return;
+    let power = 16; 
+    isMovingState = true;
+    isAiming = false; 
+    balls[0].vx = Math.cos(aimAngle) * power;
+    balls[0].vy = Math.sin(aimAngle) * power;
+    
+    statusDiv.innerHTML = "💥 Shot taken!";
+}
+
+canvas.addEventListener('mousemove', handlePointerMove);
+canvas.addEventListener('touchmove', (e) => { handlePointerMove(e); e.preventDefault(); }, { passive: false });
+
+canvas.addEventListener('click', handlePointerClick);
+canvas.addEventListener('touchend', (e) => { handlePointerClick(e); });
+
+initGame();
+update();
+</script>
+</body>
+</html>
