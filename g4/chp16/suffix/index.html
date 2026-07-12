@@ -1,1 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Word Builder Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#161a24;
+  --bg-mid:#1f2637;
+  --copper:#c8793f;
+  --copper-light:#e8a15c;
+  --teal:#1fd6c9;
+  --gold:#ffd23f;
+  --red:#ff5d5d;
+  --panel:#2a3145;
+  --panel-light:#39415a;
+  --ink:#eef2f8;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Nunito',Arial,sans-serif;background:var(--bg-deep);color:var(--ink);overflow-x:hidden}
+.screen{display:none;min-height:100vh;padding:16px;position:relative}
+.active{display:flex;flex-direction:column;align-items:center}
 
+/* SPLASH */
+#splashScreen{
+  background:#fff;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+}
+#splashScreen.active{display:flex}
+#splashScreen img{
+  width:45%;
+  max-width:380px;
+  min-width:160px;
+  height:auto;
+  object-fit:contain;
+}
+
+/* GAME BACKGROUND - custom CSS, industrial glow, no image asset */
+.game-container{
+  max-width:840px;
+  width:100%;
+  margin:0 auto;
+  position:relative;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(31,214,201,0.10) 0, rgba(31,214,201,0) 40%),
+    radial-gradient(circle at 85% 80%, rgba(255,210,63,0.10) 0, rgba(255,210,63,0) 45%),
+    linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-mid) 60%, #232b3d 100%);
+  border-radius:32px;
+  padding:20px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5), inset 0 0 0 3px rgba(200,121,63,0.25);
+  min-height:92vh;
+  overflow:hidden;
+}
+.game-container > *{position:relative;z-index:2}
+
+/* decorative background gears */
+.bg-gear{
+  position:absolute;
+  border-radius:50%;
+  border:10px dashed rgba(200,121,63,0.14);
+  z-index:0;
+  pointer-events:none;
+}
+.bg-gear::before{
+  content:"";
+  position:absolute;
+  inset:18px;
+  border-radius:50%;
+  border:4px solid rgba(200,121,63,0.1);
+}
+.gearA{width:220px;height:220px;top:-70px;left:-70px;animation:spin 40s linear infinite}
+.gearB{width:160px;height:160px;bottom:-50px;right:-50px;animation:spinRev 30s linear infinite}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes spinRev{from{transform:rotate(360deg)}to{transform:rotate(0)}}
+
+/* pulsing pipes along the top */
+.pipe-row{display:flex;gap:6px;justify-content:center;margin-bottom:10px;width:100%}
+.pipe-light{width:12px;height:12px;border-radius:50%;background:var(--teal);opacity:0.25;box-shadow:0 0 8px var(--teal);animation:blink 1.6s infinite}
+.pipe-light:nth-child(2n){background:var(--gold);box-shadow:0 0 8px var(--gold);animation-delay:0.3s}
+.pipe-light:nth-child(3n){animation-delay:0.6s}
+.pipe-light:nth-child(4n){animation-delay:0.9s}
+@keyframes blink{0%,100%{opacity:0.2}50%{opacity:1}}
+
+h1{font-family:'Fredoka',sans-serif;font-size:clamp(26px,5vw,44px);color:var(--gold);margin:6px 0;text-align:center;text-shadow:0 0 18px rgba(255,210,63,0.5);letter-spacing:0.5px}
+.subtitle{font-size:16px;text-align:center;max-width:480px;line-height:1.5;color:#c7d0e0;margin-bottom:6px}
+
+button.primary-btn{border:none;border-radius:18px;padding:14px 30px;margin:8px;font-family:'Fredoka',sans-serif;font-size:20px;cursor:pointer;background:linear-gradient(180deg,var(--copper-light),var(--copper));box-shadow:0 5px 0 #8a5326, 0 0 16px rgba(232,161,92,0.4);font-weight:600;color:#2a1500;transition:transform 0.1s}
+button.primary-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #8a5326}
+
+.topbar{display:flex;justify-content:space-between;align-items:center;background:rgba(20,24,34,0.7);border:2px solid rgba(200,121,63,0.3);padding:10px 18px;border-radius:20px;margin-bottom:14px;width:100%}
+.badge{padding:8px 14px;border-radius:12px;font-weight:700;font-size:18px;background:var(--panel);color:var(--ink);box-shadow:inset 0 0 0 2px rgba(255,210,63,0.25);font-family:'Fredoka',sans-serif}
+
+.main-layout{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%}
+
+/* THE MACHINE */
+.machine{
+  width:100%;
+  max-width:600px;
+  background:linear-gradient(180deg,var(--panel-light),var(--panel));
+  border-radius:26px;
+  border:4px solid #4a5470;
+  box-shadow:0 10px 26px rgba(0,0,0,0.4), inset 0 0 0 2px rgba(31,214,201,0.15);
+  padding:18px;
+  position:relative;
+}
+.machine-header{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
+.rivet{width:10px;height:10px;border-radius:50%;background:#5a6584;box-shadow:inset 0 1px 2px rgba(0,0,0,0.5)}
+
+.slot-row{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.slot{
+  background:#11151f;
+  border-radius:14px;
+  padding:14px 20px;
+  min-width:130px;
+  text-align:center;
+  font-family:'Fredoka',sans-serif;
+  font-size:22px;
+  font-weight:600;
+  color:var(--teal);
+  box-shadow:inset 0 2px 8px rgba(0,0,0,0.6), 0 0 12px rgba(31,214,201,0.25);
+  border:2px solid #313a52;
+}
+.plus-sign{font-family:'Fredoka',sans-serif;font-size:28px;color:var(--gold)}
+.output-slot{
+  min-width:220px;
+  font-size:26px;
+  color:var(--gold);
+  border-color:#5a4620;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,0.6), 0 0 16px rgba(255,210,63,0.2);
+}
+
+.question-text{font-family:'Fredoka',sans-serif;font-size:clamp(16px,2.6vw,20px);font-weight:500;color:#dfe6f2;text-align:center;line-height:1.5;margin-bottom:6px}
+
+.hint-banner{min-height:30px;font-size:16px;font-weight:700;color:var(--gold);background:rgba(255,210,63,0.1);border:1px solid rgba(255,210,63,0.3);padding:8px;border-radius:14px;margin:8px 0;display:none;text-align:center}
+.hint-banner.visible{display:block}
+.msg-banner{min-height:28px;font-size:19px;font-weight:700;margin:6px 0;font-family:'Fredoka',sans-serif;text-align:center}
+
+.lever-zone{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-top:14px}
+.lever-btn{
+  position:relative;
+  background:linear-gradient(180deg,#3a4260,#242a3c);
+  border:2px solid #4d5776;
+  color:var(--ink);
+  border-radius:16px;
+  padding:14px 10px;
+  font-size:16px;
+  font-family:'Fredoka',sans-serif;
+  font-weight:500;
+  cursor:pointer;
+  box-shadow:0 4px 0 #12151f, inset 0 0 0 1px rgba(255,255,255,0.03);
+  transition:transform 0.1s;
+}
+.lever-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #12151f}
+.lever-btn .opt-tag{
+  display:inline-block;
+  background:var(--teal);
+  color:#08201d;
+  font-weight:700;
+  border-radius:8px;
+  padding:2px 8px;
+  margin-right:8px;
+  font-size:14px;
+}
+.lever-btn.correct{background:linear-gradient(180deg,#3fd6a8,#1c9c76)!important;border-color:#1c9c76!important;box-shadow:0 4px 0 #0e5c46!important;color:#04231a!important}
+.lever-btn.wrong{background:linear-gradient(180deg,#ff8a72,var(--red))!important;border-color:#c73f3f!important;box-shadow:0 4px 0 #8a2626!important;color:#380a0a!important}
+.lever-btn.flash-clue{outline:3px solid var(--gold)!important;box-shadow:0 0 16px var(--gold)!important}
+.lever-btn:disabled{cursor:not-allowed;opacity:0.85}
+
+.spark{position:absolute;border-radius:50%;background:var(--gold);pointer-events:none;animation:sparkFly 0.8s ease-out forwards}
+@keyframes sparkFly{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) scale(0.2);opacity:0}
+}
+.smoke{position:absolute;border-radius:50%;background:rgba(180,180,190,0.5);pointer-events:none;animation:smokeRise 1.1s ease-out forwards}
+@keyframes smokeRise{
+  0%{transform:translateY(0) scale(0.6);opacity:0.7}
+  100%{transform:translateY(-60px) scale(1.6);opacity:0}
+}
+
+.confetti{position:fixed;top:-20px;width:12px;height:12px;pointer-events:none;animation:fall 2.5s linear forwards;z-index:999}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<div id="splashScreen" class="screen active">
+  <img src="assets/logo.png" alt="Logo">
+</div>
+
+<div id="startScreen" class="screen">
+  <div class="game-container" style="display:flex;flex-direction:column;justify-content:center;align-items:center">
+    <div class="bg-gear gearA"></div>
+    <div class="bg-gear gearB"></div>
+    <h1>The Word Builder Machine</h1>
+    <p class="subtitle">Feed a root word into the machine, pull the right lever, and watch it build a brand new word!</p>
+    <button class="primary-btn" onclick="startGame()">▶ Start Game</button>
+  </div>
+</div>
+
+<div id="gameScreen" class="screen">
+  <div class="game-container">
+    <div class="bg-gear gearA"></div>
+    <div class="bg-gear gearB"></div>
+
+    <div class="topbar">
+      <div class="badge">⭐ Score: <span id="scoreLabel">0</span></div>
+      <div class="badge" id="heartBox">❤️❤️❤️</div>
+    </div>
+
+    <div class="pipe-row">
+      <div class="pipe-light"></div><div class="pipe-light"></div><div class="pipe-light"></div>
+      <div class="pipe-light"></div><div class="pipe-light"></div><div class="pipe-light"></div>
+      <div class="pipe-light"></div><div class="pipe-light"></div>
+    </div>
+
+    <div class="main-layout">
+      <div class="machine" id="machineBox">
+        <div class="machine-header">
+          <div class="rivet"></div><div class="rivet"></div>
+          <span style="font-family:'Fredoka',sans-serif;font-size:14px;color:#9fb0cc;letter-spacing:2px">WORD BUILDER 3000</span>
+          <div class="rivet"></div><div class="rivet"></div>
+        </div>
+
+        <div class="question-text" id="qText">Question appears here...</div>
+
+        <div class="slot-row">
+          <div class="slot" id="rootSlot">ROOT</div>
+          <div class="plus-sign">+</div>
+          <div class="slot output-slot" id="outputSlot">???</div>
+        </div>
+
+        <div class="hint-banner" id="hintBox"></div>
+        <div class="msg-banner" id="msgBox"></div>
+
+        <div class="lever-zone" id="leverZone"></div>
+
+        <div style="margin-top:14px;text-align:center">
+          <button class="primary-btn" id="nextBtn" onclick="advanceStep()" style="display:none">Next ➡️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="endScreen" class="screen">
+  <div class="game-container" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+    <div class="bg-gear gearA"></div>
+    <div class="bg-gear gearB"></div>
+    <h1 id="endTitle">Machine Complete!</h1>
+    <h2 style="font-family:'Fredoka',sans-serif;font-size:26px;color:#fff">Final Score: <span id="endScore">0</span>/12</h2>
+    <button class="primary-btn" onclick="startGame()">🔄 Play Again</button>
+  </div>
+</div>
+
+<audio id="sndRight" preload="auto" src="assets/correct.mp3"></audio>
+<audio id="sndWrong" preload="auto" src="assets/wrong.mp3"></audio>
+
+<script>
+const dataset = [
+  { root: 'HOPE', q: 'Add a suffix to HOPE to mean "full of hope."', o: ['hopeful', 'hopeless', 'hopely', 'hopement'], a: 'hopeful', h: 'Hint: This suffix means "full of."' },
+  { root: 'CARE', q: 'Add a suffix to CARE to mean "without care."', o: ['careful', 'careness', 'careless', 'carement'], a: 'careless', h: 'Hint: This suffix means "without."' },
+  { root: 'KIND', q: 'Add a suffix to KIND to mean "the quality of being kind."', o: ['kindful', 'kindness', 'kindless', 'kindment'], a: 'kindness', h: 'Hint: This suffix turns an adjective into a noun meaning "the quality of."' },
+  { root: 'TEACH', q: 'Add a suffix to TEACH to mean "a person who teaches."', o: ['teachness', 'teachful', 'teacher', 'teachless'], a: 'teacher', h: 'Hint: This suffix means "a person who does something."' },
+  { root: 'ENJOY', q: 'Add a suffix to ENJOY to mean "the act of enjoying."', o: ['enjoyness', 'enjoyment', 'enjoyful', 'enjoyless'], a: 'enjoyment', h: 'Hint: This suffix turns a verb into a noun meaning "the act of."' },
+  { root: 'QUICK', q: 'Add a suffix to QUICK to describe how something is done quickly.', o: ['quickful', 'quickness', 'quickly', 'quickment'], a: 'quickly', h: 'Hint: This suffix turns an adjective into an adverb describing how something is done.' },
+  { root: 'COLOR', q: 'Add a suffix to COLOR to mean "full of color."', o: ['colorful', 'colorless', 'colorness', 'colorment'], a: 'colorful', h: 'Hint: This suffix means "full of."' },
+  { root: 'HELP', q: 'Add a suffix to HELP to mean "a person who helps."', o: ['helpness', 'helpment', 'helpful', 'helper'], a: 'helper', h: 'Hint: This suffix means "a person who does something."' },
+  { root: 'SAD', q: 'Add a suffix to SAD to mean "the state of being sad."', o: ['sadful', 'sadness', 'sadless', 'sadment'], a: 'sadness', h: 'Hint: This suffix turns an adjective into a noun meaning "the state of being."' },
+  { root: 'USE', q: 'Add a suffix to USE to mean "not able to be used."', o: ['useful', 'usement', 'useless', 'userness'], a: 'useless', h: 'Hint: This suffix means "without" or "not able to be."' },
+  { root: 'AGREE', q: 'Add a suffix to AGREE to mean "the act of agreeing."', o: ['agreeless', 'agreement', 'agreeful', 'agreeness'], a: 'agreement', h: 'Hint: This suffix turns a verb into a noun meaning "the act of."' },
+  { root: 'BRAVE', q: 'Add a suffix to BRAVE to describe how someone acts bravely.', o: ['bravement', 'braveness', 'bravely', 'braveful'], a: 'bravely', h: 'Hint: This suffix turns an adjective into an adverb describing how something is done.' }
+];
+
+const tags = ['A', 'B', 'C', 'D'];
+let step = 0, score = 0, lives = 3, busy = false, hintTimer = null;
+
+const sndRight = document.getElementById('sndRight');
+const sndWrong = document.getElementById('sndWrong');
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function updateLivesDisplay() {
+  let str = '';
+  for (let i = 0; i < 3; i++) {
+    str += (i < lives) ? '\u2764\ufe0f' : '\ud83d\udda4';
+  }
+  document.getElementById('heartBox').textContent = str;
+}
+
+function startGame() {
+  step = 0;
+  score = 0;
+  lives = 3;
+  busy = false;
+
+  document.getElementById('scoreLabel').textContent = score;
+  updateLivesDisplay();
+  showScreen('gameScreen');
+  loadQuestion(step);
+}
+
+function loadQuestion(index) {
+  const item = dataset[index];
+  document.getElementById('qText').textContent = item.q;
+  document.getElementById('rootSlot').textContent = item.root;
+  document.getElementById('outputSlot').textContent = '???';
+  document.getElementById('outputSlot').style.color = '';
+  document.getElementById('msgBox').textContent = '';
+
+  const hintBox = document.getElementById('hintBox');
+  hintBox.textContent = '';
+  hintBox.classList.remove('visible');
+
+  document.getElementById('nextBtn').style.display = 'none';
+
+  const zone = document.getElementById('leverZone');
+  zone.innerHTML = '';
+  item.o.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'lever-btn';
+    btn.innerHTML = `<span class="opt-tag">${tags[i]}</span>${opt}`;
+    btn.dataset.word = opt;
+    btn.onclick = () => pullLever(btn, opt === item.a, item);
+    zone.appendChild(btn);
+  });
+
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => {
+    hintBox.textContent = item.h;
+    hintBox.classList.add('visible');
+    document.querySelectorAll('.lever-btn').forEach(b => {
+      if (b.dataset.word === item.a) b.classList.add('flash-clue');
+    });
+  }, 10000);
+}
+
+function spawnParticles(type) {
+  const machine = document.getElementById('machineBox');
+  const rect = document.getElementById('outputSlot').getBoundingClientRect();
+  const mRect = machine.getBoundingClientRect();
+  const cx = rect.left - mRect.left + rect.width / 2;
+  const cy = rect.top - mRect.top + rect.height / 2;
+
+  const count = type === 'spark' ? 16 : 8;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = type === 'spark' ? 'spark' : 'smoke';
+    const size = type === 'spark' ? (4 + Math.random() * 4) : (10 + Math.random() * 10);
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    if (type === 'spark') {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 40 + Math.random() * 50;
+      p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+    } else {
+      p.style.left = (cx + (Math.random() * 40 - 20)) + 'px';
+    }
+    machine.appendChild(p);
+    setTimeout(() => p.remove(), 1200);
+  }
+}
+
+function confettiEffect() {
+  for (let i = 0; i < 25; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = ['#ff4081','#ffeb3b','#00e676','#304ffe','#aa00ff'][Math.floor(Math.random() * 5)];
+    c.style.animationDelay = Math.random() * 0.3 + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 2600);
+  }
+}
+
+function pullLever(selectedBtn, isCorrect, item) {
+  if (busy) return;
+  busy = true;
+  clearTimeout(hintTimer);
+  document.getElementById('hintBox').classList.remove('visible');
+
+  document.querySelectorAll('.lever-btn').forEach(b => {
+    b.disabled = true;
+    b.classList.remove('flash-clue');
+    if (b.dataset.word === item.a) b.classList.add('correct');
+  });
+
+  const msg = document.getElementById('msgBox');
+  const outputSlot = document.getElementById('outputSlot');
+
+  if (isCorrect) {
+    score++;
+    document.getElementById('scoreLabel').textContent = score;
+    msg.style.color = 'var(--teal)';
+    msg.textContent = 'Ka-chunk! The machine built it perfectly!';
+    outputSlot.textContent = item.a;
+    outputSlot.style.color = 'var(--gold)';
+    spawnParticles('spark');
+    sndRight.currentTime = 0;
+    sndRight.play().catch(() => {});
+    confettiEffect();
+  } else {
+    selectedBtn.classList.add('wrong');
+    msg.style.color = 'var(--red)';
+    msg.textContent = `Clunk! That jammed the gears. Correct word: ${item.a}`;
+    outputSlot.textContent = item.a;
+    outputSlot.style.color = '#8a94ac';
+    spawnParticles('smoke');
+    lives--;
+    updateLivesDisplay();
+    sndWrong.currentTime = 0;
+    sndWrong.play().catch(() => {});
+  }
+
+  document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function advanceStep() {
+  busy = false;
+  if (lives <= 0) {
+    concludeGame();
+    return;
+  }
+  step++;
+  if (step >= dataset.length) {
+    concludeGame();
+    return;
+  }
+  loadQuestion(step);
+}
+
+function concludeGame() {
+  showScreen('endScreen');
+  document.getElementById('endScore').textContent = score;
+
+  const title = document.getElementById('endTitle');
+  if (lives <= 0) {
+    title.textContent = 'The Machine Broke Down! \ud83d\udc94';
+    title.style.color = 'var(--red)';
+  } else if (score === dataset.length) {
+    title.textContent = 'Perfect Build! Master Word Engineer! \ud83c\udfc6';
+    title.style.color = 'var(--gold)';
+    confettiEffect();
+  } else {
+    title.textContent = 'Great Engineering! \ud83c\udf1f';
+    title.style.color = '#fff';
+    confettiEffect();
+  }
+}
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    showScreen('startScreen');
+  }, 5000);
+});
+</script>
+</body>
+</html>
