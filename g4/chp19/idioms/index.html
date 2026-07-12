@@ -240,6 +240,7 @@
         Please turn your phone sideways<br>to play in Landscape Mode!
     </div>
 
+    <!-- DYNAMIC LOGO IMAGE ROUTING -->
     <div id="splash-screen" class="fullscreen-overlay">
         <img src="g4/chp19/idioms/assets/logo.png" alt="Game Logo">
     </div>
@@ -304,7 +305,7 @@ const finalComputerPocket = document.getElementById('final-computer-pocket');
 const finalTime = document.getElementById('final-time');
 const confettiHolder = document.getElementById('confetti-holder');
 
-// --- DYNAMIC AUDIO ASSET ROUTING WITH YOUR SPECIFIC PATHS ---
+// --- DYNAMIC AUDIO ASSET ROUTING CONTEXT ---
 const correctSound = new Audio('g4/chp19/idioms/assets/correct.mp3');
 const wrongSound = new Audio('g4/chp19/idioms/assets/wrong.mp3');
 const clappingSound = new Audio('g4/chp19/idioms/assets/freesound_community-claps-44774.mp3');
@@ -514,6 +515,7 @@ function handleCollision(b1, b2) {
     }
 }
 
+/* Render Pointer Path Tracking Rules */
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
