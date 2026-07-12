@@ -1,1 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Silent Letters Quiz Wheel</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef4fb;color:#22314a;overflow-x:hidden}
+.screen{display:none;min-height:100vh;padding:16px;position:relative}
+.active{display:block}
 
+/* PERFECT CENTERING AND SCALING FOR LOGO ON ALL DEVICES */
+#splashScreen{
+  background:#fff;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+}
+#splashScreen.active{display:flex}
+#splashScreen img{
+  width:45%;
+  max-width:380px;
+  min-width:160px;
+  height:auto;
+  object-fit:contain;
+}
+
+/* GAME BACKGROUND WRAPPER - custom CSS background (no image asset) */
+.game-container{
+  max-width:800px;
+  margin:0 auto;
+  position:relative;
+  background:
+    radial-gradient(circle at 12% 15%, rgba(255,255,255,0.55) 0, rgba(255,255,255,0) 40%),
+    radial-gradient(circle at 88% 85%, rgba(255,255,255,0.35) 0, rgba(255,255,255,0) 45%),
+    linear-gradient(160deg, #6c8ff5 0%, #7fb3e8 45%, #a9dff0 100%);
+  border-radius:28px;
+  padding:16px;
+  box-shadow:0 10px 24px rgba(0,0,0,0.15);
+  min-height:92vh;
+  overflow:hidden;
+}
+/* Faint decorative letters floating in the background, evoking "silent" ghost letters */
+.game-container::before{
+  content:"K  W  B  H  S  G  T  N";
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:88px;
+  font-weight:800;
+  letter-spacing:26px;
+  color:rgba(255,255,255,0.14);
+  white-space:nowrap;
+  transform:rotate(-8deg) scale(1.4);
+  pointer-events:none;
+  z-index:0;
+}
+.game-container > *{position:relative;z-index:1}
+
+h1{font-size:clamp(28px,5vw,44px);color:#2b4c8c;margin:12px 0;text-align:center;text-shadow:1px 1px 2px #fff}
+button{border:none;border-radius:20px;padding:14px 28px;margin:8px;font-size:20px;cursor:pointer;background:#ffca28;box-shadow:0 5px 0 #f5b041;font-weight:700;transition:transform 0.1s}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 #f5b041}
+button:disabled{background:#cbd5e1!important;box-shadow:0 4px 0 #94a3b8!important;cursor:not-allowed}
+
+.topbar{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.9);padding:10px 16px;border-radius:20px;margin-bottom:12px}
+.badge{padding:8px 14px;border-radius:12px;font-weight:700;font-size:18px;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,0.05)}
+.hearts{color:#e74c3c;font-size:22px;letter-spacing:3px}
+
+/* STACKED UI: WHEEL TOP, PANEL BOTTOM */
+.main-layout{display:flex;flex-direction:column;align-items:center;gap:16px}
+.wheel-box{position:relative;width:min(90vw,340px);height:min(90vw,340px);margin:10px auto}
+#wheelSvg{width:100%;height:100%;transform:rotate(0deg);transition:transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)}
+.pointer{position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:26px solid #e74c3c;z-index:10;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.2))}
+
+.quiz-card{background:rgba(255,255,255,0.96);border-radius:24px;padding:16px;width:100%;box-shadow:0 6px 16px rgba(0,0,0,0.08);text-align:center}
+.question-text{font-size:clamp(18px,3vw,24px);font-weight:700;color:#2b4c8c;margin-bottom:12px;line-height:1.4}
+.hint-banner{min-height:32px;font-size:17px;font-weight:700;color:#ef6c00;background:#fff3e0;padding:6px;border-radius:12px;margin:8px 0;display:none}
+.hint-banner.visible{display:block}
+.msg-banner{min-height:30px;font-size:20px;font-weight:700;margin:6px 0}
+
+.options-zone{display:grid;grid-template-columns:1fr;gap:10px;width:100%;margin-top:12px}
+.opt-btn{background:#e3f0fd;border:3px solid #bcdcf7;color:#1b4d7e;border-radius:16px;padding:14px;font-size:19px;box-shadow:0 4px 0 #90c4ee}
+.opt-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #90c4ee}
+.opt-btn.correct{background:#a5d6a7!important;border-color:#66bb6a!important;color:#1b5e20!important;box-shadow:0 4px 0 #4caf50!important}
+.opt-btn.wrong{background:#ffcdd2!important;border-color:#ef9a9a!important;color:#b71c1c!important;box-shadow:0 4px 0 #e57373!important}
+.opt-btn.flash-clue{outline:4px solid #29b6f6!important;box-shadow:0 0 12px #29b6f6!important}
+
+.confetti{position:fixed;top:-20px;width:12px;height:12px;pointer-events:none;animation:fall 2.5s linear forwards;z-index:999}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<div id="splashScreen" class="screen active">
+  <img src="assets/logo.png" alt="Logo">
+</div>
+
+<div id="startScreen" class="screen">
+  <div class="game-container" style="display:flex;flex-direction:column;justify-content:center;align-items:center">
+    <h1>Silent Letters Quiz Wheel</h1>
+    <p style="font-size:18px;text-align:center;max-width:500px;line-height:1.4">Spin the colorful wheel to choose a word and find its silent letter!</p>
+    <button onclick="startGame()">▶ Start Game</button>
+  </div>
+</div>
+
+<div id="gameScreen" class="screen">
+  <div class="game-container">
+    <div class="topbar">
+      <div class="badge">⭐ Score: <span id="scoreLabel">0</span></div>
+      <div class="badge class-lives" id="heartBox">❤️❤️❤️</div>
+    </div>
+
+    <div class="main-layout">
+      <div class="wheel-box">
+        <div class="pointer"></div>
+        <svg id="wheelSvg" viewBox="0 0 200 200"></svg>
+      </div>
+
+      <div style="text-align:center">
+        <button id="spinBtn" onclick="spinWheel()">🎰 Spin the Wheel</button>
+      </div>
+
+      <div class="quiz-card" id="quizCard" style="visibility:hidden">
+        <div class="question-text" id="qText">Question appears here...</div>
+        <div class="hint-banner" id="hintBox"></div>
+        <div class="msg-banner" id="msgBox"></div>
+        <div class="options-zone" id="optionsBox"></div>
+        <div style="margin-top:12px;text-align:right">
+          <button id="nextBtn" onclick="advanceStep()" style="display:none">Next ➡️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="endScreen" class="screen">
+  <div class="game-container" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+    <h1 id="endTitle">Game Over</h1>
+    <h2 style="font-size:26px">Final Score: <span id="endScore">0</span>/10</h2>
+    <button onclick="startGame()">🔄 Play Again</button>
+  </div>
+</div>
+
+<audio id="sndRight" preload="auto" src="assets/correct.mp3"></audio>
+<audio id="sndWrong" preload="auto" src="assets/wrong.mp3"></audio>
+
+<script>
+const dataset = [
+  { word: 'KNIFE', q: 'I am used to cut food, but one of my letters makes no sound. Which letter is silent?', a: 'K', o: ['K', 'F', 'E'], h: 'Hint: This letter is silent at the start, right before the "N" sound!' },
+  { word: 'WRIST', q: 'I am the joint between your hand and arm. Which letter is silent?', a: 'W', o: ['W', 'R', 'T'], h: 'Hint: This letter is silent at the beginning, before the "R" sound!' },
+  { word: 'COMB', q: 'I am used to make your hair neat and tidy. Which letter is silent?', a: 'B', o: ['C', 'O', 'B'], h: 'Hint: This letter is silent at the end, right after the "M" sound!' },
+  { word: 'HOUR', q: 'I am a unit of time, equal to 60 minutes. Which letter is silent?', a: 'H', o: ['H', 'O', 'R'], h: 'Hint: This letter is silent at the very start of the word!' },
+  { word: 'ISLAND', q: 'I am a piece of land surrounded by water. Which letter is silent?', a: 'S', o: ['I', 'S', 'L'], h: 'Hint: This letter hides in the middle, right before the "L" sound!' },
+  { word: 'GNOME', q: 'I am a small, magical garden creature. Which letter is silent?', a: 'G', o: ['G', 'N', 'M'], h: 'Hint: This letter is silent at the start, right before the "N" sound!' },
+  { word: 'SCISSORS', q: 'I am a tool used for cutting paper. Which letter is silent?', a: 'C', o: ['S', 'C', 'R'], h: 'Hint: This letter is silent right after the first "S" sound!' },
+  { word: 'THUMB', q: 'I am the shortest finger on your hand. Which letter is silent?', a: 'B', o: ['T', 'M', 'B'], h: 'Hint: This letter is silent at the end, right after the "M" sound!' },
+  { word: 'CASTLE', q: 'I am a large building where kings and queens once lived. Which letter is silent?', a: 'T', o: ['C', 'S', 'T'], h: 'Hint: This letter hides in the middle, right before the "L" sound!' },
+  { word: 'AUTUMN', q: 'I am a season when leaves turn orange and fall. Which letter is silent?', a: 'N', o: ['T', 'U', 'N'], h: 'Hint: This letter is silent at the end of the word!' }
+];
+
+const colors = ['#ffcc80','#e6ee9c','#80deea','#b39ddb','#ffab91','#a5d6a7','#ffe082','#eeeeee','#f48fb1','#90caf9'];
+let clearedWords = [], currentItem = null, score = 0, lives = 3;
+let rotation = 0, busy = false, hintTimer = null;
+
+const sndRight = document.getElementById('sndRight');
+const sndWrong = document.getElementById('sndWrong');
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function generateWheel() {
+  const svg = document.getElementById('wheelSvg');
+  svg.innerHTML = '';
+  const total = dataset.length;
+  const angleDeg = 360 / total;
+
+  dataset.forEach((item, i) => {
+    const isCleared = clearedWords.includes(item.word);
+    const fill = isCleared ? '#cfd8dc' : colors[i % colors.length];
+
+    const aStart = i * angleDeg;
+    const aEnd = (i + 1) * angleDeg;
+
+    const radStart = (aStart - 90) * Math.PI / 180;
+    const radEnd = (aEnd - 90) * Math.PI / 180;
+
+    const x1 = 100 + 100 * Math.cos(radStart);
+    const y1 = 100 + 100 * Math.sin(radStart);
+    const x2 = 100 + 100 * Math.cos(radEnd);
+    const y2 = 100 + 100 * Math.sin(radEnd);
+
+    const pathData = `M 100 100 L ${x1} ${y1} A 100 100 0 0 1 ${x2} ${y2} Z`;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathData);
+    path.setAttribute('fill', fill);
+    path.setAttribute('stroke', '#ffffff');
+    path.setAttribute('stroke-width', '1.5');
+    svg.appendChild(path);
+
+    // Wedge Text Labels
+    const txtAngle = aStart + angleDeg / 2;
+    const txtRad = (txtAngle - 90) * Math.PI / 180;
+    const tx = 100 + 68 * Math.cos(txtRad);
+    const ty = 100 + 68 * Math.sin(txtRad);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', tx);
+    text.setAttribute('y', ty);
+    text.setAttribute('fill', isCleared ? '#78909c' : '#263238');
+    text.setAttribute('font-size', '7.5');
+    text.setAttribute('font-weight', 'bold');
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('transform', `rotate(${txtAngle}, ${tx}, ${ty})`);
+    text.textContent = item.word;
+    svg.appendChild(text);
+  });
+
+  // Center Pin
+  const center = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  center.setAttribute('cx', '100');
+  center.setAttribute('cy', '100');
+  center.setAttribute('r', '14');
+  center.setAttribute('fill', '#ffffff');
+  center.setAttribute('stroke', '#2b6cb0');
+  center.setAttribute('stroke-width', '3');
+  svg.appendChild(center);
+}
+
+function startGame() {
+  clearedWords = [];
+  score = 0;
+  lives = 3;
+  rotation = 0;
+  busy = false;
+
+  document.getElementById('scoreLabel').textContent = score;
+  updateLivesDisplay();
+  document.getElementById('wheelSvg').style.transform = `rotate(0deg)`;
+  document.getElementById('quizCard').style.visibility = 'hidden';
+  document.getElementById('spinBtn').disabled = false;
+
+  generateWheel();
+  showScreen('gameScreen');
+}
+
+function updateLivesDisplay() {
+  let str = '';
+  for(let i=0; i<3; i++) {
+    str += (i < lives) ? '❤️' : '🖤';
+  }
+  document.getElementById('heartBox').textContent = str;
+}
+
+function spinWheel() {
+  if (busy) return;
+  busy = true;
+  document.getElementById('spinBtn').disabled = true;
+  document.getElementById('quizCard').style.visibility = 'hidden';
+
+  let targetedIndex;
+  // Keep seeking until landing on a valid, uncleared index
+  while (true) {
+    targetedIndex = Math.floor(Math.random() * dataset.length);
+    if (!clearedWords.includes(dataset[targetedIndex].word)) {
+      break;
+    }
+  }
+
+  const targetWedgeAngle = 360 / dataset.length;
+  const targetOffset = 360 - (targetedIndex * targetWedgeAngle + targetWedgeAngle / 2);
+
+  const extraSpins = 3600;
+  rotation += extraSpins + (targetOffset - (rotation % 360));
+
+  const wheelSvg = document.getElementById('wheelSvg');
+  wheelSvg.style.transform = `rotate(${rotation}deg)`;
+
+  setTimeout(() => {
+    prepareQuiz(dataset[targetedIndex]);
+  }, 4100);
+}
+
+function prepareQuiz(item) {
+  currentItem = item;
+  document.getElementById('qText').textContent = item.q;
+  document.getElementById('msgBox').textContent = '';
+
+  const hintBox = document.getElementById('hintBox');
+  hintBox.textContent = '';
+  hintBox.classList.remove('visible');
+
+  const box = document.getElementById('optionsBox');
+  box.innerHTML = '';
+
+  // Dynamic Option Scrambling
+  const randomizedOptions = shuffle([...item.o]);
+  randomizedOptions.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = opt;
+    btn.onclick = () => evaluateAnswer(btn, opt === item.a);
+    box.appendChild(btn);
+  });
+
+  document.getElementById('quizCard').style.visibility = 'visible';
+  document.getElementById('nextBtn').style.display = 'none';
+
+  // Activity Clue Counter
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => {
+    hintBox.textContent = item.h;
+    hintBox.classList.add('visible');
+
+    // Highlight matching button element
+    document.querySelectorAll('.opt-btn').forEach(b => {
+      if(b.textContent === item.a) {
+        b.classList.add('flash-clue');
+      }
+    });
+  }, 10000);
+}
+
+function confettiEffect() {
+  for (let i = 0; i < 25; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = ['#ff4081','#ffeb3b','#00e676','#304ffe','#aa00ff'][Math.floor(Math.random() * 5)];
+    c.style.animationDelay = Math.random() * 0.3 + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 2600);
+  }
+}
+
+function evaluateAnswer(selectedBtn, isCorrect) {
+  clearTimeout(hintTimer);
+  document.getElementById('hintBox').classList.remove('visible');
+
+  document.querySelectorAll('.opt-btn').forEach(b => {
+    b.disabled = true;
+    b.classList.remove('flash-clue');
+    if (b.textContent === currentItem.a) {
+      b.classList.add('correct');
+    }
+  });
+
+  const msg = document.getElementById('msgBox');
+  if (isCorrect) {
+    score++;
+    document.getElementById('scoreLabel').textContent = score;
+    msg.style.color = '#2e7d32';
+    msg.textContent = 'Correct job!';
+    clearedWords.push(currentItem.word);
+    generateWheel();
+    sndRight.currentTime = 0;
+    sndRight.play().catch(() => {});
+    confettiEffect();
+  } else {
+    selectedBtn.classList.add('wrong');
+    msg.style.color = '#c62828';
+    msg.textContent = `Oops! The correct answer was: ${currentItem.a}`;
+    lives--;
+    updateLivesDisplay();
+    sndWrong.currentTime = 0;
+    sndWrong.play().catch(() => {});
+  }
+
+  document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function advanceStep() {
+  if (lives <= 0) {
+    concludeGame(false);
+    return;
+  }
+  if (clearedWords.length >= dataset.length) {
+    concludeGame(true);
+    return;
+  }
+
+  document.getElementById('quizCard').style.visibility = 'hidden';
+  document.getElementById('spinBtn').disabled = false;
+  busy = false;
+}
+
+function concludeGame(isWin) {
+  showScreen('endScreen');
+  document.getElementById('endScore').textContent = score;
+
+  const title = document.getElementById('endTitle');
+  if (lives <= 0) {
+    title.textContent = 'Game Over! Try Again! 💔';
+    title.style.color = '#c62828';
+  } else if (score === 10) {
+    title.textContent = 'Perfect score! Silent Letter Star! 🏆';
+    title.style.color = '#2b4c8c';
+    confettiEffect();
+  } else {
+    title.textContent = 'Wonderful Effort! 🌟';
+    title.style.color = '#2b6cb0';
+    confettiEffect();
+  }
+}
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    showScreen('startScreen');
+  }, 5000);
+});
+</script>
+</body>
+</html>
