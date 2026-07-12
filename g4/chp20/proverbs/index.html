@@ -1,1 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+    <title>Proverbs Brick Breaker Extreme</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            background: #0a0a16;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* Landscape constraint container */
+        #game-wrapper {
+            position: relative;
+            width: 1000px;
+            height: 500px;
+            background: #0d0d26;
+            box-shadow: 0 0 40px rgba(0, 242, 254, 0.3), inset 0 0 20px rgba(0, 0, 0, 0.6);
+            border: 4px solid #1f1f4d;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        /* UI Screens */
+        .overlay-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(10, 10, 22, 0.95);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .hidden {
+            display: none !important;
+            opacity: 0;
+            pointer-events: none;
+        }
+        /* Splash Screen */
+        #logo-container {
+            max-width: 200px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.6));
+        }
+        #logo-container img {
+            width: 100%;
+            height: auto;
+        }
+        .glitch-title {
+            font-size: 42px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #00f2fe;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.8), 0 0 20px rgba(0, 242, 254, 0.4);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .btn-premium {
+            padding: 14px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #fff;
+            background: linear-gradient(45deg, #00f2fe, #4facfe);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 242, 254, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-premium:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 242, 254, 0.6);
+        }
+        /* Quiz Window Overlay */
+        #quiz-box {
+            width: 85%;
+            max-width: 750px;
+            background: linear-gradient(135deg, #1e1e3f 0%, #0f0f26 100%);
+            border: 3px solid #ff007f;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 0 35px rgba(255, 0, 127, 0.4);
+            animation: borderPulse 2s infinite alternate;
+        }
+        @keyframes borderPulse {
+            0% { border-color: #ff007f; box-shadow: 0 0 20px rgba(255, 0, 127, 0.3); }
+            100% { border-color: #00f2fe; box-shadow: 0 0 35px rgba(0, 242, 254, 0.5); }
+        }
+        #quiz-header {
+            display: flex;
+            justify-content: space-between;
+            color: #ff007f;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        #question-text {
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 25px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .option-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid #3d3d75;
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: #e0e0ff;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover {
+            background: rgba(0, 242, 254, 0.1);
+            border-color: #00f2fe;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        /* Feedback Screen Animations */
+        #feedback-text {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        .text-correct {
+            color: #00ffcc;
+            text-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
+        }
+        .text-wrong {
+            color: #ff3366;
+            text-shadow: 0 0 20px rgba(255, 51, 102, 0.6);
+        }
+        #feedback-desc {
+            font-size: 18px;
+            color: #b0b0d0;
+            text-align: center;
+            max-width: 500px;
+            line-height: 1.5;
+        }
+        /* Top Dashboard Info Bar */
+        #dashboard {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to bottom, rgba(13,13,38,0.9), rgba(13,13,38,0));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .dash-item {
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .dash-item span {
+            color: #00f2fe;
+            text-shadow: 0 0 8px rgba(0,242,254,0.5);
+        }
+        #status-alert {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            border: 1px solid #ff007f;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 1px;
+            z-index: 4;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
 
+    <div id="game-wrapper">
+        <!-- Live Dashboard Data -->
+        <div id="dashboard">
+            <div class="dash-item">Score: <span id="score-val">0000</span></div>
+            <div class="dash-item" style="color: #ff007f;" id="mode-display">Mode: <span>Normal</span></div>
+            <div class="dash-item">Question: <span id="q-counter">1/15</span></div>
+        </div>
+
+        <div id="status-alert" class="hidden">Laser Active! Click to shoot!</div>
+
+        <!-- Canvas Game Engine Rendering View -->
+        <canvas id="gameCanvas" width="1000" height="500"></canvas>
+
+        <!-- Screen 1: Splash Screen -->
+        <div id="screen-splash" class="overlay-screen">
+            <div id="logo-container">
+                <img src="g4/chp20/proverbs/assets/logo.png" alt="Logo" onerror="this.style.display='none'">
+            </div>
+            <h1 class="glitch-title">Proverbs<br><span style="color:#ff007f;">Brick Breaker</span></h1>
+            <button class="btn-premium" onclick="startGame()">Launch Game</button>
+        </div>
+
+        <!-- Screen 2: Interactive Quiz Overlay -->
+        <div id="screen-quiz" class="overlay-screen hidden">
+            <div id="quiz-box">
+                <div id="quiz-header">
+                    <span id="quiz-category">Proverb Challenge</span>
+                    <span id="quiz-timer">Think Fast!</span>
+                </div>
+                <div id="question-text">Loading question data...</div>
+                <div class="options-grid" id="options-container">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Instant Feedback Reveal -->
+        <div id="screen-feedback" class="overlay-screen hidden">
+            <h2 id="feedback-text">CORRECT!</h2>
+            <p id="feedback-desc">Power Up Activated.</p>
+        </div>
+
+        <!-- Screen 4: Game Over / Win Summary -->
+        <div id="screen-over" class="overlay-screen hidden">
+            <h1 class="glitch-title" id="over-title" style="color:#ff007f;">Game Over</h1>
+            <p id="over-desc" style="font-size: 18px; color:#b0b0d0; margin-bottom: 30px; text-align:center;">You smashed the blocks successfully!</p>
+            <button class="btn-premium" onclick="resetToSplash()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Assets Configuration paths
+        const ASSET_PATH = 'g4/chp20/proverbs/assets/';
+        const audioCorrect = new Audio(ASSET_PATH + 'correct.mp3');
+        const audioWrong = new Audio(ASSET_PATH + 'wrong.mp3');
+        const audioWin = new Audio(ASSET_PATH + 'freesound_community-claps-44774.mp3');
+
+        // Question Data Pool
+        const questions = [
+            { q: "\"Don't count your chickens before they...\"", o: ["fly away", "hatch", "wake up", "run"], a: 1, type: "fill" },
+            { q: "\"The early bird catches the...\"", o: ["worm", "bug", "fish", "seed"], a: 0, type: "fill" },
+            { q: "\"A stitch in time saves...\"", o: ["ten", "five", "nine", "two"], a: 2, type: "fill" },
+            { q: "\"Actions speak louder than...\"", o: ["shouting", "words", "thoughts", "books"], a: 1, type: "fill" },
+            { q: "\"Don't judge a book by its...\"", o: ["pages", "title", "cover", "price"], a: 2, type: "fill" },
+            { q: "\"Look before you...\"", o: ["run", "leap", "sleep", "speak"], a: 1, type: "fill" },
+            { q: "\"Two wrongs don't make a...\"", o: ["right", "mistake", "mess", "friend"], a: 0, type: "fill" },
+            { q: "\"People who live in glass houses shouldn't throw...\"", o: ["balls", "stones", "water", "pillows"], a: 1, type: "fill" },
+            { q: "Leo is upset because his drawing isn't perfect, but his teacher says, \"Keep trying! Practice makes...\"", o: ["easy", "shiny", "perfect", "fast"], a: 2, type: "scenario" },
+            { q: "Maya was terrified of moving to a new school, but she ended up making five new best friends on her very first day. Which proverb fits her story?", o: ["Every cloud has a silver lining", "A penny saved is a penny earned", "Better safe than sorry", "Honesty is the best policy"], a: 0, type: "scenario" },
+            { q: "Sam promised to clean his room but spent the whole day playing video games instead. His mom said, \"Your actions speak louder than words.\" What did she mean?", o: ["Sam talks too quietly.", "What you actually do matters more than what you say.", "Video games are too loud.", "Cleaning should be done silently."], a: 1, type: "scenario" },
+            { q: "Liam fixed a tiny loose thread on his backpack before it could rip completely open. Which proverb describes what he did?", o: ["The squeaky wheel gets the grease", "A stitch in time saves nine", "Good things come to those who wait", "Cleanliness is next to godliness"], a: 1, type: "scenario" },
+            { q: "Jake told his brother a small lie about who ate the last cookie, but he felt so guilty that he finally confessed. His brother said, \"I'm glad you told the truth. Honesty is the...\"", o: ["hardest choice", "best policy", "only way", "smartest trick"], a: 1, type: "scenario" },
+            { q: "Sarah was so angry that Chloe broke her toy by accident that she wanted to break Chloe's toy on purpose. Her dad stopped her and said, \"Two wrongs don't make a right.\" What did he mean?", o: ["Doing something bad back to someone doesn't fix the problem.", "Math questions can have two wrong answers.", "You should break two toys instead of one.", "Always say sorry immediately."], a: 0, type: "scenario" },
+            { q: "Mia wanted to quit the soccer team because they lost their first game, but her coach said, \"Rome wasn't built in a day!\" What did the coach mean?", o: ["Soccer was invented in Rome.", "Great things take time, patience, and hard work.", "You should only play sports in the summer.", "Losing games is fun."], a: 1, type: "scenario" }
+        ];
+
+        // Core Game Engine State variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let gameActive = false;
+        let canvas, ctx;
+        
+        // Physics Objects configurations
+        let ball, paddle, bricks = [], particles = [], lasers = [];
+        let activePowerup = null; // 'laser' or 'penalty'
+        let powerupTimer = 0;
+
+        const PADDLE_HEIGHT = 16;
+        const BALL_RADIUS = 9;
+        
+        // Input Handling State tracker
+        let mouseX = 500;
+
+        function initEngine() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+
+            // Set event listeners for tracking input across devices
+            window.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                mouseX = (e.clientX - rect.left) * scaleX;
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                if(e.touches.length > 0) {
+                    const rect = canvas.getBoundingClientRect();
+                    const scaleX = canvas.width / rect.width;
+                    mouseX = (e.touches[0].clientX - rect.left) * scaleX;
+                }
+            });
+
+            window.addEventListener('click', () => {
+                if (gameActive && activePowerup === 'laser') {
+                    // Fire extravagant double laser beams!
+                    lasers.push({ x: paddle.x + 10, y: paddle.y - 5 });
+                    lasers.push({ x: paddle.x + paddle.width - 10, y: paddle.y - 5 });
+                }
+            });
+        }
+
+        function startGame() {
+            document.getElementById('screen-splash').classList.add('hidden');
+            score = 0;
+            currentQuestionIndex = 0;
+            document.getElementById('score-val').innerText = "0000";
+            initLevelLayout();
+            triggerQuizWindow();
+            animateEngineLoop();
+        }
+
+        function initLevelLayout() {
+            // Re-instantiate game objects cleanly
+            paddle = {
+                x: 425,
+                y: 450,
+                width: 150,
+                height: PADDLE_HEIGHT,
+                speed: 12
+            };
+
+            ball = {
+                x: 500,
+                y: 430,
+                vx: (Math.random() * 4 - 2) * 2,
+                vy: -5,
+                speedMultiplier: 1
+            };
+
+            bricks = [];
+            particles = [];
+            lasers = [];
+            activePowerup = null;
+            powerupTimer = 0;
+            updateDashboardLayout();
+
+            // Populate an grid of glowing futuristic bricks
+            const rows = 4;
+            const cols = 9;
+            const bWidth = 90;
+            const bHeight = 24;
+            const padding = 14;
+            const startX = 40;
+            const startY = 70;
+
+            const hues = [330, 280, 190, 45]; // Beautiful premium palette layout
+            for(let r = 0; r < rows; r++) {
+                for(let c = 0; c < cols; c++) {
+                    bricks.push({
+                        x: startX + c * (bWidth + padding),
+                        y: startY + r * (bHeight + padding),
+                        width: bWidth,
+                        height: bHeight,
+                        hue: hues[r],
+                        alive: true
+                    });
+                }
+            }
+        }
+
+        function triggerQuizWindow() {
+            gameActive = false;
+            if (currentQuestionIndex >= questions.length) {
+                endGame(true);
+                return;
+            }
+            
+            document.getElementById('q-counter').innerText = `${currentQuestionIndex + 1}/${questions.length}`;
+            const currentQ = questions[currentQuestionIndex];
+            
+            document.getElementById('question-text').innerText = currentQ.q;
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            currentQ.o.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = `${String.fromCharCode(65 + idx)}) ${opt}`;
+                btn.onclick = () => handleAnswerSubmission(idx);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('screen-quiz').classList.remove('hidden');
+        }
+
+        function handleAnswerSubmission(chosenIdx) {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            const currentQ = questions[currentQuestionIndex];
+            const isCorrect = (chosenIdx === currentQ.a);
+            
+            const feedbackScreen = document.getElementById('screen-feedback');
+            const fbTitle = document.getElementById('feedback-text');
+            const fbDesc = document.getElementById('feedback-desc');
+
+            if (isCorrect) {
+                audioCorrect.play().catch(()=>{});
+                score += 200;
+                fbTitle.innerText = "CORRECT!";
+                fbTitle.className = "text-correct";
+                fbDesc.innerText = "🔥 POWERUP ACTIVATED: GOLDEN LASER PADDLE! Click/tap screen to blast bricks!";
+                
+                // Trigger Extravagant Buff Status
+                activePowerup = 'laser';
+                powerupTimer = 450; // generous action frame duration
+                paddle.width = 240; // Expand size dramatically
+                ball.speedMultiplier = 0.9; // steady pace control
+            } else {
+                audioWrong.play().catch(()=>{});
+                fbTitle.innerText = "INCORRECT";
+                fbTitle.className = "text-wrong";
+                fbDesc.innerText = "⚠️ DANGER: Paddle shrunk and ball speed accelerated! Keep it alive!";
+                
+                // Trigger Penalty Status
+                activePowerup = 'penalty';
+                powerupTimer = 300;
+                paddle.width = 80; // Shrunk size
+                ball.speedMultiplier = 1.4; // Fast speed
+            }
+
+            document.getElementById('score-val').innerText = String(score).padStart(4, '0');
+            updateDashboardLayout();
+            feedbackScreen.classList.remove('hidden');
+
+            setTimeout(() => {
+                feedbackScreen.classList.add('hidden');
+                // Center ball back securely onto the paddle platform safely to begin phase action
+                ball.x = paddle.x + (paddle.width / 2);
+                ball.y = paddle.y - 20;
+                ball.vy = -5.5;
+                ball.vx = (Math.random() * 4 - 2);
+                gameActive = true;
+            }, 3000);
+        }
+
+        function updateDashboardLayout() {
+            const modeSpan = document.querySelector('#mode-display span');
+            if (activePowerup === 'laser') {
+                modeSpan.innerText = "⚡ GOLDEN LASER";
+                modeSpan.style.color = "#00f2fe";
+                document.getElementById('status-alert').classList.remove('hidden');
+            } else if (activePowerup === 'penalty') {
+                modeSpan.innerText = "🚨 DANGER MODE";
+                modeSpan.style.color = "#ff3366";
+                document.getElementById('status-alert').classList.add('hidden');
+            } else {
+                modeSpan.innerText = "NORMAL";
+                modeSpan.style.color = "#fff";
+                document.getElementById('status-alert').classList.add('hidden');
+            }
+        }
+
+        function spawnParticles(x, y, hue) {
+            for(let i=0; i<12; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    radius: Math.random() * 3 + 2,
+                    alpha: 1,
+                    decay: Math.random() * 0.03 + 0.02,
+                    hue: hue
+                });
+            }
+        }
+
+        function processPhysicsEngines() {
+            if (!gameActive) return;
+
+            // Handle powerup timeline loops
+            if (powerupTimer > 0) {
+                powerupTimer--;
+                if (powerupTimer <= 0) {
+                    activePowerup = null;
+                    paddle.width = 150;
+                    ball.speedMultiplier = 1.0;
+                    updateDashboardLayout();
+                }
+            }
+
+            // Paddle tracking logic mapping smooth bounds
+            let targetX = mouseX - (paddle.width / 2);
+            paddle.x += (targetX - paddle.x) * 0.25; // Interpolate movement safely
+            if (paddle.x < 0) paddle.x = 0;
+            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+
+            // Ball physics loop engine calculations
+            ball.x += ball.vx * ball.speedMultiplier;
+            ball.y += ball.vy * ball.speedMultiplier;
+
+            // Wall Collisions
+            if (ball.x - BALL_RADIUS < 0) { ball.x = BALL_RADIUS; ball.vx *= -1; }
+            if (ball.x + BALL_RADIUS > canvas.width) { ball.x = canvas.width - BALL_RADIUS; ball.vx *= -1; }
+            if (ball.y - BALL_RADIUS < 40) { ball.y = BALL_RADIUS + 40; ball.vy *= -1; } // Dashboard cushion buffer
+
+            // Bottom Drop Loss Check
+            if (ball.y + BALL_RADIUS > canvas.height) {
+                currentQuestionIndex++;
+                triggerQuizWindow();
+                return;
+            }
+
+            // Paddle Interaction calculations
+            if (ball.y + BALL_RADIUS >= paddle.y && ball.y - BALL_RADIUS <= paddle.y + paddle.height) {
+                if (ball.x >= paddle.x && ball.x <= paddle.x + paddle.width) {
+                    ball.vy = -Math.abs(ball.vy);
+                    // Dynamically map hit angle impact reflections
+                    let hitPoint = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
+                    ball.vx = hitPoint * 6;
+                }
+            }
+
+            // Lasers Engine processing
+            for (let i = lasers.length - 1; i >= 0; i--) {
+                lasers[i].y -= 8;
+                if (lasers[i].y < 40) {
+                    lasers.splice(i, 1);
+                    continue;
+                }
+
+                // Laser hitting a brick
+                for (let j = 0; j < bricks.length; j++) {
+                    let b = bricks[j];
+                    if (b.alive && lasers[i] &&
+                        lasers[i].x >= b.x && lasers[i].x <= b.x + b.width &&
+                        lasers[i].y >= b.y && lasers[i].y <= b.y + b.height) {
+                        
+                        b.alive = false;
+                        score += 50;
+                        document.getElementById('score-val').innerText = String(score).padStart(4, '0');
+                        spawnParticles(b.x + b.width/2, b.y + b.height/2, b.hue);
+                        lasers.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+
+            // Brick bounce collisions tracking loop
+            let activeBricksLeft = false;
+            for (let i = 0; i < bricks.length; i++) {
+                let b = bricks[i];
+                if (!b.alive) continue;
+                activeBricksLeft = true;
+
+                // Simple high precision box checks
+                if (ball.x + BALL_RADIUS > b.x && ball.x - BALL_RADIUS < b.x + b.width &&
+                    ball.y + BALL_RADIUS > b.y && ball.y - BALL_RADIUS < b.y + b.height) {
+                    
+                    b.alive = false;
+                    score += 100;
+                    document.getElementById('score-val').innerText = String(score).padStart(4, '0');
+                    spawnParticles(b.x + b.width/2, b.y + b.height/2, b.hue);
+                    ball.vy *= -1;
+                    break;
+                }
+            }
+
+            // Next question trigger or clear validation checker
+            if (!activeBricksLeft) {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    initLevelLayout();
+                    triggerQuizWindow();
+                } else {
+                    endGame(true);
+                }
+            }
+
+            // Particle engine decay array tracking
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+                if (p.alpha <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function renderGraphicsView() {
+            // Draw luxury backdrop layers cleanly
+            ctx.fillStyle = '#0d0d26';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Tech line grids styling
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 40) {
+                ctx.beginPath(); ctx.moveTo(i, 40); ctx.lineTo(i, canvas.height); ctx.stroke();
+            }
+
+            // Render Bricks safely with bright neon strokes
+            bricks.forEach(b => {
+                if (!b.alive) return;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = `hsla(${b.hue}, 100%, 60%, 0.6)`;
+                ctx.fillStyle = `hsla(${b.hue}, 90%, 45%, 0.8)`;
+                ctx.strokeStyle = `hsla(${b.hue}, 100%, 75%, 1)`;
+                ctx.lineWidth = 2;
+
+                // Draw rounded look bricks directly
+                ctx.beginPath();
+                ctx.roundRect(b.x, b.y, b.width, b.height, 6);
+                ctx.fill();
+                ctx.stroke();
+            });
+
+            // Draw active Lasers projectings
+            ctx.shadowBlur = 8;
+            ctx.strokeStyle = '#ff007f';
+            ctx.lineWidth = 4;
+            lasers.forEach(l => {
+                ctx.beginPath();
+                ctx.moveTo(l.x, l.y);
+                ctx.lineTo(l.x, l.y - 15);
+                ctx.stroke();
+            });
+
+            // Draw Extravagant Paddle base
+            ctx.shadowBlur = 15;
+            if (activePowerup === 'laser') {
+                ctx.shadowColor = '#00f2fe';
+                ctx.fillStyle = 'linear-gradient(90deg, #00f2fe, #4facfe)';
+                // Make a stylized tech bar paddle design mapping glow elements
+                ctx.fillStyle = '#00f2fe';
+            } else if (activePowerup === 'penalty') {
+                ctx.shadowColor = '#ff3366';
+                ctx.fillStyle = '#ff3366';
+            } else {
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+                ctx.fillStyle = '#ffffff';
+            }
+
+            ctx.beginPath();
+            ctx.roundRect(paddle.x, paddle.y, paddle.width, paddle.height, 8);
+            ctx.fill();
+
+            // Draw glowing Neon Core Energy Ball cleanly
+            ctx.shadowBlur = 14;
+            ctx.shadowColor = activePowerup === 'laser' ? '#00f2fe' : '#ff007f';
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Clear configuration states context parameters safely back to prevent rendering artifacts leakages
+            ctx.shadowBlur = 0;
+
+            // Render explosive breaking visual fragments components
+            particles.forEach(p => {
+                ctx.fillStyle = `hsla(${p.hue}, 100%, 60%, ${p.alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function animateEngineLoop() {
+            processPhysicsEngines();
+            renderGraphicsView();
+            requestAnimationFrame(animateEngineLoop);
+        }
+
+        function endGame(isWin) {
+            gameActive = false;
+            document.getElementById('screen-over').classList.remove('hidden');
+            const title = document.getElementById('over-title');
+            const desc = document.getElementById('over-desc');
+
+            if(isWin) {
+                audioWin.play().catch(()=>{});
+                title.innerText = "VICTORY!";
+                title.style.color = "#00ffcc";
+                desc.innerText = `Sensational job! You mastered the proverbs and finished with an extravagant score of ${score} points!`;
+            } else {
+                title.innerText = "GAME OVER";
+                title.style.color = "#ff3366";
+                desc.innerText = `Good try! You completed questions with a total final score of ${score}. Try again to break all records!`;
+            }
+        }
+
+        function resetToSplash() {
+            document.getElementById('screen-over').classList.add('hidden');
+            document.getElementById('screen-splash').classList.remove('hidden');
+        }
+
+        // Boot system up instantly upon load parsing frames completed safely
+        window.onload = initEngine;
+    </script>
+</body>
+</html>
