@@ -1,1 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Synonym Sprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky1:#ff9d6c;
+  --sky2:#ff6b9d;
+  --sky3:#6a5acd;
+  --ground:#2e2350;
+  --track:#3d2f66;
+  --lane-line:rgba(255,255,255,0.18);
+  --gold:#ffd23f;
+  --green:#3fd6a8;
+  --red:#ff5d5d;
+  --ink:#241a3a;
+  --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Nunito',Arial,sans-serif;background:var(--ground);color:var(--ink);overflow-x:hidden;user-select:none}
+.screen{display:none;min-height:100vh;padding:16px;position:relative}
+.active{display:flex;flex-direction:column;align-items:center}
 
+/* SPLASH */
+#splashScreen{
+  background:#fff;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+}
+#splashScreen.active{display:flex}
+#splashScreen img{
+  width:45%;
+  max-width:380px;
+  min-width:160px;
+  height:auto;
+  object-fit:contain;
+}
+
+.game-container{
+  max-width:860px;
+  width:100%;
+  margin:0 auto;
+  position:relative;
+  background:linear-gradient(180deg, var(--sky3) 0%, var(--sky2) 55%, var(--sky1) 100%);
+  border-radius:32px;
+  padding:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.45);
+  min-height:92vh;
+  overflow:hidden;
+}
+.game-container > *{position:relative;z-index:2}
+
+/* parallax scenery */
+.sun{
+  position:absolute;top:6%;left:8%;width:80px;height:80px;border-radius:50%;
+  background:radial-gradient(circle, #fff6c9 0%, var(--gold) 70%, rgba(255,210,63,0) 100%);
+  box-shadow:0 0 50px 14px rgba(255,210,63,0.45);
+  z-index:0;pointer-events:none;
+}
+.mountains{
+  position:absolute;left:0;right:0;bottom:120px;height:140px;z-index:0;pointer-events:none;
+  background:
+    linear-gradient(135deg, transparent 49%, #7a5fc9 50%) 0 0/60px 140px repeat-x,
+    linear-gradient(45deg, transparent 49%, #6a4fb8 50%) 30px 0/60px 140px repeat-x;
+  opacity:0.55;
+  animation:scrollBack 18s linear infinite;
+}
+@keyframes scrollBack{from{background-position:0 0, 30px 0}to{background-position:-600px 0, -570px 0}}
+
+h1{font-family:'Baloo 2',sans-serif;font-size:clamp(26px,5vw,44px);color:#fff;margin:6px 0;text-align:center;text-shadow:0 3px 0 rgba(0,0,0,0.2);letter-spacing:0.5px}
+.subtitle{font-size:16px;text-align:center;max-width:500px;line-height:1.5;color:#fff0e8;margin-bottom:6px;font-weight:600}
+
+button.primary-btn{border:none;border-radius:18px;padding:14px 30px;margin:8px;font-family:'Baloo 2',sans-serif;font-size:20px;cursor:pointer;background:var(--gold);box-shadow:0 5px 0 #c99416;font-weight:700;color:#4a2e00;transition:transform 0.1s}
+button.primary-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #c99416}
+
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(255,255,255,0.95);padding:10px 16px;border-radius:20px;margin-bottom:10px;width:100%}
+.badge{padding:8px 12px;border-radius:12px;font-weight:700;font-size:16px;background:#fff7e0;box-shadow:0 2px 5px rgba(0,0,0,0.08);font-family:'Baloo 2',sans-serif;white-space:nowrap}
+.energy-wrap{flex:1;display:flex;align-items:center;gap:8px}
+.energy-label{font-family:'Baloo 2',sans-serif;font-size:14px;font-weight:700;color:#7a4a00}
+.energy-bar-bg{flex:1;height:18px;background:#e9dfc9;border-radius:10px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.15)}
+.energy-bar-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--green),#7be8c9);border-radius:10px;transition:width 0.15s linear, background 0.3s}
+
+.sentence-card{background:rgba(255,255,255,0.97);border-radius:20px;padding:14px 18px;width:100%;max-width:640px;box-shadow:0 6px 16px rgba(0,0,0,0.18);text-align:center;margin-bottom:10px}
+.sentence-text{font-family:'Baloo 2',sans-serif;font-size:clamp(16px,2.6vw,21px);font-weight:700;color:var(--ink);line-height:1.5}
+.msg-banner{min-height:26px;font-size:17px;font-weight:700;margin-top:4px;font-family:'Baloo 2',sans-serif}
+
+/* TRACK */
+.track-wrap{
+  position:relative;
+  width:100%;
+  max-width:700px;
+  background:var(--track);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:inset 0 4px 14px rgba(0,0,0,0.35), 0 6px 16px rgba(0,0,0,0.25);
+  padding:6px 0;
+}
+.finish-line{
+  position:absolute;
+  left:11%;
+  top:0;
+  bottom:0;
+  width:3px;
+  background:repeating-linear-gradient(180deg,#fff 0 10px, transparent 10px 20px);
+  z-index:3;
+  opacity:0.8;
+}
+.mascot{
+  position:absolute;
+  left:4%;
+  font-size:34px;
+  z-index:4;
+  transform:translateY(-50%);
+  transition:transform 0.15s;
+  filter:drop-shadow(0 4px 4px rgba(0,0,0,0.4));
+}
+.mascot.leap{animation:leap 0.4s ease-out}
+.mascot.stumble{animation:stumble 0.4s ease-out}
+@keyframes leap{0%{transform:translateY(-50%) scale(1)}40%{transform:translateY(-90%) scale(1.15)}100%{transform:translateY(-50%) scale(1)}}
+@keyframes stumble{0%{transform:translateY(-50%) rotate(0)}30%{transform:translateY(-40%) rotate(-12deg)}60%{transform:translateY(-50%) rotate(8deg)}100%{transform:translateY(-50%) rotate(0)}}
+
+.lane{
+  position:relative;
+  height:64px;
+  border-bottom:2px dashed var(--lane-line);
+}
+.lane:last-child{border-bottom:none}
+
+.token{
+  position:absolute;
+  top:50%;
+  transform:translate(0,-50%);
+  background:linear-gradient(180deg,#ffffff,#f1ecff);
+  border:3px solid #c9b8ff;
+  border-radius:16px;
+  padding:8px 16px;
+  font-family:'Baloo 2',sans-serif;
+  font-weight:700;
+  font-size:16px;
+  color:var(--ink);
+  white-space:nowrap;
+  cursor:pointer;
+  box-shadow:0 4px 0 #a893e0, 0 4px 10px rgba(0,0,0,0.25);
+  z-index:2;
+}
+.token:active{transform:translate(0,-46%)}
+.token.caught-correct{animation:caughtGood 0.35s forwards}
+.token.caught-wrong{animation:caughtBad 0.35s forwards}
+@keyframes caughtGood{to{transform:translate(-40px,-50%) scale(0.2);opacity:0}}
+@keyframes caughtBad{to{transform:translate(-10px,-50%) scale(0.3) rotate(-20deg);opacity:0}}
+
+.spark{position:absolute;border-radius:50%;background:var(--gold);pointer-events:none;animation:sparkFly 0.7s ease-out forwards;z-index:5}
+@keyframes sparkFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0.2);opacity:0}}
+
+.distance-toast{
+  position:absolute;
+  font-family:'Baloo 2',sans-serif;
+  font-weight:700;
+  font-size:15px;
+  color:var(--gold);
+  text-shadow:0 2px 3px rgba(0,0,0,0.4);
+  pointer-events:none;
+  animation:toastUp 0.9s ease-out forwards;
+  z-index:6;
+}
+@keyframes toastUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-40px);opacity:0}}
+
+.confetti{position:fixed;top:-20px;width:12px;height:12px;pointer-events:none;animation:fall 2.5s linear forwards;z-index:999}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<div id="splashScreen" class="screen active">
+  <img src="assets/logo.png" alt="Logo">
+</div>
+
+<div id="startScreen" class="screen">
+  <div class="game-container" style="display:flex;flex-direction:column;justify-content:center;align-items:center">
+    <div class="sun"></div>
+    <h1>Synonym Sprint</h1>
+    <p class="subtitle">Read the sentence, then tap the word racing toward the finish line that fits best — before it gets away! Keep your energy up to keep sprinting.</p>
+    <button class="primary-btn" onclick="startGame()">▶ Start Sprint</button>
+  </div>
+</div>
+
+<div id="gameScreen" class="screen">
+  <div class="game-container">
+    <div class="sun"></div>
+    <div class="mountains"></div>
+
+    <div class="topbar">
+      <div class="badge">🏁 <span id="distLabel">0</span>m</div>
+      <div class="energy-wrap">
+        <span class="energy-label">⚡</span>
+        <div class="energy-bar-bg"><div class="energy-bar-fill" id="energyFill"></div></div>
+      </div>
+    </div>
+
+    <div class="sentence-card">
+      <div class="sentence-text" id="qText">Sentence appears here...</div>
+      <div class="msg-banner" id="msgBox"></div>
+    </div>
+
+    <div class="track-wrap" id="trackWrap">
+      <div class="finish-line"></div>
+      <div class="mascot" id="mascot" style="top:0">🦊</div>
+    </div>
+  </div>
+</div>
+
+<div id="endScreen" class="screen">
+  <div class="game-container" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+    <div class="sun"></div>
+    <h1 id="endTitle">Sprint Over!</h1>
+    <h2 style="font-family:'Baloo 2',sans-serif;font-size:26px;color:#fff">Distance: <span id="endScore">0</span>m</h2>
+    <h3 style="font-family:'Baloo 2',sans-serif;font-size:18px;color:#fff0e8;font-weight:500">Correct catches: <span id="endCatches">0</span></h3>
+    <button class="primary-btn" onclick="startGame()">🔄 Sprint Again</button>
+  </div>
+</div>
+
+<audio id="sndRight" preload="auto" src="assets/correct.mp3"></audio>
+<audio id="sndWrong" preload="auto" src="assets/wrong.mp3"></audio>
+
+<script>
+const dataset = [
+  { sentence: 'After the marathon, the runners were completely ___.', o: ['drained', 'tired', 'busy', 'pleased'], a: 'drained' },
+  { sentence: 'The old mansion looked ___ under the stormy sky.', o: ['pretty', 'different', 'sinister', 'loud'], a: 'sinister' },
+  { sentence: 'She felt ___ when she finally solved the hardest puzzle.', o: ['okay', 'triumphant', 'glad', 'annoyed'], a: 'triumphant' },
+  { sentence: 'The detective grew ___ of the stranger\u2019s odd behavior.', o: ['curious', 'worried', 'tired', 'suspicious'], a: 'suspicious' },
+  { sentence: 'The crowd turned ___ when the show was cancelled without warning.', o: ['furious', 'upset', 'sad', 'quiet'], a: 'furious' },
+  { sentence: 'The ancient bridge looked ___ against the golden sunset.', o: ['tall', 'majestic', 'nice', 'big'], a: 'majestic' },
+  { sentence: 'The lost puppy seemed ___ during the thunderstorm.', o: ['nervous', 'shy', 'terrified', 'tired'], a: 'terrified' },
+  { sentence: 'His new invention left the scientists ___.', o: ['surprised', 'busy', 'pleased', 'astonished'], a: 'astonished' },
+  { sentence: 'The tired hikers finally reached the ___ mountain peak.', o: ['rocky', 'tall', 'towering', 'steep'], a: 'towering' },
+  { sentence: 'Her handwriting was so ___ that no one could read it.', o: ['messy', 'illegible', 'quick', 'small'], a: 'illegible' },
+  { sentence: 'The champion swimmer felt ___ after breaking the record.', o: ['fine', 'calm', 'elated', 'happy'], a: 'elated' },
+  { sentence: 'The abandoned factory gave off a ___ feeling.', o: ['busy', 'eerie', 'strange', 'plain'], a: 'eerie' }
+];
+
+const sndRight = document.getElementById('sndRight');
+const sndWrong = document.getElementById('sndWrong');
+
+let order = [];
+let orderIdx = 0;
+let energy = 100;
+let distance = 0;
+let correctCatches = 0;
+let running = false;
+let lastFrameTime = null;
+let elapsed = 0;
+let roundActive = false;
+let currentTokens = []; // {el, x, correct, lane}
+const LANE_COUNT = 4;
+const RUNNER_X = 11; // percent, matches finish-line position
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function shuffle(array) {
+  const a = [...array];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildLanes() {
+  const track = document.getElementById('trackWrap');
+  track.querySelectorAll('.lane').forEach(l => l.remove());
+  for (let i = 0; i < LANE_COUNT; i++) {
+    const lane = document.createElement('div');
+    lane.className = 'lane';
+    lane.dataset.lane = i;
+    track.appendChild(lane);
+  }
+  // position mascot vertically centered across whole track
+  const mascot = document.getElementById('mascot');
+  mascot.style.top = '50%';
+}
+
+function currentSpeedPercentPerSec() {
+  // ramps from ~9%/s up to ~22%/s over 60s of survival, then caps
+  const t = Math.min(elapsed, 60);
+  return 9 + (t / 60) * 13;
+}
+
+function currentDrainPerSec() {
+  const t = Math.min(elapsed, 60);
+  return 2 + (t / 60) * 3;
+}
+
+function startGame() {
+  energy = 100;
+  distance = 0;
+  correctCatches = 0;
+  elapsed = 0;
+  orderIdx = 0;
+  order = shuffle(dataset.map((_, i) => i));
+  running = true;
+  roundActive = false;
+  lastFrameTime = null;
+
+  document.getElementById('distLabel').textContent = '0';
+  updateEnergyBar();
+  buildLanes();
+  showScreen('gameScreen');
+
+  spawnRound();
+  requestAnimationFrame(gameLoop);
+}
+
+function updateEnergyBar() {
+  const fill = document.getElementById('energyFill');
+  fill.style.width = Math.max(0, energy) + '%';
+  if (energy > 55) {
+    fill.style.background = 'linear-gradient(90deg,var(--green),#7be8c9)';
+  } else if (energy > 25) {
+    fill.style.background = 'linear-gradient(90deg,var(--gold),#ffe58a)';
+  } else {
+    fill.style.background = 'linear-gradient(90deg,var(--red),#ff9a8a)';
+  }
+}
+
+function nextDataIndex() {
+  if (orderIdx >= order.length) {
+    order = shuffle(dataset.map((_, i) => i));
+    orderIdx = 0;
+  }
+  return order[orderIdx++];
+}
+
+function spawnRound() {
+  const track = document.getElementById('trackWrap');
+  const item = dataset[nextDataIndex()];
+  document.getElementById('qText').textContent = item.sentence;
+  document.getElementById('msgBox').textContent = '';
+
+  const lanes = shuffle([0, 1, 2, 3]);
+  const options = item.o;
+  currentTokens = [];
+
+  options.forEach((word, i) => {
+    const laneIndex = lanes[i];
+    const laneEl = track.querySelectorAll('.lane')[laneIndex];
+    const tok = document.createElement('div');
+    tok.className = 'token';
+    tok.textContent = word;
+    tok.style.left = '100%';
+    laneEl.appendChild(tok);
+
+    const tokenObj = { el: tok, x: 100, correct: (word === item.a), lane: laneIndex, done: false };
+    tok.onclick = () => catchToken(tokenObj, item);
+    currentTokens.push(tokenObj);
+  });
+
+  roundActive = true;
+}
+
+function catchToken(tokenObj, item) {
+  if (!running || !roundActive || tokenObj.done) return;
+  tokenObj.done = true;
+
+  if (tokenObj.correct) {
+    resolveRound(true, tokenObj);
+  } else {
+    tokenObj.el.classList.add('caught-wrong');
+    energy -= 18;
+    updateEnergyBar();
+    mascotStumble();
+    sndWrong.currentTime = 0;
+    sndWrong.play().catch(() => {});
+    const msg = document.getElementById('msgBox');
+    msg.style.color = 'var(--red)';
+    msg.textContent = 'Not the best fit — keep going!';
+    if (energy <= 0) {
+      endGame();
+    }
+  }
+}
+
+function resolveRound(caughtCorrectly, tokenObj) {
+  roundActive = false;
+  currentTokens.forEach(t => {
+    if (!t.done) {
+      t.done = true;
+      if (t.el.parentNode) t.el.remove();
+    }
+  });
+
+  if (caughtCorrectly) {
+    tokenObj.el.classList.add('caught-correct');
+    energy = Math.min(100, energy + 26);
+    correctCatches++;
+    distance += 40;
+    updateEnergyBar();
+    mascotLeap();
+    spawnSparks(tokenObj.el);
+    showDistanceToast('+40m', tokenObj.el);
+    sndRight.currentTime = 0;
+    sndRight.play().catch(() => {});
+    const msg = document.getElementById('msgBox');
+    msg.style.color = 'var(--green)';
+    msg.textContent = 'Great catch! Full speed ahead!';
+  }
+
+  setTimeout(() => {
+    if (running) spawnRound();
+  }, 500);
+}
+
+function missRound() {
+  roundActive = false;
+  currentTokens.forEach(t => {
+    if (t.el.parentNode) t.el.remove();
+  });
+  energy -= 22;
+  updateEnergyBar();
+  mascotStumble();
+  sndWrong.currentTime = 0;
+  sndWrong.play().catch(() => {});
+  const msg = document.getElementById('msgBox');
+  msg.style.color = 'var(--red)';
+  msg.textContent = 'It got away! Watch closely next time.';
+
+  if (energy <= 0) {
+    endGame();
+    return;
+  }
+  setTimeout(() => {
+    if (running) spawnRound();
+  }, 500);
+}
+
+function mascotLeap() {
+  const m = document.getElementById('mascot');
+  m.classList.remove('stumble');
+  void m.offsetWidth;
+  m.classList.add('leap');
+}
+function mascotStumble() {
+  const m = document.getElementById('mascot');
+  m.classList.remove('leap');
+  void m.offsetWidth;
+  m.classList.add('stumble');
+}
+
+function spawnSparks(nearEl) {
+  const track = document.getElementById('trackWrap');
+  const tRect = track.getBoundingClientRect();
+  const eRect = nearEl.getBoundingClientRect();
+  const cx = eRect.left - tRect.left;
+  const cy = eRect.top - tRect.top + eRect.height / 2;
+  for (let i = 0; i < 10; i++) {
+    const s = document.createElement('div');
+    s.className = 'spark';
+    const size = 4 + Math.random() * 4;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.left = cx + 'px';
+    s.style.top = cy + 'px';
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 30 + Math.random() * 40;
+    s.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+    s.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+    track.appendChild(s);
+    setTimeout(() => s.remove(), 800);
+  }
+}
+
+function showDistanceToast(text, nearEl) {
+  const track = document.getElementById('trackWrap');
+  const tRect = track.getBoundingClientRect();
+  const eRect = nearEl.getBoundingClientRect();
+  const toast = document.createElement('div');
+  toast.className = 'distance-toast';
+  toast.textContent = text;
+  toast.style.left = (eRect.left - tRect.left) + 'px';
+  toast.style.top = (eRect.top - tRect.top) + 'px';
+  track.appendChild(toast);
+  setTimeout(() => toast.remove(), 900);
+}
+
+function confettiEffect() {
+  for (let i = 0; i < 25; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = ['#ff4081','#ffeb3b','#00e676','#304ffe','#aa00ff'][Math.floor(Math.random() * 5)];
+    c.style.animationDelay = Math.random() * 0.3 + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 2600);
+  }
+}
+
+function gameLoop(ts) {
+  if (!running) return;
+  if (lastFrameTime === null) lastFrameTime = ts;
+  const dt = Math.min((ts - lastFrameTime) / 1000, 0.05);
+  lastFrameTime = ts;
+  elapsed += dt;
+
+  const speed = currentSpeedPercentPerSec();
+  const drain = currentDrainPerSec();
+
+  // passive drain
+  energy -= drain * dt;
+  updateEnergyBar();
+
+  // passive distance from survival
+  distance += speed * dt * 0.6;
+  document.getElementById('distLabel').textContent = Math.floor(distance);
+
+  if (energy <= 0) {
+    updateEnergyBar();
+    endGame();
+    return;
+  }
+
+  if (roundActive) {
+    let anyReachedEnd = false;
+    currentTokens.forEach(t => {
+      if (t.done) return;
+      t.x -= speed * dt;
+      if (t.x <= RUNNER_X) {
+        t.x = RUNNER_X;
+        anyReachedEnd = true;
+      }
+      t.el.style.left = t.x + '%';
+    });
+    if (anyReachedEnd) {
+      missRound();
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+function endGame() {
+  running = false;
+  showScreen('endScreen');
+  document.getElementById('endScore').textContent = Math.floor(distance);
+  document.getElementById('endCatches').textContent = correctCatches;
+
+  const title = document.getElementById('endTitle');
+  if (correctCatches >= 15) {
+    title.textContent = 'Incredible Sprint! Synonym Champion! \ud83c\udfc6';
+    title.style.color = 'var(--gold)';
+    confettiEffect();
+  } else if (correctCatches >= 8) {
+    title.textContent = 'Awesome Sprint! \ud83c\udf1f';
+    title.style.color = '#fff';
+    confettiEffect();
+  } else {
+    title.textContent = 'Sprint Over \u2014 Run It Back! \ud83d\udca8';
+    title.style.color = '#fff0e8';
+  }
+}
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    showScreen('startScreen');
+  }, 5000);
+});
+</script>
+</body>
+</html>
