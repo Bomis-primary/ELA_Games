@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Verb Slingshot Arena</title>
+    <!-- Tailwind CSS for high-fidelity interactive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for playful and clean educational typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0b0f19; /* Cosmic midnight blue background */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            overflow: hidden;
+        }
+        .playful-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-1 text-slate-100">
+
+    <!-- Main Container styled to fit 100% viewport height cleanly on mobile without vertical scrolling -->
+    <div class="relative w-full max-w-md md:max-w-4xl bg-slate-950 rounded-2xl border-2 md:border-4 border-indigo-500 shadow-2xl shadow-indigo-500/10 overflow-hidden flex flex-col h-[98vh] md:h-[90vh]">
+
+        <!-- Pure White Splash Screen (Exactly 5-seconds display aligned with assets in image_2f43bc.png) -->
+        <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[220px] w-4/5 h-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <div id="logo-fallback" class="hidden text-center">
+                <div class="text-4xl font-black tracking-wider text-slate-900 uppercase font-sans">INNOVINE</div>
+                <div class="text-xs text-indigo-600 font-semibold uppercase tracking-widest mt-1 font-sans">Learning Games</div>
+            </div>
+        </div>
+
+        <!-- Start Screen / Instructions Overlay -->
+        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-3 md:p-6 text-center z-40 hidden overflow-y-auto">
+            <div class="max-w-sm bg-slate-900/90 p-4 md:p-6 rounded-xl border border-indigo-500/40 backdrop-blur-md shadow-2xl my-auto">
+                <div class="text-5xl mb-2 animate-bounce">🎯🚀</div>
+                <h2 class="text-xl md:text-2xl font-extrabold text-indigo-400 mb-0.5 uppercase playful-font">Verb Slingshot</h2>
+                <h3 class="text-xs text-slate-300 font-semibold mb-3">Tense Practice Arena (Grade 3)</h3>
+                
+                <div class="text-[11px] md:text-xs text-slate-300 text-left space-y-2 bg-slate-950/60 p-3 rounded-lg border border-slate-800 mb-4 max-h-[180px] overflow-y-auto">
+                    <p>🎯 <strong>Objective:</strong> Read each sentence carefully. Identify the requested target tense form of the base verb!</p>
+                    <p class="font-bold text-indigo-400">⚡ Practice Rules:</p>
+                    <ul class="list-disc pl-4 space-y-1 text-[10px] md:text-xs text-slate-300">
+                        <li><strong>Simple Present (Regular/Irregular):</strong> Suffixes like -s, -es, or base shifts (e.g., <em>shines</em>, <em>runs</em>, <em>delivers</em>).</li>
+                        <li><strong>Simple Past (Regular/Irregular):</strong> Past shifts (e.g., <em>baked</em>, <em>cried</em>, <em>rode</em>, <em>caught</em>).</li>
+                    </ul>
+                    <p class="text-amber-400 font-semibold">🎮 Controls: Drag back the Slingshot to aim, or tap/click a target directly to blast it!</p>
+                </div>
+
+                <button id="start-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 active:from-indigo-700 text-white font-extrabold py-2.5 px-4 rounded-lg shadow-lg transform transition active:scale-95 text-xs uppercase tracking-wide playful-font">
+                    Enter Arena
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over / Victory Screen -->
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-40 hidden">
+            <div class="max-w-sm bg-slate-900/90 p-6 rounded-xl border border-indigo-500/40 backdrop-blur-md shadow-2xl">
+                <div class="text-5xl mb-2">🏆⚡</div>
+                <h2 id="victory-title" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300 mb-1 playful-font">CHAMPIONSHIP OVER!</h2>
+                <p id="victory-desc" class="text-slate-400 text-xs mb-4">You successfully completed your target practice!</p>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Targets Hit</span>
+                        <span id="final-player-score" class="text-xl font-black text-indigo-400">0</span>
+                    </div>
+                    <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Glitch Hits</span>
+                        <span id="final-rival-score" class="text-xl font-black text-rose-400">0</span>
+                    </div>
+                </div>
+
+                <p id="performance-feedback" class="text-xs text-slate-200 italic mb-4 px-1 font-medium"></p>
+
+                <button id="restart-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-extrabold py-3 px-4 rounded-lg shadow-lg transform transition active:scale-95 text-sm uppercase tracking-wide playful-font">
+                    Practice Again
+                </button>
+            </div>
+        </div>
+
+        <!-- Header Panel -->
+        <header class="bg-slate-900/95 px-3 py-2 border-b border-indigo-500/30 flex justify-between items-center z-10">
+            <div class="flex items-center gap-1.5">
+                <span class="text-lg">🎯</span>
+                <h1 class="text-xs md:text-sm font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-purple-400 playful-font">
+                    VERB SLINGSHOT
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-1.5 text-[10px] md:text-xs font-semibold">
+                <div class="bg-slate-950/80 px-2 py-0.5 rounded-full border border-slate-800 font-mono">
+                    Round: <span id="question-index" class="text-indigo-400 font-bold">1/10</span>
+                </div>
+                <div class="bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-500/30 font-mono">
+                    HITS: <span id="player-score" class="text-indigo-400 font-bold">0</span>
+                </div>
+                <div class="bg-rose-950/60 px-2 py-0.5 rounded-full border border-rose-500/30 font-mono">
+                    GLITCHES: <span id="rival-score" class="text-rose-400 font-bold">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Question Instructions and Flower Sentence Banner -->
+        <section class="bg-slate-900 px-3 py-2 border-b border-slate-850 flex flex-col items-center justify-center text-center z-10 gap-1">
+            <p id="target-tense-label" class="text-[9px] md:text-xs uppercase tracking-widest text-indigo-400 font-black">
+                AIM AT: SIMPLE PRESENT (REGULAR)
+            </p>
+            
+            <div class="w-full max-w-xl flex flex-col gap-1">
+                <div id="sentence-card" class="text-xs md:text-sm font-bold text-white leading-snug px-3 py-2 bg-slate-950/80 rounded-lg border border-indigo-500/10 shadow-inner playful-font">
+                    Configuring holographic targeted systems...
+                </div>
+                <!-- Interactive Rules Panel displaying base verb and grammar target -->
+                <div class="flex justify-center gap-2 text-[10px]">
+                    <div class="bg-slate-950 px-2 py-1 rounded border border-slate-800">
+                        <span class="text-slate-400 mr-1 uppercase font-semibold">Base:</span>
+                        <span id="base-verb-indicator" class="text-indigo-400 font-black uppercase tracking-wide">WALK</span>
+                    </div>
+                    <div class="bg-slate-950 px-2 py-1 rounded border border-slate-800 font-mono">
+                        <span class="text-slate-400 mr-1 uppercase font-semibold">Type:</span>
+                        <span id="conjugate-rule-indicator" class="text-sky-400 font-black uppercase tracking-wide">REGULAR</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Botanical Arcade Area - Compact Layout for Phone Compatibility -->
+        <main class="relative flex-grow bg-slate-950/40 overflow-hidden flex flex-col p-1">
+            
+            <div class="flex-grow relative bg-slate-950 border border-slate-800/60 rounded-xl overflow-hidden min-h-[160px] h-[35vh] md:h-auto">
+                <canvas id="slingshotCanvas" class="w-full h-full block"></canvas>
+                
+                <!-- Feedback overlay message -->
+                <div id="feedback-msg" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[9px] md:text-xs text-indigo-300 uppercase tracking-widest font-black bg-slate-900/90 px-3 py-1 rounded-full border border-indigo-500/20 text-center animate-pulse shadow-md">
+                    Drag slingshot or tap target directly to shoot!
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="bg-slate-900 border-t border-slate-800 px-3 py-1.5 flex justify-between items-center gap-1 z-10 text-[8px] text-indigo-500 uppercase tracking-widest font-bold">
+            <div>🎯 Verb Slingshot Arena &bull; Grade 3</div>
+            <div>Based on assets from image_2f43bc.png</div>
+        </footer>
+    </div>
+
+    <script>
+        // High fidelity Grade 3 Present and Past Tense Verbs Question Bank
+        const questionBank = [
+            // Simple Present (Regular)
+            { sentence: "Every single morning, our friendly dog ________ happily inside the garden.", target: "SIMPLE PRESENT (REGULAR)", baseVerb: "bark", ans: "barks", opts: ["barks", "barked", "barking"] },
+            { sentence: "The big yellow school bus ________ near the park gates every afternoon.", target: "SIMPLE PRESENT (REGULAR)", baseVerb: "stop", ans: "stops", opts: ["stops", "stopped", "stopping"] },
+            { sentence: "Every weekend, my active sister ________ her soccer ball in the backyard.", target: "SIMPLE PRESENT (REGULAR)", baseVerb: "kick", ans: "kicks", opts: ["kicks", "kicked", "kicking"] },
+            { sentence: "Water ________ quickly when it gets extremely hot on the kitchen stove.", target: "SIMPLE PRESENT (REGULAR)", baseVerb: "boil", ans: "boils", opts: ["boils", "boiled", "boiling"] },
+
+            // Simple Present (Irregular)
+            { sentence: "Usually, the bright golden sun ________ warmly through my window.", target: "SIMPLE PRESENT (IRREGULAR)", baseVerb: "shine", ans: "shines", opts: ["shines", "shined", "shining"] },
+            { sentence: "Every Saturday morning, we ________ to the city library to read stories.", target: "SIMPLE PRESENT (IRREGULAR)", baseVerb: "go", ans: "go", opts: ["go", "goes", "went"] },
+            { sentence: "A busy honey bee ________ from flower to flower to gather sweet honey.", target: "SIMPLE PRESENT (IRREGULAR)", baseVerb: "fly", ans: "flies", opts: ["flies", "flew", "flyed"] },
+            { sentence: "My wise older brother ________ fantastic mystery stories on his laptop.", target: "SIMPLE PRESENT (IRREGULAR)", baseVerb: "write", ans: "writes", opts: ["writes", "wrote", "writing"] },
+
+            // Simple Past (Regular)
+            { sentence: "Yesterday afternoon, my grandmother ________ a sweet chocolate pie.", target: "SIMPLE PAST (REGULAR)", baseVerb: "bake", ans: "baked", opts: ["baked", "bakes", "baking"] },
+            { sentence: "The little baby ________ loudly when his favorite toy fell down.", target: "SIMPLE PAST (REGULAR)", baseVerb: "cry", ans: "cried", opts: ["cried", "cries", "crying"] },
+            { sentence: "Before school, we ________ our faces with warm water and soap.", target: "SIMPLE PAST (REGULAR)", baseVerb: "wash", ans: "washed", opts: ["washed", "washes", "washing"] },
+            { sentence: "The active green frogs ________ along the edge of the blue pond.", target: "SIMPLE PAST (REGULAR)", baseVerb: "hop", ans: "hopped", opts: ["hopped", "hops", "hopping"] },
+
+            // Simple Past (Irregular)
+            { sentence: "During the match on Monday, the player ________ the high ball easily.", target: "SIMPLE PAST (IRREGULAR)", baseVerb: "catch", ans: "caught", opts: ["caught", "catches", "catched"] },
+            { sentence: "Our caring parents ________ us a beautiful wooden treehouse last summer.", target: "SIMPLE PAST (IRREGULAR)", baseVerb: "build", ans: "built", opts: ["built", "builds", "builded"] },
+            { sentence: "Yesterday morning, the puppy ________ super fast across the wet grass.", target: "SIMPLE PAST (IRREGULAR)", baseVerb: "run", ans: "ran", opts: ["ran", "runs", "running"] },
+            { sentence: "Last night, the small birds ________ a sweet song up in the oak tree.", target: "SIMPLE PAST (IRREGULAR)", baseVerb: "sing", ans: "sang", opts: ["sang", "sings", "singing"] }
+        ];
+
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3')
+        };
+        let audioCtx = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+            audioInitialized = true;
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => playSynthFallback('correct'));
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => playSynthFallback('wrong'));
+            }
+        }
+
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.12); // A5
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(160, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                }
+            } catch (e) {
+                console.warn("Synthesizer fallback error", e);
+            }
+        }
+
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+
+        const targetTenseLabel = document.getElementById("target-tense-label");
+        const sentenceCard = document.getElementById("sentence-card");
+        const feedbackMsg = document.getElementById("feedback-msg");
+        
+        const baseVerbIndicator = document.getElementById("base-verb-indicator");
+        const conjugateRuleIndicator = document.getElementById("conjugate-rule-indicator");
+
+        const questionIndexEl = document.getElementById("question-index");
+        const playerScoreEl = document.getElementById("player-score");
+        const rivalScoreEl = document.getElementById("rival-score");
+        const finalPlayerScoreEl = document.getElementById("final-player-score");
+        const finalRivalScoreEl = document.getElementById("final-rival-score");
+        const performanceFeedback = document.getElementById("performance-feedback");
+
+        const slingshotCanvas = document.getElementById("slingshotCanvas");
+        const ctx = slingshotCanvas.getContext("2d");
+
+        // Game state variables
+        let currentQuestionIdx = 0;
+        let playerScore = 0;
+        let rivalScore = 0;
+        let activeQuestions = [];
+        
+        let optionsList = [];
+        let correctAnswer = "";
+        let roundActive = false;
+
+        // Slingshot variables
+        const slingAnchor = { x: 0, y: 0 };
+        const dragPos = { x: 0, y: 0 };
+        let isDragging = false;
+        const maxDrag = 70;
+
+        // Projectile variable
+        const projectile = {
+            x: 0,
+            y: 0,
+            vx: 0,
+            vy: 0,
+            active: false,
+            radius: 8
+        };
+
+        // Targets list (circular bubbles containing answer text options)
+        let targets = [];
+        let particles = [];
+
+        function createExplosion(x, y, color, isCorrect) {
+            const count = isCorrect ? 25 : 12;
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * (isCorrect ? 6 : 3),
+                    vy: (Math.random() - 0.5) * (isCorrect ? 6 : 3) - 2,
+                    r: Math.random() * 3 + 1.5,
+                    color: color,
+                    alpha: 1.0,
+                    life: Math.random() * 30 + 20
+                });
+            }
+        }
+
+        function prepareQuestions() {
+            // Select 10 randomized present/past questions
+            activeQuestions = [...questionBank].sort(() => 0.5 - Math.random()).slice(0, 10);
+            currentQuestionIdx = 0;
+            playerScore = 0;
+            rivalScore = 0;
+
+            playerScoreEl.textContent = playerScore;
+            rivalScoreEl.textContent = rivalScore;
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIdx >= activeQuestions.length) {
+                concludeGame();
+                return;
+            }
+
+            roundActive = true;
+            questionIndexEl.textContent = `${currentQuestionIdx + 1}/10`;
+            const q = activeQuestions[currentQuestionIdx];
+
+            // Setup instruction displays
+            targetTenseLabel.textContent = `AIM AT THE CORRECT: ${q.target}`;
+            baseVerbIndicator.textContent = q.baseVerb;
+            
+            // Extract the simple/continuous or regular/irregular tag
+            const labelType = q.target.includes("REGULAR") ? "REGULAR" : "IRREGULAR";
+            conjugateRuleIndicator.textContent = labelType;
+
+            // Display sentence structure with blank slot
+            sentenceCard.innerHTML = q.sentence.replace("________", "<span class='text-indigo-400 font-extrabold underline decoration-wavy px-1 decoration-1'>________</span>");
+
+            correctAnswer = q.ans.toLowerCase();
+            optionsList = [...q.opts];
+
+            // Position Anchor and projectile
+            resetSlingshotPosition();
+
+            // Populate floaters targets
+            generateTargetBubbles();
+
+            feedbackMsg.textContent = "Drag slingshot or tap target directly to shoot!";
+            feedbackMsg.className = "absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[9px] md:text-xs text-indigo-300 uppercase tracking-widest font-black bg-slate-900/90 px-3 py-1 rounded-full border border-indigo-500/20 text-center animate-pulse shadow-md";
+        }
+
+        function resetSlingshotPosition() {
+            slingAnchor.x = slingshotCanvas.width / 2;
+            slingAnchor.y = slingshotCanvas.height - 45;
+            dragPos.x = slingAnchor.x;
+            dragPos.y = slingAnchor.y;
+            isDragging = false;
+            projectile.active = false;
+        }
+
+        function generateTargetBubbles() {
+            targets = [];
+            const spacing = slingshotCanvas.width / 3;
+            
+            optionsList.forEach((option, idx) => {
+                targets.push({
+                    x: spacing * idx + spacing / 2,
+                    y: 40 + Math.random() * 30,
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    radius: 36,
+                    label: option,
+                    color: '#6366f1', // Neon indigo
+                    glow: 'rgba(99, 102, 241, 0.4)'
+                });
+            });
+        }
+
+        function triggerTargetShot(hitIndex) {
+            if (!roundActive) return;
+            roundActive = false; // Block inputs during resolution animation
+
+            const selectedOption = targets[hitIndex].label.toLowerCase();
+            const isCorrect = (selectedOption === correctAnswer);
+
+            const hitTarget = targets[hitIndex];
+
+            if (isCorrect) {
+                playSound('correct');
+                createExplosion(hitTarget.x, hitTarget.y, '#10b981', true); // Green blast
+                
+                playerScore++;
+                playerScoreEl.textContent = playerScore;
+
+                feedbackMsg.textContent = "DIRECT HIT! TARGET SECURED! 🎯";
+                feedbackMsg.className = "absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-emerald-400 uppercase tracking-widest font-black bg-slate-950/95 px-4 py-1 rounded-full border border-emerald-500/30 text-center shadow-lg";
+
+                // Update sentence box with the solved verb
+                const q = activeQuestions[currentQuestionIdx];
+                sentenceCard.innerHTML = q.sentence.replace("________", `<span class='text-emerald-400 font-black px-1 underline decoration-1'>${q.ans.toUpperCase()}</span>`);
+
+                // Remove targets
+                targets = [];
+
+                setTimeout(() => {
+                    currentQuestionIdx++;
+                    loadQuestion();
+                }, 2000);
+
+            } else {
+                playSound('wrong');
+                createExplosion(hitTarget.x, hitTarget.y, '#ef4444', false); // Red spark blast
+
+                rivalScore++;
+                rivalScoreEl.textContent = rivalScore;
+
+                feedbackMsg.textContent = "GLITCH DETECTED! TARGET DESTROYED! ⚠️";
+                feedbackMsg.className = "absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-rose-400 uppercase tracking-widest font-black bg-slate-950/95 px-4 py-1 rounded-full border border-rose-500/30 text-center shadow-lg";
+
+                // Auto reveal correct option in sentence
+                const q = activeQuestions[currentQuestionIdx];
+                sentenceCard.innerHTML = q.sentence.replace("________", `<span class='text-rose-400 font-black px-1 underline decoration-1 decoration-rose-500'>${q.ans.toUpperCase()}</span>`);
+
+                // Highlight correct option by adding positive explosion at correct spot
+                const correctIdx = optionsList.findIndex(o => o.toLowerCase() === correctAnswer);
+                if (correctIdx !== -1 && targets[correctIdx]) {
+                    createExplosion(targets[correctIdx].x, targets[correctIdx].y, '#10b981', true);
+                }
+
+                targets = [];
+
+                setTimeout(() => {
+                    currentQuestionIdx++;
+                    loadQuestion();
+                }, 2400);
+            }
+        }
+
+        function drawSlingshotRange() {
+            const width = slingshotCanvas.width;
+            const height = slingshotCanvas.height;
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw range target background grid lines
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.04)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < width; i += 30) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, height);
+                ctx.stroke();
+            }
+            for (let j = 0; j < height; j += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, j);
+                ctx.lineTo(width, j);
+                ctx.stroke();
+            }
+
+            // Draw target bubble floaters
+            targets.forEach(t => {
+                // Bubble glow aura
+                ctx.fillStyle = t.glow;
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.radius + 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Inner core
+                ctx.fillStyle = '#0f172a';
+                ctx.strokeStyle = t.color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Highlight gloss mark
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.beginPath();
+                ctx.ellipse(t.x - 12, t.y - 12, 10, 5, -Math.PI/4, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Text option
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 11px "Fredoka"';
+                ctx.textAlign = 'center';
+                ctx.fillText(t.label.toUpperCase(), t.x, t.y + 4);
+            });
+
+            // Draw dynamic particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= 0.03;
+                p.life--;
+
+                if (p.alpha <= 0 || p.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Draw active projectile
+            if (projectile.active) {
+                // Glow trailing tail
+                ctx.fillStyle = 'rgba(251, 146, 60, 0.5)';
+                ctx.beginPath();
+                ctx.arc(projectile.x - projectile.vx * 1.5, projectile.y - projectile.vy * 1.5, projectile.radius + 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Core orange projectile
+                ctx.fillStyle = '#fb923c';
+                ctx.beginPath();
+                ctx.arc(projectile.x, projectile.y, projectile.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Draw slingshot band and anchor frame
+            if (roundActive) {
+                const baseSlingLeft = slingAnchor.x - 22;
+                const baseSlingRight = slingAnchor.x + 22;
+                const topForkY = slingAnchor.y - 12;
+
+                // Slingshot Fork posts
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(slingAnchor.x, slingAnchor.y + 15);
+                ctx.lineTo(slingAnchor.x, slingAnchor.y);
+                ctx.moveTo(slingAnchor.x, slingAnchor.y);
+                ctx.lineTo(baseSlingLeft, topForkY);
+                ctx.moveTo(slingAnchor.x, slingAnchor.y);
+                ctx.lineTo(baseSlingRight, topForkY);
+                ctx.stroke();
+
+                // Slingshot stretch bands
+                if (isDragging) {
+                    ctx.strokeStyle = '#f43f5e'; // glowing red elastic bands
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(baseSlingLeft, topForkY);
+                    ctx.lineTo(dragPos.x, dragPos.y);
+                    ctx.moveTo(baseSlingRight, topForkY);
+                    ctx.lineTo(dragPos.x, dragPos.y);
+                    ctx.stroke();
+
+                    // Drag pouch indicator
+                    ctx.fillStyle = '#f43f5e';
+                    ctx.beginPath();
+                    ctx.arc(dragPos.x, dragPos.y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (!projectile.active) {
+                    // Rest bands
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(baseSlingLeft, topForkY);
+                    ctx.lineTo(slingAnchor.x, topForkY);
+                    ctx.lineTo(baseSlingRight, topForkY);
+                    ctx.stroke();
+
+                    // Rest pellet
+                    ctx.fillStyle = '#f43f5e';
+                    ctx.beginPath();
+                    ctx.arc(slingAnchor.x, topForkY, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function updateSlingshotPhysics() {
+            // Update bubble target movements
+            targets.forEach(t => {
+                t.x += t.vx;
+                t.y += t.vy;
+
+                // Bounce horizontally
+                if (t.x - t.radius < 0 || t.x + t.radius > slingshotCanvas.width) {
+                    t.vx *= -1;
+                    t.x = Math.max(t.radius, Math.min(slingshotCanvas.width - t.radius, t.x));
+                }
+                // Bounce vertically
+                if (t.y - t.radius < 5 || t.y + t.radius > slingshotCanvas.height * 0.5) {
+                    t.vy *= -1;
+                    t.y = Math.max(t.radius + 5, Math.min(slingshotCanvas.height * 0.5 - t.radius, t.y));
+                }
+            });
+
+            // Update projectile flight
+            if (projectile.active) {
+                projectile.x += projectile.vx;
+                projectile.y += projectile.vy;
+                
+                // Slight gravity pull
+                projectile.vy += 0.05;
+
+                // Out of bounds check
+                if (projectile.y < 0 || projectile.x < 0 || projectile.x > slingshotCanvas.width || projectile.y > slingshotCanvas.height) {
+                    projectile.active = false;
+                    resetSlingshotPosition();
+                }
+
+                // Check collisions against active targets
+                for (let i = 0; i < targets.length; i++) {
+                    const t = targets[i];
+                    const dist = Math.hypot(projectile.x - t.x, projectile.y - t.y);
+                    if (dist < t.radius + projectile.radius) {
+                        projectile.active = false;
+                        triggerTargetShot(i);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Aiming drag event handlers
+        function handleDragStart(x, y) {
+            if (!roundActive || projectile.active) return;
+            const dist = Math.hypot(x - slingAnchor.x, y - (slingAnchor.y - 12));
+            if (dist < 40) {
+                isDragging = true;
+                dragPos.x = x;
+                dragPos.y = y;
+            }
+        }
+
+        function handleDragMove(x, y) {
+            if (!isDragging) return;
+            const dx = x - slingAnchor.x;
+            const dy = y - (slingAnchor.y - 12);
+            const dist = Math.hypot(dx, dy);
+
+            if (dist > maxDrag) {
+                const angle = Math.atan2(dy, dx);
+                dragPos.x = slingAnchor.x + Math.cos(angle) * maxDrag;
+                dragPos.y = (slingAnchor.y - 12) + Math.sin(angle) * maxDrag;
+            } else {
+                dragPos.x = x;
+                dragPos.y = y;
+            }
+        }
+
+        function handleDragEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+
+            // Firing projectile logic
+            const dx = slingAnchor.x - dragPos.x;
+            const dy = (slingAnchor.y - 12) - dragPos.y;
+
+            projectile.x = slingAnchor.x;
+            projectile.y = slingAnchor.y - 12;
+            
+            // Adjust velocity vector based on drag ratio
+            projectile.vx = dx * 0.14;
+            projectile.vy = dy * 0.14;
+            projectile.active = true;
+        }
+
+        // Touch event bindings
+        slingshotCanvas.addEventListener('mousedown', (e) => {
+            const rect = slingshotCanvas.getBoundingClientRect();
+            handleDragStart(e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        slingshotCanvas.addEventListener('mousemove', (e) => {
+            const rect = slingshotCanvas.getBoundingClientRect();
+            handleDragMove(e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        window.addEventListener('mouseup', () => {
+            handleDragEnd();
+        });
+
+        slingshotCanvas.addEventListener('touchstart', (e) => {
+            const rect = slingshotCanvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            handleDragStart(touch.clientX - rect.left, touch.clientY - rect.top);
+        }, { passive: true });
+
+        slingshotCanvas.addEventListener('touchmove', (e) => {
+            const rect = slingshotCanvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            handleDragMove(touch.clientX - rect.left, touch.clientY - rect.top);
+        }, { passive: true });
+
+        slingshotCanvas.addEventListener('touchend', () => {
+            handleDragEnd();
+        }, { passive: true });
+
+        // Add Direct Target tap compatibility to assist younger players
+        slingshotCanvas.addEventListener('click', (e) => {
+            if (!roundActive || isDragging || projectile.active) return;
+            const rect = slingshotCanvas.getBoundingClientRect();
+            const tapX = e.clientX - rect.left;
+            const tapY = e.clientY - rect.top;
+
+            // Check if player clicked directly on any bubble target
+            for (let i = 0; i < targets.length; i++) {
+                const t = targets[i];
+                const dist = Math.hypot(tapX - t.x, tapY - t.y);
+                if (dist < t.radius + 15) {
+                    // Trigger direct auto-shot from slingshot
+                    projectile.x = t.x;
+                    projectile.y = t.y;
+                    triggerTargetShot(i);
+                    break;
+                }
+            }
+        });
+
+        function concludeGame() {
+            gameoverScreen.classList.remove("hidden");
+            playSound('correct');
+
+            finalPlayerScoreEl.textContent = playerScore;
+            finalRivalScoreEl.textContent = rivalScore;
+
+            let msg = "";
+            if (playerScore > rivalScore) {
+                msg = "🏆 Legendary Grandmaster Archer! Your simple present, simple past, regular, and irregular target conversions are perfect!";
+                document.getElementById("victory-title").textContent = "TIMELINE STABILIZED!";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 mb-1 playful-font";
+            } else if (playerScore === rivalScore) {
+                msg = "🤝 Equal Energy Balancing! The target structures are aligned, but you should practice irregular base shifts again!";
+                document.getElementById("victory-title").textContent = "ARENA BALANCED";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-amber-400 mb-1 playful-font";
+            } else {
+                msg = "⚠️ Quantum Drift Warning! Irregular past and regular present verbs got unsynced. Let's aim again to align them!";
+                document.getElementById("victory-title").textContent = "DRIFT OVERRUN";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-indigo-400 mb-1 playful-font";
+            }
+            performanceFeedback.textContent = msg;
+        }
+
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            prepareQuestions();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            prepareQuestions();
+        });
+
+        // Exact 5-Second Brand splash overlay
+        setTimeout(() => {
+            logoScreen.style.opacity = "0";
+            setTimeout(() => {
+                logoScreen.classList.add("hidden");
+                startScreen.classList.remove("hidden");
+            }, 1000);
+        }, 5000);
+
+        function resizeCanvas() {
+            const container = slingshotCanvas.parentElement;
+            slingshotCanvas.width = container.clientWidth || 320;
+            slingshotCanvas.height = container.clientHeight || 240;
+            resetSlingshotPosition();
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+        // Main game cycle loop
+        function gameLoop() {
+            drawSlingshotRange();
+            updateSlingshotPhysics();
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = function () {
+            resizeCanvas();
+            gameLoop();
+        }
+    </script>
+</body>
+</html>
