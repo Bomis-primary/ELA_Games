@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Greenhouse: Present Tense Blossom</title>
+    <!-- Tailwind CSS for high-fidelity interactive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for playful and clean educational typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #022c22; /* Deep eco green background */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            overflow: hidden;
+        }
+        .playful-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-1 text-emerald-50">
+
+    <!-- Main Container styled to fit 100% viewport height cleanly on mobile without vertical scrolling -->
+    <div class="relative w-full max-w-md md:max-w-4xl bg-slate-950 rounded-2xl border-2 md:border-4 border-emerald-500 shadow-2xl shadow-emerald-500/10 overflow-hidden flex flex-col h-[98vh] md:h-[90vh]">
+
+        <!-- Pure White Splash Screen (Exactly 5-seconds display conforming to image_2ecb5b.png assets) -->
+        <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[220px] w-4/5 h-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <div id="logo-fallback" class="hidden text-center">
+                <div class="text-4xl font-black tracking-wider text-slate-900 uppercase font-sans">INNOVINE</div>
+                <div class="text-xs text-indigo-600 font-semibold uppercase tracking-widest mt-1 font-sans">Learning Games</div>
+            </div>
+        </div>
+
+        <!-- Start Screen / Instructions Overlay -->
+        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-3 md:p-6 text-center z-40 hidden overflow-y-auto">
+            <div class="max-w-sm bg-slate-900/90 p-4 md:p-6 rounded-xl border border-emerald-500/40 backdrop-blur-md shadow-2xl my-auto">
+                <div class="text-5xl mb-2 animate-bounce">🌱🌸</div>
+                <h2 class="text-xl md:text-2xl font-extrabold text-emerald-400 mb-0.5 uppercase playful-font">Present Tense Greenhouse</h2>
+                <h3 class="text-xs text-slate-300 font-semibold mb-3">Greenhouse Blossom Challenge (Grade 3)</h3>
+                
+                <div class="text-[11px] md:text-xs text-slate-300 text-left space-y-2 bg-slate-950/60 p-3 rounded-lg border border-slate-800 mb-4 max-h-[180px] overflow-y-auto">
+                    <p>💧 <strong>Gardener Core Alert:</strong> Help our magic greenhouse seedlings bloom by showering them with the correct present tense verb sprinkler!</p>
+                    <p class="font-bold text-emerald-400">⚡ Tenses to Practice:</p>
+                    <ul class="list-disc pl-4 space-y-1 text-[10px] md:text-xs text-slate-300">
+                        <li><strong>Simple Present Tense:</strong> e.g., <em>The bird sings</em> or <em>They play</em>. Matches singular and plural subject verbs.</li>
+                        <li><strong>Present Continuous Tense:</strong> e.g., <em>He is running</em> or <em>We are painting</em>. Shows actions happening right now.</li>
+                    </ul>
+                </div>
+
+                <button id="start-btn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:from-emerald-700 text-white font-extrabold py-2.5 px-4 rounded-lg shadow-lg transform transition active:scale-95 text-xs uppercase tracking-wide playful-font">
+                    Enter Greenhouse
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over / Victory Screen -->
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-40 hidden">
+            <div class="max-w-sm bg-slate-900/90 p-6 rounded-xl border border-emerald-500/40 backdrop-blur-md shadow-2xl">
+                <div class="text-5xl mb-2">🏆💐</div>
+                <h2 id="victory-title" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 mb-1 playful-font">GARDEN FULLY BLOOMED!</h2>
+                <p id="victory-desc" class="text-slate-400 text-xs mb-4">You successfully nurtured all present tense seedlings!</p>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Bloomed</span>
+                        <span id="final-player-score" class="text-xl font-black text-emerald-400">0</span>
+                    </div>
+                    <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Weeds Sprouted</span>
+                        <span id="final-rival-score" class="text-xl font-black text-rose-400">0</span>
+                    </div>
+                </div>
+
+                <p id="performance-feedback" class="text-xs text-slate-200 italic mb-4 px-1 font-medium"></p>
+
+                <button id="restart-btn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold py-3 px-4 rounded-lg shadow-lg transform transition active:scale-95 text-sm uppercase tracking-wide playful-font">
+                    Grow Again
+                </button>
+            </div>
+        </div>
+
+        <!-- Header Panel -->
+        <header class="bg-emerald-950/95 px-3 py-2 border-b border-emerald-500/30 flex justify-between items-center z-10">
+            <div class="flex items-center gap-1.5">
+                <span class="text-lg">🌿</span>
+                <h1 class="text-xs md:text-sm font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-green-400 playful-font">
+                    PRESENT GREENHOUSE
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-1.5 text-[10px] md:text-xs font-semibold">
+                <div class="bg-slate-950/80 px-2 py-0.5 rounded-full border border-slate-800 font-mono">
+                    Pot: <span id="question-index" class="text-emerald-400 font-bold">1/10</span>
+                </div>
+                <div class="bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30 font-mono">
+                    BLOOMS: <span id="player-score" class="text-emerald-400 font-bold font-mono">0</span>
+                </div>
+                <div class="bg-rose-950/60 px-2 py-0.5 rounded-full border border-rose-500/30 font-mono">
+                    WEEDS: <span id="rival-score" class="text-rose-400 font-bold font-mono">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Question Instructions and Flower Sentence Banner -->
+        <section class="bg-emerald-950 px-3 py-2 border-b border-emerald-900 flex flex-col items-center justify-center text-center z-10 gap-1">
+            <p id="target-tense-label" class="text-[9px] md:text-xs uppercase tracking-widest text-emerald-400 font-black">
+                TAP THE SPRINKLER TO WATER THE CORPUS IN: SIMPLE PRESENT FORM!
+            </p>
+            
+            <div class="w-full max-w-xl flex flex-col gap-1">
+                <div id="sentence-card" class="text-xs md:text-sm font-bold text-white leading-snug px-3 py-2 bg-slate-900/80 rounded-lg border border-emerald-500/10 shadow-inner playful-font">
+                    Initializing spatial botany communications...
+                </div>
+                <!-- Interactive Rules Panel displaying base verb and grammar target -->
+                <div class="flex justify-center gap-2 text-[10px]">
+                    <div class="bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                        <span class="text-slate-400 mr-1 uppercase font-semibold">Base:</span>
+                        <span id="base-verb-indicator" class="text-emerald-400 font-black uppercase tracking-wide">PLAY</span>
+                    </div>
+                    <div class="bg-slate-900 px-2 py-1 rounded border border-slate-800 font-mono">
+                        <span class="text-slate-400 mr-1 uppercase font-semibold">Tense:</span>
+                        <span id="conjugate-rule-indicator" class="text-teal-400 font-black uppercase tracking-wide">SIMPLE PRESENT</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Botanical Arcade Area - Compact Layout for Phone Compatibility -->
+        <main class="relative flex-grow bg-emerald-950/40 overflow-hidden flex flex-col p-2 gap-2">
+            
+            <!-- Dynamic 3-Seedling Canvas Area showing growing pots, magical sprinkler water rays and blooming flowers -->
+            <div class="flex-grow relative bg-slate-900/80 border border-emerald-900/60 rounded-xl p-1 overflow-hidden min-h-[160px] h-[35vh] md:h-auto">
+                <canvas id="gardenCanvas" class="w-full h-full block"></canvas>
+                
+                <!-- Feedback overlay message -->
+                <div id="feedback-msg" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-teal-300 uppercase tracking-widest font-black bg-slate-950/90 px-3 py-1 rounded-full border border-teal-500/20 text-center animate-pulse shadow-md">
+                    Tap a plant's sprinkler line below to water it!
+                </div>
+            </div>
+
+            <!-- Highly Touch-Responsive Water Cannons / Spinklers for Tablets and Mobile Phones -->
+            <div class="w-full max-w-md mx-auto grid grid-cols-3 gap-2.5">
+                <button id="btn-sprinkler-0" class="flex flex-col items-center justify-center bg-slate-900 hover:bg-slate-800 active:bg-emerald-600 border border-emerald-900 rounded-xl py-2 px-1 transition transform active:scale-95 touch-manipulation shadow-md">
+                    <span class="text-xl">🚿</span>
+                    <span id="option-label-0" class="text-[10px] md:text-xs font-bold text-emerald-300 mt-1 uppercase truncate max-w-full">plays</span>
+                    <span class="text-[8px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Sprinkler 1</span>
+                </button>
+                <button id="btn-sprinkler-1" class="flex flex-col items-center justify-center bg-slate-900 hover:bg-slate-800 active:bg-emerald-600 border border-emerald-900 rounded-xl py-2 px-1 transition transform active:scale-95 touch-manipulation shadow-md">
+                    <span class="text-xl">🚿</span>
+                    <span id="option-label-1" class="text-[10px] md:text-xs font-bold text-emerald-300 mt-1 uppercase truncate max-w-full">playing</span>
+                    <span class="text-[8px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Sprinkler 2</span>
+                </button>
+                <button id="btn-sprinkler-2" class="flex flex-col items-center justify-center bg-slate-900 hover:bg-slate-800 active:bg-emerald-600 border border-emerald-900 rounded-xl py-2 px-1 transition transform active:scale-95 touch-manipulation shadow-md">
+                    <span class="text-xl">🚿</span>
+                    <span id="option-label-2" class="text-[10px] md:text-xs font-bold text-emerald-300 mt-1 uppercase truncate max-w-full">is playing</span>
+                    <span class="text-[8px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Sprinkler 3</span>
+                </button>
+            </div>
+
+        </main>
+
+        <footer class="bg-emerald-950 border-t border-emerald-900 px-3 py-1.5 flex justify-between items-center gap-1 z-10 text-[8px] text-emerald-600 uppercase tracking-widest font-bold">
+            <div>🌿 Greenhouse Blossom &bull; Grade 3</div>
+            <div>Innovine Learning Games</div>
+        </footer>
+    </div>
+
+    <script>
+        // Formulated Grade 3 Present Tense Sentence Bank with Simple Present & Present Continuous rules
+        const questionBank = [
+            // Simple Present Tense (testing subject-verb agreement, irregular additions like flies/washes)
+            { sentence: "Every single morning, our friendly dog (bark) ________ at the postman.", target: "SIMPLE PRESENT", baseVerb: "bark", ans: "barks", opts: ["barks", "barking", "is barking"] },
+            { sentence: "Before school, my active sister (wash) ________ her face with cold water.", target: "SIMPLE PRESENT", baseVerb: "wash", ans: "washes", opts: ["washes", "washing", "is washing"] },
+            { sentence: "The big yellow school bus (stop) ________ near the park gates every afternoon.", target: "SIMPLE PRESENT", baseVerb: "stop", ans: "stops", opts: ["stops", "stopping", "is stopping"] },
+            { sentence: "Curious bees (fly) ________ from flower to flower to collect sweet honey.", target: "SIMPLE PRESENT", baseVerb: "fly", ans: "fly", opts: ["fly", "flies", "are flying"] },
+            { sentence: "In winter, the strong cold wind (blow) ________ leaves across the street.", target: "SIMPLE PRESENT", baseVerb: "blow", ans: "blows", opts: ["blows", "blowing", "is blowing"] },
+            { sentence: "Bright golden stars (shine) ________ beautifully in the clear dark sky.", target: "SIMPLE PRESENT", baseVerb: "shine", ans: "shine", opts: ["shine", "shines", "are shining"] },
+            { sentence: "The helpful baker (bake) ________ fresh bread early every Monday morning.", target: "SIMPLE PRESENT", baseVerb: "bake", ans: "bakes", opts: ["bakes", "baking", "is baking"] },
+            { sentence: "My wise grandfather (read) ________ a thick storybook before going to bed.", target: "SIMPLE PRESENT", baseVerb: "read", ans: "reads", opts: ["reads", "reading", "read"] },
+            { sentence: "The active little frogs (hop) ________ along the edge of the blue pond.", target: "SIMPLE PRESENT", baseVerb: "hop", ans: "hop", opts: ["hop", "hops", "are hopping"] },
+            { sentence: "Our caring parents (make) ________ yummy lunches for us before we start class.", target: "SIMPLE PRESENT", baseVerb: "make", ans: "make", opts: ["make", "makes", "are making"] },
+
+            // Present Continuous Tense (testing is/are helper selection and double consonant modifications)
+            { sentence: "Listen! The small birds (sing) ________ sweet songs up in the tall tree right now.", target: "PRESENT CONTINUOUS", baseVerb: "sing", ans: "are singing", opts: ["are singing", "is singing", "sings"] },
+            { sentence: "Look outside! A fluffy baby kitten (nap) ________ soundly on the warm rug.", target: "PRESENT CONTINUOUS", baseVerb: "nap", ans: "is napping", opts: ["is napping", "are napping", "naps"] },
+            { sentence: "At this very moment, we (learn) ________ about magic plant tenses.", target: "PRESENT CONTINUOUS", baseVerb: "learn", ans: "are learning", opts: ["are learning", "is learning", "learns"] },
+            { sentence: "Quietly in her bedroom, my creative sister (paint) ________ a colorful picture.", target: "PRESENT CONTINUOUS", baseVerb: "paint", ans: "is painting", opts: ["is painting", "are painting", "paints"] },
+            { sentence: "Watch out! The active soccer players (run) ________ very fast across the field.", target: "PRESENT CONTINUOUS", baseVerb: "run", ans: "are running", opts: ["are running", "is running", "runs"] },
+            { sentence: "In the kitchen right now, my helper brother (set) ________ the wooden table.", target: "PRESENT CONTINUOUS", baseVerb: "set", ans: "is setting", opts: ["is setting", "are setting", "sets"] },
+            { sentence: "Under the hot sun, the sweet ice cream cone (melt) ________ quickly.", target: "PRESENT CONTINUOUS", baseVerb: "melt", ans: "is melting", opts: ["is melting", "are melting", "melts"] },
+            { sentence: "Look! Two graceful squirrels (climb) ________ up the rough trunk of the oak tree.", target: "PRESENT CONTINUOUS", baseVerb: "climb", ans: "are climbing", opts: ["are climbing", "is climbing", "climbs"] },
+            { sentence: "Right now, the heavy grey clouds (move) ________ across the windy sky.", target: "PRESENT CONTINUOUS", baseVerb: "move", ans: "are moving", opts: ["are moving", "is moving", "moves"] },
+            { sentence: "In the cozy living room, my dad (play) ________ a slow song on the piano.", target: "PRESENT CONTINUOUS", baseVerb: "play", ans: "is playing", opts: ["is playing", "are playing", "plays"] }
+        ];
+
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3')
+        };
+        let audioCtx = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+            audioInitialized = true;
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => playSynthFallback('correct'));
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => playSynthFallback('wrong'));
+            }
+        }
+
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    osc.frequency.setValueAtTime(698.46, audioCtx.currentTime + 0.1); // F5
+                    osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.2); // A5
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(140, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                }
+            } catch (e) {
+                console.warn("Synthesizer fallback error", e);
+            }
+        }
+
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+
+        const targetTenseLabel = document.getElementById("target-tense-label");
+        const sentenceCard = document.getElementById("sentence-card");
+        const feedbackMsg = document.getElementById("feedback-msg");
+        
+        const baseVerbIndicator = document.getElementById("base-verb-indicator");
+        const conjugateRuleIndicator = document.getElementById("conjugate-rule-indicator");
+
+        const questionIndexEl = document.getElementById("question-index");
+        const playerScoreEl = document.getElementById("player-score");
+        const rivalScoreEl = document.getElementById("rival-score");
+        const finalPlayerScoreEl = document.getElementById("final-player-score");
+        const finalRivalScoreEl = document.getElementById("final-rival-score");
+        const performanceFeedback = document.getElementById("performance-feedback");
+
+        const gardenCanvas = document.getElementById("gardenCanvas");
+        const ctx = gardenCanvas.getContext("2d");
+
+        const btnSprinkler0 = document.getElementById("btn-sprinkler-0");
+        const btnSprinkler1 = document.getElementById("btn-sprinkler-1");
+        const btnSprinkler2 = document.getElementById("btn-sprinkler-2");
+
+        const optLabel0 = document.getElementById("option-label-0");
+        const optLabel1 = document.getElementById("option-label-1");
+        const optLabel2 = document.getElementById("option-label-2");
+
+        let currentQuestionIdx = 0;
+        let playerScore = 0;
+        let rivalScore = 0;
+        let activeQuestions = [];
+        
+        let optionsList = [];
+        let correctAnswer = "";
+        let selectedSprinklerIdx = null;
+        let waterBeamTimer = 0; 
+        let roundActive = false;
+
+        // Visual plant seedling objects with smooth physics targets
+        let plants = [
+            { xRatio: 0.18, state: 'seed', color: '#10b981', bloomProgress: 0, targetProgress: 0.2, label: "" },
+            { xRatio: 0.50, state: 'seed', color: '#3b82f6', bloomProgress: 0, targetProgress: 0.2, label: "" },
+            { xRatio: 0.82, state: 'seed', color: '#ec4899', bloomProgress: 0, targetProgress: 0.2, label: "" }
+        ];
+
+        let butterflies = []; 
+
+        function generateButterflies(x, y, color) {
+            for (let i = 0; i < 15; i++) {
+                butterflies.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 1.5) * 3,
+                    r: Math.random() * 4 + 2,
+                    color: color,
+                    alpha: 1,
+                    angle: Math.random() * Math.PI * 2
+                });
+            }
+        }
+
+        function renderGardenGraph() {
+            const width = gardenCanvas.width;
+            const height = gardenCanvas.height;
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw clean greenhouse floor shelf
+            const shelfY = height * 0.82;
+            const shelfGrad = ctx.createLinearGradient(0, shelfY, 0, height);
+            shelfGrad.addColorStop(0, "#134e4a"); 
+            shelfGrad.addColorStop(1, "#022c22");
+            ctx.fillStyle = shelfGrad;
+            ctx.fillRect(0, shelfY, width, height - shelfY);
+
+            ctx.strokeStyle = "rgba(16, 185, 129, 0.2)";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, shelfY);
+            ctx.lineTo(width, shelfY);
+            ctx.stroke();
+
+            // Draw Greenhouse background panel beams
+            ctx.strokeStyle = "rgba(20, 184, 166, 0.05)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(width * 0.33, 0);
+            ctx.lineTo(width * 0.33, shelfY);
+            ctx.moveTo(width * 0.66, 0);
+            ctx.lineTo(width * 0.66, shelfY);
+            ctx.stroke();
+
+            // Draw water beams if sprinkler active
+            if (selectedSprinklerIdx !== null && waterBeamTimer > 0) {
+                const targetPlant = plants[selectedSprinklerIdx];
+                const px = width * targetPlant.xRatio;
+                const topSprinklerY = 15;
+
+                // Glowing blue water cone
+                const waterGrad = ctx.createLinearGradient(px, topSprinklerY, px, shelfY - 20);
+                waterGrad.addColorStop(0, "rgba(56, 189, 248, 0.7)");
+                waterGrad.addColorStop(1, "rgba(56, 189, 248, 0.05)");
+                ctx.fillStyle = waterGrad;
+
+                ctx.beginPath();
+                ctx.moveTo(px - 15, topSprinklerY);
+                ctx.lineTo(px + 15, topSprinklerY);
+                ctx.lineTo(px + 45, shelfY - 30);
+                ctx.lineTo(px - 45, shelfY - 30);
+                ctx.closePath();
+                ctx.fill();
+
+                // Droplet sparkles
+                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+                for (let i = 0; i < 8; i++) {
+                    const dropY = topSprinklerY + Math.random() * (shelfY - 30 - topSprinklerY);
+                    const spread = (dropY / shelfY) * 35;
+                    const dropX = px + (Math.random() - 0.5) * spread;
+                    ctx.beginPath();
+                    ctx.arc(dropX, dropY, Math.random() * 2 + 1, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                waterBeamTimer--;
+                if (waterBeamTimer <= 0) {
+                    selectedSprinklerIdx = null;
+                }
+            }
+
+            // Draw Plants & Seed Pots
+            plants.forEach((plant, idx) => {
+                const px = width * plant.xRatio;
+                const potHeight = 35;
+                const potY = shelfY - potHeight;
+
+                // Smoothly update growing progress frame-by-frame
+                const growDiff = plant.targetProgress - plant.bloomProgress;
+                plant.bloomProgress += growDiff * 0.1; // Smooth ease-out growth physics
+
+                // Pot top coordinates
+                const potTopWidth = 55;
+                const potBottomWidth = 40;
+
+                // Standard Plant Pot Drawing
+                ctx.fillStyle = "#7c2d12"; // Terracotta pot
+                ctx.beginPath();
+                ctx.moveTo(px - potTopWidth/2, potY);
+                ctx.lineTo(px + potTopWidth/2, potY);
+                ctx.lineTo(px + potBottomWidth/2, shelfY);
+                ctx.lineTo(px - potBottomWidth/2, shelfY);
+                ctx.closePath();
+                ctx.fill();
+
+                // Pot rim shadow
+                ctx.fillStyle = "#9a3412";
+                ctx.fillRect(px - (potTopWidth+6)/2, potY, potTopWidth + 6, 8);
+
+                // Stem & Leaves Drawing
+                const stemLength = 65;
+                const stemTopY = potY - stemLength * plant.bloomProgress;
+
+                if (plant.bloomProgress > 0.05) {
+                    ctx.strokeStyle = "#059669";
+                    ctx.lineWidth = 6;
+                    ctx.lineCap = "round";
+                    ctx.beginPath();
+                    ctx.moveTo(px, potY);
+                    ctx.quadraticCurveTo(px + Math.sin(Date.now() / 300) * 5, potY - stemLength/2, px, stemTopY);
+                    ctx.stroke();
+
+                    // Side leaves
+                    ctx.fillStyle = "#10b981";
+                    ctx.save();
+                    ctx.translate(px, potY - stemLength/2);
+                    ctx.rotate(Math.sin(Date.now() / 400) * 0.1);
+                    
+                    // Left Leaf
+                    ctx.beginPath();
+                    ctx.ellipse(-14, -5, 14, 7, -Math.PI/6, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    // Right Leaf
+                    ctx.beginPath();
+                    ctx.ellipse(14, -10, 14, 7, Math.PI/6, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    ctx.restore(); // FIXED: Changed to call 'ctx.restore()' correctly
+                }
+
+                // If fully bloomed, draw beautiful flower petals
+                if (plant.state === 'bloomed') {
+                    const bloomScale = plant.bloomProgress;
+                    const petalRadius = 18 * bloomScale;
+
+                    // Petals background glow
+                    const petGrad = ctx.createRadialGradient(px, stemTopY, 2, px, stemTopY, petalRadius * 2);
+                    petGrad.addColorStop(0, plant.color);
+                    petGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+                    ctx.fillStyle = petGrad;
+                    ctx.beginPath();
+                    ctx.arc(px, stemTopY, petalRadius * 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Draw 5 overlapping flower petals
+                    ctx.fillStyle = plant.color;
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * Math.PI * 2) / 5 + (Date.now() / 2000);
+                        const petalX = px + Math.cos(angle) * petalRadius;
+                        const petalY = stemTopY + Math.sin(angle) * petalRadius;
+                        ctx.beginPath();
+                        ctx.arc(petalX, petalY, petalRadius * 0.9, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // Flower core bulb
+                    ctx.fillStyle = "#facc15"; // Yellow core center
+                    ctx.beginPath();
+                    ctx.arc(px, stemTopY, petalRadius * 0.6, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (plant.state === 'weeds') {
+                    // Draw wild purple weeds with thorns
+                    ctx.strokeStyle = "#8b5cf6";
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(px, potY);
+                    ctx.lineTo(px - 15, potY - (40 * plant.bloomProgress));
+                    ctx.moveTo(px, potY);
+                    ctx.lineTo(px + 15, potY - (35 * plant.bloomProgress));
+                    ctx.stroke();
+                }
+
+                // Text choice written directly on top of the plant's blossom coordinate
+                if (plant.label) {
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "bold 11px 'Fredoka'";
+                    ctx.textAlign = "center";
+                    // Drop shadow background for text
+                    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+                    const textWidth = ctx.measureText(plant.label).width;
+                    ctx.beginPath();
+                    ctx.roundRect(px - (textWidth + 12)/2, potY - 95, textWidth + 12, 18, 5);
+                    ctx.fill();
+
+                    ctx.fillStyle = (plant.state === 'bloomed') ? "#facc15" : ((plant.state === 'weeds') ? "#f43f5e" : "#10b981");
+                    ctx.fillText(plant.label, px, potY - 82);
+                }
+            });
+
+            // Draw Butterfly feedback particles
+            for (let i = butterflies.length - 1; i >= 0; i--) {
+                const b = butterflies[i];
+                b.x += b.vx;
+                b.y += b.vy;
+                b.vy += 0.05; // gravity ease
+                b.alpha -= 0.015;
+                b.angle += 0.08;
+
+                if (b.alpha <= 0) {
+                    butterflies.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.translate(b.x, b.y);
+                ctx.globalAlpha = b.alpha;
+                ctx.fillStyle = b.color;
+                
+                // Wing left and right flapping math
+                const flapWidth = b.r * Math.sin(b.angle);
+                ctx.beginPath();
+                ctx.ellipse(-flapWidth/2, 0, b.r, b.r*1.5, Math.PI/4, 0, Math.PI*2);
+                ctx.ellipse(flapWidth/2, 0, b.r, b.r*1.5, -Math.PI/4, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+
+            requestAnimationFrame(renderGardenGraph);
+        }
+
+        // Setup Canvas Sizing
+        function resizeCanvas() {
+            const container = gardenCanvas.parentElement;
+            gardenCanvas.width = container.clientWidth || 320;
+            gardenCanvas.height = container.clientHeight || 240;
+        }
+
+        function prepareQuestions() {
+            // Select exactly 10 randomized questions from standard simple bank
+            const simples = questionBank.filter(q => q.target === "SIMPLE PRESENT").sort(() => 0.5 - Math.random()).slice(0, 5);
+            const conts = questionBank.filter(q => q.target === "PRESENT CONTINUOUS").sort(() => 0.5 - Math.random()).slice(0, 5);
+            
+            activeQuestions = [...simples, ...conts].sort(() => 0.5 - Math.random());
+            currentQuestionIdx = 0;
+            playerScore = 0;
+            rivalScore = 0;
+
+            playerScoreEl.textContent = playerScore;
+            rivalScoreEl.textContent = rivalScore;
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIdx >= activeQuestions.length) {
+                concludeGame();
+                return;
+            }
+
+            roundActive = true;
+            questionIndexEl.textContent = `${currentQuestionIdx + 1}/10`;
+            const q = activeQuestions[currentQuestionIdx];
+
+            // Setup Target Instructions & conjugation parameters
+            targetTenseLabel.textContent = `WATER THE MAGICAL FLOWER IN: ${q.target} TENSE!`;
+            baseVerbIndicator.textContent = q.baseVerb;
+            conjugateRuleIndicator.textContent = q.target;
+            
+            // Render sentence block with underscores
+            sentenceCard.innerHTML = q.sentence.replace("________", "<span class='text-emerald-400 font-extrabold underline decoration-wavy px-1 decoration-1'>________</span>");
+
+            correctAnswer = q.ans.toLowerCase();
+            optionsList = [...q.opts]; // choices
+
+            // Reset seedling plants
+            plants.forEach((plant, idx) => {
+                plant.state = 'seed';
+                plant.bloomProgress = 0.0;     // Start from ground level
+                plant.targetProgress = 0.25;   // Base seedling size
+                plant.label = optionsList[idx];
+            });
+
+            // Push choices to on-screen touch buttons
+            optLabel0.textContent = optionsList[0];
+            optLabel1.textContent = optionsList[1];
+            optLabel2.textContent = optionsList[2];
+
+            feedbackMsg.textContent = "Tap a plant's sprinkler nozzle below to grow it!";
+            feedbackMsg.className = "absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-teal-300 uppercase tracking-widest font-black bg-slate-950/90 px-3 py-1 rounded-full border border-teal-500/20 text-center animate-pulse shadow-md";
+        }
+
+        function triggerWaterPlant(chosenIndex) {
+            if (!roundActive) return;
+            roundActive = false; // block inputs
+
+            selectedSprinklerIdx = chosenIndex;
+            waterBeamTimer = 45; // trigger water sprinkler duration loop
+
+            const chosenVerb = optionsList[chosenIndex].toLowerCase();
+            const isCorrect = (chosenVerb === correctAnswer);
+
+            setTimeout(() => {
+                const activePlant = plants[chosenIndex];
+                const width = gardenCanvas.width;
+                const px = width * activePlant.xRatio;
+                const stemTopY = gardenCanvas.height * 0.82 - 65;
+
+                if (isCorrect) {
+                    playSound('correct');
+                    activePlant.state = 'bloomed';
+                    activePlant.targetProgress = 1.0; // Grows smoothly to maximum bloom scale in frame loop!
+
+                    playerScore++;
+                    playerScoreEl.textContent = playerScore;
+
+                    feedbackMsg.textContent = "SPECTACULAR BLOSSOM BLOOMED! 🌸";
+                    feedbackMsg.className = "absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-emerald-400 uppercase tracking-widest font-black bg-slate-950/95 px-4 py-1 rounded-full border border-emerald-500/30 text-center shadow-lg";
+
+                    generateButterflies(px, stemTopY, activePlant.color);
+
+                    // Update sentence label with solved value
+                    const q = activeQuestions[currentQuestionIdx];
+                    sentenceCard.innerHTML = q.sentence.replace("________", `<span class='text-emerald-400 font-black px-1 underline decoration-1'>${q.ans.toUpperCase()}</span>`);
+
+                    setTimeout(() => {
+                        currentQuestionIdx++;
+                        loadQuestion();
+                    }, 2500);
+
+                } else {
+                    playSound('wrong');
+                    activePlant.state = 'weeds';
+                    activePlant.targetProgress = 0.75; // Weeds grow quickly as feedback
+                    
+                    rivalScore++;
+                    rivalScoreEl.textContent = rivalScore;
+
+                    feedbackMsg.textContent = "OH NO! WEEDS SPROUTED! ⚠️";
+                    feedbackMsg.className = "absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-rose-400 uppercase tracking-widest font-black bg-slate-950/95 px-4 py-1 rounded-full border border-rose-500/30 text-center shadow-lg";
+
+                    // Show correct option in center card
+                    const q = activeQuestions[currentQuestionIdx];
+                    sentenceCard.innerHTML = q.sentence.replace("________", `<span class='text-rose-400 font-black px-1 underline decoration-1 decoration-rose-500'>${q.ans.toUpperCase()}</span>`);
+
+                    // Automatically bloom the correct flower to provide visual learning reinforcement
+                    const correctIdx = optionsList.indexOf(q.ans);
+                    if (correctIdx !== -1) {
+                        plants[correctIdx].state = 'bloomed';
+                        plants[correctIdx].targetProgress = 1.0; // Correct option blossoms smoothly
+                    }
+
+                    setTimeout(() => {
+                        currentQuestionIdx++;
+                        loadQuestion();
+                    }, 2850);
+                }
+            }, 600); // delay response slightly until sprinkler ray settles
+        }
+
+        // Add Touch/Mouse click triggers directly inside Canvas
+        gardenCanvas.addEventListener('click', (e) => {
+            if (!roundActive) return;
+            const rect = gardenCanvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickRatio = clickX / gardenCanvas.width;
+
+            // Determine closest plant pot ratio clicked
+            let closestIdx = 0;
+            let minDist = Math.abs(clickRatio - plants[0].xRatio);
+
+            for (let i = 1; i < plants.length; i++) {
+                const dist = Math.abs(clickRatio - plants[i].xRatio);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closestIdx = i;
+                }
+            }
+
+            // Only trigger if click was relatively near the target pot boundaries
+            if (minDist < 0.16) {
+                triggerWaterPlant(closestIdx);
+            }
+        });
+
+        // Setup individual action buttons
+        btnSprinkler0.addEventListener('click', () => triggerWaterPlant(0));
+        btnSprinkler1.addEventListener('click', () => triggerWaterPlant(1));
+        btnSprinkler2.addEventListener('click', () => triggerWaterPlant(2));
+
+        function concludeGame() {
+            gameoverScreen.classList.remove("hidden");
+            playSound('correct');
+
+            finalPlayerScoreEl.textContent = playerScore;
+            finalRivalScoreEl.textContent = rivalScore;
+
+            let msg = "";
+            if (playerScore > rivalScore) {
+                msg = "🏆 Legendary Greenhouse Botanist! You aligned subject structures and progressive helpers perfectly!";
+                document.getElementById("victory-title").textContent = "GARDEN SAFE!";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 mb-1 playful-font";
+            } else if (playerScore === rivalScore) {
+                msg = "🤝 Even Ecosystem Balance! The greenhouse seedlings are growing, but you should practice plural present continuous helper rules again!";
+                document.getElementById("victory-title").textContent = "ECOSYSTEM BALANCED";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-amber-400 mb-1 playful-font";
+            } else {
+                msg = "⚠️ Invasive Weeds Detected! Present tense verb conjugation codes got corrupted. Let's grow again to fix them!";
+                document.getElementById("victory-title").textContent = "WEED OVERRUN";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-emerald-400 mb-1 playful-font";
+            }
+            performanceFeedback.textContent = msg;
+        }
+
+        // Start button trigger
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            prepareQuestions();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            prepareQuestions();
+        });
+
+        // Exact 5-Second Brand splash overlay
+        setTimeout(() => {
+            logoScreen.style.opacity = "0";
+            setTimeout(() => {
+                logoScreen.classList.add("hidden");
+                startScreen.classList.remove("hidden");
+            }, 1000);
+        }, 5000);
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+        // Initialize Canvas drawing and gear rotation loops on load
+        window.onload = function () {
+            resizeCanvas();
+            renderGardenGraph();
+        }
+    </script>
+</body>
+</html>
