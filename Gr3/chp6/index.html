@@ -1,341 +1,951 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Subject & Predicate Marathon</title>
+    <!-- Tailwind CSS for modern athletic design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Playful typography from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #080710; /* Deep stadium midnight black */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            overflow: hidden;
+        }
+        .playful-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-1 md:p-4 text-slate-100">
 
-// --- QUESTION BANKS (15 per level) ---
-// Level 1: Applying knowledge to identify complete subjects and predicates in varied sentences
-const level1Bank = [
-  { q: 'In the sentence "The tiny green frog hopped across the lily pad," what is the complete subject?', options: ['The tiny green frog', 'hopped across', 'the lily pad', 'green frog hopped'], ans: 'The tiny green frog' },
-  { q: 'Identify the complete predicate: "My older brother bakes delicious chocolate chip cookies."', options: ['bakes delicious chocolate chip cookies', 'My older brother', 'delicious chocolate', 'brother bakes'], ans: 'bakes delicious chocolate chip cookies' },
-  { q: 'Which part is the complete subject? "Under the bed, the scared kitten hid."', options: ['the scared kitten', 'Under the bed', 'kitten hid', 'hid'], ans: 'the scared kitten' },
-  { q: 'Identify the complete predicate: "The roaring lion scared the tourists."', options: ['scared the tourists', 'The roaring lion', 'lion scared', 'the tourists'], ans: 'scared the tourists' },
-  { q: 'What is the complete subject? "Three bright stars shined in the night sky."', options: ['Three bright stars', 'shined in the night', 'the night sky', 'stars shined'], ans: 'Three bright stars' },
-  { q: 'Identify the complete predicate: "The old wooden door creaked loudly in the wind."', options: ['creaked loudly in the wind', 'The old wooden door', 'door creaked', 'loudly in the wind'], ans: 'creaked loudly in the wind' },
-  { q: 'What is the complete subject? "Our school\'s basketball team won the championship."', options: ['Our school\'s basketball team', 'won the championship', 'school\'s basketball', 'the championship'], ans: 'Our school\'s basketball team' },
-  { q: 'Identify the complete predicate: "A swarm of angry bees chased the bear."', options: ['chased the bear', 'A swarm of angry bees', 'swarm of angry', 'bees chased'], ans: 'chased the bear' },
-  { q: 'What is the complete subject? "The fluffy white clouds floated by slowly."', options: ['The fluffy white clouds', 'floated by slowly', 'white clouds floated', 'by slowly'], ans: 'The fluffy white clouds' },
-  { q: 'Identify the complete predicate: "My best friend Sarah plays the violin beautifully."', options: ['plays the violin beautifully', 'My best friend Sarah', 'friend Sarah plays', 'the violin'], ans: 'plays the violin beautifully' },
-  { q: 'What is the complete subject? "A shiny new bicycle sat in the driveway."', options: ['A shiny new bicycle', 'sat in the driveway', 'new bicycle sat', 'in the driveway'], ans: 'A shiny new bicycle' },
-  { q: 'Identify the complete predicate: "The hungry caterpillars ate all the green leaves."', options: ['ate all the green leaves', 'The hungry caterpillars', 'caterpillars ate', 'all the green'], ans: 'ate all the green leaves' },
-  { q: 'What is the complete subject? "The brave firefighter rescued the cat from the tree."', options: ['The brave firefighter', 'rescued the cat', 'firefighter rescued', 'from the tree'], ans: 'The brave firefighter' },
-  { q: 'Identify the complete predicate: "A loud thunderstorm woke me up in the middle of the night."', options: ['woke me up in the middle of the night', 'A loud thunderstorm', 'thunderstorm woke', 'middle of the night'], ans: 'woke me up in the middle of the night' },
-  { q: 'What is the complete subject? "The mysterious old map led to a hidden treasure."', options: ['The mysterious old map', 'led to a hidden treasure', 'old map led', 'a hidden treasure'], ans: 'The mysterious old map' },
-];
+    <div class="relative w-full max-w-5xl bg-slate-950 rounded-3xl border-4 border-cyan-500 shadow-2xl shadow-cyan-500/10 overflow-hidden flex flex-col h-[98vh] md:h-[90vh]">
 
-// Level 2: Logical matching, compound subjects/predicates, and identifying fragments (beyond basic recall)
-const level2Bank = [
-  { q: 'Which predicate makes the most logical sense for the subject "The boiling water"?', options: ['bubbled and steamed on the stove.', 'slept quietly in the basket.', 'barked at the mailman.', 'flew south for the winter.'], ans: 'bubbled and steamed on the stove.' },
-  { q: 'Which subject makes the most sense for the predicate "melted quickly in the hot sun"?', options: ['The double-scoop ice cream cone', 'The heavy winter coat', 'The rock solid brick', 'The loud music'], ans: 'The double-scoop ice cream cone' },
-  { q: 'Identify the compound subject: "The dog and the cat slept peacefully on the rug."', options: ['The dog and the cat', 'slept peacefully', 'on the rug', 'dog and the cat slept'], ans: 'The dog and the cat' },
-  { q: 'Identify the compound predicate: "The children ran outside and played in the snow."', options: ['ran outside and played in the snow.', 'The children', 'ran outside', 'played in the snow.'], ans: 'ran outside and played in the snow.' },
-  { q: 'Which of these is a fragment because it is MISSING a subject?', options: ['Ran as fast as possible to the finish line.', 'The little boy ran.', 'She smiled at me.', 'The heavy rain fell.'], ans: 'Ran as fast as possible to the finish line.' },
-  { q: 'Which of these is a fragment because it is MISSING a predicate?', options: ['The giant oak tree in the front yard.', 'The tree fell down.', 'Birds sing.', 'I am happy.'], ans: 'The giant oak tree in the front yard.' },
-  { q: 'Complete the sentence logically: "The fierce, green dragon..."', options: ['guarded the shiny gold in the cave.', 'was baked in the oven.', 'grew on the apple tree.', 'drove the school bus.'], ans: 'guarded the shiny gold in the cave.' },
-  { q: 'Complete the sentence logically: "...soared high above the fluffy clouds."', options: ['The silver airplane', 'The heavy bowling ball', 'The underground worm', 'The deep ocean'], ans: 'The silver airplane' },
-  { q: 'Identify the compound subject: "Apples and bananas are my favorite fruits."', options: ['Apples and bananas', 'are my favorite fruits', 'my favorite fruits', 'Apples are'], ans: 'Apples and bananas' },
-  { q: 'Identify the compound predicate: "The monkey swung from the branch and grabbed a banana."', options: ['swung from the branch and grabbed a banana.', 'The monkey', 'swung from the branch', 'grabbed a banana.'], ans: 'swung from the branch and grabbed a banana.' },
-  { q: 'Which option is a COMPLETE sentence (has both a subject and a working predicate)?', options: ['The wind blew fiercely all night.', 'A bowl of hot, delicious soup.', 'Jumping over the tall fence.', 'The large, friendly golden retriever.'], ans: 'The wind blew fiercely all night.' },
-  { q: 'Which option is NOT a complete sentence?', options: ['A bright shooting star.', 'The dog barked.', 'We won the game!', 'She laughed.'], ans: 'A bright shooting star.' },
-  { q: 'Find the complete subject: "Both of my parents work at the city hospital."', options: ['Both of my parents', 'work at the city hospital', 'parents work', 'at the city hospital'], ans: 'Both of my parents' },
-  { q: 'Find the complete predicate: "The sneaky raccoon dug through our trash can."', options: ['dug through our trash can.', 'The sneaky raccoon', 'raccoon dug', 'our trash can.'], ans: 'dug through our trash can.' },
-  { q: 'Which predicate fits best? "The rusty old robot..."', options: ['clanked and sputtered as it walked.', 'swam beautifully in the ocean.', 'purred softly on my lap.', 'bloomed in the spring.'], ans: 'clanked and sputtered as it walked.' },
-];
-
-// Helper: Shuffle array and return a specific number of items
-const getShuffledQuestions = (bank, count) => {
-  const shuffled = [...bank].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-};
-
-// Helper: Shuffle options for a question
-const shuffleOptions = (options) => {
-  return [...options].sort(() => 0.5 - Math.random());
-};
-
-export default function App() {
-  const [gameState, setGameState] = useState('splash'); // splash, menu, transition, playing, gameover
-  const [currentLevel, setCurrentLevel] = useState(1);
-  const [score, setScore] = useState(0);
-  const [questions, setQuestions] = useState([]);
-  const [currentQIndex, setCurrentQIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(15);
-  const [shuffledCurrentOptions, setShuffledCurrentOptions] = useState([]);
-  const [feedback, setFeedback] = useState(null); // 'correct', 'wrong', null
-  
-  const timerRef = useRef(null);
-
-  // Audio elements
-  const playSound = (type) => {
-    try {
-      const audioPath = type === 'correct' ? 'assets/correct.mp3' : 'assets/wrong.mp3';
-      const audio = new Audio(audioPath);
-      audio.play().catch(e => console.log("Audio play prevented by browser, waiting for user interaction."));
-    } catch (error) {
-      console.log("Audio failed to load", error);
-    }
-  };
-
-  // Splash Screen Logic
-  useEffect(() => {
-    if (gameState === 'splash') {
-      const timer = setTimeout(() => {
-        setGameState('menu');
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [gameState]);
-
-  // Timer logic during gameplay
-  useEffect(() => {
-    if (gameState === 'playing' && feedback === null) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current);
-            handleAnswerTimeout();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [gameState, feedback, currentQIndex]);
-
-  const startGame = () => {
-    setScore(0);
-    startLevel(1);
-  };
-
-  const startLevel = (level) => {
-    setCurrentLevel(level);
-    const bank = level === 1 ? level1Bank : level2Bank;
-    const selectedQs = getShuffledQuestions(bank, 10); // Select 10 out of 15
-    setQuestions(selectedQs);
-    setCurrentQIndex(0);
-    setGameState('transition');
-    
-    setTimeout(() => {
-      prepareQuestion(selectedQs[0]);
-      setGameState('playing');
-    }, 2500); // 2.5s transition screen
-  };
-
-  const prepareQuestion = (question) => {
-    setShuffledCurrentOptions(shuffleOptions(question.options));
-    setTimeLeft(15);
-    setFeedback(null);
-  };
-
-  const handleAnswerTimeout = () => {
-    playSound('wrong');
-    setFeedback('wrong');
-    setTimeout(() => advanceQuestion(), 1500);
-  };
-
-  const handleAnswerClick = (selectedOption) => {
-    if (feedback !== null) return; // Prevent multiple clicks
-    
-    const currentQ = questions[currentQIndex];
-    const isCorrect = selectedOption === currentQ.ans;
-
-    if (isCorrect) {
-      playSound('correct');
-      setScore(prev => prev + (timeLeft * 10) + 100); // Bonus for fast answers
-      setFeedback('correct');
-    } else {
-      playSound('wrong');
-      setFeedback('wrong');
-    }
-
-    clearInterval(timerRef.current);
-    setTimeout(() => advanceQuestion(), 1500);
-  };
-
-  const advanceQuestion = () => {
-    if (currentQIndex + 1 < questions.length) {
-      const nextIndex = currentQIndex + 1;
-      setCurrentQIndex(nextIndex);
-      prepareQuestion(questions[nextIndex]);
-    } else {
-      // Level complete
-      if (currentLevel === 1) {
-        startLevel(2);
-      } else {
-        setGameState('gameover');
-      }
-    }
-  };
-
-  // --- RENDERERS ---
-
-  if (gameState === 'splash') {
-    return (
-      <div className="w-full h-screen flex flex-col items-center justify-center bg-white transition-opacity duration-1000">
-        <img 
-          src="assets/innovine-logo.png" 
-          alt="Innovine Logo" 
-          className="max-w-[80%] max-h-[50vh] object-contain animate-pulse"
-          onError={(e) => {
-            // Fallback just in case the path is missing in preview environment
-            e.target.style.display = 'none';
-            e.target.insertAdjacentHTML('afterend', '<h1 class="text-4xl font-bold text-blue-600">INNOVINE GAMES</h1>');
-          }}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full min-h-screen bg-slate-900 text-white font-sans selection:bg-cyan-500 flex flex-col items-center justify-center p-4 overflow-hidden relative">
-      
-      {/* Background Starfield Effect (CSS based to save bandwidth) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-        {[...Array(20)].map((_, i) => (
-          <div key={i} className="absolute bg-white rounded-full animate-ping" 
-               style={{
-                 width: Math.random() * 4 + 'px', 
-                 height: Math.random() * 4 + 'px', 
-                 top: Math.random() * 100 + '%', 
-                 left: Math.random() * 100 + '%',
-                 animationDuration: (Math.random() * 3 + 2) + 's',
-                 animationDelay: Math.random() * 2 + 's'
-               }}>
-          </div>
-        ))}
-      </div>
-
-      {/* Main Menu */}
-      {gameState === 'menu' && (
-        <div className="z-10 flex flex-col items-center text-center max-w-2xl bg-slate-800 p-8 rounded-3xl border-4 border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.6)]">
-          <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 mb-4 drop-shadow-md">
-            GALACTIC GRAMMAR
-          </h1>
-          <h2 className="text-xl md:text-2xl text-cyan-200 mb-8 font-semibold tracking-wide">
-            Subject & Predicate Rescue
-          </h2>
-          
-          <div className="bg-slate-700 p-4 rounded-xl mb-8 text-left text-sm md:text-base border border-slate-600">
-            <p className="mb-2">👨‍🚀 <strong className="text-fuchsia-400">Commander:</strong> "We need your help to fix broken communications!"</p>
-            <ul className="list-disc pl-5 space-y-2 text-slate-300">
-              <li><strong>Level 1:</strong> Identify the missing Subject or Predicate to restore the signal.</li>
-              <li><strong>Level 2:</strong> Solve advanced grammar anomalies to save the galaxy.</li>
-              <li>Answer quickly for hyper-speed bonus points!</li>
-            </ul>
-          </div>
-
-          <button 
-            onClick={startGame}
-            className="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xl rounded-full transform transition hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.8)]"
-          >
-            START MISSION
-          </button>
-        </div>
-      )}
-
-      {/* Level Transition */}
-      {gameState === 'transition' && (
-        <div className="z-10 flex flex-col items-center animate-bounce">
-          <h2 className="text-5xl md:text-7xl font-black text-fuchsia-400 drop-shadow-[0_0_15px_rgba(232,121,249,0.8)]">
-            LEVEL {currentLevel}
-          </h2>
-          <p className="text-xl mt-4 text-cyan-300">
-            {currentLevel === 1 ? "Target Identification" : "Advanced Logic Systems"}
-          </p>
-          <div className="mt-8 text-slate-400 animate-pulse">Entering sector...</div>
-        </div>
-      )}
-
-      {/* Gameplay */}
-      {gameState === 'playing' && questions.length > 0 && (
-        <div className="z-10 w-full max-w-3xl flex flex-col h-full">
-          {/* Top HUD */}
-          <div className="flex justify-between items-center bg-slate-800/80 p-4 rounded-2xl border-2 border-slate-700 mb-6 backdrop-blur-sm">
-            <div className="flex flex-col">
-              <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Level {currentLevel}</span>
-              <span className="text-cyan-400 font-bold text-lg">Mission {currentQIndex + 1}/10</span>
+        <!-- Pure White Splash Screen Overlay (Active for exactly 5 seconds) -->
+        <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[280px] w-4/5 h-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <!-- Safe fallback if offline/no local brand logo asset -->
+            <div id="logo-fallback" class="hidden text-center">
+                <div class="text-5xl font-black tracking-wider text-slate-900 uppercase">INNOVINE</div>
+                <div class="text-sm text-cyan-600 font-semibold uppercase tracking-widest mt-1">Learning Games</div>
             </div>
-            <div className="flex flex-col items-end">
-              <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Score</span>
-              <span className="text-fuchsia-400 font-black text-2xl">{score}</span>
-            </div>
-          </div>
+        </div>
 
-          {/* Timer Bar */}
-          <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden mb-6 border border-slate-700">
-            <div 
-              className={`h-full transition-all duration-1000 ease-linear ${timeLeft > 5 ? 'bg-cyan-500' : 'bg-red-500 animate-pulse'}`}
-              style={{ width: `${(timeLeft / 15) * 100}%` }}
-            ></div>
-          </div>
+        <!-- Start/Instruction Screen Overlay -->
+        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 md:p-6 text-center z-40 hidden overflow-y-auto">
+            <div class="max-w-md bg-slate-900/90 p-5 md:p-8 rounded-2xl border-2 border-cyan-500/40 backdrop-blur-md shadow-2xl my-auto">
+                <div class="text-5xl md:text-6xl mb-4 animate-bounce">🏃‍♂️🏅</div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-cyan-400 mb-1 uppercase playful-font">Marathon Run</h2>
+                <h3 class="text-md text-slate-300 font-semibold mb-4">Subject & Predicate Challenge</h3>
+                
+                <div class="text-sm text-slate-300 text-left space-y-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800 mb-6 max-h-[220px] overflow-y-auto">
+                    <p>🏃‍♂️ <strong>How to Play:</strong> Guide your marathon runner down the stadium tracks by changing lanes!</p>
+                    <p class="font-bold text-cyan-400">🔥 Marathon Rules:</p>
+                    <ul class="list-disc pl-5 space-y-1.5 text-xs text-slate-300">
+                        <li><strong>Read the sentence</strong> and prompt displayed at the top of the stadium monitor.</li>
+                        <li><strong>Steer your runner</strong> into the lane with the correct phrase gate!</li>
+                        <li><strong>Pass the gate successfully</strong> to earn a massive speed boost, collect water bottles, and pull ahead of your rival!</li>
+                        <li><strong>Crashing into the wrong gate</strong> will cause your runner to trip, slowing you down while your rival dashes forward!</li>
+                    </ul>
+                    <p class="text-xs text-orange-400 font-semibold">🎮 Controls: Tap the Lane Buttons below, tap lanes directly on the screen, swipe left/right, or use Keyboard Left/Right Arrow keys!</p>
+                </div>
 
-          {/* Question Box */}
-          <div className="bg-slate-800 border-2 border-cyan-500 rounded-3xl p-6 md:p-8 mb-6 shadow-[0_0_20px_rgba(6,182,212,0.2)] text-center relative min-h-[150px] flex items-center justify-center">
-            <h3 className="text-xl md:text-2xl font-semibold leading-relaxed">
-              {questions[currentQIndex].q}
-            </h3>
-            
-            {/* Feedback Overlay */}
-            {feedback && (
-              <div className={`absolute inset-0 flex items-center justify-center rounded-3xl backdrop-blur-sm ${feedback === 'correct' ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                <span className={`text-4xl md:text-6xl font-black ${feedback === 'correct' ? 'text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,1)]' : 'text-red-400 drop-shadow-[0_0_10px_rgba(248,113,113,1)]'}`}>
-                  {feedback === 'correct' ? 'EXCELLENT!' : 'SYSTEM ERROR'}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Options Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {shuffledCurrentOptions.map((option, idx) => {
-              // Determine button styling based on state
-              let btnClass = "bg-slate-700 border-2 border-slate-600 hover:border-cyan-400 hover:bg-slate-600 text-slate-100";
-              if (feedback !== null) {
-                if (option === questions[currentQIndex].ans) {
-                  btnClass = "bg-green-600 border-2 border-green-400 text-white shadow-[0_0_15px_rgba(74,222,128,0.5)]"; // Highlight correct answer
-                } else if (feedback === 'wrong') {
-                  btnClass = "bg-slate-800 border-2 border-slate-700 text-slate-500 opacity-50"; // Dim others
-                }
-              }
-
-              return (
-                <button
-                  key={idx}
-                  disabled={feedback !== null}
-                  onClick={() => handleAnswerClick(option)}
-                  className={`p-4 md:p-6 rounded-2xl font-medium text-lg text-left transition-all duration-200 flex items-center min-h-[80px] ${btnClass}`}
-                >
-                  <span className="mr-3 text-cyan-500 font-black text-xl">{['A','B','C','D'][idx]}</span>
-                  <span>{option}</span>
+                <button id="start-btn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 active:from-cyan-700 text-white font-extrabold py-3.5 px-6 rounded-xl shadow-lg shadow-cyan-500/20 transform transition active:scale-95 text-md uppercase tracking-wide playful-font">
+                    Enter Stadium
                 </button>
-              );
-            })}
-          </div>
+            </div>
         </div>
-      )}
 
-      {/* Game Over Screen */}
-      {gameState === 'gameover' && (
-        <div className="z-10 flex flex-col items-center text-center max-w-2xl bg-slate-800 p-8 rounded-3xl border-4 border-fuchsia-500 shadow-[0_0_30px_rgba(232,121,249,0.5)]">
-          <h2 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400 mb-2">
-            MISSION ACCOMPLISHED
-          </h2>
-          <p className="text-xl text-slate-300 mb-8">The grammar galaxy is safe thanks to you!</p>
-          
-          <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl p-6 mb-8 w-full">
-            <p className="text-sm text-cyan-400 font-bold uppercase tracking-widest mb-1">Final Score</p>
-            <p className="text-6xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
-              {score}
+        <!-- Level Cleared / Next Sector Overlay -->
+        <div id="level-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40 hidden">
+            <div class="max-w-md bg-slate-900/90 p-8 rounded-2xl border-2 border-cyan-500/40 backdrop-blur-md shadow-2xl">
+                <div class="text-6xl mb-4 animate-pulse">🏆👟</div>
+                <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 mb-2 playful-font">LEVEL CLEARED!</h2>
+                <p id="level-msg-text" class="text-slate-300 mb-6">Excellent sprinting! Ready for Level 2: Predicate Power-Up?</p>
+                <button id="level-next-btn" class="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg transform transition active:scale-95 text-lg uppercase tracking-wide playful-font">
+                    Begin Level 2
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over / Victory Screen Overlay -->
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40 hidden">
+            <div class="max-w-md bg-slate-900/90 p-8 rounded-2xl border-2 border-cyan-500/40 backdrop-blur-md shadow-2xl">
+                <div class="text-6xl mb-4">👑🏁</div>
+                <h2 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-cyan-400 mb-2 playful-font">FINISH LINE!</h2>
+                <p class="text-slate-300 text-sm mb-6">You have completed the Grammar Marathon!</p>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800">
+                        <span class="block text-xs text-slate-400 font-bold uppercase tracking-widest">Your Distance</span>
+                        <span id="final-score" class="text-2xl font-black text-cyan-400">0m</span>
+                    </div>
+                    <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800">
+                        <span class="block text-xs text-slate-400 font-bold uppercase tracking-widest">Rival Distance</span>
+                        <span id="final-rival-score" class="text-2xl font-black text-slate-400 font-semibold">0m</span>
+                    </div>
+                </div>
+
+                <p id="performance-message" class="text-slate-200 italic mb-6 font-semibold text-sm px-2"></p>
+
+                <button id="restart-btn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg transform transition active:scale-95 text-lg uppercase tracking-wide playful-font">
+                    Run Rematch
+                </button>
+            </div>
+        </div>
+
+        <!-- Header Dashboard / Scores Panel -->
+        <header class="bg-slate-900/95 px-4 py-3 border-b-2 border-cyan-500/30 flex flex-wrap justify-between items-center gap-2 z-10 backdrop-blur-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-pulse">🏃‍♂️</span>
+                <h1 class="text-lg md:text-xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400 playful-font">
+                    GRAMMAR MARATHON
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-2 text-xs md:text-sm font-semibold">
+                <div class="bg-slate-950/80 px-2.5 py-1 rounded-full border border-slate-800">
+                    Lvl: <span id="current-level" class="text-cyan-400 font-bold">1</span>
+                </div>
+                <div class="bg-slate-950/80 px-2.5 py-1 rounded-full border border-slate-800">
+                    Run: <span id="question-index" class="text-cyan-400 font-bold">1/10</span>
+                </div>
+                <div class="bg-cyan-950/60 px-2.5 py-1 rounded-full border border-cyan-500/30">
+                    YOU: <span id="player-score" class="text-cyan-400 font-bold">0m</span>
+                </div>
+                <div class="bg-rose-950/60 px-2.5 py-1 rounded-full border border-rose-500/30">
+                    RIVAL: <span id="rival-score" class="text-rose-400 font-bold">0m</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Game Instructions & Question Area (The Monitor) -->
+        <section id="question-panel" class="bg-slate-950 px-4 py-3 border-b border-slate-900/60 flex flex-col items-center justify-center text-center z-10 relative">
+            <p id="instruction-sub" class="text-[10px] md:text-xs uppercase tracking-widest text-cyan-400 font-bold mb-1">
+                RUN THROUGH THE CORRECT GATE AHEAD!
             </p>
-          </div>
+            
+            <div id="sentence-container" class="w-full max-w-3xl flex flex-col gap-1.5">
+                <div id="sentence-text" class="text-sm md:text-base font-bold text-white leading-relaxed px-4 py-2.5 bg-slate-900/80 rounded-xl border border-cyan-500/20 playful-font">
+                    Waiting for marathon gun...
+                </div>
+            </div>
+        </section>
 
-          <button 
-            onClick={startGame}
-            className="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-bold text-xl rounded-full transform transition hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(232,121,249,0.8)]"
-          >
-            PLAY AGAIN
-          </button>
-        </div>
-      )}
+        <!-- Main Running Canvas Area -->
+        <main class="relative flex-grow bg-slate-950 overflow-hidden flex flex-col">
+            <!-- Stadium Track Canvas -->
+            <canvas id="gameCanvas" class="w-full h-full block flex-grow"></canvas>
 
+            <!-- Speed line visual indicators & messages -->
+            <div id="feedback-banner" class="absolute top-4 left-1/2 transform -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
+                <div id="feedback-banner-text" class="px-6 py-2 rounded-full border-2 border-cyan-500 bg-slate-900/90 text-xl font-black uppercase text-cyan-400 drop-shadow-md playful-font">
+                    CORRECT GATE! SPEED BOOST!
+                </div>
+            </div>
+        </main>
+
+        <!-- High-Accessibility Touch Control Dock for Small Devices -->
+        <section class="bg-slate-900/95 p-3 border-t border-slate-800 flex justify-center items-center gap-3 z-10">
+            <button id="btn-lane-0" class="flex-1 max-w-[120px] bg-slate-800 hover:bg-slate-700 active:bg-cyan-600 text-slate-200 font-bold py-3 px-2 rounded-xl border border-slate-700 transition active:scale-95 text-xs uppercase tracking-wider">
+                ◀ Lane 1
+            </button>
+            <button id="btn-lane-1" class="flex-1 max-w-[120px] bg-slate-800 hover:bg-slate-700 active:bg-cyan-600 text-slate-200 font-bold py-3 px-2 rounded-xl border border-slate-700 transition active:scale-95 text-xs uppercase tracking-wider">
+                ▲ Lane 2
+            </button>
+            <button id="btn-lane-2" class="flex-1 max-w-[120px] bg-slate-800 hover:bg-slate-700 active:bg-cyan-600 text-slate-200 font-bold py-3 px-2 rounded-xl border border-slate-700 transition active:scale-95 text-xs uppercase tracking-wider">
+                Lane 3 ▶
+            </button>
+        </section>
+
+        <!-- Stadium Footer -->
+        <footer class="bg-slate-900/95 border-t border-slate-800 px-4 py-2 flex flex-col sm:flex-row justify-between items-center gap-1 z-10 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+            <div class="flex items-center gap-1.5 text-slate-400">
+                <span>⚡ Subject & Predicate Run &bull; Grade 3 Arena</span>
+            </div>
+            <div>
+                Innovine Learning Games &bull; Stadium Course
+            </div>
+        </footer>
     </div>
-  );
-}
+
+    <script>
+        // Formally styled Level 1 (Subject Sprint) and Level 2 (Predicate Power-Up) for Grade 3
+        const level1Bank = [
+            { sentence: "The clever little boy solved the puzzle.", target: "COMPLETE SUBJECT", ans: "The clever little boy", opts: ["The clever little boy", "solved the puzzle", "the puzzle"] },
+            { sentence: "Our friendly teacher smiled at us.", target: "COMPLETE SUBJECT", ans: "Our friendly teacher", opts: ["Our friendly teacher", "smiled at us", "at us"] },
+            { sentence: "Three beautiful butterflies landed on the flower.", target: "COMPLETE SUBJECT", ans: "Three beautiful butterflies", opts: ["Three beautiful butterflies", "landed on the flower", "the flower"] },
+            { sentence: "The heavy wooden door opened slowly.", target: "COMPLETE SUBJECT", ans: "The heavy wooden door", opts: ["The heavy wooden door", "opened slowly", "slowly"] },
+            { sentence: "My family's new car is bright red.", target: "COMPLETE SUBJECT", ans: "My family's new car", opts: ["My family's new car", "is bright red", "bright red"] },
+            { sentence: "A wild brown rabbit hopped across the lawn.", target: "COMPLETE SUBJECT", ans: "A wild brown rabbit", opts: ["A wild brown rabbit", "hopped across", "the lawn"] },
+            { sentence: "The warm summer sun heated the swimming pool.", target: "COMPLETE SUBJECT", ans: "The warm summer sun", opts: ["The warm summer sun", "heated the swimming pool", "the swimming pool"] },
+            { sentence: "Many excited children ran onto the field.", target: "COMPLETE SUBJECT", ans: "Many excited children", opts: ["Many excited children", "ran onto", "the field"] },
+            { sentence: "The quiet library helper stacked the books.", target: "COMPLETE SUBJECT", ans: "The quiet library helper", opts: ["The quiet library helper", "stacked the books", "the books"] },
+            { sentence: "Our school soccer team won the game.", target: "COMPLETE SUBJECT", ans: "Our school soccer team", opts: ["Our school soccer team", "won the game", "the game"] }
+        ];
+
+        const level2Bank = [
+            { sentence: "The hungry brown bear caught a fresh fish.", target: "COMPLETE PREDICATE", ans: "caught a fresh fish", opts: ["The hungry brown bear", "caught a fresh fish", "a fresh fish"] },
+            { sentence: "My little sister paints colorful pictures.", target: "COMPLETE PREDICATE", ans: "paints colorful pictures", opts: ["My little sister", "paints colorful pictures", "colorful pictures"] },
+            { sentence: "The bright yellow stars shined all night long.", target: "COMPLETE PREDICATE", ans: "shined all night long", opts: ["The bright yellow stars", "shined all night long", "all night long"] },
+            { sentence: "A loud thunderstorm scared our puppy.", target: "COMPLETE PREDICATE", ans: "scared our puppy", opts: ["A loud thunderstorm", "scared our puppy", "our puppy"] },
+            { sentence: "The school bus arrived on time.", target: "COMPLETE PREDICATE", ans: "arrived on time", opts: ["The school bus", "arrived on time", "on time"] },
+            { sentence: "An old maple tree fell during the storm.", target: "COMPLETE PREDICATE", ans: "fell during the storm", opts: ["An old maple tree", "fell during the storm", "during the storm"] },
+            { sentence: "The fast train zipped through the valley.", target: "COMPLETE PREDICATE", ans: "zipped through the valley", opts: ["The fast train", "zipped through the valley", "the valley"] },
+            { sentence: "Two curious kittens played with the yarn.", target: "COMPLETE PREDICATE", ans: "played with the yarn", opts: ["Two curious kittens", "played with the yarn", "with the yarn"] },
+            { sentence: "My grandfather walks in the park every morning.", target: "COMPLETE PREDICATE", ans: "walks in the park every morning", opts: ["My grandfather", "walks in the park every morning", "in the park"] },
+            { sentence: "The busy bees made sweet honey.", target: "COMPLETE PREDICATE", ans: "made sweet honey", opts: ["The busy bees", "made sweet honey", "sweet honey"] }
+        ];
+
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3')
+        };
+        let audioCtx = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+            audioInitialized = true;
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => playSynthFallback('correct'));
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => playSynthFallback('wrong'));
+            }
+        }
+
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Upbeat chime
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.5);
+                } else {
+                    // Lower stumble sound
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime); 
+                    osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.warn("Synth failed to play", e);
+            }
+        }
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const levelScreen = document.getElementById("level-screen");
+        const levelNextBtn = document.getElementById("level-next-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+        
+        const currentLevelEl = document.getElementById("current-level");
+        const questionIndexEl = document.getElementById("question-index");
+        const playerScoreEl = document.getElementById("player-score");
+        const rivalScoreEl = document.getElementById("rival-score");
+        const finalScoreEl = document.getElementById("final-score");
+        const finalRivalScoreEl = document.getElementById("final-rival-score");
+        const performanceMessageEl = document.getElementById("performance-message");
+        const sentenceTextEl = document.getElementById("sentence-text");
+        const feedbackBanner = document.getElementById("feedback-banner");
+        const feedbackBannerText = document.getElementById("feedback-banner-text");
+
+        const btnLane0 = document.getElementById("btn-lane-0");
+        const btnLane1 = document.getElementById("btn-lane-1");
+        const btnLane2 = document.getElementById("btn-lane-2");
+
+        // Marathon State variables
+        let gameState = 'SPLASH'; // SPLASH, MENU, RUNNING, LEVEL_UP, GAME_OVER
+        let score = 0; // Player distance in meters
+        let rivalScore = 0; // Rival runner distance in meters
+        let currentQuestionIndex = 0;
+        let currentLevel = 1;
+        const totalQuestionsLimit = 10;
+        let activeQuestions = [];
+        
+        let trackOffset = 0;
+        let scaleFactor = 1;
+
+        // Player & Rival positions
+        const runner = {
+            lane: 1, // 0, 1, 2
+            x: 0,
+            y: 0,
+            targetX: 0,
+            width: 45,
+            height: 70,
+            legPhase: 0,
+            speed: 5,
+            targetSpeed: 5,
+            stumbleTimer: 0
+        };
+
+        const rival = {
+            x: 0,
+            y: 0,
+            width: 45,
+            height: 70,
+            legPhase: 0.5, // slightly offset run cycle
+            speed: 4.8,
+            lane: 0
+        };
+
+        // Gates holding answer choices
+        let gates = {
+            y: -300, // Approaching from top
+            visible: false,
+            choices: [], // Option strings for lanes 0, 1, 2
+            triggered: false,
+            height: 50,
+            correctLane: 0
+        };
+
+        let waterBottles = []; // Bonus collectibles on correct lanes
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            scaleFactor = Math.min(1, canvas.width / 600);
+            
+            runner.width = 40 * scaleFactor;
+            runner.height = 65 * scaleFactor;
+            rival.width = 40 * scaleFactor;
+            rival.height = 65 * scaleFactor;
+
+            // Anchor runners in lower middle portion
+            runner.y = canvas.height * 0.75;
+            rival.y = canvas.height * 0.82;
+
+            updateRunnerTargetX();
+        }
+
+        function updateRunnerTargetX() {
+            const laneWidth = canvas.width / 3;
+            runner.targetX = (runner.lane * laneWidth) + (laneWidth / 2);
+            if (runner.x === 0) runner.x = runner.targetX;
+        }
+
+        function setLane(laneIndex) {
+            if (gameState !== 'RUNNING') return;
+            runner.lane = laneIndex;
+            updateRunnerTargetX();
+        }
+
+        // Keyboard support
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                if (runner.lane > 0) setLane(runner.lane - 1);
+            } else if (e.key === 'ArrowRight') {
+                if (runner.lane < 2) setLane(runner.lane + 1);
+            }
+        });
+
+        // Touch swipe controls
+        let touchStartX = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const diffX = touchEndX - touchStartX;
+            if (Math.abs(diffX) > 40) {
+                if (diffX < 0 && runner.lane > 0) {
+                    setLane(runner.lane - 1);
+                } else if (diffX > 0 && runner.lane < 2) {
+                    setLane(runner.lane + 1);
+                }
+            }
+        }, { passive: true });
+
+        // Tapping direct lanes on canvas
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickedLane = Math.floor((clickX / canvas.width) * 3);
+            if (clickedLane >= 0 && clickedLane <= 2) {
+                setLane(clickedLane);
+            }
+        });
+
+        // Button control listeners
+        btnLane0.addEventListener('click', () => setLane(0));
+        btnLane1.addEventListener('click', () => setLane(1));
+        btnLane2.addEventListener('click', () => setLane(2));
+
+        function startLevel(level) {
+            currentLevel = level;
+            currentLevelEl.textContent = currentLevel;
+            currentQuestionIndex = 0;
+            score = 0;
+            rivalScore = 0;
+
+            if (level === 1) {
+                activeQuestions = [...level1Bank].sort(() => 0.5 - Math.random()).slice(0, totalQuestionsLimit);
+            } else {
+                activeQuestions = [...level2Bank].sort(() => 0.5 - Math.random()).slice(0, totalQuestionsLimit);
+            }
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= totalQuestionsLimit) {
+                if (currentLevel === 1) {
+                    gameState = 'LEVEL_UP';
+                    document.getElementById('level-msg-text').textContent = "Incredible Sprinting! Ready to challenge Level 2: Predicate Power-up?";
+                    levelScreen.classList.remove("hidden");
+                } else {
+                    endGameSession();
+                }
+                return;
+            }
+
+            questionIndexEl.textContent = `${currentQuestionIndex + 1}/${totalQuestionsLimit}`;
+            
+            const q = activeQuestions[currentQuestionIndex];
+            
+            // Clearly emphasize target part of the sentence inside the monitor HUD
+            document.getElementById("instruction-sub").innerHTML = `RUN TO COLLECT THE <span class="text-cyan-400 font-extrabold underline">${q.target}</span>!`;
+            sentenceTextEl.innerHTML = q.sentence;
+
+            // Generate gates with options shuffled across lanes 0, 1, 2
+            const shuffledOpts = [...q.opts].sort(() => 0.5 - Math.random());
+            gates.choices = shuffledOpts;
+            gates.correctLane = shuffledOpts.indexOf(q.ans);
+            gates.y = -180; // Start high up
+            gates.visible = true;
+            gates.triggered = false;
+
+            // Spawn optional water bottles on correct track lane
+            waterBottles = [];
+            for (let i = 0; i < 3; i++) {
+                waterBottles.push({
+                    lane: gates.correctLane,
+                    y: gates.y - (120 + i * 50),
+                    active: true
+                });
+            }
+
+            gameState = 'RUNNING';
+        }
+
+        function triggerGateMatch(chosenLane) {
+            if (gates.triggered) return;
+            gates.triggered = true;
+
+            const q = activeQuestions[currentQuestionIndex];
+            const isCorrect = (chosenLane === gates.correctLane);
+
+            if (isCorrect) {
+                playSound('correct');
+                showBanner("CORRECT GATE! SPEED BOOST! ⚡", true);
+                
+                // Add bonus distance score
+                score += 150;
+                rivalScore += 80; // Rival moves slower on correct answer
+
+                // Trigger brief turbo trail velocity
+                runner.targetSpeed = 10;
+                setTimeout(() => {
+                    runner.targetSpeed = 5;
+                }, 1000);
+            } else {
+                playSound('wrong');
+                showBanner("STUMBLED! WRONG PATH! ⚠️", false);
+                
+                // Crash consequence: Rival gains ground!
+                score += 40;
+                rivalScore += 160; 
+                
+                runner.stumbleTimer = 40; // Trigger physical stun animation
+                runner.targetSpeed = 2;
+                setTimeout(() => {
+                    runner.targetSpeed = 5;
+                }, 1200);
+            }
+
+            // Sync scores
+            playerScoreEl.textContent = `${score}m`;
+            rivalScoreEl.textContent = `${rivalScore}m`;
+
+            // Wait brief moment before launching the next question
+            setTimeout(() => {
+                gates.visible = false;
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 1800);
+        }
+
+        function showBanner(text, isPositive) {
+            feedbackBannerText.textContent = text;
+            if (isPositive) {
+                feedbackBannerText.className = "px-6 py-2 rounded-full border-2 border-emerald-400 bg-slate-900/95 text-md font-black uppercase text-emerald-400 drop-shadow-md playful-font";
+            } else {
+                feedbackBannerText.className = "px-6 py-2 rounded-full border-2 border-rose-500 bg-slate-900/95 text-md font-black uppercase text-rose-400 drop-shadow-md playful-font";
+            }
+            feedbackBanner.style.opacity = "1";
+            feedbackBanner.style.transform = "translate(-50%, 0) scale(1.1)";
+            
+            setTimeout(() => {
+                feedbackBanner.style.opacity = "0";
+                feedbackBanner.style.transform = "translate(-50%, 0) scale(0.75)";
+            }, 1600);
+        }
+
+        function endGameSession() {
+            gameState = 'GAME_OVER';
+            gameoverScreen.classList.remove("hidden");
+            playSound('correct');
+
+            finalScoreEl.textContent = `${score}m`;
+            finalRivalScoreEl.textContent = `${rivalScore}m`;
+
+            let msg = "";
+            if (score > rivalScore) {
+                msg = "🏆 Champion Sprinter! You mastered complete Subjects & Predicates with gold medal speed!";
+            } else if (score === rivalScore) {
+                msg = "🤝 A Photo Finish! An incredible tie in the ELA Stadium!";
+            } else {
+                msg = "👟 Great run! Keep jogging and practicing your grammar lanes to win the cup!";
+            }
+            performanceMessageEl.textContent = msg;
+        }
+
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            startLevel(1);
+        });
+
+        levelNextBtn.addEventListener('click', () => {
+            levelScreen.classList.add("hidden");
+            startLevel(2);
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            startLevel(1);
+        });
+
+        // Pure logo screen duration trigger (Exactly 5 seconds)
+        setTimeout(() => {
+            logoScreen.style.opacity = "0";
+            setTimeout(() => {
+                logoScreen.classList.add("hidden");
+                startScreen.classList.remove("hidden");
+            }, 1000);
+        }, 5000);
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function drawScene() {
+            // Smooth background erase
+            ctx.fillStyle = "#0c111e";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const laneWidth = canvas.width / 3;
+
+            // Scrolling track texture lines
+            ctx.strokeStyle = "rgba(6, 182, 212, 0.15)";
+            ctx.lineWidth = 3;
+            for (let i = 1; i < 3; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * laneWidth, 0);
+                ctx.lineTo(i * laneWidth, canvas.height);
+                ctx.stroke();
+            }
+
+            // Outer stadium track borders
+            ctx.strokeStyle = "#0891b2";
+            ctx.lineWidth = 6;
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+            // Draw animated lane dash lines (simulating forward movement)
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([20, 30]);
+            
+            for (let i = 1; i < 3; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * laneWidth, trackOffset);
+                ctx.lineTo(i * laneWidth, canvas.height + trackOffset);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]); // Reset line dash
+
+            // Draw track number graphics
+            ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.font = `bold ${80 * scaleFactor}px 'Outfit'`;
+            ctx.textAlign = "center";
+            ctx.fillText("1", laneWidth * 0.5, canvas.height * 0.5);
+            ctx.fillText("2", laneWidth * 1.5, canvas.height * 0.5);
+            ctx.fillText("3", laneWidth * 2.5, canvas.height * 0.5);
+
+            // Draw bonus water bottles
+            waterBottles.forEach(b => {
+                if (!b.active) return;
+                const bx = (b.lane * laneWidth) + (laneWidth / 2);
+                
+                // Water cup/bottle design
+                ctx.fillStyle = "#38bdf8";
+                ctx.beginPath();
+                ctx.arc(bx, b.y, 10 * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(bx - 3 * scaleFactor, b.y - 15 * scaleFactor, 6 * scaleFactor, 6 * scaleFactor);
+            });
+
+            // Draw approach gates
+            if (gates.visible) {
+                gates.choices.forEach((choice, idx) => {
+                    const gx = idx * laneWidth;
+                    
+                    // Draw neon gate base glow
+                    const isCorrectChoice = (idx === gates.correctLane);
+                    ctx.strokeStyle = gates.triggered ? (isCorrectChoice ? "#10b981" : "#ef4444") : "#06b6d4";
+                    ctx.fillStyle = "rgba(12, 17, 30, 0.9)";
+                    ctx.lineWidth = 4 * scaleFactor;
+                    
+                    // Box holding choice string
+                    const boxPadding = 8 * scaleFactor;
+                    const boxHeight = 65 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.roundRect(gx + boxPadding, gates.y, laneWidth - (boxPadding * 2), boxHeight, 10 * scaleFactor);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Text display
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = `bold ${11 * scaleFactor}px 'Outfit'`;
+                    ctx.textAlign = "center";
+                    
+                    // Simple word wrapper to fit inside lane boxes
+                    const words = choice.split(" ");
+                    if (words.length > 2) {
+                        ctx.fillText(words.slice(0, 2).join(" "), gx + (laneWidth / 2), gates.y + (24 * scaleFactor));
+                        ctx.fillText(words.slice(2).join(" "), gx + (laneWidth / 2), gates.y + (42 * scaleFactor));
+                    } else {
+                        ctx.fillText(choice, gx + (laneWidth / 2), gates.y + (36 * scaleFactor));
+                    }
+
+                    // Draw colorful lane arch headers above text box
+                    ctx.fillStyle = isCorrectChoice && gates.triggered ? "#10b981" : "#0ea5e9";
+                    ctx.beginPath();
+                    ctx.roundRect(gx + boxPadding, gates.y - (12 * scaleFactor), laneWidth - (boxPadding * 2), 12 * scaleFactor, [5, 5, 0, 0]);
+                    ctx.fill();
+
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = `900 ${9 * scaleFactor}px 'Outfit'`;
+                    ctx.fillText(`GATE ${idx + 1}`, gx + (laneWidth / 2), gates.y - (3 * scaleFactor));
+                });
+            }
+
+            // Draw Rival Runner (Purple / Orange Jersey)
+            drawRunnerSprite(rival.x, rival.y, rival.legPhase, "#a855f7", "#f97316");
+
+            // Draw Player Runner (Cyan / Pink Jersey)
+            if (runner.stumbleTimer > 0 && Math.floor(Date.now() / 80) % 2 === 0) {
+                // Flash transparent when stumbling
+            } else {
+                drawRunnerSprite(runner.x, runner.y, runner.legPhase, "#06b6d4", "#ec4899");
+            }
+        }
+
+        function drawRunnerSprite(rx, ry, phase, primaryColor, secondaryColor) {
+            ctx.save();
+            
+            // 1. Draw modern drop shadow underneath the feet
+            ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+            ctx.beginPath();
+            // Shadow pulses slightly with running bounce
+            const shadowY = ry + 32 * scaleFactor;
+            const bounce = Math.sin(phase * Math.PI * 2) * 2 * scaleFactor;
+            ctx.ellipse(rx, shadowY, (14 + bounce) * scaleFactor, 4 * scaleFactor, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Apply a natural running forward lean
+            ctx.translate(rx, ry);
+            ctx.rotate(0.08); // Slight sprinter lean
+
+            // Running bounce (vertical displacement)
+            const verticalBounce = Math.abs(Math.sin(phase * Math.PI * 2)) * 4 * scaleFactor;
+            ctx.translate(0, -verticalBounce);
+
+            // 2. Draw Left Arm (Background arm - opposite leg cycle)
+            ctx.strokeStyle = "#fbcfe8"; // skin tone
+            ctx.lineWidth = 5 * scaleFactor;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            const armAngle1 = Math.sin(phase * Math.PI * 2);
+            ctx.beginPath();
+            ctx.moveTo(-8 * scaleFactor, -10 * scaleFactor);
+            // bent elbow
+            ctx.lineTo((-16 - armAngle1 * 4) * scaleFactor, (2 + armAngle1 * 3) * scaleFactor);
+            // hand
+            ctx.lineTo((-10 - armAngle1 * 6) * scaleFactor, (10 + armAngle1 * 2) * scaleFactor);
+            ctx.stroke();
+
+            // 3. Draw Left Leg (Background leg)
+            ctx.strokeStyle = "#fbcfe8"; // skin tone
+            ctx.lineWidth = 6 * scaleFactor;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            
+            // Run elliptical path for back foot
+            const legPhaseLeft = phase + 0.5;
+            const footXLeft = Math.cos(legPhaseLeft * Math.PI * 2) * 12 * scaleFactor;
+            const footYLeft = Math.sin(legPhaseLeft * Math.PI * 2) * 8 * scaleFactor + 22 * scaleFactor;
+            
+            // Hip to Knee, Knee to Foot
+            ctx.beginPath();
+            ctx.moveTo(-5 * scaleFactor, 10 * scaleFactor); // Hip
+            ctx.lineTo((-7 + footXLeft * 0.4) * scaleFactor, (18 + Math.max(0, footYLeft * 0.3)) * scaleFactor); // Knee
+            ctx.lineTo(footXLeft - 2 * scaleFactor, footYLeft + 4 * scaleFactor); // Foot
+            ctx.stroke();
+
+            // Left Sneaker
+            ctx.fillStyle = secondaryColor;
+            ctx.beginPath();
+            ctx.roundRect((footXLeft - 6) * scaleFactor, (footYLeft + 2) * scaleFactor, 12 * scaleFactor, 5 * scaleFactor, 2 * scaleFactor);
+            ctx.fill();
+            ctx.fillStyle = "#ffffff"; // Sole
+            ctx.fillRect((footXLeft - 6) * scaleFactor, (footYLeft + 6) * scaleFactor, 12 * scaleFactor, 1.5 * scaleFactor);
+
+            // 4. Torso (Athletic Jersey)
+            ctx.fillStyle = primaryColor;
+            ctx.beginPath();
+            ctx.roundRect(-9 * scaleFactor, -15 * scaleFactor, 18 * scaleFactor, 24 * scaleFactor, [6 * scaleFactor, 6 * scaleFactor, 4 * scaleFactor, 4 * scaleFactor]);
+            ctx.fill();
+
+            // Sleek athletic design lines on Jersey
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2 * scaleFactor;
+            ctx.beginPath();
+            ctx.moveTo(-9 * scaleFactor, -6 * scaleFactor);
+            ctx.lineTo(9 * scaleFactor, -2 * scaleFactor);
+            ctx.stroke();
+
+            // Bib Number Shield
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.roundRect(-6 * scaleFactor, -5 * scaleFactor, 12 * scaleFactor, 10 * scaleFactor, 2 * scaleFactor);
+            ctx.fill();
+            
+            ctx.fillStyle = "#0f172a";
+            ctx.font = `900 ${8 * scaleFactor}px 'Outfit'`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("88", 0, 0);
+
+            // 5. Right Leg (Foreground leg)
+            ctx.strokeStyle = "#fbcfe8"; // skin tone
+            ctx.lineWidth = 6 * scaleFactor;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            
+            const footXRight = Math.cos(phase * Math.PI * 2) * 12 * scaleFactor;
+            const footYRight = Math.sin(phase * Math.PI * 2) * 8 * scaleFactor + 22 * scaleFactor;
+
+            ctx.beginPath();
+            ctx.moveTo(5 * scaleFactor, 10 * scaleFactor); // Hip
+            ctx.lineTo((7 + footXRight * 0.4) * scaleFactor, (18 + Math.max(0, footYRight * 0.3)) * scaleFactor); // Knee
+            ctx.lineTo(footXRight + 2 * scaleFactor, footYRight + 4 * scaleFactor); // Foot
+            ctx.stroke();
+
+            // Right Sneaker
+            ctx.fillStyle = secondaryColor;
+            ctx.beginPath();
+            ctx.roundRect((footXRight - 4) * scaleFactor, (footYRight + 2) * scaleFactor, 12 * scaleFactor, 5 * scaleFactor, 2 * scaleFactor);
+            ctx.fill();
+            ctx.fillStyle = "#ffffff"; // Sole
+            ctx.fillRect((footXRight - 4) * scaleFactor, (footYRight + 6) * scaleFactor, 12 * scaleFactor, 1.5 * scaleFactor);
+
+            // Shorts
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.roundRect(-10 * scaleFactor, 7 * scaleFactor, 20 * scaleFactor, 6 * scaleFactor, 2 * scaleFactor);
+            ctx.fill();
+
+            // 6. Right Arm (Foreground arm)
+            ctx.strokeStyle = "#fbcfe8"; // skin
+            ctx.lineWidth = 5 * scaleFactor;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.beginPath();
+            ctx.moveTo(8 * scaleFactor, -10 * scaleFactor);
+            // bent elbow swing
+            ctx.lineTo((16 + armAngle1 * 4) * scaleFactor, (2 - armAngle1 * 3) * scaleFactor);
+            // hand/fist
+            ctx.lineTo((12 + armAngle1 * 6) * scaleFactor, (10 - armAngle1 * 2) * scaleFactor);
+            ctx.stroke();
+
+            // 7. Head, Hair, & Visor
+            // Neck
+            ctx.fillStyle = "#fbcfe8";
+            ctx.fillRect(-3 * scaleFactor, -18 * scaleFactor, 6 * scaleFactor, 5 * scaleFactor);
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(0, -22 * scaleFactor, 8 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Modern Spiky Hair / Cap
+            ctx.fillStyle = secondaryColor;
+            ctx.beginPath();
+            ctx.arc(0, -23 * scaleFactor, 8 * scaleFactor, Math.PI * 0.9, Math.PI * 2.1);
+            ctx.fill();
+            // Hair spikes
+            ctx.beginPath();
+            ctx.moveTo(-8 * scaleFactor, -24 * scaleFactor);
+            ctx.lineTo(-12 * scaleFactor, -27 * scaleFactor);
+            ctx.lineTo(-4 * scaleFactor, -26 * scaleFactor);
+            ctx.lineTo(0, -31 * scaleFactor);
+            ctx.lineTo(4 * scaleFactor, -26 * scaleFactor);
+            ctx.lineTo(8 * scaleFactor, -24 * scaleFactor);
+            ctx.fill();
+
+            // Cool Neon Running Visor/Glasses
+            ctx.fillStyle = "#22d3ee"; // glowing cyan visor
+            ctx.beginPath();
+            ctx.roundRect(-2 * scaleFactor, -24 * scaleFactor, 11 * scaleFactor, 4 * scaleFactor, 1.5 * scaleFactor);
+            ctx.fill();
+            
+            ctx.strokeStyle = "#0f172a"; // band
+            ctx.lineWidth = 1 * scaleFactor;
+            ctx.beginPath();
+            ctx.moveTo(-8 * scaleFactor, -23 * scaleFactor);
+            ctx.lineTo(-2 * scaleFactor, -23 * scaleFactor);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function updatePhysics() {
+            if (gameState !== 'RUNNING') return;
+
+
+            // Progress track speed
+            trackOffset += runner.speed;
+            if (trackOffset > canvas.height) trackOffset = 0;
+
+            // Smooth runner transition across lanes
+            const dx = runner.targetX - runner.x;
+            runner.x += dx * 0.15;
+
+            // Cycle leg phase only when moving actively (slowed down for natural stride)
+            runner.legPhase += (runner.speed * 0.012);
+            if (runner.legPhase > 1) runner.legPhase = 0;
+
+            // Adjust actual runner speed to match target
+            runner.speed += (runner.targetSpeed - runner.speed) * 0.08;
+
+            // Update Rival position vectors (slowed down for natural stride)
+            rival.legPhase += (rival.speed * 0.012);
+            if (rival.legPhase > 1) rival.legPhase = 0;
+
+            // Rival runs in a straight line down Lane 1 (index 0) to avoid giving any answer hints
+            rival.lane = 0;
+            const rivalLaneWidth = canvas.width / 3;
+            const targetRivalX = (rival.lane * rivalLaneWidth) + (rivalLaneWidth / 2);
+            rival.x += (targetRivalX - rival.x) * 0.08;
+
+            // Slowly slide rival backwards or forwards relative to player speed
+            const distanceDiff = score - rivalScore;
+            // Map distance to visual y coordinate
+            const targetRivalY = canvas.height * 0.75 + (distanceDiff * 0.4);
+            rival.y += (targetRivalY - rival.y) * 0.05;
+            
+            // Keep rival inside safe visible parameters
+            if (rival.y < canvas.height * 0.2) rival.y = canvas.height * 0.2;
+            if (rival.y > canvas.height * 0.88) rival.y = canvas.height * 0.88;
+
+            // Stumble timer recovery
+            if (runner.stumbleTimer > 0) {
+                runner.stumbleTimer--;
+            }
+
+            // Slowly gain standard meter score while running
+            score += 0.25;
+            rivalScore += 0.22;
+            playerScoreEl.textContent = `${Math.floor(score)}m`;
+            rivalScoreEl.textContent = `${Math.floor(rivalScore)}m`;
+
+            // Pull gate downward
+            if (gates.visible) {
+                gates.y += runner.speed * 0.8;
+
+                // Bottle collect check
+                waterBottles.forEach(b => {
+                    b.y += runner.speed * 0.8;
+                    
+                    if (b.active && Math.abs(b.y - runner.y) < 25 && runner.lane === b.lane) {
+                        b.active = false;
+                        score += 30; // bonus speed distance
+                        playSound('correct');
+                    }
+                });
+
+                // Gate crossover triggering check
+                if (gates.y >= runner.y - 10 && gates.y <= runner.y + 20) {
+                    triggerGateMatch(runner.lane);
+                }
+            }
+        }
+
+        // Core animation frames
+        function updateLoop() {
+            drawScene();
+            updatePhysics();
+            requestAnimationFrame(updateLoop);
+        }
+
+        // Initialize scene on document load
+        window.onload = function () {
+            resizeCanvas();
+            requestAnimationFrame(updateLoop);
+        };
+    </script>
+</body>
+</html>
