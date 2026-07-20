@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Future Tense Basketball Shootout</title>
+    <!-- Tailwind CSS for high-fidelity responsive layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Playful typography from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0b0f19; /* Deep stadium shadow blue */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            overflow: hidden;
+        }
+        .playful-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+        /* Custom scrollbar for safe overflowing areas */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f97316;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-4 text-slate-100">
+
+    <div class="relative w-full max-w-5xl bg-slate-950 rounded-3xl border-4 border-orange-500 shadow-2xl shadow-orange-500/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
+
+        <!-- Splash Screen Overlay (Centered logo, pure white backdrop, active for 5s) -->
+        <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[280px] w-4/5 h-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <!-- Safe typographic fallback if offline/no connection -->
+            <div id="logo-fallback" class="hidden text-center">
+                <div class="text-5xl font-black tracking-wider text-slate-900 uppercase">INNOVINE</div>
+                <div class="text-sm text-orange-600 font-semibold uppercase tracking-widest mt-1">Learning Games</div>
+            </div>
+        </div>
+
+        <!-- Start Menu Screen -->
+        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40 hidden overflow-y-auto">
+            <div class="max-w-md bg-slate-900/90 p-6 md:p-8 rounded-2xl border-2 border-orange-500/40 backdrop-blur-md shadow-2xl my-auto">
+                <div class="text-5xl md:text-6xl mb-4 animate-bounce">🏀⚡</div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-orange-400 mb-2 uppercase playful-font">Future Tense Shootout</h2>
+                <h3 class="text-md text-slate-300 font-semibold mb-4">Grade 3 Court Challenge</h3>
+                
+                <div class="text-sm text-slate-300 text-left space-y-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800 mb-6 max-h-[220px] overflow-y-auto">
+                    <p>🏀 <strong>Game Rules:</strong> Read the sentence context and select the correct future tense verb (Simple Future or Future Continuous).</p>
+                    <p class="font-bold text-orange-400">🔥 Turn System:</p>
+                    <ul class="list-disc pl-5 space-y-1.5 text-xs">
+                        <li><strong>Right Answer:</strong> You get 1 turn to drag, aim, and shoot the basketball! Try to swish it for maximum points!</li>
+                        <li><strong>Wrong Answer:</strong> The smart Computer defender takes over and shoots a basket automatically to gain points. Be careful!</li>
+                    </ul>
+                    <p class="text-xs text-orange-300">Tip: Pull back on the basketball to adjust angle and power before releasing.</p>
+                </div>
+
+                <button id="start-btn" class="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 active:from-orange-700 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg shadow-orange-500/20 transform transition active:scale-95 text-lg uppercase tracking-wide playful-font">
+                    Enter Court
+                </button>
+            </div>
+        </div>
+
+        <!-- Level Transition Overlay -->
+        <div id="level-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40 hidden">
+            <div class="max-w-md bg-slate-900/90 p-8 rounded-2xl border-2 border-orange-500/40 backdrop-blur-md shadow-2xl">
+                <div class="text-6xl mb-4">🎖️🏀</div>
+                <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500 mb-2 playful-font">LEVEL passed!</h2>
+                <p id="level-msg-text" class="text-slate-300 mb-6">Warping to Future Continuous Sector...</p>
+                <button id="level-next-btn" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg transform transition active:scale-95 text-lg uppercase tracking-wide playful-font">
+                    Begin Next Level
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over / Complete Screen -->
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40 hidden">
+            <div class="max-w-md bg-slate-900/90 p-8 rounded-2xl border-2 border-orange-500/40 backdrop-blur-md shadow-2xl">
+                <div class="text-6xl mb-4">🏆🌟</div>
+                <h2 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-300 mb-2 playful-font">GAME OVER!</h2>
+                <p class="text-slate-300 text-sm mb-6">Your tense challenge matches are complete!</p>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800">
+                        <span class="block text-xs text-slate-400 font-bold uppercase tracking-widest">Your Score</span>
+                        <span id="final-score" class="text-2xl font-black text-orange-400">0</span>
+                    </div>
+                    <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800">
+                        <span class="block text-xs text-slate-400 font-bold uppercase tracking-widest">CPU Score</span>
+                        <span id="final-cpu-score" class="text-2xl font-black text-slate-400">0</span>
+                    </div>
+                </div>
+
+                <p id="performance-message" class="text-slate-200 italic mb-6 font-semibold text-sm"></p>
+
+                <button id="restart-btn" class="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg transform transition active:scale-95 text-lg uppercase tracking-wide playful-font">
+                    Rematch Match
+                </button>
+            </div>
+        </div>
+
+        <header class="bg-slate-900/95 px-4 py-3 border-b-2 border-orange-500/30 flex flex-wrap justify-between items-center gap-2 z-10 backdrop-blur-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-pulse">🏀</span>
+                <h1 class="text-lg md:text-xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-yellow-400 playful-font">
+                    FUTURE TENSE SHOOTOUT
+                </h1>
+            </div>
+            
+            <!-- Real-time Versus Scoreboard -->
+            <div class="flex items-center gap-2 text-xs md:text-sm font-semibold">
+                <div class="bg-slate-950/80 px-2.5 py-1 rounded-full border border-slate-800">
+                    Lvl: <span id="current-level" class="text-orange-400 font-bold">1</span>
+                </div>
+                <div class="bg-slate-950/80 px-2.5 py-1 rounded-full border border-slate-800">
+                    Quest: <span id="question-index" class="text-orange-400 font-bold">1/10</span>
+                </div>
+                <div class="bg-blue-950/60 px-2.5 py-1 rounded-full border border-blue-500/30">
+                    YOU: <span id="player-score" class="text-orange-400 font-bold">0</span>
+                </div>
+                <div class="bg-red-950/60 px-2.5 py-1 rounded-full border border-red-500/30">
+                    CPU: <span id="cpu-score" class="text-slate-300 font-bold">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Game Instructions & Question Area -->
+        <section id="question-panel" class="bg-slate-950 px-4 py-3 border-b border-slate-900/60 flex flex-col items-center justify-center text-center z-10 relative">
+            <p id="instruction-sub" class="text-[10px] md:text-xs uppercase tracking-widest text-orange-400 font-bold mb-1">
+                ANSWER TO EARN A BASKETBALL SHOT!
+            </p>
+            
+            <div id="sentence-container" class="w-full max-w-3xl flex flex-col gap-3">
+                <div id="sentence-text" class="text-base md:text-lg font-bold text-white leading-relaxed px-4 py-2 bg-slate-900/50 rounded-xl border border-orange-500/20 playful-font min-h-[44px]">
+                    Waiting for court match...
+                </div>
+                
+                <!-- Interactive, Touch-Friendly MCQ Buttons -->
+                <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+                    <!-- Dynamic choices load here -->
+                </div>
+            </div>
+        </section>
+
+        <main class="relative flex-grow bg-slate-950 overflow-hidden min-h-[300px] h-[40vh] md:h-[350px]">
+            <!-- Basketball Physics Canvas -->
+            <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+            <!-- Live Court Indicator HUD Overlay -->
+            <div id="turn-banner" class="absolute top-4 left-1/2 transform -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
+                <div id="turn-banner-text" class="px-6 py-2 rounded-full border-2 border-orange-500 bg-slate-900/90 text-xl font-black uppercase text-orange-400 drop-shadow-md playful-font">
+                    YOUR TURN TO SHOOT!
+                </div>
+            </div>
+
+            <!-- Drag indicator overlay for touchscreen instructions -->
+            <div id="aim-guide-tip" class="absolute bottom-4 left-4 pointer-events-none bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-lg text-xs text-slate-400 transition-opacity duration-300 opacity-0">
+                👆 Drag backwards from basketball to aim, let go to shoot!
+            </div>
+        </main>
+
+        <footer class="bg-slate-900/95 border-t border-slate-900/60 px-4 py-2 flex flex-col sm:flex-row justify-between items-center gap-2 z-10">
+            <div class="flex items-center gap-1.5 text-slate-400 text-[10px] font-semibold uppercase tracking-wider">
+                <span>⚡ Simple Future vs. Future Continuous</span>
+            </div>
+            
+            <div class="text-[10px] text-center text-slate-500 uppercase tracking-widest font-semibold">
+                Future Tense Shootout &bull; Grade 3 ELA Arena
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Formally styled Simple Future and Future Continuous sentences for Grade 3 with explicit tense tags
+        const level1Bank = [
+            { sentence: "Tomorrow, the park ranger ________ the new bird houses.", ans: "will build", opts: ["will build", "will be building", "builds", "built"], tense: "Simple Future" },
+            { sentence: "Our science class ________ the oak trees next Monday morning.", ans: "will count", opts: ["will count", "will be counting", "counted", "counts"], tense: "Simple Future" },
+            { sentence: "The warm spring sun ________ the remaining snow soon.", ans: "will melt", opts: ["will melt", "will be melting", "melts", "melted"], tense: "Simple Future" },
+            { sentence: "We ________ our organic lunch near the central fountain today.", ans: "will eat", opts: ["will eat", "will be eating", "eats", "ate"], tense: "Simple Future" },
+            { sentence: "I hope you ________ your bike safely down the pathway.", ans: "will ride", opts: ["will ride", "will be riding", "rides", "rode"], tense: "Simple Future" },
+            { sentence: "Soon, the little squirrels ________ nuts for the coming winter.", ans: "will gather", opts: ["will gather", "will be gathering", "gathers", "gathered"], tense: "Simple Future" },
+            { sentence: "A bright orange butterfly ________ on that flower shortly.", ans: "will land", opts: ["will land", "will be landing", "lands", "landed"], tense: "Simple Future" },
+            { sentence: "The groundkeepers ________ the green lawn early tomorrow.", ans: "will water", opts: ["will water", "will be watering", "waters", "watered"], tense: "Simple Future" },
+            { sentence: "My family ________ the nature trails over the weekend.", ans: "will explore", opts: ["will explore", "will be exploring", "explores", "explored"], tense: "Simple Future" },
+            { sentence: "The children ________ to the ranger station for the talk.", ans: "will walk", opts: ["will walk", "will be walking", "walks", "walked"], tense: "Simple Future" }
+        ];
+
+        const level2Bank = [
+            { sentence: "This time tomorrow, we ________ under the giant redwood trees.", ans: "will be hiking", opts: ["will be hiking", "will hike", "were hiking", "hikes"], tense: "Future Continuous" },
+            { sentence: "All afternoon, the ducklings ________ across the quiet pond.", ans: "will be swimming", opts: ["will be swimming", "will swim", "swimming", "swam"], tense: "Future Continuous" },
+            { sentence: "At five o'clock, the busy bees ________ honey back to their hive.", ans: "will be carrying", opts: ["will be carrying", "will carry", "carried", "carries"], tense: "Future Continuous" },
+            { sentence: "The wind ________ through the treetops all night long.", ans: "will be blowing", opts: ["will be blowing", "will blow", "blew", "blows"], tense: "Future Continuous" },
+            { sentence: "During our campout tonight, we ________ under the bright stars.", ans: "will be sleeping", opts: ["will be sleeping", "will sleep", "slept", "sleeps"], tense: "Future Continuous" },
+            { sentence: "While you are at school, the engineers ________ the new bridge.", ans: "will be repairing", opts: ["will be repairing", "will repair", "repaired", "repairs"], tense: "Future Continuous" },
+            { sentence: "At noon, our team ________ a special picnic in the shade.", ans: "will be having", opts: ["will be having", "will have", "had", "have"], tense: "Future Continuous" },
+            { sentence: "Throughout the month, the botanists ________ the rare jungle ferns.", ans: "will be studying", opts: ["will be studying", "will study", "studied", "studies"], tense: "Future Continuous" },
+            { sentence: "When the sun sets, the night owls ________ through the woods.", ans: "will be flying", opts: ["will be flying", "will fly", "flew", "flies"], tense: "Future Continuous" },
+            { sentence: "Next week, the gardeners ________ beautiful roses in the soil.", ans: "will be planting", opts: ["will be planting", "will plant", "planted", "plants"], tense: "Future Continuous" }
+        ];
+
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3')
+        };
+        let audioCtx = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+            audioInitialized = true;
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => playSynthFallback('correct'));
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => playSynthFallback('wrong'));
+            }
+        }
+
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Upbeat success chime
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else {
+                    // Sad buzzing error indicator
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.linearRampToValueAtTime(130, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const levelScreen = document.getElementById("level-screen");
+        const levelNextBtn = document.getElementById("level-next-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+        
+        const currentLevelEl = document.getElementById("current-level");
+        const questionIndexEl = document.getElementById("question-index");
+        const playerScoreEl = document.getElementById("player-score");
+        const cpuScoreEl = document.getElementById("cpu-score");
+        const finalScoreEl = document.getElementById("final-score");
+        const finalCpuScoreEl = document.getElementById("final-cpu-score");
+        const performanceMessageEl = document.getElementById("performance-message");
+        const sentenceTextEl = document.getElementById("sentence-text");
+        const optionsContainer = document.getElementById("options-container");
+        const turnBanner = document.getElementById("turn-banner");
+        const turnBannerText = document.getElementById("turn-banner-text");
+        const aimGuideTip = document.getElementById("aim-guide-tip");
+
+        // Game state parameters
+        let gameState = 'SPLASH'; // SPLASH, MENU, QUESTIONING, PLAYER_SHOOTING, COMPUTER_SHOOTING, GAME_OVER
+        let score = 0;
+        let cpuScore = 0;
+        let currentQuestionIndex = 0;
+        let currentLevel = 1;
+        const totalQuestionsLimit = 10;
+        let activeQuestions = [];
+        let optionSelected = false;
+
+        // Scale factors and coordinates
+        let scaleFactor = 1;
+        let netParticles = [];
+
+        // Basketball Physics configuration
+        const ball = {
+            x: 150,
+            y: 280,
+            originalX: 150,
+            originalY: 280,
+            radius: 18,
+            vx: 0,
+            vy: 0,
+            isShot: false,
+            isDragging: false,
+            dragStartX: 0,
+            dragStartY: 0,
+            gravity: 0.35,
+            color: '#f97316'
+        };
+
+        const hoop = {
+            x: 720,
+            y: 120,
+            width: 80,
+            rimHeight: 8,
+            backboardWidth: 10,
+            backboardHeight: 80,
+            radius: 28
+        };
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            scaleFactor = Math.min(1, canvas.width / 800);
+            
+            // Adjust coordinates based on viewport size
+            hoop.x = canvas.width - (90 * scaleFactor);
+            hoop.y = canvas.height * 0.4;
+            hoop.width = 65 * scaleFactor;
+            hoop.rimHeight = 6 * scaleFactor;
+            hoop.backboardWidth = 8 * scaleFactor;
+            hoop.backboardHeight = 70 * scaleFactor;
+            hoop.radius = hoop.width / 2;
+
+            ball.radius = 16 * scaleFactor;
+            ball.originalX = 120 * scaleFactor;
+            ball.originalY = canvas.height - (60 * scaleFactor);
+            
+            // Reset position if not mid-flight
+            if (!ball.isShot) {
+                resetBall();
+            }
+        }
+
+        function resetBall() {
+            ball.x = ball.originalX;
+            ball.y = ball.originalY;
+            ball.vx = 0;
+            ball.vy = 0;
+            ball.isShot = false;
+            ball.isDragging = false;
+        }
+
+        function triggerNetSplash() {
+            for (let i = 0; i < 25; i++) {
+                netParticles.push({
+                    x: hoop.x + hoop.radius,
+                    y: hoop.y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 4 - 2,
+                    radius: Math.random() * 3 + 1,
+                    color: i % 2 === 0 ? '#f97316' : '#ffffff',
+                    alpha: 1,
+                    decay: Math.random() * 0.03 + 0.015
+                });
+            }
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= totalQuestionsLimit) {
+                if (currentLevel === 1) {
+                    gameState = 'LEVEL_UP';
+                    document.getElementById('level-msg-text').textContent = "Excellent work! Ready to challenge Level 2: Future Continuous?";
+                    levelScreen.classList.remove("hidden");
+                } else {
+                    endGameSession();
+                }
+                return;
+            }
+
+            questionIndexEl.textContent = `${currentQuestionIndex + 1}/${totalQuestionsLimit}`;
+            optionSelected = false;
+            
+            const q = activeQuestions[currentQuestionIndex];
+            
+            // Give clear guidance to the player on which specific future tense type to look for
+            const instructionSub = document.getElementById("instruction-sub");
+            instructionSub.innerHTML = `USE <span class="text-yellow-400 font-extrabold underline">${q.tense.toUpperCase()}</span> TENSE TO EARN A BASKETBALL SHOT!`;
+            
+            // Format sentence text to show blank line clearly
+            sentenceTextEl.innerHTML = q.sentence.replace("________", "<span class='px-4 py-1 mx-1 bg-orange-500/10 border-b-4 border-dashed border-orange-500 text-orange-400 font-extrabold rounded-lg inline-block animate-pulse'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+            
+            // Draw options
+            optionsContainer.innerHTML = "";
+            const shuffledOpts = [...q.opts].sort(() => 0.5 - Math.random());
+            shuffledOpts.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "w-full text-left bg-slate-900/90 hover:bg-slate-800 text-slate-100 hover:text-white border-2 border-slate-800 rounded-xl px-4 py-3 font-semibold text-sm transition transform hover:scale-[1.01] active:scale-95 flex items-center gap-3";
+                btn.innerHTML = `<span class="flex-none w-6 h-6 rounded-full bg-slate-800 text-slate-400 text-xs flex items-center justify-center font-bold font-mono">■</span> ${opt}`;
+                btn.addEventListener("click", () => handleOptionSelection(opt, btn));
+                optionsContainer.appendChild(btn);
+            });
+
+            // Put game back in questioning state
+            gameState = 'QUESTIONING';
+            resetBall();
+        }
+
+        function handleOptionSelection(selectedOpt, clickedBtn) {
+            if (optionSelected) return;
+            optionSelected = true;
+
+            const q = activeQuestions[currentQuestionIndex];
+            const isCorrect = (selectedOpt === q.ans);
+
+            // Highlight chosen button
+            if (isCorrect) {
+                clickedBtn.classList.remove("border-slate-800", "bg-slate-900/90");
+                clickedBtn.classList.add("border-green-500", "bg-green-950/40", "text-green-300");
+                clickedBtn.querySelector("span").className = "flex-none w-6 h-6 rounded-full bg-green-500 text-slate-950 text-xs flex items-center justify-center font-bold";
+                clickedBtn.querySelector("span").textContent = "✓";
+                
+                playSound('correct');
+                
+                // Show turn banner
+                showTurnBanner("YOUR SHOT!", true);
+                aimGuideTip.style.opacity = "1";
+                
+                // Transition state to player shooting mode
+                setTimeout(() => {
+                    gameState = 'PLAYER_SHOOTING';
+                }, 1000);
+            } else {
+                clickedBtn.classList.remove("border-slate-800", "bg-slate-900/90");
+                clickedBtn.classList.add("border-red-500", "bg-red-950/40", "text-red-300");
+                clickedBtn.querySelector("span").className = "flex-none w-6 h-6 rounded-full bg-red-500 text-slate-100 text-xs flex items-center justify-center font-bold";
+                clickedBtn.querySelector("span").textContent = "✗";
+
+                // Highlight correct one also for learning feedback
+                Array.from(optionsContainer.children).forEach(child => {
+                    if (child.textContent.includes(q.ans)) {
+                        child.classList.remove("border-slate-800");
+                        child.classList.add("border-green-500/60");
+                    }
+                });
+
+                playSound('wrong');
+
+                // Show computer turn banner
+                showTurnBanner("DEFENDER'S SHOT!", false);
+                
+                // Transition state to computer shooting mode
+                setTimeout(() => {
+                    gameState = 'COMPUTER_SHOOTING';
+                    triggerComputerShot();
+                }, 1500);
+            }
+        }
+
+        function showTurnBanner(text, isPlayer) {
+            turnBannerText.textContent = text;
+            if (isPlayer) {
+                turnBannerText.className = "px-6 py-2 rounded-full border-2 border-green-500 bg-slate-900/90 text-xl font-black uppercase text-green-400 drop-shadow-md playful-font";
+            } else {
+                turnBannerText.className = "px-6 py-2 rounded-full border-2 border-red-500 bg-slate-900/90 text-xl font-black uppercase text-red-400 drop-shadow-md playful-font";
+            }
+            turnBanner.style.opacity = "1";
+            turnBanner.style.transform = "translate(-50%, 0) scale(1.1)";
+            
+            setTimeout(() => {
+                turnBanner.style.opacity = "0";
+                turnBanner.style.transform = "translate(-50%, 0) scale(0.75)";
+            }, 2500);
+        }
+
+        function triggerComputerShot() {
+            // Give CPU its basketball position
+            ball.x = ball.originalX;
+            ball.y = ball.originalY;
+            ball.isShot = true;
+
+            // Simple physics projection aimed directly towards net
+            // Add slight randomness so CPU does not always score (80% success chance)
+            const targetX = hoop.x + hoop.radius;
+            const targetY = hoop.y;
+            const distanceX = targetX - ball.x;
+            
+            // Kinematics solver
+            const timeSteps = 50;
+            ball.vx = distanceX / timeSteps;
+            
+            // Randomize trajectory accuracy
+            const scoreChance = Math.random() < 0.8;
+            const accuracyAdjustment = scoreChance ? 0 : (Math.random() > 0.5 ? -15 : 15) * scaleFactor;
+            
+            // y = y0 + vy*t + 0.5*g*t^2 => vy = (y - y0 - 0.5*g*t^2) / t
+            const totalGravity = 0.5 * ball.gravity * timeSteps * timeSteps;
+            ball.vy = ((targetY + accuracyAdjustment) - ball.y - totalGravity) / timeSteps;
+        }
+
+        function getPointerPos(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function handlePointerDown(e) {
+            if (gameState !== 'PLAYER_SHOOTING' || ball.isShot) return;
+            initAudio();
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const pos = getPointerPos(clientX, clientY);
+
+            // Tap near the basketball to grab it
+            const dist = Math.hypot(pos.x - ball.x, pos.y - ball.y);
+            if (dist < ball.radius * 2.5) {
+                ball.isDragging = true;
+                ball.dragStartX = pos.x;
+                ball.dragStartY = pos.y;
+            }
+        }
+
+        function handlePointerMove(e) {
+            if (!ball.isDragging) return;
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const pos = getPointerPos(clientX, clientY);
+
+            // Track dragging displacement
+            ball.x = pos.x;
+            ball.y = pos.y;
+
+            // Restrict bounds so it does not fly completely away
+            const limit = 120 * scaleFactor;
+            const dist = Math.hypot(ball.x - ball.originalX, ball.y - ball.originalY);
+            if (dist > limit) {
+                const angle = Math.atan2(ball.y - ball.originalY, ball.x - ball.originalX);
+                ball.x = ball.originalX + Math.cos(angle) * limit;
+                ball.y = ball.originalY + Math.sin(angle) * limit;
+            }
+        }
+
+        function handlePointerUp() {
+            if (!ball.isDragging) return;
+            ball.isDragging = false;
+
+            // Generate thrust speed based on pull distance
+            const dx = ball.originalX - ball.x;
+            const dy = ball.originalY - ball.y;
+
+            ball.vx = dx * 0.14;
+            ball.vy = dy * 0.14;
+            ball.isShot = true;
+            aimGuideTip.style.opacity = "0";
+        }
+
+        canvas.addEventListener('mousedown', handlePointerDown);
+        canvas.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+
+        canvas.addEventListener('touchstart', handlePointerDown, { passive: true });
+        canvas.addEventListener('touchmove', handlePointerMove, { passive: true });
+        window.addEventListener('touchend', handlePointerUp);
+
+        function startLevel(level) {
+            currentLevel = level;
+            currentLevelEl.textContent = currentLevel;
+            currentQuestionIndex = 0;
+            netParticles = [];
+
+            if (level === 1) {
+                activeQuestions = [...level1Bank].sort(() => 0.5 - Math.random()).slice(0, totalQuestionsLimit);
+            } else {
+                activeQuestions = [...level2Bank].sort(() => 0.5 - Math.random()).slice(0, totalQuestionsLimit);
+            }
+
+            loadQuestion();
+        }
+
+        function initGame() {
+            score = 0;
+            cpuScore = 0;
+            playerScoreEl.textContent = score;
+            cpuScoreEl.textContent = cpuScore;
+            startLevel(1);
+        }
+
+        function endGameSession() {
+            gameState = 'GAME_OVER';
+            gameoverScreen.classList.remove("hidden");
+            playSound('correct');
+
+            finalScoreEl.textContent = score;
+            finalCpuScoreEl.textContent = cpuScore;
+
+            let msg = "";
+            if (score > cpuScore) {
+                msg = "🏆 Champions Performance! You mastered simple and continuous future tenses!";
+            } else if (score === cpuScore) {
+                msg = "🤝 Incredible Draw! It was a legendary head-to-head grammar clash!";
+            } else {
+                msg = "🏀 Great workout on the court! Take another shot to win the championship!";
+            }
+            performanceMessageEl.textContent = msg;
+        }
+
+        // UI Listeners
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            initGame();
+        });
+
+        levelNextBtn.addEventListener('click', () => {
+            levelScreen.classList.add("hidden");
+            startLevel(2);
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            initGame();
+        });
+
+        // Blank Splash Screen trigger for exactly 5 seconds
+        setTimeout(() => {
+            logoScreen.style.opacity = "0";
+            setTimeout(() => {
+                logoScreen.classList.add("hidden");
+                startScreen.classList.remove("hidden");
+            }, 1000);
+        }, 5000);
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function drawScene() {
+            // Clean slate backdrop
+            ctx.fillStyle = "#0c101d";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Render subtle park floor grass/court pattern in backdrop
+            ctx.fillStyle = "rgba(249, 115, 22, 0.03)";
+            ctx.fillRect(0, canvas.height - (30 * scaleFactor), canvas.width, 30 * scaleFactor);
+
+            // Draw Court lines
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.lineWidth = 4 * scaleFactor;
+            
+            // Three-point arch vector
+            ctx.beginPath();
+            ctx.arc(canvas.width, canvas.height, canvas.height * 0.9, Math.PI, Math.PI * 1.5);
+            ctx.stroke();
+
+            // Key line
+            ctx.strokeRect(canvas.width - (180 * scaleFactor), canvas.height - (100 * scaleFactor), 180 * scaleFactor, 100 * scaleFactor);
+
+            // Draw backboard and pole structure
+            ctx.lineWidth = 6 * scaleFactor;
+            ctx.strokeStyle = "#475569";
+            
+            // Pole
+            ctx.beginPath();
+            ctx.moveTo(hoop.x + hoop.width + (15 * scaleFactor), canvas.height);
+            ctx.lineTo(hoop.x + hoop.width + (15 * scaleFactor), hoop.y - (30 * scaleFactor));
+            ctx.lineTo(hoop.x + hoop.width, hoop.y - (30 * scaleFactor));
+            ctx.stroke();
+
+            // Glass backboard shadow
+            ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+            ctx.fillRect(hoop.x + hoop.width, hoop.y - (60 * scaleFactor), hoop.backboardWidth, hoop.backboardHeight);
+            
+            // Glass backboard red square border
+            ctx.strokeStyle = "#ef4444";
+            ctx.lineWidth = 2 * scaleFactor;
+            ctx.strokeRect(hoop.x + hoop.width, hoop.y - (60 * scaleFactor), hoop.backboardWidth, hoop.backboardHeight);
+
+            // Draw particles splashes
+            netParticles.forEach((p, idx) => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+                
+                if (p.alpha <= 0) {
+                    netParticles.splice(idx, 1);
+                }
+            });
+            ctx.globalAlpha = 1.0;
+
+            // Draw Basket Rim (Orange)
+            ctx.fillStyle = "#f97316";
+            ctx.fillRect(hoop.x, hoop.y, hoop.width, hoop.rimHeight);
+
+            // Draw Net mesh vectors
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.lineWidth = 1.5 * scaleFactor;
+            ctx.beginPath();
+            
+            // Left net loop
+            ctx.moveTo(hoop.x, hoop.y + hoop.rimHeight);
+            ctx.lineTo(hoop.x + (15 * scaleFactor), hoop.y + (30 * scaleFactor));
+            ctx.lineTo(hoop.x + (25 * scaleFactor), hoop.y + (40 * scaleFactor));
+            
+            // Right net loop
+            ctx.moveTo(hoop.x + hoop.width, hoop.y + hoop.rimHeight);
+            ctx.lineTo(hoop.x + hoop.width - (15 * scaleFactor), hoop.y + (30 * scaleFactor));
+            ctx.lineTo(hoop.x + hoop.width - (25 * scaleFactor), hoop.y + (40 * scaleFactor));
+
+            // Criss-cross loops
+            ctx.lineTo(hoop.x + (25 * scaleFactor), hoop.y + (40 * scaleFactor));
+            ctx.moveTo(hoop.x + (15 * scaleFactor), hoop.y + (30 * scaleFactor));
+            ctx.lineTo(hoop.x + hoop.width - (25 * scaleFactor), hoop.y + (40 * scaleFactor));
+            ctx.stroke();
+
+            if (ball.isDragging) {
+                // Aim line projection
+                ctx.strokeStyle = "rgba(249, 115, 22, 0.4)";
+                ctx.lineWidth = 3 * scaleFactor;
+                ctx.setLineDash([6 * scaleFactor, 4 * scaleFactor]);
+                
+                const dx = ball.originalX - ball.x;
+                const dy = ball.originalY - ball.y;
+                
+                ctx.beginPath();
+                ctx.moveTo(ball.originalX, ball.originalY);
+                ctx.lineTo(ball.originalX + dx * 2, ball.originalY + dy * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw target crosshair preview
+                ctx.fillStyle = "rgba(251, 191, 36, 0.3)";
+                ctx.beginPath();
+                ctx.arc(ball.originalX + dx * 2, ball.originalY + dy * 2, 8 * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Draw Basketball
+            ctx.save();
+            ctx.shadowColor = ball.color;
+            ctx.shadowBlur = ball.isDragging ? 15 : 4;
+            
+            ctx.fillStyle = ball.color;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Basket seam line curves
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.45)";
+            ctx.lineWidth = 1.8 * scaleFactor;
+            ctx.beginPath();
+            // Horizontal seam
+            ctx.arc(ball.x, ball.y, ball.radius, 0.15 * Math.PI, 0.85 * Math.PI);
+            ctx.stroke();
+            ctx.beginPath();
+            // Vertical seam
+            ctx.arc(ball.x, ball.y, ball.radius, 0.65 * Math.PI, 1.35 * Math.PI);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+
+        function updatePhysics() {
+            if (ball.isShot) {
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+                ball.vy += ball.gravity; // Gravity pull
+
+                // Collision detection with net rim area
+                const hoopCenterX = hoop.x + hoop.radius;
+                const distToRimCenter = Math.hypot(ball.x - hoopCenterX, ball.y - hoop.y);
+                
+                // Net cross-through threshold validation
+                if (distToRimCenter < hoop.radius + 10 * scaleFactor && ball.vy > 0 && ball.y < hoop.y + (20 * scaleFactor)) {
+                    // Score successful goal!
+                    triggerNetSplash();
+                    playSound('correct');
+
+                    // Stop velocity
+                    ball.vx = 0;
+                    ball.vy = 2 * scaleFactor; // fall through slowly
+
+                    // Award score and turn transition
+                    if (gameState === 'PLAYER_SHOOTING') {
+                        score += 150;
+                        playerScoreEl.textContent = score;
+                    } else if (gameState === 'COMPUTER_SHOOTING') {
+                        cpuScore += 150;
+                        cpuScoreEl.textContent = cpuScore;
+                    }
+
+                    ball.isShot = false;
+
+                    // Pause before next question
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        loadQuestion();
+                    }, 1200);
+                    return;
+                }
+
+                // Bounce or hit from backboard
+                if (ball.x + ball.radius >= hoop.x + hoop.width && ball.x - ball.radius <= hoop.x + hoop.width + hoop.backboardWidth) {
+                    if (ball.y >= hoop.y - (60 * scaleFactor) && ball.y <= hoop.y + (20 * scaleFactor)) {
+                        // Reflect speed
+                        ball.vx = -ball.vx * 0.55;
+                    }
+                }
+
+                // Ball missed and fell to the floor
+                if (ball.y > canvas.height + 40 || ball.x > canvas.width + 40 || ball.x < -40) {
+                    ball.isShot = false;
+                    
+                    // Transition to next round
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        loadQuestion();
+                    }, 1000);
+                }
+            }
+        }
+
+        function updateLoop() {
+            drawScene();
+            updatePhysics();
+            requestAnimationFrame(updateLoop);
+        }
+
+        window.onload = function () {
+            resizeCanvas();
+            requestAnimationFrame(updateLoop);
+        };
+    </script>
+</body>
+</html>
