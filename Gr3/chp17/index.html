@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Punctuation Park Ranger</title>
+    <!-- Tailwind CSS for high-performance layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for professional playful typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #064e3b; /* Deep forest green */
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .playful-font {
+            font-family: 'Fredoka One', cursive;
+        }
+        /* Wood textured styling helper */
+        .wood-panel {
+            background: linear-gradient(135deg, #78350f 0%, #451a03 100%);
+            border: 4px solid #b45309;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
+        }
+        /* Custom touch manipulation styling to prevent double tap zoom on mobile */
+        .touch-action-none {
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-6 text-white">
+
+    <!-- Main Game Frame -->
+    <div class="relative w-full max-w-5xl bg-emerald-950 rounded-3xl border-4 border-emerald-400 shadow-2xl shadow-emerald-500/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
+        
+        <!-- Strictly blank white screen with centered logo ONLY. Covers everything. -->
+        <div id="logo-screen" class="absolute inset-0 bg-white flex items-center justify-center p-6 z-50 transition-opacity duration-1000">
+            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[280px] w-full h-auto object-contain transition-all duration-300">
+        </div>
+        
+        <!-- Header / Dashboard HUD -->
+        <header class="bg-gradient-to-r from-emerald-900 via-teal-950 to-emerald-900 px-4 py-3 border-b-2 border-emerald-400 flex flex-wrap justify-between items-center gap-2 z-10">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-bounce">🦋</span>
+                <h1 class="text-lg md:text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-100 to-amber-200 playful-font">
+                    PUNCTUATION PARK RANGER
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-2 md:gap-3 text-xs md:text-base font-semibold">
+                <div class="bg-emerald-950/85 px-2.5 py-1 rounded-full border border-emerald-700">
+                    Level: <span id="level-display" class="text-amber-300 font-bold">1</span>
+                </div>
+                <div class="bg-emerald-950/85 px-2.5 py-1 rounded-full border border-emerald-700">
+                    Mission: <span id="question-index" class="text-teal-300 font-bold">1/10</span>
+                </div>
+                <div class="bg-emerald-950/85 px-2.5 py-1 rounded-full border border-emerald-700">
+                    Score: <span id="score" class="text-amber-300 font-bold">0</span>
+                </div>
+                <div class="bg-emerald-950/85 px-2.5 py-1 rounded-full border border-emerald-700">
+                    Streak: <span id="streak" class="text-pink-300 font-bold">🔥 0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hanging Wooden Park Sign Board / Question Section -->
+        <section class="bg-gradient-to-b from-sky-100 to-emerald-50 p-4 border-b border-emerald-900/40 flex flex-col items-center justify-center text-center z-10 relative">
+            <p id="instruction-title" class="text-[10px] md:text-xs uppercase tracking-widest text-emerald-800 font-bold mb-1.5">
+                TAP THE FLUTTERING BUTTERFLY or the choice buttons below to repair the signboard!
+            </p>
+            <div id="question-card" class="wood-panel text-white font-bold text-sm md:text-xl tracking-wide leading-relaxed px-6 py-3.5 rounded-2xl max-w-2xl w-full transition-transform duration-300 playful-font">
+                Preparing park trails...
+            </div>
+        </section>
+
+        <!-- Stage/Canvas Play Zone with park elements -->
+        <main class="relative flex-grow bg-emerald-950 overflow-hidden min-h-[300px] h-[45vh] md:h-[400px]">
+            <!-- Interactive Play Area Canvas -->
+            <canvas id="gameCanvas" class="w-full h-full block touch-none"></canvas>
+
+            <!-- Start Menu Screen -->
+            <div id="start-screen" class="absolute inset-0 bg-emerald-950/95 flex flex-col items-center justify-center p-4 text-center z-20 hidden">
+                <div class="max-w-md w-full bg-emerald-900/90 p-6 md:p-8 rounded-3xl border-2 border-emerald-400 backdrop-blur-md shadow-2xl">
+                    <div class="text-6xl mb-3 animate-pulse">🌳🎒</div>
+                    <h2 class="text-3xl font-extrabold text-amber-300 mb-1 playful-font">PUNCTUATION PARK</h2>
+                    <h3 class="text-md text-emerald-100 font-semibold mb-4">Grade 3 Ranger Patrol</h3>
+                    
+                    <p class="text-sm text-emerald-50 mb-6 leading-relaxed bg-emerald-950/80 p-4 rounded-xl text-left border border-emerald-800/50">
+                        🌻 <strong>HOW TO PLAY:</strong><br>
+                        Read the formal park signboard at the top of the screen. Look for the missing punctuation marked by the underlined space.<br><br>
+                        🎯 <strong>Tap the fluttering butterfly</strong> holding the correct symbol or select from the options panel at the bottom to earn your Ranger badges!
+                    </p>
+                    
+                    <button id="start-btn" class="w-full bg-gradient-to-r from-amber-400 to-emerald-600 hover:from-amber-300 hover:to-emerald-500 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-amber-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
+                        Begin Patrol
+                    </button>
+                </div>
+            </div>
+
+            <!-- Level completion splash overlay -->
+            <div id="level-screen" class="absolute inset-0 bg-emerald-950/95 flex flex-col items-center justify-center p-6 text-center z-20 hidden">
+                <div class="max-w-md bg-emerald-900/90 p-8 rounded-3xl border-2 border-emerald-400 backdrop-blur-md shadow-2xl">
+                    <div class="text-6xl mb-4 animate-bounce">🏕️🎖️</div>
+                    <h2 id="level-title" class="text-4xl font-extrabold text-amber-300 mb-2 playful-font">MEADOW PATROL CLEAR!</h2>
+                    <p id="level-desc" class="text-emerald-100 text-sm mb-6 leading-relaxed">
+                        Excellent job, Ranger! Meadow Sector is fully corrected. Next up: Canopy Climb!
+                    </p>
+                    <button id="next-level-btn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-emerald-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
+                        Patrol Canopy Climb
+                    </button>
+                </div>
+            </div>
+
+            <!-- Session Victory / Game Over Overlay -->
+            <div id="gameover-screen" class="absolute inset-0 bg-emerald-950/95 flex flex-col items-center justify-center p-4 text-center z-20 hidden">
+                <div class="max-w-md w-full bg-emerald-900/90 p-6 md:p-8 rounded-3xl border-2 border-amber-400 backdrop-blur-md shadow-2xl">
+                    <div class="text-6xl mb-4">🏆🌲</div>
+                    <h2 class="text-3xl font-extrabold text-amber-300 mb-1 playful-font">Chief Ranger Award!</h2>
+                    <p class="text-emerald-100 text-sm mb-6">You corrected all punctuation elements across Punctuation Park.</p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-emerald-950/80 p-3 rounded-xl border border-emerald-800">
+                            <span class="block text-xs text-emerald-300 font-bold uppercase">Final Score</span>
+                            <span id="final-score" class="text-2xl font-black text-amber-300 playful-font">0</span>
+                        </div>
+                        <div class="bg-emerald-950/80 p-3 rounded-xl border border-emerald-800">
+                            <span class="block text-xs text-emerald-300 font-bold uppercase">Accuracy</span>
+                            <span id="final-accuracy" class="text-2xl font-black text-teal-300 playful-font">0%</span>
+                        </div>
+                    </div>
+
+                    <p id="performance-message" class="text-emerald-50 italic mb-6 font-semibold text-sm"></p>
+
+                    <button id="restart-btn" class="w-full bg-gradient-to-r from-amber-400 to-emerald-600 hover:from-amber-300 hover:to-emerald-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-amber-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
+                        Patrol Again
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive HUD Action Alert Banner -->
+            <div id="hit-notification" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
+                <div id="hud-text" class="text-5xl md:text-7xl font-black tracking-wider drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font">
+                    PATROL UPDATED!
+                </div>
+            </div>
+        </main>
+
+        <!-- Option Panel: Extremely tablet and phone friendly, providing clear big tap targets below canvas -->
+        <div id="options-panel" class="bg-emerald-900/90 border-t border-emerald-800 p-3 flex flex-wrap justify-center items-center gap-2 md:gap-4 z-10 select-none">
+            <!-- Buttons dynamically populated by JS -->
+        </div>
+
+        <footer class="bg-emerald-950 border-t border-emerald-900 px-6 py-3 flex flex-col sm:flex-row justify-between items-center gap-2 z-10 text-xs text-emerald-400">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block animate-ping"></span>
+                <span>Fully Optimized for Phone, Tablet, & Low Connection</span>
+            </div>
+            <div class="text-center">
+                Punctuation Park Ranger &bull; Grade 3 Learning Center
+            </div>
+        </footer>
+    </div>
+
+    <!-- Gameplay Script -->
+    <script>
+        // --- AUDIO ENGINE ---
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3')
+        };
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+            audioInitialized = true;
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => {
+                    playSynthFallback('correct');
+                });
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => {
+                    playSynthFallback('wrong');
+                });
+            }
+        }
+
+        // Web Audio Synthesizer fallback for low-latency offline backup
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Bright harmonic wood block chime
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.16); // G5
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                } else if (type === 'wrong') {
+                    // Low double buzzer thud
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                }
+            } catch (e) {
+                console.warn("Audio Synthesis fallback blocked: ", e);
+            }
+        }
+
+        // --- STREAMING_CHUNK: Structuring Punctuation Constraints and Question banks ---
+        // Constraint: Only Capital, Comma, Full Stop, Question Mark, Exclamation, and Apostrophe.
+        // Option representation labels used:
+        // 'Capital' (Capital Letter), ',' (Comma), '.' (Full Stop), '?' (Question Mark), '!' (Exclamation), '\'' (Apostrophe)
+        
+        // Level 1 Bank: 15 formal narrative/descriptive park-themed items
+        const level1Bank = [
+            { s: "The ranger packed binoculars ___ a map, and a compass.", ans: ",", options: [",", ".", "?", "Capital"], label: "Comma" },
+            { s: "The majestic eagle nested on the highest cliff ___", ans: ".", options: [".", "?", "!", ","], label: "Full Stop" },
+            { s: "How many species of wildflowers grow in this valley ___", ans: "?", options: ["?", ".", "!", "'"], label: "Question Mark" },
+            { s: "Many visitors travel to ___ellowstone National Park during summer.", ans: "Capital", options: ["Capital", ",", ".", "'"], label: "Capital Letter" },
+            { s: "The young bear ___ s paws left deep prints in the mud.", ans: "'", options: ["'", ",", ".", "?"], label: "Apostrophe" },
+            { s: "Our guided nature patrol began on June 12 ___ 2026.", ans: ",", options: [",", ".", "'", "Capital"], label: "Comma" },
+            { s: "During the autumn months, ___ctober brings the most vibrant leaves.", ans: "Capital", options: ["Capital", ".", "!", ","], label: "Capital Letter" },
+            { s: "Observe the nesting rules of fragile bird species ___", ans: "!", options: ["!", ".", "?", ","], label: "Exclamation" },
+            { s: "The conservation center is located in Seattle ___ Washington.", ans: ",", options: [",", ".", "?", "'"], label: "Comma" },
+            { s: "The weather report states that it ___ s going to rain today.", ans: "'", options: ["'", ",", ".", "?"], label: "Apostrophe" },
+            { s: "We observed a family of deer drinking from the stream ___", ans: ".", options: [".", ",", "?", "Capital"], label: "Full Stop" },
+            { s: "Could you tell me the direction to the ranger station ___", ans: "?", options: ["?", ".", "!", ","], label: "Question Mark" },
+            { s: "Oak trees ___ pine trees, and maples cover the forest floor.", ans: ",", options: [",", ".", "'", "!"], label: "Comma" },
+            { s: "The historical trail was named after ___aptain Meriwether Lewis.", ans: "Capital", options: ["Capital", "'", ",", "."], label: "Capital Letter" },
+            { s: "The park volunteers found the bird ___ s hidden nests.", ans: "'", options: ["'", ",", "?", "."], label: "Apostrophe" }
+        ];
+
+        // Level 2 Bank: 15 formal advanced items
+        const level2Bank = [
+            { s: "Every Tuesday, ___anger Harrison leads the conservation walk.", ans: "Capital", options: ["Capital", ".", ",", "?"], label: "Capital Letter" },
+            { s: "Deep inside the cavern ___ we discovered ancient rock formations.", ans: ",", options: [",", ".", "'", "!"], label: "Comma" },
+            { s: "The wildlife rescue team couldn ___ t locate the injured hawk.", ans: "'", options: ["'", ",", ".", "?"], label: "Apostrophe" },
+            { s: "Which trail leads directly to the mountain summit ___", ans: "?", options: ["?", ".", "!", ","], label: "Question Mark" },
+            { s: "Mr. Thompson ___ the chief environmental officer, wrote the guide.", ans: ",", options: [",", ".", "'", "Capital"], label: "Comma" },
+            { s: "Look at the magnificent waterfalls cascading down the mountain ___", ans: "!", options: ["!", ".", "?", ","], label: "Exclamation" },
+            { s: "The rules are enforced by the ___nvironmental Protection Agency.", ans: "Capital", options: ["Capital", ".", ",", "'"], label: "Capital Letter" },
+            { s: "An owl ___ s sharp eyes can spot prey from a great distance.", ans: "'", options: ["'", ",", ".", "?"], label: "Apostrophe" },
+            { s: "The storm damaged several old trees ___ but the pathways remained clear.", ans: ",", options: [",", ".", "?", "!"], label: "Comma" },
+            { s: "The scientific team completed their research on soil erosion ___", ans: ".", options: [".", "?", ",", "Capital"], label: "Full Stop" },
+            { s: "We will cross the ___uget Sound on a ferry tomorrow morning.", ans: "Capital", options: ["Capital", ".", ",", "!"], label: "Capital Letter" },
+            { s: "Has the annual migration of monarch butterflies commenced ___", ans: "?", options: ["?", ".", "!", ","], label: "Question Mark" },
+            { s: "Indeed ___ the ecosystem relies heavily on seasonal rainfall.", ans: ",", options: [",", ".", "'", "Capital"], label: "Comma" },
+            { s: "The nature center displays the forest ___ s botanical history.", ans: "'", options: ["'", ",", ".", "?"], label: "Apostrophe" },
+            { s: "What a spectacular view of the canyon we have from this peak ___", ans: "!", options: ["!", ".", "?", ","], label: "Exclamation" }
+        ];
+
+        // --- STREAMING_CHUNK: Setup States & Randomization Variables ---
+        let activeQuestions = [];
+        let currentLevel = 1;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let correctAnswersCount = 0;
+        const totalQuestionsLimit = 10;
+        let correctAnswerText = "";
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // UI HTML Overlay Hooks
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const levelScreen = document.getElementById("level-screen");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const startBtn = document.getElementById("start-btn");
+        const nextLevelBtn = document.getElementById("next-level-btn");
+        const restartBtn = document.getElementById("restart-btn");
+        const hitNotification = document.getElementById("hit-notification");
+        const hudText = document.getElementById("hud-text");
+        const optionsPanel = document.getElementById("options-panel");
+
+        const levelDisplayEl = document.getElementById("level-display");
+        const questionIndexEl = document.getElementById("question-index");
+        const scoreEl = document.getElementById("score");
+        const streakEl = document.getElementById("streak");
+        const finalScoreEl = document.getElementById("final-score");
+        const finalAccuracyEl = document.getElementById("final-accuracy");
+        const performanceMessageEl = document.getElementById("performance-message");
+        const questionCardEl = document.getElementById("question-card");
+
+        let isGameRunning = false;
+        let scaleFactor = 1;
+
+        // Interactive Canvas objects
+        let butterflies = []; // Punctuation fluttering butterflies
+        let windParticles = []; // Autumn leaf / petal drift particles
+        let clouds = []; // Beautiful background clouds
+        let rippleEffect = null; // Water ripple effect upon tap
+
+        // Map labels to short symbols
+        const symbolToFriendlyName = {
+            "Capital": "Capital A-Z",
+            ",": "Comma ( , )",
+            ".": "Full Stop ( . )",
+            "?": "Question ( ? )",
+            "!": "Exclamation ( ! )",
+            "'": "Apostrophe ( ' )"
+        };
+
+        // Prepare randomized question sets
+        function prepareLevelQuestions(levelNum) {
+            const sourceBank = levelNum === 1 ? level1Bank : level2Bank;
+            const shuffled = [...sourceBank].sort(() => 0.5 - Math.random());
+            activeQuestions = shuffled.slice(0, totalQuestionsLimit);
+            currentQuestionIndex = 0;
+        }
+
+        // Adapting canvas viewport dynamically
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            scaleFactor = Math.min(1, canvas.width / 800);
+            
+            // Build aesthetic background clouds once
+            if (clouds.length === 0) {
+                for (let i = 0; i < 4; i++) {
+                    clouds.push({
+                        x: Math.random() * canvas.width,
+                        y: 20 + Math.random() * 50,
+                        r: 20 + Math.random() * 15,
+                        speed: 0.12 + Math.random() * 0.12
+                    });
+                }
+            }
+
+            // Create foliage wind particles once
+            if (windParticles.length === 0) {
+                for (let i = 0; i < 15; i++) {
+                    windParticles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        r: 6 + Math.random() * 5,
+                        speedX: -0.3 - Math.random() * 0.5,
+                        speedY: 0.2 + Math.random() * 0.3,
+                        color: getRandomFoliageColor(),
+                        angle: Math.random() * Math.PI
+                    });
+                }
+            }
+        }
+
+        function getRandomFoliageColor() {
+            const colors = ['#f59e0b', '#d97706', '#10b981', '#059669', '#f43f5e'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // --- STREAMING_CHUNK: Game logic & HUD loading handlers ---
+        function triggerLevelTransition() {
+            isGameRunning = false;
+            levelScreen.classList.remove("hidden");
+            document.getElementById("level-title").textContent = `MEADOW PATROL CLEAR!`;
+            document.getElementById("level-desc").textContent = `Incredible work! All signs in Meadow Sector have been repaired. Ready to patrol the Canopy Climb?`;
+        }
+
+        function startNextLevel() {
+            currentLevel = 2;
+            levelScreen.classList.add("hidden");
+            levelDisplayEl.textContent = currentLevel;
+            prepareLevelQuestions(currentLevel);
+            isGameRunning = true;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= totalQuestionsLimit) {
+                if (currentLevel === 1) {
+                    triggerLevelTransition();
+                } else {
+                    endGameSession();
+                }
+                return;
+            }
+
+            questionIndexEl.textContent = `${currentQuestionIndex + 1}/${totalQuestionsLimit}`;
+            const curQ = activeQuestions[currentQuestionIndex];
+            correctAnswerText = curQ.ans;
+
+            // Render sentence on signboard with wavy amber underlined gap
+            questionCardEl.innerHTML = curQ.s.replace("___", "<span class='text-amber-300 font-extrabold underline decoration-wavy decoration-amber-400'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+
+            // Reset dynamic stage variables
+            butterflies = [];
+
+            // Spawn 4 beautiful butterflies carrying target symbols
+            const opts = [...curQ.options].sort(() => 0.5 - Math.random());
+            const spacing = canvas.width / (opts.length + 1);
+
+            for (let i = 0; i < opts.length; i++) {
+                butterflies.push({
+                    text: opts[i],
+                    x: spacing * (i + 1),
+                    y: canvas.height + 60 + (Math.random() * 40),
+                    targetY: 120 + Math.random() * 70,
+                    r: 30 * scaleFactor,
+                    speed: 1.1 + Math.random() * 0.8,
+                    wingState: Math.random() * Math.PI,
+                    isCorrect: opts[i] === correctAnswerText,
+                    color: getButterflyColor(i),
+                    offsetOffset: Math.random() * 100
+                });
+            }
+
+            // Generate high-accessibility option buttons for phone/tablet interfaces
+            optionsPanel.innerHTML = "";
+            opts.forEach(opt => {
+                const button = document.createElement("button");
+                button.className = "touch-action-none flex-grow min-w-[100px] bg-gradient-to-r from-amber-600 to-amber-700 active:from-amber-500 active:to-amber-600 border-2 border-amber-400/50 hover:border-amber-300 rounded-xl px-4 py-3 text-sm md:text-base font-extrabold shadow-md transform active:scale-95 transition-all text-center select-none";
+                button.textContent = symbolToFriendlyName[opt] || opt;
+                button.addEventListener("click", () => {
+                    // Match corresponding butterfly object or execute direct
+                    const targetButterfly = butterflies.find(b => b.text === opt);
+                    if (targetButterfly) {
+                        executeCollection(targetButterfly);
+                    }
+                });
+                optionsPanel.appendChild(button);
+            });
+        }
+
+        function getButterflyColor(index) {
+            const themes = [
+                { wing: '#f43f5e', wingInner: '#ffe4e6', body: '#4c0519' }, // Magenta Rose
+                { wing: '#06b6d4', wingInner: '#ecfeff', body: '#083344' }, // Sky Cyan
+                { wing: '#eab308', wingInner: '#fef9c3', body: '#451a03' }, // Forest Gold
+                { wing: '#a855f7', wingInner: '#f3e8ff', body: '#2e1065' }  // Royal Purple
+            ];
+            return themes[index % themes.length];
+        }
+
+        function triggerHUDNotification(text, isCorrect) {
+            hudText.textContent = text;
+            if (isCorrect) {
+                hudText.className = "text-4xl md:text-6xl font-black text-amber-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] playful-font";
+            } else {
+                hudText.className = "text-4xl md:text-6xl font-black text-rose-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] playful-font";
+            }
+            hitNotification.style.opacity = "1";
+            hitNotification.style.transform = "translate(-50%, -50%) scale(1.1)";
+            
+            setTimeout(() => {
+                hitNotification.style.opacity = "0";
+                hitNotification.style.transform = "translate(-50%, -50%) scale(0.75)";
+            }, 1000);
+        }
+
+        // --- STREAMING_CHUNK: Interactive particle triggers ---
+        function spawnExplosion(x, y, color) {
+            for (let i = 0; i < 18; i++) {
+                windParticles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6 - 2,
+                    r: Math.random() * 5 + 3,
+                    color: color,
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.02,
+                    angle: Math.random() * Math.PI,
+                    isExp: true
+                });
+            }
+        }
+
+        // Tap validation mechanics
+        function checkTapCoordinates(e) {
+            if (!isGameRunning) return;
+            initAudio();
+
+            const rect = canvas.getBoundingClientRect();
+            const tapX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const tapY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+            // Water ripple trigger
+            rippleEffect = { x: tapX, y: tapY, r: 0, alpha: 0.8 };
+
+            for (let i = butterflies.length - 1; i >= 0; i--) {
+                const b = butterflies[i];
+                const dx = tapX - b.x;
+                const dy = tapY - b.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                // Touch padding buffer for comfortable mobile interactions
+                if (distance < b.r + 25) {
+                    executeCollection(b);
+                    break;
+                }
+            }
+        }
+
+        function executeCollection(targetButterfly) {
+            spawnExplosion(targetButterfly.x, targetButterfly.y, targetButterfly.color.wing);
+            const isCorrect = targetButterfly.isCorrect;
+
+            if (isCorrect) {
+                score += 100 + (streak * 20);
+                streak++;
+                correctAnswersCount++;
+                playSound('correct');
+                triggerHUDNotification("MARVELOUS!", true);
+
+                // Update signboard visually with target answer temporarily
+                const curQ = activeQuestions[currentQuestionIndex];
+                let displaySymbol = curQ.ans === "Capital" ? curQ.ans.toUpperCase()[0] : curQ.ans;
+                questionCardEl.innerHTML = curQ.s.replace("___", `<span class='text-emerald-400 font-extrabold underline decoration-wavy scale-110 inline-block'>&nbsp;${displaySymbol}&nbsp;</span>`);
+
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                }, 1100);
+            } else {
+                streak = 0;
+                playSound('wrong');
+                triggerHUDNotification("CHECK AGAIN!", false);
+                shakeSignBoard();
+            }
+
+            scoreEl.textContent = score;
+            streakEl.textContent = "🔥 " + streak;
+        }
+
+        function shakeSignBoard() {
+            questionCardEl.style.transform = "translateX(10px)";
+            setTimeout(() => questionCardEl.style.transform = "translateX(-10px)", 50);
+            setTimeout(() => questionCardEl.style.transform = "translateX(5px)", 100);
+            setTimeout(() => questionCardEl.style.transform = "translateX(0px)", 150);
+        }
+
+        function endGameSession() {
+            isGameRunning = false;
+            gameoverScreen.classList.remove("hidden");
+            optionsPanel.innerHTML = ""; // Clear options on game over
+
+            finalScoreEl.textContent = score;
+            const accuracy = Math.round((correctAnswersCount / (totalQuestionsLimit * 2)) * 100);
+            finalAccuracyEl.textContent = accuracy + "%";
+
+            let msg = "";
+            if (accuracy >= 85) {
+                msg = "🏆 Legendary Ranger! Your punctuation skills are absolutely impeccable!";
+            } else if (accuracy >= 60) {
+                msg = "🥈 Excellent Patrol! Punctuation Park is beautifully preserved under your watch!";
+            } else {
+                msg = "💫 Ranger practice makes perfect. Let's study the park paths and try again!";
+            }
+            performanceMessageEl.textContent = msg;
+        }
+
+        // --- STREAMING_CHUNK: High Fidelity Canvas Rendering ---
+        function drawCanvasScene() {
+            // Background Sky linear gradient
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGrad.addColorStop(0, '#bae6fd'); // Light sky blue
+            skyGrad.addColorStop(1, '#f0fdf4'); // Soft warm green fade near horizon
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Drifting background clouds
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            for (let i = 0; i < clouds.length; i++) {
+                const c = clouds[i];
+                c.x += c.speed;
+                if (c.x - c.r > canvas.width) c.x = -c.r;
+                
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+                ctx.arc(c.x + c.r * 0.6, c.y - c.r * 0.2, c.r * 0.8, 0, Math.PI * 2);
+                ctx.arc(c.x - c.r * 0.6, c.y, c.r * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Beautiful rolling meadow hills
+            ctx.fillStyle = '#34d399'; // Emerald-400 background hill
+            ctx.beginPath();
+            ctx.ellipse(canvas.width * 0.35, canvas.height + 40, canvas.width * 0.6, 120 * scaleFactor, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#10b981'; // Emerald-500 foreground grass meadow
+            ctx.beginPath();
+            ctx.ellipse(canvas.width * 0.75, canvas.height + 50, canvas.width * 0.75, 140 * scaleFactor, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Render majestic park tree vectors
+            ctx.save();
+            const treeX = canvas.width * 0.15;
+            const treeY = canvas.height - 20;
+            // Trunk
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(treeX - 8 * scaleFactor, treeY - 80 * scaleFactor, 16 * scaleFactor, 80 * scaleFactor);
+            // Foliage
+            ctx.fillStyle = '#047857';
+            ctx.beginPath();
+            ctx.arc(treeX, treeY - 80 * scaleFactor, 42 * scaleFactor, 0, Math.PI * 2);
+            ctx.arc(treeX - 22 * scaleFactor, treeY - 110 * scaleFactor, 32 * scaleFactor, 0, Math.PI * 2);
+            ctx.arc(treeX + 22 * scaleFactor, treeY - 110 * scaleFactor, 32 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Render park details: a secondary willow tree on the right side
+            ctx.save();
+            const willowX = canvas.width * 0.85;
+            const willowY = canvas.height - 20;
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(willowX - 6 * scaleFactor, willowY - 70 * scaleFactor, 12 * scaleFactor, 70 * scaleFactor);
+            ctx.fillStyle = '#065f46';
+            ctx.beginPath();
+            ctx.arc(willowX, willowY - 70 * scaleFactor, 35 * scaleFactor, 0, Math.PI * 2);
+            ctx.arc(willowX - 18 * scaleFactor, willowY - 95 * scaleFactor, 25 * scaleFactor, 0, Math.PI * 2);
+            ctx.arc(willowX + 18 * scaleFactor, willowY - 95 * scaleFactor, 25 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Render drifting park wind foliage & petal elements
+            for (let i = windParticles.length - 1; i >= 0; i--) {
+                const p = windParticles[i];
+                if (p.isExp) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.alpha -= p.decay;
+                    if (p.alpha <= 0) {
+                        windParticles.splice(i, 1);
+                        continue;
+                    }
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                } else {
+                    // Constant natural breeze animation
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    p.angle += 0.015;
+                    if (p.x < -20) p.x = canvas.width + 20;
+                    if (p.y > canvas.height + 20) p.y = -20;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.angle);
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.quadraticCurveTo(p.r, -p.r, 0, -p.r * 2);
+                    ctx.quadraticCurveTo(-p.r, -p.r, 0, 0);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            // Pond touch ripple circle vector rendering
+            if (rippleEffect) {
+                rippleEffect.r += 2.5;
+                rippleEffect.alpha -= 0.03;
+                if (rippleEffect.alpha <= 0) {
+                    rippleEffect = null;
+                } else {
+                    ctx.strokeStyle = `rgba(165, 243, 252, ${rippleEffect.alpha})`;
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    ctx.arc(rippleEffect.x, rippleEffect.y, rippleEffect.r, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+
+            // Draw active butterflies
+            if (isGameRunning) {
+                const time = Date.now() * 0.005;
+                for (let i = 0; i < butterflies.length; i++) {
+                    const b = butterflies[i];
+
+                    // Smooth hover vertical climb & sway calculations
+                    if (b.y > b.targetY) {
+                        b.y -= b.speed;
+                    }
+                    const swayOffset = Math.sin(time + b.offsetOffset) * 1.6;
+                    b.x += swayOffset;
+
+                    b.wingState = Math.sin(time * 3 + b.offsetOffset);
+
+                    ctx.save();
+                    ctx.translate(b.x, b.y);
+
+                    // Drop shadows for butterflies to add physical dimension
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = 'rgba(0,0,0,0.12)';
+
+                    // Draw wings (scaled with dynamic flutter flap states)
+                    const wingScaleX = Math.abs(b.wingState) * 0.85 + 0.15;
+                    ctx.fillStyle = b.color.wing;
+
+                    // Left Wings
+                    ctx.beginPath();
+                    ctx.ellipse(-12 * scaleFactor * wingScaleX, -8 * scaleFactor, 16 * scaleFactor * wingScaleX, 13 * scaleFactor, Math.PI / 6, 0, Math.PI * 2);
+                    ctx.ellipse(-10 * scaleFactor * wingScaleX, 8 * scaleFactor, 11 * scaleFactor * wingScaleX, 9 * scaleFactor, -Math.PI / 6, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Right Wings
+                    ctx.beginPath();
+                    ctx.ellipse(12 * scaleFactor * wingScaleX, -8 * scaleFactor, 16 * scaleFactor * wingScaleX, 13 * scaleFactor, -Math.PI / 6, 0, Math.PI * 2);
+                    ctx.ellipse(10 * scaleFactor * wingScaleX, 8 * scaleFactor, 11 * scaleFactor * wingScaleX, 9 * scaleFactor, Math.PI / 6, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Inner decorative wings patterns
+                    ctx.fillStyle = b.color.wingInner;
+                    ctx.beginPath();
+                    ctx.ellipse(-8 * scaleFactor * wingScaleX, -8 * scaleFactor, 9 * scaleFactor * wingScaleX, 7 * scaleFactor, Math.PI / 6, 0, Math.PI * 2);
+                    ctx.ellipse(8 * scaleFactor * wingScaleX, -8 * scaleFactor, 9 * scaleFactor * wingScaleX, 7 * scaleFactor, -Math.PI / 6, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Middle body
+                    ctx.fillStyle = b.color.body;
+                    ctx.shadowBlur = 0; // Turn off shadows for clean typography rendering
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 4.5 * scaleFactor, 15 * scaleFactor, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Antennae curves
+                    ctx.strokeStyle = b.color.body;
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(-1.5 * scaleFactor, -12 * scaleFactor);
+                    ctx.quadraticCurveTo(-5 * scaleFactor, -22 * scaleFactor, -8 * scaleFactor, -20 * scaleFactor);
+                    ctx.moveTo(1.5 * scaleFactor, -12 * scaleFactor);
+                    ctx.quadraticCurveTo(5 * scaleFactor, -22 * scaleFactor, 8 * scaleFactor, -20 * scaleFactor);
+                    ctx.stroke();
+
+                    ctx.restore();
+
+                    // Center-aligned text symbol overlay (Represent short punctuation symbols cleanly)
+                    ctx.save();
+                    ctx.fillStyle = '#1e293b'; // High-contrast carbon gray text
+                    ctx.font = `bold ${Math.max(20, Math.floor(25 * scaleFactor))}px Outfit, sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    // Adjust display symbol for Capital choice
+                    const displaySymbol = b.text === "Capital" ? "Abc" : b.text;
+                    ctx.fillText(displaySymbol, b.x, b.y + 1);
+                    ctx.restore();
+                }
+            }
+
+            requestAnimationFrame(drawCanvasScene);
+        }
+
+        // --- STREAMING_CHUNK: User Input Event Listeners ---
+        canvas.addEventListener('mousedown', checkTapCoordinates);
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                checkTapCoordinates(e.touches[0]);
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            isGameRunning = true;
+            score = 0;
+            streak = 0;
+            currentLevel = 1;
+            correctAnswersCount = 0;
+            levelDisplayEl.textContent = currentLevel;
+            scoreEl.textContent = score;
+            streakEl.textContent = "🔥 " + streak;
+            
+            prepareLevelQuestions(currentLevel);
+            loadQuestion();
+        });
+
+        nextLevelBtn.addEventListener('click', () => {
+            initAudio();
+            startNextLevel();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            initAudio();
+            gameoverScreen.classList.add("hidden");
+            isGameRunning = true;
+            score = 0;
+            streak = 0;
+            currentLevel = 1;
+            correctAnswersCount = 0;
+            levelDisplayEl.textContent = currentLevel;
+            scoreEl.textContent = score;
+            streakEl.textContent = "🔥 " + streak;
+            
+            prepareLevelQuestions(currentLevel);
+            loadQuestion();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- STREAMING_CHUNK: System Initialization On Window Load ---
+        window.onload = function() {
+            resizeCanvas();
+            drawCanvasScene();
+
+            // Run the pure white logo splash screen for exactly 5 seconds
+            setTimeout(() => {
+                logoScreen.classList.add("opacity-0");
+                setTimeout(() => {
+                    logoScreen.classList.add("hidden");
+                    startScreen.classList.remove("hidden");
+                }, 1000);
+            }, 5000);
+        };
+    </script>
+</body>
+</html>
