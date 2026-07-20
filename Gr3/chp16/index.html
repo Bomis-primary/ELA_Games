@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Conjunction Junction: Energy Bridge</title>
-    <!-- Tailwind CSS for styling -->
+    <!-- Tailwind CSS for robust mobile-friendly utility layout -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts for playful and legible typography -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka+One&display=swap" rel="stylesheet">
@@ -20,18 +20,19 @@
         .playful-font {
             font-family: 'Fredoka One', cursive;
         }
-        /* Custom touch manipulation to optimize mobile screen response */
+        /* Touch manipulation optimize */
         .touch-action-none {
-            touch-action: manipulation;
+            touch-action: none;
         }
-        /* Bridge snapping block active state simulation */
-        .glow-button {
+        /* Draggable active hover state */
+        .card-glowing {
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-            transition: all 0.2s ease-in-out;
+            transition: box-shadow 0.2s ease-in-out;
         }
-        .glow-button:active {
-            transform: scale(0.95);
-            box-shadow: 0 0 25px rgba(236, 72, 153, 0.8);
+        .card-dragging {
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.9) !important;
+            opacity: 0.9;
+            z-index: 50 !important;
         }
     </style>
 </head>
@@ -39,13 +40,71 @@
 
     <div class="relative w-full max-w-5xl bg-slate-950 rounded-3xl border-4 border-cyan-400 shadow-2xl shadow-cyan-500/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
         
-        <!-- STRICTLY BLANK WHITE SPLASH SCREEN WITH CENTRED LOGO ONLY (No text, loaders, or frames) -->
+        <!-- STRICTLY BLANK WHITE SPLASH SCREEN WITH CENTRED LOGO ONLY -->
         <div id="logo-screen" class="absolute inset-0 bg-white flex items-center justify-center p-6 z-50 transition-opacity duration-1000">
             <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[280px] w-full h-auto object-contain transition-all duration-300">
         </div>
+
+        <!-- FULL-FRAME START SCREEN OVERLAY (Z-INDEX 30 - NOW OVERLAYS DOCK SO START BUTTON IS ALWAYS VISIBLE) -->
+        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-30 hidden">
+            <div class="max-w-md w-full max-h-[90vh] overflow-y-auto bg-slate-900/95 p-6 md:p-8 rounded-3xl border-2 border-cyan-400 backdrop-blur-md shadow-2xl flex flex-col items-center">
+                <div class="text-6xl mb-3 animate-bounce">⚡🛞</div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-cyan-300 mb-1 playful-font">CONJUNCTION JUNCTION</h2>
+                <h3 class="text-md text-pink-400 font-semibold mb-4">Grade 3 Bridge Builder</h3>
+                
+                <p class="text-sm text-slate-300 mb-6 leading-relaxed bg-slate-950/80 p-4 rounded-xl text-left border border-slate-800/50">
+                    🛰️ <strong>MISSION DEBRIEFING:</strong><br>
+                    Help the Space Explorer Rover cross the deep canyon! Read the two disconnected sentence clauses at the top of the monitor panel.<br><br>
+                    🎯 <strong>Drag one of the conjunction blocks</strong> from the bottom launcher and drop it directly into the blinking target slot above. If the logic holds, the bridge will activate!
+                </p>
+                
+                <button id="start-btn" class="w-full bg-gradient-to-r from-cyan-400 to-indigo-600 hover:from-cyan-300 hover:to-indigo-500 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-cyan-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
+                    Engage Systems
+                </button>
+            </div>
+        </div>
+
+        <!-- FULL-FRAME SECTOR CLEAR OVERLAY -->
+        <div id="level-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-30 hidden">
+            <div class="max-w-md bg-slate-900/90 p-8 rounded-3xl border-2 border-cyan-400 backdrop-blur-md shadow-2xl">
+                <div class="text-6xl mb-4 animate-pulse">🌌🛸</div>
+                <h2 id="level-title" class="text-4xl font-extrabold text-cyan-300 mb-2 playful-font">SECTOR 1 SECURED!</h2>
+                <p id="level-desc" class="text-slate-300 text-sm mb-6 leading-relaxed">
+                    Fantastic connection skills, Captain! All canyon platforms have been fully reinforced. Ready to patrol the Sub-Orbital Sector?
+                </p>
+                <button id="next-level-btn" class="w-full bg-gradient-to-r from-cyan-500 to-pink-600 hover:from-cyan-400 hover:to-pink-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-cyan-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
+                    Patrol Next Sector
+                </button>
+            </div>
+        </div>
+
+        <!-- FULL-FRAME GAME OVER OVERLAY -->
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-30 hidden">
+            <div class="max-w-md w-full bg-slate-900/90 p-6 md:p-8 rounded-3xl border-2 border-pink-400 backdrop-blur-md shadow-2xl">
+                <div class="text-6xl mb-4">🏆🛰️</div>
+                <h2 class="text-3xl font-extrabold text-cyan-300 mb-1 playful-font">Master Bridge Engineer!</h2>
+                <p class="text-slate-300 text-sm mb-6">You corrected and secured all structural logical connections across the galaxy!</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+                        <span class="block text-xs text-slate-400 font-bold uppercase">Final Power</span>
+                        <span id="final-score" class="text-2xl font-black text-amber-300 playful-font">0</span>
+                    </div>
+                    <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+                        <span class="block text-xs text-slate-400 font-bold uppercase">Success Rate</span>
+                        <span id="final-accuracy" class="text-2xl font-black text-cyan-300 playful-font">0%</span>
+                    </div>
+                </div>
+
+                <p id="performance-message" class="text-slate-200 italic mb-6 font-semibold text-sm"></p>
+
+                <button id="restart-btn" class="w-full bg-gradient-to-r from-cyan-400 to-pink-600 hover:from-cyan-300 hover:to-pink-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-cyan-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
+                    Deploy New Patrol
+                </button>
+            </div>
+        </div>
         
-        <!-- Header / Stats Dashboard HUD -->
-        <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-4 py-3 border-b-2 border-cyan-400 flex flex-wrap justify-between items-center gap-2 z-10">
+        <header class="bg-gradient-to-r from-slate-900 via-indigo-955 to-slate-900 px-4 py-3 border-b-2 border-cyan-400 flex flex-wrap justify-between items-center gap-2 z-10">
             <div class="flex items-center gap-2">
                 <span class="text-2xl animate-bounce">⚡</span>
                 <h1 class="text-lg md:text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-indigo-200 to-pink-300 playful-font">
@@ -70,20 +129,20 @@
         </header>
 
         <!-- Dynamic Split Sentence Clause Box / Hologram Board -->
-        <section class="bg-gradient-to-b from-slate-900 to-indigo-950/40 p-4 border-b border-cyan-500/20 flex flex-col items-center justify-center text-center z-10 relative">
+        <section class="bg-gradient-to-b from-slate-900 to-indigo-955/40 p-4 border-b border-cyan-500/20 flex flex-col items-center justify-center text-center z-10 relative">
             <p id="instruction-title" class="text-[10px] md:text-xs uppercase tracking-widest text-cyan-400 font-bold mb-2">
-                Launch the correct conjunction block to power up the energy bridge!
+                Drag and drop the correct conjunction block into the bridge slot!
             </p>
             
-            <div class="flex flex-col md:flex-row items-center justify-center gap-3 w-full max-w-4xl px-2">
+            <div class="flex flex-col md:flex-row items-center justify-center gap-3 w-full max-w-4xl px-2 relative">
                 <!-- Left Sentence Segment -->
                 <div id="clause-left" class="bg-slate-900/90 border border-cyan-500/30 text-white font-bold text-xs md:text-lg px-4 py-3 rounded-xl flex-1 text-center shadow-lg leading-relaxed">
                     Analyzing energy readings...
                 </div>
                 
-                <!-- Glow Snapping Connector Gap Indicator -->
-                <div id="connector-gap" class="w-28 md:w-36 h-10 md:h-12 border-2 border-dashed border-pink-500/60 bg-pink-500/10 rounded-xl flex items-center justify-center text-xs font-bold text-pink-300 animate-pulse uppercase tracking-wider">
-                    [ Empty Slot ]
+                <!-- Glow Snapping Connector Gap Indicator Drop Zone -->
+                <div id="connector-gap" class="w-32 md:w-40 h-12 md:h-14 border-2 border-dashed border-pink-500/60 bg-pink-500/10 rounded-xl flex items-center justify-center text-xs font-bold text-pink-300 animate-pulse uppercase tracking-wider transition-all duration-300">
+                    [ Drop Block ]
                 </div>
                 
                 <!-- Right Sentence Segment -->
@@ -98,65 +157,6 @@
             <!-- Interactive Canyon Canvas -->
             <canvas id="gameCanvas" class="w-full h-full block touch-none"></canvas>
 
-            <!-- Start Menu Screen Overlay -->
-            <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20 hidden">
-                <div class="max-w-md w-full bg-slate-900/90 p-6 md:p-8 rounded-3xl border-2 border-cyan-400 backdrop-blur-md shadow-2xl">
-                    <div class="text-6xl mb-3 animate-bounce">⚡🛞</div>
-                    <h2 class="text-3xl font-extrabold text-cyan-300 mb-1 playful-font">CONJUNCTION JUNCTION</h2>
-                    <h3 class="text-md text-pink-400 font-semibold mb-4">Grade 3 Bridge Builder</h3>
-                    
-                    <p class="text-sm text-slate-300 mb-6 leading-relaxed bg-slate-950/80 p-4 rounded-xl text-left border border-slate-800/50">
-                        🛰️ <strong>MISSION DEBRIEFING:</strong><br>
-                        Help the Space Explorer Rover cross the deep canyon! Read the two disconnected sentence clauses at the top of the monitor panel.<br><br>
-                        🎯 <strong>Tap one of the conjunction blocks</strong> at the bottom launcher to fire it into the holographic bridge gap. If the logic holds, the bridge will activate!
-                    </p>
-                    
-                    <button id="start-btn" class="w-full bg-gradient-to-r from-cyan-400 to-indigo-600 hover:from-cyan-300 hover:to-indigo-500 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-cyan-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
-                        Engage Systems
-                    </button>
-                </div>
-            </div>
-
-            <!-- Sector (Level) Clear Splash Screen Overlay -->
-            <div id="level-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-20 hidden">
-                <div class="max-w-md bg-slate-900/90 p-8 rounded-3xl border-2 border-cyan-400 backdrop-blur-md shadow-2xl">
-                    <div class="text-6xl mb-4 animate-pulse">🌌🛸</div>
-                    <h2 id="level-title" class="text-4xl font-extrabold text-cyan-300 mb-2 playful-font">SECTOR 1 SECURED!</h2>
-                    <p id="level-desc" class="text-slate-300 text-sm mb-6 leading-relaxed">
-                        Fantastic connection skills, Captain! All canyon platforms have been fully reinforced. Ready to patrol the Sub-Orbital Sector?
-                    </p>
-                    <button id="next-level-btn" class="w-full bg-gradient-to-r from-cyan-500 to-pink-600 hover:from-cyan-400 hover:to-pink-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-cyan-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
-                        Patrol Next Sector
-                    </button>
-                </div>
-            </div>
-
-            <!-- Session Victory / Game Over Overlay -->
-            <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20 hidden">
-                <div class="max-w-md w-full bg-slate-900/90 p-6 md:p-8 rounded-3xl border-2 border-pink-400 backdrop-blur-md shadow-2xl">
-                    <div class="text-6xl mb-4">🏆🛰️</div>
-                    <h2 class="text-3xl font-extrabold text-cyan-300 mb-1 playful-font">Master Bridge Engineer!</h2>
-                    <p class="text-slate-300 text-sm mb-6">You corrected and secured all structural logical connections across the galaxy!</p>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
-                            <span class="block text-xs text-slate-400 font-bold uppercase">Final Power</span>
-                            <span id="final-score" class="text-2xl font-black text-amber-300 playful-font">0</span>
-                        </div>
-                        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
-                            <span class="block text-xs text-slate-400 font-bold uppercase">Success Rate</span>
-                            <span id="final-accuracy" class="text-2xl font-black text-cyan-300 playful-font">0%</span>
-                        </div>
-                    </div>
-
-                    <p id="performance-message" class="text-slate-200 italic mb-6 font-semibold text-sm"></p>
-
-                    <button id="restart-btn" class="w-full bg-gradient-to-r from-cyan-400 to-pink-600 hover:from-cyan-300 hover:to-pink-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-cyan-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
-                        Deploy New Patrol
-                    </button>
-                </div>
-            </div>
-
             <!-- Interactive HUD Action Alert Banner -->
             <div id="hit-notification" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
                 <div id="hud-text" class="text-5xl md:text-7xl font-black tracking-wider drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font">
@@ -165,11 +165,11 @@
             </div>
         </main>
 
-        <!-- Conjunction Block Launch Dock (Extremely touch & tap friendly for phones/tablets) -->
-        <div class="bg-slate-900 border-t-2 border-cyan-500 p-3 flex flex-col items-center gap-2 z-10 select-none">
-            <span class="text-[10px] md:text-xs uppercase tracking-widest text-slate-400 font-bold">Select and launch a conjunction block</span>
-            <div id="launch-panel" class="w-full flex flex-wrap justify-center items-center gap-2 md:gap-3">
-                <!-- Dynamically populated buttons -->
+        <!-- Conjunction Block Launch Dock (Touch & drag friendly for phones/tablets) -->
+        <div class="bg-slate-900 border-t-2 border-cyan-500 p-3 flex flex-col items-center gap-2 z-10 select-none relative min-h-[100px]">
+            <span class="text-[10px] md:text-xs uppercase tracking-widest text-slate-400 font-bold">Drag cards up to the missing sentence gap</span>
+            <div id="launch-panel" class="w-full flex flex-wrap justify-center items-center gap-3 relative py-2 min-h-[60px]">
+                <!-- Conjunction blocks will render as absolutely or relatively positioned touch components here -->
             </div>
         </div>
 
@@ -177,7 +177,7 @@
         <footer class="bg-slate-950 border-t border-slate-900 px-6 py-3 flex flex-col sm:flex-row justify-between items-center gap-2 z-10 text-xs text-slate-400">
             <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-cyan-400 inline-block animate-ping"></span>
-                <span>Optimized for low-bandwidth & touchscreen response</span>
+                <span>Touch-drag responsive coordination layout</span>
             </div>
             <div class="text-center">
                 Conjunction Junction &bull; Grade 3 Grammar Center
@@ -187,7 +187,6 @@
 
     <!-- Gameplay Script -->
     <script>
-        // --- AUDIO ENGINE CONSTRAINTS ---
         const audioAssets = {
             correct: new Audio('assets/correct.mp3'),
             wrong: new Audio('assets/wrong.mp3')
@@ -221,7 +220,7 @@
             }
         }
 
-        // Web Audio Synthesizer fallback for reliable offline connectivity
+        // Web Audio Synthesizer fallback for reliable connectivity
         function playSynthFallback(type) {
             if (!audioCtx) return;
             if (audioCtx.state === 'suspended') {
@@ -234,16 +233,14 @@
                 gain.connect(audioCtx.destination);
 
                 if (type === 'correct') {
-                    // Upbeat sci-fi electronic sweep chime
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
-                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.2); // A5
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime); 
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.2); 
                     gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
                     osc.start();
                     osc.stop(audioCtx.currentTime + 0.25);
                 } else if (type === 'wrong') {
-                    // Buzzing mechanical diagnostic sound
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(150, audioCtx.currentTime);
                     osc.frequency.linearRampToValueAtTime(60, audioCtx.currentTime + 0.3);
@@ -257,46 +254,44 @@
             }
         }
 
-        // --- GRAMMAR DATABASES ---
-        // Level 1: Core compound linkages (and, but, or, so)
+        // Level 1 Database (and, or, but, because, so, if)
         const level1Bank = [
-            { left: "The sun was shining brightly", right: "a cool breeze swept across the valley.", ans: "and" },
-            { left: "We wanted to explore the deep cave", right: "we forgot our flashlights.", ans: "but" },
-            { left: "You can choose the rocky mountain trail", right: "the smooth river path.", ans: "or" },
-            { left: "The storm damaged the wooden bridge", right: "we had to turn back.", ans: "so" },
-            { left: "The baby deer heard a rustling sound", right: "it quickly bounded away.", ans: "so" },
-            { left: "The ranger wore a heavy jacket", right: "the wind was freezing.", ans: "because" },
-            { left: "We can set up the campfire now", right: "wait until it gets darker.", ans: "or" },
-            { left: "The trail was long and muddy", right: "we made it to the summit.", ans: "but" },
-            { left: "We saw wild eagles soaring high", right: "we spotted a sleeping owl.", ans: "and" },
-            { left: "Please wear your hiking boots", right: "the trail is very slippery.", ans: "because" },
-            { left: "You will get lost in the forest", right: "you do not stay on the path.", ans: "if" },
-            { left: "The river was flowing too fast", right: "it was unsafe to cross.", ans: "so" },
-            { left: "The campfire was warm", right: "it kept the cold night air away.", ans: "and" },
-            { left: "We tried to catch the fast rabbit", right: "it was much too quick.", ans: "but" },
-            { left: "You can cook hot dogs on the fire", right: "roast sweet marshmallows.", ans: "or" }
+            { left: "We wanted to play outside", right: "it started to rain heavily.", ans: "but" },
+            { left: "You can have sweet apple slices", right: "crunchy carrot sticks.", ans: "or" },
+            { left: "The kitten fell asleep", right: "it was very tired.", ans: "because" },
+            { left: "We packed a large umbrella", right: "we would stay dry.", ans: "so" },
+            { left: "You will get cold", right: "you do not wear your jacket.", ans: "if" },
+            { left: "He turned on the light", right: "the room was very dark.", ans: "because" },
+            { left: "I looked everywhere for my keys", right: "I could not find them.", ans: "but" },
+            { left: "Would you like to visit the zoo", right: "go to the science park?", ans: "or" },
+            { left: "The bird built a nest", right: "laid three small eggs.", ans: "and" },
+            { left: "She studied hard for her test", right: "she earned an excellent grade.", ans: "so" },
+            { left: "The alarm will ring", right: "someone opens this security door.", ans: "if" },
+            { left: "My brother likes painting", right: "I prefer crafting models.", ans: "but" },
+            { left: "We arrived early", right: "we wanted to get prime seats.", ans: "because" },
+            { left: "We can bake a fresh cake", right: "we can buy one from the shop.", ans: "or" },
+            { left: "The dog barked loudly", right: "wagged its tail happily.", ans: "and" }
         ];
 
-        // Level 2: Complex logical / causal dependencies (because, if, advanced logical flows)
+        // Level 2 Database (advanced logical reasoning)
         const level2Bank = [
-            { left: "We must find shelter immediately", right: "the dark rain clouds are gathering.", ans: "because" },
-            { left: "The flowers will bloom beautifully", right: "they receive enough sunlight.", ans: "if" },
-            { left: "The mountain peak was covered in snow", right: "it was the middle of summer.", ans: "but" },
-            { left: "The map was extremely old", right: "we could still read the directions.", ans: "but" },
-            { left: "We filled our bottles with fresh water", right: "we would not get thirsty.", ans: "so" },
-            { left: "The forest will remain beautiful", right: "visitors keep it clean.", ans: "if" },
-            { left: "The owl hunts at night", right: "its eyes are built for the dark.", ans: "because" },
-            { left: "You must pack your sleeping bag", right: "you want to stay warm tonight.", ans: "if" },
-            { left: "The squirrels gathered many acorns", right: "winter was coming soon.", ans: "because" },
-            { left: "The dark trail was spooky", right: "we held our lanterns high.", ans: "so" },
-            { left: "We cannot cross the deep canyon", right: "the wooden bridge is broken.", ans: "if" },
-            { left: "The compass needle spins wildly", right: "you place it near metal.", ans: "if" },
-            { left: "We did not see any bears", right: "we saw several fresh footprints.", ans: "but" },
-            { left: "The guide spoke very softly", right: "he did not want to scare the birds.", ans: "because" },
-            { left: "The hiking team stopped to rest", right: "they had been walking for hours.", ans: "because" }
+            { left: "The rover will stop moving", right: "its battery power runs out.", ans: "if" },
+            { left: "The flowers bloomed early", right: "the spring weather was warm.", ans: "because" },
+            { left: "He ran as fast as he could", right: "he still missed the school bus.", ans: "but" },
+            { left: "We need to clean the solar panels", right: "they can collect energy.", ans: "so" },
+            { left: "Do you want to study the red planet", right: "explore the asteroid belt?", ans: "or" },
+            { left: "We must stay inside the cabin", right: "there is a heavy dust storm.", ans: "because" },
+            { left: "The telescope is highly powerful", right: "it cannot see through dust clouds.", ans: "but" },
+            { left: "We should check the map now", right: "we do not get lost.", ans: "so" },
+            { left: "She gathered fresh space rock samples", right: "cataloged them carefully.", ans: "and" },
+            { left: "The mission will succeed", right: "everyone works together as a team.", ans: "if" },
+            { left: "He forgot to charge his communicator", right: "he could not call home.", ans: "so" },
+            { left: "I wanted to view the solar eclipse", right: "the sky was too cloudy.", ans: "but" },
+            { left: "The space greenhouse grew organic tomatoes", right: "crisp green lettuce.", ans: "and" },
+            { left: "The space crew went to sleep", right: "their long shift was completed.", ans: "because" },
+            { left: "You can adjust the oxygen levels", right: "turn on the backup fans.", ans: "or" }
         ];
 
-        // --- SYSTEM ENGINE CONSTANTS ---
         const CONJUNCTIONS = ["and", "or", "but", "because", "so", "if"];
         
         let activeQuestions = [];
@@ -340,12 +335,15 @@
 
         // Interactive entities
         let particles = [];
-        let stars = []; // Background stars
-        let bridgeFlickerIntensity = 0;
-        let bridgeState = 'EMPTY'; // EMPTY, SNAPPING, SECURED, SHATTERING
+        let stars = [];
+        let bridgeState = 'EMPTY'; // EMPTY, SECURED, SHATTERING
         
-        // Animated Block Projection
-        let projectionBlock = null;
+        // Pointer Coordinates for accurate custom Drag and Drop tracking
+        let activeDragElement = null;
+        let pointerStartX = 0;
+        let pointerStartY = 0;
+        let dragStartX = 0;
+        let dragStartY = 0;
 
         // Rover entity properties
         const rover = {
@@ -353,14 +351,13 @@
             y: 0,
             targetX: 0,
             speed: 3,
-            state: 'IDLE', // IDLE, WALKING, REBOUNDING, RETURNING, RETREATING
-            spriteXOffset: 0,
-            spriteWidth: 70,
-            spriteHeight: 50,
-            wheelAngle: 0
+            state: 'IDLE', // IDLE, WALKING, REBOUNDING, RETURNING, SECURED
+            wheelAngle: 0,
+            width: 70,
+            height: 50
         };
 
-        // Initialize question batches
+        // Prepare randomized queries
         function prepareLevelQuestions(levelNum) {
             const sourceBank = levelNum === 1 ? level1Bank : level2Bank;
             const shuffled = [...sourceBank].sort(() => 0.5 - Math.random());
@@ -416,7 +413,6 @@
             }
         }
 
-        // --- TRANSITIONS & SECTORS ---
         function triggerSectorTransition() {
             isGameRunning = false;
             levelScreen.classList.remove("hidden");
@@ -433,7 +429,7 @@
             loadQuestion();
         }
 
-        // Load new sentence cards
+        // Load new sentence cards and initialize conjunction cards
         function loadQuestion() {
             if (currentQuestionIndex >= totalQuestionsLimit) {
                 if (currentLevel === 1) {
@@ -451,12 +447,11 @@
             leftClauseEl.textContent = currentQ.left;
             rightClauseEl.textContent = currentQ.right;
             
-            connectorGapEl.textContent = "[ Empty Slot ]";
-            connectorGapEl.className = "w-28 md:w-36 h-10 md:h-12 border-2 border-dashed border-pink-500/60 bg-pink-500/10 rounded-xl flex items-center justify-center text-xs font-bold text-pink-300 animate-pulse uppercase tracking-wider";
+            connectorGapEl.textContent = "[ Drop Block ]";
+            connectorGapEl.className = "w-32 md:w-40 h-12 md:h-14 border-2 border-dashed border-pink-500/60 bg-pink-500/10 rounded-xl flex items-center justify-center text-xs font-bold text-pink-300 animate-pulse uppercase tracking-wider transition-all duration-300";
 
-            // Reset snapping parameters
+            // Reset state
             bridgeState = 'EMPTY';
-            projectionBlock = null;
             
             const cliffY = canvas.height * 0.75;
             rover.x = canvas.width * 0.12 - 35;
@@ -464,52 +459,95 @@
             rover.targetX = rover.x;
             rover.state = 'IDLE';
 
-            // Populate high-accessibility action launchers
             launchPanel.innerHTML = "";
             CONJUNCTIONS.forEach(conj => {
-                const button = document.createElement("button");
-                button.className = "touch-action-none flex-grow min-w-[90px] bg-gradient-to-r from-slate-800 via-indigo-950 to-slate-800 active:from-indigo-900 border-2 border-cyan-400/40 hover:border-cyan-300 rounded-xl py-3 text-sm md:text-base font-extrabold shadow-md transform transition-all duration-200 text-center select-none glow-button";
-                button.textContent = conj.toUpperCase();
-                
-                button.addEventListener("click", () => {
-                    if (bridgeState === 'EMPTY' && rover.state === 'IDLE') {
-                        fireSnappingBlock(conj, button);
+                const card = document.createElement("div");
+                card.className = "touch-action-none bg-gradient-to-r from-cyan-500 to-indigo-600 border-2 border-cyan-300 rounded-xl px-5 py-3 text-sm md:text-base font-extrabold shadow-lg select-none cursor-grab active:cursor-grabbing text-center min-w-[70px] flex items-center justify-center card-glowing transition-transform duration-100";
+                card.textContent = conj.toUpperCase();
+                card.dataset.conjunction = conj;
+
+                // Setup Pointer Events for absolute responsive drag tracking across platforms
+                card.addEventListener('pointerdown', (e) => {
+                    if (bridgeState !== 'EMPTY' || rover.state !== 'IDLE') return;
+                    initAudio();
+                    activeDragElement = card;
+                    card.classList.add('card-dragging');
+                    card.style.position = 'fixed';
+                    card.style.touchAction = 'none';
+
+                    // Capture pointer and element offset
+                    const rect = card.getBoundingClientRect();
+                    pointerStartX = e.clientX;
+                    pointerStartY = e.clientY;
+                    dragStartX = rect.left;
+                    dragStartY = rect.top;
+
+                    // Set initial coordinates
+                    card.style.left = `${dragStartX}px`;
+                    card.style.top = `${dragStartY}px`;
+                    card.style.width = `${rect.width}px`;
+                    card.style.height = `${rect.height}px`;
+
+                    card.setPointerCapture(e.pointerId);
+                });
+
+                card.addEventListener('pointermove', (e) => {
+                    if (activeDragElement !== card) return;
+                    const dx = e.clientX - pointerStartX;
+                    const dy = e.clientY - pointerStartY;
+                    card.style.left = `${dragStartX + dx}px`;
+                    card.style.top = `${dragStartY + dy}px`;
+
+                    // Visually highlight drop zone if dragging near it
+                    const gapRect = connectorGapEl.getBoundingClientRect();
+                    const cardRect = card.getBoundingClientRect();
+                    if (
+                        cardRect.left + cardRect.width / 2 > gapRect.left &&
+                        cardRect.left + cardRect.width / 2 < gapRect.right &&
+                        cardRect.top + cardRect.height / 2 > gapRect.top &&
+                        cardRect.top + cardRect.height / 2 < gapRect.bottom
+                    ) {
+                        connectorGapEl.className = "w-32 md:w-40 h-12 md:h-14 border-2 border-solid border-cyan-400 bg-cyan-500/20 rounded-xl flex items-center justify-center text-xs font-bold text-cyan-200 uppercase tracking-wider scale-105 transition-all duration-300";
+                    } else {
+                        connectorGapEl.className = "w-32 md:w-40 h-12 md:h-14 border-2 border-dashed border-pink-500/60 bg-pink-500/10 rounded-xl flex items-center justify-center text-xs font-bold text-pink-300 animate-pulse uppercase tracking-wider transition-all duration-300";
                     }
                 });
-                launchPanel.appendChild(button);
+
+                card.addEventListener('pointerup', (e) => {
+                    if (activeDragElement !== card) return;
+                    card.releasePointerCapture(e.pointerId);
+                    card.classList.remove('card-dragging');
+                    activeDragElement = null;
+
+                    // Evaluate collision with drop zone target bounds
+                    const gapRect = connectorGapEl.getBoundingClientRect();
+                    const cardRect = card.getBoundingClientRect();
+                    const cardCenterX = cardRect.left + cardRect.width / 2;
+                    const cardCenterY = cardRect.top + cardRect.height / 2;
+
+                    if (
+                        cardCenterX > gapRect.left &&
+                        cardCenterX < gapRect.right &&
+                        cardCenterY > gapRect.top &&
+                        cardCenterY < gapRect.bottom
+                    ) {
+                        verifySentence(card.dataset.conjunction);
+                        card.remove(); // Clean drop card
+                    } else {
+                        // Return to launch panel
+                        card.style.position = '';
+                        card.style.left = '';
+                        card.style.top = '';
+                        card.style.width = '';
+                        card.style.height = '';
+                        connectorGapEl.className = "w-32 md:w-40 h-12 md:h-14 border-2 border-dashed border-pink-500/60 bg-pink-500/10 rounded-xl flex items-center justify-center text-xs font-bold text-pink-300 animate-pulse uppercase tracking-wider transition-all duration-300";
+                    }
+                });
+
+                launchPanel.appendChild(card);
             });
         }
 
-        // Projection block logic: launches from selected slot coordinates up into central slot zone
-        function fireSnappingBlock(selectedConj, element) {
-            initAudio();
-
-            // Locate triggering coordinates to launch from
-            const rect = element.getBoundingClientRect();
-            const canvasRect = canvas.getBoundingClientRect();
-            
-            // Map button screen layout safely into Canvas coordinates
-            const launchX = (rect.left + rect.width / 2) - canvasRect.left;
-            const launchY = canvas.height;
-
-            const targetX = canvas.width / 2;
-            const targetY = canvas.height * 0.75 - 15; // Centered in deep bridge slot
-
-            projectionBlock = {
-                text: selectedConj,
-                x: launchX,
-                y: launchY,
-                targetX: targetX,
-                targetY: targetY,
-                speed: 15,
-                progress: 0,
-                color: '#38bdf8'
-            };
-
-            bridgeState = 'SNAPPING';
-        }
-
-        // Validate bridge snap
         function verifySentence(conjunctionText) {
             const currentQ = activeQuestions[currentQuestionIndex];
             const isCorrect = conjunctionText === currentQ.ans;
@@ -517,19 +555,15 @@
             connectorGapEl.textContent = conjunctionText.toUpperCase();
             
             if (isCorrect) {
-                // Update styling of gap block to Green success
-                connectorGapEl.className = "w-28 md:w-36 h-10 md:h-12 border-2 border-green-500 bg-green-500/20 rounded-xl flex items-center justify-center text-sm font-black text-green-400 tracking-widest uppercase scale-105 transition-all duration-300";
-                
+                connectorGapEl.className = "w-32 md:w-40 h-12 md:h-14 border-2 border-green-500 bg-green-500/20 rounded-xl flex items-center justify-center text-sm font-black text-green-400 tracking-widest uppercase scale-105 transition-all duration-300";
                 bridgeState = 'SECURED';
                 rover.state = 'WALKING';
-                rover.targetX = canvas.width * 0.88 - 35; // Target is safety of Right cliff
+                rover.targetX = canvas.width * 0.88 - 35; 
             } else {
-                // Update styling of gap block to Red failure
-                connectorGapEl.className = "w-28 md:w-36 h-10 md:h-12 border-2 border-rose-500 bg-rose-500/20 rounded-xl flex items-center justify-center text-sm font-black text-rose-400 tracking-widest uppercase scale-105 transition-all duration-300";
-                
+                connectorGapEl.className = "w-32 md:w-40 h-12 md:h-14 border-2 border-rose-500 bg-rose-500/20 rounded-xl flex items-center justify-center text-sm font-black text-rose-400 tracking-widest uppercase scale-105 transition-all duration-300";
                 bridgeState = 'SHATTERING';
                 rover.state = 'REBOUNDING';
-                rover.targetX = canvas.width * 0.45; // Test up to early bridge segment, then collapse
+                rover.targetX = canvas.width * 0.45;
             }
         }
 
@@ -552,7 +586,7 @@
         function endGameSession() {
             isGameRunning = false;
             gameoverScreen.classList.remove("hidden");
-            launchPanel.innerHTML = ""; // Clear active controls on end screen
+            launchPanel.innerHTML = ""; 
 
             finalScoreEl.textContent = score;
             const accuracy = Math.round((correctAnswersCount / (totalQuestionsLimit * 2)) * 100);
@@ -569,12 +603,10 @@
             performanceMessageEl.textContent = msg;
         }
 
-        // --- HIGH PERFORMANCE RENDERING ENGINE ---
         function drawScene() {
-            // Background cosmic void deep color space gradient
             const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            skyGrad.addColorStop(0, '#020617'); // Dark slate void
-            skyGrad.addColorStop(1, '#0f172a'); // Slightly lighter slate near horizons
+            skyGrad.addColorStop(0, '#020617'); 
+            skyGrad.addColorStop(1, '#0f172a'); 
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -593,28 +625,27 @@
                 ctx.restore();
             });
 
-            // Nebulous energy auroras
+            // Spotlights
             const time = Date.now() * 0.001;
             const auroraX1 = Math.sin(time * 0.5) * 100 + canvas.width * 0.5;
             const auroraY1 = Math.cos(time * 0.3) * 50 + canvas.height * 0.3;
 
             ctx.save();
             const radGrad = ctx.createRadialGradient(auroraX1, auroraY1, 20, auroraX1, auroraY1, 250);
-            radGrad.addColorStop(0, 'rgba(14, 116, 144, 0.08)'); // Deep Cyan glow
-            radGrad.addColorStop(0.5, 'rgba(131, 24, 67, 0.04)'); // Pink glow
+            radGrad.addColorStop(0, 'rgba(14, 116, 144, 0.08)'); 
+            radGrad.addColorStop(0.5, 'rgba(131, 24, 67, 0.04)'); 
             radGrad.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.fillStyle = radGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.restore();
 
-            // Cliff coordinate markers
-            const cliffHeight = canvas.height * 0.28;
+            // Cliff coordinates
             const cliffY = canvas.height * 0.75;
             const leftCliffWidth = canvas.width * 0.25;
             const rightCliffWidth = canvas.width * 0.25;
 
-            // Draw left cliff (Tech-Platform Slab style)
-            ctx.fillStyle = '#1e293b'; // Slate gray structure
+            // Draw left cliff
+            ctx.fillStyle = '#1e293b'; 
             ctx.beginPath();
             ctx.moveTo(0, cliffY);
             ctx.lineTo(leftCliffWidth, cliffY);
@@ -624,7 +655,7 @@
             ctx.fill();
 
             // Plate highlight edge
-            ctx.strokeStyle = '#06b6d4'; // Cyan neon line
+            ctx.strokeStyle = '#06b6d4'; 
             ctx.lineWidth = 3 * scaleFactor;
             ctx.beginPath();
             ctx.moveTo(0, cliffY);
@@ -648,7 +679,6 @@
             ctx.lineTo(canvas.width - rightCliffWidth, cliffY);
             ctx.stroke();
 
-            // Draw energy bridge structures
             const startBridgeX = leftCliffWidth;
             const endBridgeX = canvas.width - rightCliffWidth;
             const bridgeWidth = endBridgeX - startBridgeX;
@@ -664,11 +694,9 @@
 
             // Draw active/inactive bridge energy beams
             if (bridgeState === 'SECURED') {
-                // Fully illuminated secure green highway
-                ctx.fillStyle = 'rgba(34, 197, 94, 0.15)'; // Green glow path
+                ctx.fillStyle = 'rgba(34, 197, 94, 0.15)'; 
                 ctx.fillRect(startBridgeX, cliffY, bridgeWidth, bridgeHeight);
 
-                // Neon track rails
                 ctx.strokeStyle = '#22c55e';
                 ctx.lineWidth = 4 * scaleFactor;
                 ctx.beginPath();
@@ -678,7 +706,6 @@
                 ctx.lineTo(endBridgeX, cliffY + bridgeHeight);
                 ctx.stroke();
             } else if (bridgeState === 'SHATTERING') {
-                // Failing red glowing sequence
                 ctx.fillStyle = 'rgba(244, 63, 94, 0.1)';
                 ctx.fillRect(startBridgeX, cliffY, bridgeWidth, bridgeHeight);
 
@@ -690,22 +717,8 @@
                 ctx.moveTo(startBridgeX, cliffY + bridgeHeight);
                 ctx.lineTo(endBridgeX, cliffY + bridgeHeight);
                 ctx.stroke();
-            } else if (bridgeState === 'SNAPPING') {
-                // Shifting cyan preview beam
-                ctx.fillStyle = 'rgba(6, 182, 212, 0.08)';
-                ctx.fillRect(startBridgeX, cliffY, bridgeWidth, bridgeHeight);
-
-                ctx.strokeStyle = 'rgba(6, 182, 212, 0.5)';
-                ctx.lineWidth = 2 * scaleFactor;
-                ctx.beginPath();
-                ctx.moveTo(startBridgeX, cliffY);
-                ctx.lineTo(endBridgeX, cliffY);
-                ctx.moveTo(startBridgeX, cliffY + bridgeHeight);
-                ctx.lineTo(endBridgeX, cliffY + bridgeHeight);
-                ctx.stroke();
             } else {
-                // Default empty holographic frame coordinates
-                ctx.fillStyle = 'rgba(236, 72, 153, 0.04)'; // Soft empty purple shimmer
+                ctx.fillStyle = 'rgba(236, 72, 153, 0.04)'; 
                 ctx.fillRect(startBridgeX, cliffY, bridgeWidth, bridgeHeight);
 
                 ctx.strokeStyle = 'rgba(236, 72, 153, 0.3)';
@@ -717,99 +730,13 @@
                 ctx.moveTo(startBridgeX, cliffY + bridgeHeight);
                 ctx.lineTo(endBridgeX, cliffY + bridgeHeight);
                 ctx.stroke();
-                ctx.setLineDash([]); // Reset dash state
+                ctx.setLineDash([]); 
             }
 
-            // Draw physical structural canyon anchors
+            // Draw physical anchors
             ctx.fillStyle = '#475569';
             ctx.fillRect(leftCliffWidth - 10 * scaleFactor, cliffY - 5 * scaleFactor, 15 * scaleFactor, 25 * scaleFactor);
             ctx.fillRect(canvas.width - rightCliffWidth - 5 * scaleFactor, cliffY - 5 * scaleFactor, 15 * scaleFactor, 25 * scaleFactor);
-
-            // PROCESS BLOCK PROJECTION ANIMATION
-            if (projectionBlock) {
-                projectionBlock.progress += 0.04;
-                if (projectionBlock.progress >= 1) {
-                    projectionBlock.progress = 1;
-                    
-                    const finalConj = projectionBlock.text;
-                    projectionBlock = null;
-
-                    // Trigger logical verification sequence
-                    verifySentence(finalConj);
-                } else {
-                    // Update bezier curve position vector
-                    const p = projectionBlock.progress;
-                    // Linear interpolation curves
-                    projectionBlock.x = projectionBlock.x + (projectionBlock.targetX - projectionBlock.x) * p;
-                    projectionBlock.y = projectionBlock.y + (projectionBlock.targetY - projectionBlock.y) * p;
-
-                    // Spark trail particles
-                    if (Math.random() < 0.4) {
-                        particles.push({
-                            x: projectionBlock.x,
-                            y: projectionBlock.y,
-                            vx: (Math.random() - 0.5) * 3,
-                            vy: (Math.random() - 0.5) * 3,
-                            radius: Math.random() * 3 + 1,
-                            color: '#e0f2fe',
-                            alpha: 1,
-                            decay: 0.04
-                        });
-                    }
-
-                    // Render projection block on canvas
-                    ctx.save();
-                    ctx.shadowBlur = 15;
-                    ctx.shadowColor = '#06b6d4';
-                    ctx.fillStyle = '#0891b2';
-                    ctx.strokeStyle = '#22d3ee';
-                    ctx.lineWidth = 2 * scaleFactor;
-                    
-                    const boxW = 85 * scaleFactor;
-                    const boxH = 30 * scaleFactor;
-                    ctx.beginPath();
-                    ctx.roundRect(projectionBlock.x - boxW / 2, projectionBlock.y - boxH / 2, boxW, boxH, 8 * scaleFactor);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // Text overlay
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = `bold ${Math.max(12, Math.floor(14 * scaleFactor))}px Outfit, sans-serif`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(projectionBlock.text.toUpperCase(), projectionBlock.x, projectionBlock.y);
-                    ctx.restore();
-                }
-            }
-
-            // Draw static glowing snapped conjunction block inside slot coordinates
-            if (bridgeState === 'SECURED' || bridgeState === 'SHATTERING') {
-                const blockX = canvas.width / 2;
-                const blockY = cliffY + 7 * scaleFactor;
-                const boxW = 100 * scaleFactor;
-                const boxH = 34 * scaleFactor;
-
-                ctx.save();
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = bridgeState === 'SECURED' ? '#22c55e' : '#f43f5e';
-                ctx.fillStyle = bridgeState === 'SECURED' ? '#15803d' : '#9f1239';
-                ctx.strokeStyle = bridgeState === 'SECURED' ? '#4ade80' : '#fda4af';
-                ctx.lineWidth = 3 * scaleFactor;
-
-                ctx.beginPath();
-                ctx.roundRect(blockX - boxW / 2, blockY - boxH / 2, boxW, boxH, 10 * scaleFactor);
-                ctx.fill();
-                ctx.stroke();
-
-                // Dynamic text display of current snap
-                ctx.fillStyle = '#ffffff';
-                ctx.font = `bold ${Math.max(14, Math.floor(16 * scaleFactor))}px Outfit, sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                const activeConj = activeQuestions[currentQuestionIndex] ? activeQuestions[currentQuestionIndex].ans : "";
-                ctx.fillText(activeConj.toUpperCase(), blockX, blockY);
-                ctx.restore();
-            }
 
             // ANIMATE AND DRAW ROVER RANGER
             if (isGameRunning) {
@@ -817,11 +744,10 @@
                     rover.x += rover.speed;
                     rover.wheelAngle += 0.15;
                     
-                    // Trigger ground puff dust coordinates
                     if (Math.random() < 0.25) {
                         particles.push({
                             x: rover.x + 10 * scaleFactor,
-                            y: rover.y + rover.spriteHeight - 2,
+                            y: rover.y + rover.height - 2,
                             vx: -1 - Math.random() * 2,
                             vy: -Math.random() * 1.5,
                             radius: Math.random() * 3 + 1.5,
@@ -835,14 +761,13 @@
                         rover.x = rover.targetX;
                         rover.state = 'SECURED';
 
-                        // Calculate points earned dynamically
                         score += 100 + (streak * 20);
                         streak++;
                         correctAnswersCount++;
                         playSound('correct');
                         triggerHUDNotification("BRIDGE SECURED!", true);
 
-                        // Reveal final joined sentence format on monitor board
+                        // Highlight final completed block layout
                         const currentQ = activeQuestions[currentQuestionIndex];
                         leftClauseEl.textContent = "";
                         rightClauseEl.textContent = "";
@@ -858,24 +783,18 @@
                         }, 2600);
                     }
                 } else if (rover.state === 'REBOUNDING') {
-                    // Rover travels onto bridge, faces failure collapse event
                     rover.x += rover.speed;
                     rover.wheelAngle += 0.15;
 
                     if (rover.x >= rover.targetX) {
                         rover.state = 'RETURNING';
-                        
-                        // Spark explosion at structural failure spot
                         createExplosion(rover.x + 40 * scaleFactor, rover.y + 20 * scaleFactor, '#f43f5e', 25);
                         playSound('wrong');
                         triggerHUDNotification("ERROR: LOGIC FAILS!", false);
-
-                        // Trigger visual bridge gap collapse particle fragments
                         createExplosion(canvas.width / 2, cliffY, '#e2e8f0', 15);
-                        bridgeState = 'EMPTY'; // Remove bridge beams
+                        bridgeState = 'EMPTY'; 
                     }
                 } else if (rover.state === 'RETURNING') {
-                    // Rover retreats backward back to left safety cliff
                     rover.x -= rover.speed * 1.5;
                     rover.wheelAngle -= 0.22;
 
@@ -885,9 +804,11 @@
                         streak = 0;
                         streakEl.textContent = "🔥 " + streak;
                         
-                        // Reset the gap display block to prompt choice again
-                        connectorGapEl.textContent = "[ Empty Slot ]";
-                        connectorGapEl.className = "w-28 md:w-36 h-10 md:h-12 border-2 border-dashed border-pink-500/60 bg-pink-500/10 rounded-xl flex items-center justify-center text-xs font-bold text-pink-300 animate-pulse uppercase tracking-wider";
+                        connectorGapEl.textContent = "[ Drop Block ]";
+                        connectorGapEl.className = "w-32 md:w-40 h-12 md:h-14 border-2 border-dashed border-pink-500/60 bg-pink-500/10 rounded-xl flex items-center justify-center text-xs font-bold text-pink-300 animate-pulse uppercase tracking-wider transition-all duration-300";
+                        
+                        // Reload options so user can try again
+                        loadQuestion();
                     }
                 }
 
@@ -896,13 +817,13 @@
                 ctx.translate(rover.x, rover.y);
 
                 // Body hull structure
-                ctx.fillStyle = '#64748b'; // Slate hull
+                ctx.fillStyle = '#64748b'; 
                 ctx.beginPath();
                 ctx.roundRect(5 * scaleFactor, 15 * scaleFactor, 50 * scaleFactor, 22 * scaleFactor, 6 * scaleFactor);
                 ctx.fill();
 
                 // Cyber dome scanner head
-                ctx.fillStyle = '#06b6d4'; // Cyan glowing windshield
+                ctx.fillStyle = '#06b6d4'; 
                 ctx.beginPath();
                 ctx.roundRect(35 * scaleFactor, 5 * scaleFactor, 16 * scaleFactor, 13 * scaleFactor, 4 * scaleFactor);
                 ctx.fill();
@@ -935,19 +856,16 @@
                     ctx.translate(wx, wy);
                     ctx.rotate(rover.wheelAngle);
                     
-                    // Tire rubber rim
                     ctx.fillStyle = '#1e293b';
                     ctx.beginPath();
                     ctx.arc(0, 0, 9 * scaleFactor, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Mechanical interior hub
                     ctx.fillStyle = '#94a3b8';
                     ctx.beginPath();
                     ctx.arc(0, 0, 5 * scaleFactor, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Tread spokes to show rotation dynamically
                     ctx.strokeStyle = '#0f172a';
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
@@ -960,7 +878,6 @@
                     ctx.restore();
                 };
 
-                // Render Left, Center, and Right heavy tires
                 drawWheel(12 * scaleFactor, 38 * scaleFactor);
                 drawWheel(30 * scaleFactor, 38 * scaleFactor);
                 drawWheel(48 * scaleFactor, 38 * scaleFactor);
@@ -968,7 +885,6 @@
                 ctx.restore();
             }
 
-            // UPDATE AND DRAW DETAILED PARTICLES
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 p.x += p.vx;
@@ -992,7 +908,7 @@
             requestAnimationFrame(drawScene);
         }
 
-        // --- DOCK TRIGGERS & ONLOAD EVENT BINDINGS ---
+        // --- BUTTON TRIGGERS & BINDINGS ---
         startBtn.addEventListener('click', () => {
             initAudio();
             startScreen.classList.add("hidden");
@@ -1037,7 +953,7 @@
             resizeCanvas();
             drawScene();
 
-            // Retain absolute blank white brand logo intro splash for exactly 5 seconds
+            // Splash Intro loop logic
             setTimeout(() => {
                 logoScreen.classList.add("opacity-0");
                 setTimeout(() => {
