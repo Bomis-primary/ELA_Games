@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Adverb Warp Drive</title>
+    <!-- Tailwind CSS for high-fidelity responsive layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Playful typography from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #030712; /* Deep cosmic dark space */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            overflow: hidden;
+        }
+        .playful-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-4 text-slate-100">
+
+    <div class="relative w-full max-w-5xl bg-slate-950 rounded-3xl border-4 border-cyan-500 shadow-2xl shadow-cyan-500/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
+
+        <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+            <!-- Centered logo without any spinners, secondary texts, or game titles -->
+            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[280px] w-4/5 h-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <!-- Safe typographic fallback if offline/no connection -->
+            <div id="logo-fallback" class="hidden text-center">
+                <div class="text-5xl font-black tracking-wider text-slate-900 uppercase">INNOVINE</div>
+                <div class="text-sm text-cyan-600 font-semibold uppercase tracking-widest mt-1">Learning Games</div>
+            </div>
+        </div>
+
+        <!-- Start Menu Screen -->
+        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40 hidden overflow-y-auto">
+            <div class="max-w-md bg-slate-900/90 p-6 md:p-8 rounded-2xl border-2 border-cyan-500/40 backdrop-blur-md shadow-2xl my-auto">
+                <div class="text-5xl md:text-6xl mb-4 animate-pulse">🛸🌌</div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-cyan-400 mb-2 uppercase playful-font">Adverb Warp Drive</h2>
+                <h3 class="text-md text-slate-300 font-semibold mb-4">Grade 3 Space Navigator</h3>
+                
+                <div class="text-sm text-slate-300 text-left space-y-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800 mb-6 max-h-[220px] overflow-y-auto">
+                    <p>👨‍✈️ <strong>Captain's Order:</strong> Collect the correct falling adverbs to power up the spaceship's warp drive and travel safely across space!</p>
+                    <p class="font-bold text-cyan-300">🎮 How to Play:</p>
+                    <ul class="list-disc pl-5 space-y-1.5 text-xs">
+                        <li><strong>Level 1:</strong> Read the sentence gap. Catch the correct falling word that fits perfectly!</li>
+                        <li><strong>Level 2:</strong> Steer your ship to catch ONLY the specific adverbs shown on your screen (Time or Place).</li>
+                        <li><strong>Controls:</strong> Slide your finger left/right anywhere on the screen, or use the large tap arrows at the bottom!</li>
+                    </ul>
+                </div>
+
+                <button id="start-btn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 active:from-cyan-700 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg shadow-cyan-500/20 transform transition active:scale-95 text-lg uppercase tracking-wide playful-font">
+                    Engage Warp Systems
+                </button>
+            </div>
+        </div>
+
+        <!-- Level Transition / Alert Overlay -->
+        <div id="level-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40 hidden">
+            <div class="max-w-md bg-slate-900/90 p-8 rounded-2xl border-2 border-cyan-500/40 backdrop-blur-md shadow-2xl">
+                <div class="text-6xl mb-4">🌀🚀</div>
+                <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 mb-2 playful-font">LEVEL 1 PASSED!</h2>
+                <p class="text-slate-300 mb-6">Warp core stabilized. Preparing next jump sector...</p>
+                <button id="level-next-btn" class="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg transform transition active:scale-95 text-lg uppercase tracking-wide playful-font">
+                    Enter Level 2
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over / Complete Screen -->
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40 hidden">
+            <div class="max-w-md bg-slate-900/90 p-8 rounded-2xl border-2 border-fuchsia-500/40 backdrop-blur-md shadow-2xl">
+                <div class="text-6xl mb-4">🌟🏆</div>
+                <h2 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-amber-300 mb-2 playful-font">MISSION COMPLETED!</h2>
+                <p class="text-slate-300 text-sm mb-6">You navigated the space-time sectors perfectly!</p>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800">
+                        <span class="block text-xs text-slate-400 font-bold uppercase tracking-widest">Final Score</span>
+                        <span id="final-score" class="text-2xl font-black text-amber-300">0</span>
+                    </div>
+                    <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800">
+                        <span class="block text-xs text-slate-400 font-bold uppercase tracking-widest">Accuracy</span>
+                        <span id="final-accuracy" class="text-2xl font-black text-cyan-300">0%</span>
+                    </div>
+                </div>
+
+                <p id="performance-message" class="text-slate-200 italic mb-6 font-semibold text-sm"></p>
+
+                <button id="restart-btn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg transform transition active:scale-95 text-lg uppercase tracking-wide playful-font">
+                    Navigate Again
+                </button>
+            </div>
+        </div>
+
+        <header class="bg-slate-900/90 px-4 py-3 border-b-2 border-cyan-500/30 flex flex-wrap justify-between items-center gap-2 z-10 backdrop-blur-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-bounce">⚡</span>
+                <h1 class="text-lg md:text-xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 playful-font">
+                    ADVERB WARP DRIVE
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-2 text-xs md:text-sm font-semibold">
+                <div class="bg-slate-950/80 px-2.5 py-1 rounded-full border border-slate-800">
+                    Level: <span id="current-level" class="text-cyan-400 font-bold">1</span>
+                </div>
+                <div class="bg-slate-950/80 px-2.5 py-1 rounded-full border border-slate-800">
+                    Question: <span id="question-index" class="text-cyan-400 font-bold">1/10</span>
+                </div>
+                <div class="bg-slate-950/80 px-2.5 py-1 rounded-full border border-slate-800">
+                    Score: <span id="score" class="text-amber-300 font-bold">0</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="bg-slate-950 px-4 py-3 border-b border-slate-900/60 flex flex-col items-center justify-center text-center z-10 relative">
+            <p id="instruction-sub" class="text-[10px] md:text-xs uppercase tracking-widest text-cyan-400 font-bold mb-1">
+                SLIDE THE SHIP TO CATCH THE CORRECT FALLING ADVERB CRYSTAL!
+            </p>
+            <div id="sentence-container" class="flex flex-wrap items-center justify-center gap-1.5 text-base md:text-xl font-bold text-white leading-relaxed px-4 py-2 bg-slate-900/50 rounded-xl border border-cyan-500/20 max-w-3xl playful-font min-h-[44px]">
+                Analyzing galaxy coordinates...
+            </div>
+        </section>
+
+        <main class="relative flex-grow bg-slate-950 overflow-hidden min-h-[300px] h-[45vh] md:h-[400px]">
+            <!-- Responsive Canvas component -->
+            <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+            <!-- Touch Action Alert HUD -->
+            <div id="hit-notification" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
+                <div id="hud-text" class="text-4xl md:text-6xl font-black tracking-wider drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] text-center playful-font">
+                    WARP SECURED!
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-slate-900/95 border-t border-slate-900/60 px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 z-10">
+            <!-- PC Keyboard prompt instructions -->
+            <div class="hidden md:flex items-center gap-2.5 text-slate-400 text-xs font-semibold">
+                <span class="bg-slate-950 px-2 py-1 rounded-md border border-slate-800">◀ Arrow Left</span>
+                <span class="bg-slate-950 px-2 py-1 rounded-md border border-slate-800">▶ Arrow Right</span>
+                <span>or move your mouse / swipe left-right on the screen</span>
+            </div>
+
+            <!-- Fully Responsive Large Mobile Navigation Buttons -->
+            <div class="flex items-center justify-center w-full md:w-auto gap-4">
+                <button id="btn-left" class="w-20 h-14 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl active:bg-cyan-600 active:border-cyan-400 flex items-center justify-center text-white text-2xl transition shadow-lg select-none touch-manipulation">
+                    ◀
+                </button>
+                <div class="text-slate-400 text-[10px] uppercase font-bold tracking-wider hidden sm:block md:hidden">Slide or Use Arrows</div>
+                <button id="btn-right" class="w-20 h-14 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl active:bg-cyan-600 active:border-cyan-400 flex items-center justify-center text-white text-2xl transition shadow-lg select-none touch-manipulation">
+                    ▶
+                </button>
+            </div>
+            
+            <div class="text-[10px] text-center text-slate-500 uppercase tracking-widest font-semibold">
+                Adverb Warp Drive &bull; Grade 3 English Academy
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Level 1: Sentence gaps (Complete using falling Place or Time adverb crystals)
+        const level1Bank = [
+            { qLeft: "We will go to the park ", qRight: ".", ans: "tomorrow", opts: ["tomorrow", "inside", "downstairs", "far"] },
+            { qLeft: "The little birds are singing ", qRight: ".", ans: "outside", opts: ["outside", "yesterday", "soon", "early"] },
+            { qLeft: "My lost puppy is waiting ", qRight: ".", ans: "there", opts: ["there", "soon", "late", "before"] },
+            { qLeft: "Let's clean our dusty room ", qRight: ".", ans: "now", opts: ["now", "downstairs", "nearby", "far"] },
+            { qLeft: "The bright airplane flew high ", qRight: ".", ans: "above", opts: ["above", "early", "yesterday", "tonight"] },
+            { qLeft: "I will eat my delicious lunch ", qRight: ".", ans: "soon", opts: ["soon", "upstairs", "inside", "here"] },
+            { qLeft: "The children played happily ", qRight: ".", ans: "indoors", opts: ["indoors", "tomorrow", "now", "then"] },
+            { qLeft: "The school bus will arrive ", qRight: ".", ans: "early", opts: ["early", "everywhere", "outside", "there"] },
+            { qLeft: "My warm winter coat is hanging ", qRight: ".", ans: "nearby", opts: ["nearby", "late", "recently", "soon"] },
+            { qLeft: "The stars shine brightly ", qRight: ".", ans: "tonight", opts: ["tonight", "far", "indoor", "here"] },
+            { qLeft: "Please place the heavy box ", qRight: ".", ans: "here", opts: ["here", "yesterday", "tomorrow", "soon"] },
+            { qLeft: "We are going on a fun trip ", qRight: ".", ans: "today", opts: ["today", "behind", "downstairs", "there"] },
+            { qLeft: "The curious kitten climbed ", qRight: ".", ans: "upstairs", opts: ["upstairs", "soon", "yesterday", "tonight"] },
+            { qLeft: "I promise to write back ", qRight: ".", ans: "later", opts: ["later", "downstairs", "inside", "everywhere"] },
+            { qLeft: "A colorful hot air balloon floated ", qRight: ".", ans: "away", opts: ["away", "early", "yesterday", "today"] }
+        ];
+
+        // Level 2: Word list for sorting classifications
+        const level2Bank = [
+            { word: "yesterday", type: "time" },
+            { word: "outside", type: "place" },
+            { word: "tomorrow", type: "time" },
+            { word: "everywhere", type: "place" },
+            { word: "soon", type: "time" },
+            { word: "downstairs", type: "place" },
+            { word: "today", type: "time" },
+            { word: "upstairs", type: "place" },
+            { word: "tonight", type: "time" },
+            { word: "nearby", type: "place" },
+            { word: "now", type: "time" },
+            { word: "there", type: "place" },
+            { word: "early", type: "time" },
+            { word: "inside", type: "place" },
+            { word: "later", type: "time" },
+            { word: "away", type: "place" },
+            { word: "then", type: "time" },
+            { word: "here", type: "place" }
+        ];
+
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3')
+        };
+        let audioCtx = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+            audioInitialized = true;
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => playSynthFallback('correct'));
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => playSynthFallback('wrong'));
+            }
+        }
+
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const levelScreen = document.getElementById("level-screen");
+        const levelNextBtn = document.getElementById("level-next-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+        const hitNotification = document.getElementById("hit-notification");
+        const hudText = document.getElementById("hud-text");
+
+        const currentLevelEl = document.getElementById("current-level");
+        const questionIndexEl = document.getElementById("question-index");
+        const scoreEl = document.getElementById("score");
+        const finalScoreEl = document.getElementById("final-score");
+        const finalAccuracyEl = document.getElementById("final-accuracy");
+        const performanceMessageEl = document.getElementById("performance-message");
+        const sentenceContainer = document.getElementById("sentence-container");
+        const instructionSub = document.getElementById("instruction-sub");
+
+        const btnLeft = document.getElementById("btn-left");
+        const btnRight = document.getElementById("btn-right");
+
+        let gameState = 'SPLASH'; // SPLASH, MENU, PLAYING, LEVEL_UP, FINISHED
+        let isGameRunning = false;
+        let score = 0;
+        let correctAnswersCount = 0;
+        let currentQuestionIndex = 0;
+        let currentLevel = 1;
+        const totalQuestionsLimit = 10;
+
+        let activeQuestions = [];
+        let activeLevel2Target = "place"; // "place" or "time" sorted in level 2
+
+        let scaleFactor = 1;
+        let particles = [];
+        let cosmicDust = [];
+        let fallingCrystals = [];
+
+        const catcher = {
+            x: 0,
+            y: 0,
+            width: 140,
+            height: 70,
+            speed: 18,
+            targetX: 0,
+            isMovingLeft: false,
+            isMovingRight: false
+        };
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
+            scaleFactor = Math.min(1, canvas.width / 800);
+            
+            catcher.width = 150 * scaleFactor;
+            catcher.height = 75 * scaleFactor;
+            catcher.y = canvas.height - catcher.height - 20;
+            catcher.speed = 18 * scaleFactor;
+
+            if (catcher.x === 0) {
+                catcher.x = canvas.width / 2 - catcher.width / 2;
+            }
+
+            if (cosmicDust.length === 0) {
+                for (let i = 0; i < 30; i++) {
+                    cosmicDust.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        radius: Math.random() * 2 + 0.5,
+                        brightness: Math.random(),
+                        speed: (0.1 + Math.random() * 0.5)
+                    });
+                }
+            }
+        }
+
+        function createExplosion(x, y, color, count = 15) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 1,
+                    radius: Math.random() * 4 + 1.5,
+                    color: color,
+                    alpha: 1,
+                    decay: Math.random() * 0.03 + 0.015
+                });
+            }
+        }
+
+        function spawnCrystal(text, isCorrect, options = {}) {
+            fallingCrystals.push({
+                text: text,
+                isCorrect: isCorrect,
+                x: Math.random() * (canvas.width - 120 * scaleFactor) + 60 * scaleFactor,
+                y: -30,
+                radius: 28 * scaleFactor,
+                speed: (0.7 + Math.random() * 0.6) * scaleFactor, // Reduced speed for comfortable Grade 3 tracking and gameplay
+                color: options.color || "#06b6d4"
+            });
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= totalQuestionsLimit) {
+                if (currentLevel === 1) {
+                    isGameRunning = false;
+                    levelScreen.classList.remove("hidden");
+                } else {
+                    endGameSession();
+                }
+                return;
+            }
+
+            questionIndexEl.textContent = `${currentQuestionIndex + 1}/${totalQuestionsLimit}`;
+            const q = activeQuestions[currentQuestionIndex];
+            fallingCrystals = [];
+
+            // Reset container text
+            sentenceContainer.innerHTML = "";
+
+            if (currentLevel === 1) {
+                instructionSub.textContent = "SLIDE THE SHIP TO CATCH THE CORRECT FALLING ADVERB CRYSTAL!";
+                
+                const leftSpan = document.createElement("span");
+                leftSpan.textContent = q.qLeft;
+                leftSpan.className = "text-slate-100";
+                sentenceContainer.appendChild(leftSpan);
+
+                const gapBox = document.createElement("div");
+                gapBox.id = "sentence-gap";
+                gapBox.className = "px-4 py-1 mx-2 bg-cyan-500/10 border-2 border-dashed border-cyan-400 rounded-xl inline-block text-cyan-300 font-bold tracking-widest min-w-[110px] text-center animate-pulse uppercase text-xs md:text-sm";
+                gapBox.textContent = "EMPTY SLOT";
+                sentenceContainer.appendChild(gapBox);
+
+                const rightSpan = document.createElement("span");
+                rightSpan.textContent = q.qRight;
+                rightSpan.className = "text-slate-100";
+                sentenceContainer.appendChild(rightSpan);
+
+                // Spawn options as falling crystals (Uniform glowing cyan, keeping it highly challenging!)
+                q.opts.forEach((opt) => {
+                    const isCorrect = (opt === q.ans);
+                    spawnCrystal(opt, isCorrect, { color: "#06b6d4" });
+                });
+            } else {
+                // Determine category target randomly for the word classification
+                activeLevel2Target = q.type; // "place" or "time"
+                instructionSub.textContent = `STEER SHIP TARGET SYSTEM! ONLY CATCH: Adverbs of ${activeLevel2Target.toUpperCase()}`;
+
+                const categoryHeader = document.createElement("div");
+                categoryHeader.className = "text-2xl font-black uppercase text-center w-full text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 animate-pulse tracking-widest";
+                categoryHeader.textContent = `TARGET ACQUISITION: CATCH [ ${activeLevel2Target.toUpperCase()} ]`;
+                sentenceContainer.appendChild(categoryHeader);
+
+                // Spawn the current word to classify, plus a mismatching alternative
+                const otherCategory = activeLevel2Target === "place" ? "time" : "place";
+                const wrongWords = level2Bank.filter(item => item.type === otherCategory);
+                const randomWrong = wrongWords[Math.floor(Math.random() * wrongWords.length)].word;
+
+                // Spawn both options as uniform beautiful cyan colors to challenge Grade 3 players on reading
+                spawnCrystal(q.word, true, { color: "#06b6d4" }); 
+                spawnCrystal(randomWrong, false, { color: "#06b6d4" }); 
+            }
+        }
+
+        function triggerHUDNotification(text, isCorrect) {
+            hudText.textContent = text;
+            if (isCorrect) {
+                hudText.className = "text-4xl md:text-6xl font-black tracking-wider text-teal-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] text-center playful-font";
+            } else {
+                hudText.className = "text-4xl md:text-6xl font-black tracking-wider text-rose-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] text-center playful-font";
+            }
+
+            hitNotification.style.opacity = "1";
+            hitNotification.style.transform = "translate(-50%, -50%) scale(1.1)";
+            
+            setTimeout(() => {
+                hitNotification.style.opacity = "0";
+                hitNotification.style.transform = "translate(-50%, -50%) scale(0.75)";
+            }, 1000);
+        }
+
+        function startLevel(level) {
+            currentLevel = level;
+            currentLevelEl.textContent = currentLevel;
+            currentQuestionIndex = 0;
+            fallingCrystals = [];
+
+            if (level === 1) {
+                activeQuestions = [...level1Bank].sort(() => 0.5 - Math.random()).slice(0, totalQuestionsLimit);
+            } else {
+                activeQuestions = [...level2Bank].sort(() => 0.5 - Math.random()).slice(0, totalQuestionsLimit);
+            }
+
+            loadQuestion();
+            isGameRunning = true;
+        }
+
+        function initGame() {
+            score = 0;
+            correctAnswersCount = 0;
+            scoreEl.textContent = score;
+            startLevel(1);
+        }
+
+        function endGameSession() {
+            isGameRunning = false;
+            gameoverScreen.classList.remove("hidden");
+            playSound('correct');
+
+            finalScoreEl.textContent = score;
+            const accuracy = Math.round((correctAnswersCount / (totalQuestionsLimit * 2)) * 100);
+            finalAccuracyEl.textContent = accuracy + "%";
+
+            let msg = "";
+            if (accuracy >= 85) {
+                msg = "🚀 Outstanding Space Pilot! Your understanding of time & place adverbs is legendary!";
+            } else if (accuracy >= 60) {
+                msg = "⭐ Great Navigator! You warp-jumped cleanly through space sectors!";
+            } else {
+                msg = "🔭 Mission complete! Calibrate your scanners and try another celestial course!";
+            }
+            performanceMessageEl.textContent = msg;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                catcher.isMovingLeft = true;
+            } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+                catcher.isMovingRight = true;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                catcher.isMovingLeft = false;
+            } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+                catcher.isMovingRight = false;
+            }
+        });
+
+        // Mouse/Touch slide controller coordinates mapping
+        function handlePointerMove(clientX) {
+            if (!isGameRunning) return;
+            const rect = canvas.getBoundingClientRect();
+            const relativeX = clientX - rect.left;
+            catcher.x = relativeX - catcher.width / 2;
+
+            // Restrict coordinates inside canvas screen bounds
+            if (catcher.x < 0) catcher.x = 0;
+            if (catcher.x > canvas.width - catcher.width) catcher.x = canvas.width - catcher.width;
+        }
+
+        canvas.addEventListener('mousemove', (e) => handlePointerMove(e.clientX));
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches && e.touches[0]) {
+                handlePointerMove(e.touches[0].clientX);
+            }
+        }, { passive: true });
+
+        // Touch Arrow Keys triggers
+        btnLeft.addEventListener('mousedown', () => { catcher.isMovingLeft = true; initAudio(); });
+        btnLeft.addEventListener('mouseup', () => catcher.isMovingLeft = false);
+        btnLeft.addEventListener('mouseleave', () => catcher.isMovingLeft = false);
+        btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); catcher.isMovingLeft = true; initAudio(); });
+        btnLeft.addEventListener('touchend', () => catcher.isMovingLeft = false);
+
+        btnRight.addEventListener('mousedown', () => { catcher.isMovingRight = true; initAudio(); });
+        btnRight.addEventListener('mouseup', () => catcher.isMovingRight = false);
+        btnRight.addEventListener('mouseleave', () => catcher.isMovingRight = false);
+        btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); catcher.isMovingRight = true; initAudio(); });
+        btnRight.addEventListener('touchend', () => catcher.isMovingRight = false);
+
+        // UI trigger operations
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            initGame();
+        });
+
+        levelNextBtn.addEventListener('click', () => {
+            levelScreen.classList.add("hidden");
+            startLevel(2);
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            initGame();
+        });
+
+        setTimeout(() => {
+            logoScreen.style.opacity = "0";
+            setTimeout(() => {
+                logoScreen.classList.add("hidden");
+                startScreen.classList.remove("hidden");
+            }, 1000);
+        }, 5000);
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function drawScene() {
+            // Dark space background layer
+            ctx.fillStyle = "#030712";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw cosmic ambient dust
+            ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+            cosmicDust.forEach((star) => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Slowly float down
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+
+            // Draw debris explosion particles
+            particles.forEach((p, idx) => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+                
+                if (p.alpha <= 0) {
+                    particles.splice(idx, 1);
+                }
+            });
+            ctx.globalAlpha = 1.0;
+
+            ctx.save();
+            ctx.translate(catcher.x, catcher.y);
+
+            // 1. Draw glowing background warp energy under the mesh
+            let energyGlow = ctx.createRadialGradient(
+                catcher.width / 2, catcher.height / 2, 5 * scaleFactor,
+                catcher.width / 2, catcher.height / 2, catcher.width / 2
+            );
+            energyGlow.addColorStop(0, "rgba(6, 182, 212, 0.2)");
+            energyGlow.addColorStop(1, "rgba(6, 182, 212, 0)");
+            ctx.fillStyle = energyGlow;
+            ctx.fillRect(0, 0, catcher.width, catcher.height);
+
+            // 2. Draw curved mesh pocket (Basket body)
+            ctx.strokeStyle = "rgba(6, 182, 212, 0.5)";
+            ctx.lineWidth = 2 * scaleFactor;
+            ctx.fillStyle = "rgba(15, 23, 42, 0.7)"; // Semi-opaque dark basket inside
+            ctx.beginPath();
+            ctx.moveTo(10 * scaleFactor, 12 * scaleFactor);
+            // Draw curved basket bottom shape
+            ctx.bezierCurveTo(
+                15 * scaleFactor, catcher.height + 10 * scaleFactor,
+                catcher.width - 15 * scaleFactor, catcher.height + 10 * scaleFactor,
+                catcher.width - 10 * scaleFactor, 12 * scaleFactor
+            );
+            ctx.lineTo(catcher.width - 15 * scaleFactor, 12 * scaleFactor);
+            ctx.bezierCurveTo(
+                catcher.width - 20 * scaleFactor, catcher.height - 5 * scaleFactor,
+                20 * scaleFactor, catcher.height - 5 * scaleFactor,
+                15 * scaleFactor, 12 * scaleFactor
+            );
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 3. Draw energy grid weave lines inside the basket pocket
+            ctx.strokeStyle = "rgba(6, 182, 212, 0.25)";
+            ctx.lineWidth = 1 * scaleFactor;
+            ctx.beginPath();
+            // Vertical curves
+            for (let i = 1; i < 6; i++) {
+                let ratio = i / 6;
+                let startX = catcher.width * ratio;
+                let cpX1 = catcher.width * ratio - (15 * scaleFactor);
+                let cpX2 = catcher.width * ratio + (15 * scaleFactor);
+                ctx.moveTo(startX, 12 * scaleFactor);
+                ctx.bezierCurveTo(
+                    cpX1, catcher.height / 2,
+                    cpX2, catcher.height,
+                    catcher.width / 2 + (ratio - 0.5) * (catcher.width - 40 * scaleFactor), catcher.height - 5 * scaleFactor
+                );
+            }
+            // Horizontal contours
+            for (let j = 1; j < 4; j++) {
+                let ratioY = j / 4;
+                let controlY = 12 * scaleFactor + (catcher.height - 20 * scaleFactor) * ratioY;
+                ctx.moveTo(12 * scaleFactor, controlY);
+                ctx.quadraticCurveTo(catcher.width / 2, controlY + 15 * scaleFactor, catcher.width - 12 * scaleFactor, controlY);
+            }
+            ctx.stroke();
+
+            // 4. Draw high-tech glowing open top Rim
+            let rimGlow = ctx.createLinearGradient(0, 0, catcher.width, 0);
+            rimGlow.addColorStop(0, "#0891b2");
+            rimGlow.addColorStop(0.5, "#22d3ee");
+            rimGlow.addColorStop(1, "#0891b2");
+            ctx.fillStyle = rimGlow;
+            
+            // Draw open top elliptical rim rim
+            ctx.beginPath();
+            ctx.ellipse(catcher.width / 2, 12 * scaleFactor, catcher.width / 2 - 5 * scaleFactor, 10 * scaleFactor, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Highlight inner arc of the open basket
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2 * scaleFactor;
+            ctx.beginPath();
+            ctx.ellipse(catcher.width / 2, 12 * scaleFactor, catcher.width / 2 - 10 * scaleFactor, 6 * scaleFactor, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // 5. Draw futuristic glowing base brackets
+            ctx.fillStyle = "#1e293b";
+            ctx.strokeStyle = "#38bdf8";
+            ctx.lineWidth = 1.5 * scaleFactor;
+            ctx.beginPath();
+            ctx.rect(5 * scaleFactor, 8 * scaleFactor, 10 * scaleFactor, 10 * scaleFactor);
+            ctx.rect(catcher.width - 15 * scaleFactor, 8 * scaleFactor, 10 * scaleFactor, 10 * scaleFactor);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+
+            fallingCrystals.forEach((crystal, idx) => {
+                crystal.y += crystal.speed;
+
+                // Glowing neon shadow effect
+                ctx.shadowColor = crystal.color;
+                ctx.shadowBlur = 15;
+
+                // Draw solid crystal core
+                ctx.fillStyle = crystal.color;
+                ctx.beginPath();
+                ctx.moveTo(crystal.x, crystal.y - crystal.radius); // Top point
+                ctx.lineTo(crystal.x + crystal.radius * 0.7, crystal.y - crystal.radius * 0.3); // Top Right
+                ctx.lineTo(crystal.x + crystal.radius * 0.7, crystal.y + crystal.radius * 0.3); // Bottom Right
+                ctx.lineTo(crystal.x, crystal.y + crystal.radius); // Bottom point
+                ctx.lineTo(crystal.x - crystal.radius * 0.7, crystal.y + crystal.radius * 0.3); // Bottom Left
+                ctx.lineTo(crystal.x - crystal.radius * 0.7, crystal.y - crystal.radius * 0.3); // Top Left
+                ctx.closePath();
+                ctx.fill();
+
+                // Highlight reflections
+                ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+                ctx.beginPath();
+                ctx.moveTo(crystal.x, crystal.y - crystal.radius);
+                ctx.lineTo(crystal.x + crystal.radius * 0.3, crystal.y - crystal.radius * 0.2);
+                ctx.lineTo(crystal.x, crystal.y);
+                ctx.lineTo(crystal.x - crystal.radius * 0.3, crystal.y - crystal.radius * 0.2);
+                ctx.closePath();
+                ctx.fill();
+
+                // Reset shadow filters to prevent canvas overhead lag
+                ctx.shadowBlur = 0;
+
+                // Draw clear centered text labeling the crystal
+                ctx.fillStyle = "#ffffff";
+                ctx.font = `bold ${Math.max(11, 14 * scaleFactor)}px 'Fredoka', sans-serif`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                // Standard uppercase presentation
+                ctx.fillText(crystal.text.toUpperCase(), crystal.x, crystal.y);
+
+                // Catcher open top horizontal window
+                const withinX = (crystal.x >= catcher.x - 10 * scaleFactor) && (crystal.x <= catcher.x + catcher.width + 10 * scaleFactor);
+                // Inside target vertical rim threshold
+                const withinY = (crystal.y >= catcher.y) && (crystal.y <= catcher.y + 35 * scaleFactor);
+
+                if (withinX && withinY) {
+                    // Explode crystal remnants
+                    createExplosion(crystal.x, crystal.y, crystal.color, 20);
+
+                    // Validate accuracy
+                    if (crystal.isCorrect) {
+                        score += 100;
+                        correctAnswersCount++;
+                        playSound('correct');
+                        triggerHUDNotification("WARP CHARGED!", true);
+                        scoreEl.textContent = score;
+
+                        // Swap sentence gap view instantly to show caught answer
+                        const sentenceGap = document.getElementById("sentence-gap");
+                        if (sentenceGap) {
+                            sentenceGap.textContent = crystal.text.toUpperCase();
+                            sentenceGap.className = "px-4 py-1 mx-2 bg-teal-500/20 border-2 border-solid border-teal-400 rounded-xl inline-block text-teal-300 font-bold tracking-wider animate-bounce text-xs md:text-sm";
+                        }
+                    } else {
+                        score = Math.max(0, score - 50);
+                        playSound('wrong');
+                        triggerHUDNotification("WARP FAILURE", false);
+                        scoreEl.textContent = score;
+                    }
+
+                    // Advance onto next question
+                    fallingCrystals = [];
+                    currentQuestionIndex++;
+                    setTimeout(loadQuestion, 1200);
+                    return;
+                }
+
+                // Remove crystals drifting past the screen bottom
+                if (crystal.y > canvas.height + 50) {
+                    fallingCrystals.splice(idx, 1);
+                    // If no crystals are left and the question hasn't changed, spawn again to prevent soft-locks
+                    if (fallingCrystals.length === 0 && isGameRunning) {
+                        loadQuestion();
+                    }
+                }
+            });
+        }
+
+        function updateLoop() {
+            if (isGameRunning) {
+                // Update slider coordinates
+                if (catcher.isMovingLeft) {
+                    catcher.x -= catcher.speed;
+                    if (catcher.x < 0) catcher.x = 0;
+                }
+                if (catcher.isMovingRight) {
+                    catcher.x += catcher.speed;
+                    if (catcher.x > canvas.width - catcher.width) catcher.x = canvas.width - catcher.width;
+                }
+            }
+
+            drawScene();
+            requestAnimationFrame(updateLoop);
+        }
+
+        window.onload = function () {
+            resizeCanvas();
+            requestAnimationFrame(updateLoop);
+        };
+    </script>
+</body>
+</html>
