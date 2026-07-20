@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Preposition Sky Navigator</title>
+    <!-- Tailwind CSS for modern responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for premium typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0c0a09; /* Dark stone backup background */
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .playful-font {
+            font-family: 'Fredoka One', cursive;
+        }
+        /* Custom touch responsive helper */
+        .touch-action-none {
+            touch-action: none;
+        }
+        /* Transition animations */
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease-out;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 md:p-6 text-white">
+
+    <!-- Main Game Frame -->
+    <div class="relative w-full max-w-5xl bg-stone-950 rounded-3xl border-4 border-sky-400 shadow-2xl shadow-sky-500/10 overflow-hidden flex flex-col h-[95vh] md:h-auto">
+        
+        <!-- STRICTLY BLANK WHITE SPLASH SCREEN WITH CENTRED LOGO ONLY (z-50) -->
+        <div id="logo-screen" class="absolute inset-0 bg-white flex items-center justify-center p-6 z-50">
+            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[280px] w-full h-auto object-contain">
+        </div>
+
+        <!-- Start Menu Screen overlay -->
+        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-30 hidden">
+            <div class="max-w-md w-full max-h-[90vh] overflow-y-auto bg-slate-900/95 p-6 md:p-8 rounded-3xl border-2 border-sky-400 backdrop-blur-md shadow-2xl flex flex-col items-center">
+                <div class="text-6xl mb-4 animate-bounce">🎈🧭</div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-sky-400 mb-1 playful-font uppercase tracking-wide">SKY NAVIGATOR</h2>
+                <h3 class="text-sm text-sky-200 font-semibold mb-4">Grade 3 Preposition Patrol</h3>
+                
+                <p class="text-xs md:text-sm text-slate-300 mb-6 leading-relaxed bg-slate-950/80 p-4 rounded-xl text-left border border-slate-800">
+                    🧭 <strong>FLIGHT CO-ORDINATES:</strong><br>
+                    Pilot the atmospheric research balloon through the sky! Read the formal sentence at the top of your console to determine the missing preposition.<br><br>
+                    🎯 <strong>Drag your Balloon</strong> or <strong>tap a portal ring</strong> in the sky matching the correct preposition to dock and secure the data coordinates.
+                </p>
+                
+                <button id="start-btn" class="w-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 font-extrabold py-3.5 px-6 rounded-2xl shadow-lg shadow-sky-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
+                    Engage Autopilot
+                </button>
+            </div>
+        </div>
+
+        <!-- Level Cleared transition screen overlay -->
+        <div id="level-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-30 hidden">
+            <div class="max-w-md bg-slate-900/90 p-8 rounded-3xl border-2 border-sky-400 backdrop-blur-md shadow-2xl">
+                <div class="text-6xl mb-4 animate-pulse">⛰️⚡</div>
+                <h2 id="level-title" class="text-4xl font-extrabold text-sky-400 mb-2 playful-font uppercase">ZONE 1 SECURED!</h2>
+                <p id="level-desc" class="text-slate-300 text-sm mb-6 leading-relaxed">
+                    Splendid spatial calculation! The lower atmospheric weather readings are secure. Ready to navigate the mountain peaks of Level 2?
+                </p>
+                <button id="next-level-btn" class="w-full bg-gradient-to-r from-sky-400 to-blue-500 text-slate-950 font-extrabold py-3.5 px-6 rounded-xl shadow-lg shadow-sky-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
+                    Ascend to Altitude
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over completion screen overlay -->
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-30 hidden">
+            <div class="max-w-md w-full bg-slate-900/90 p-6 md:p-8 rounded-3xl border-2 border-sky-400 backdrop-blur-md shadow-2xl">
+                <div class="text-6xl mb-4">🏆🎖️</div>
+                <h2 class="text-3xl font-extrabold text-sky-400 mb-1 playful-font uppercase">MASTER NAVIGATOR!</h2>
+                <p class="text-slate-300 text-sm mb-6">You calculated and completed all spatial preposition flight missions successfully!</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+                        <span class="block text-[10px] text-slate-400 font-bold uppercase">Navigation Points</span>
+                        <span id="final-score" class="text-2xl font-black text-sky-400 playful-font">0</span>
+                    </div>
+                    <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+                        <span class="block text-[10px] text-slate-400 font-bold uppercase">Success Rate</span>
+                        <span id="final-accuracy" class="text-2xl font-black text-emerald-400 playful-font">0%</span>
+                    </div>
+                </div>
+
+                <p id="performance-message" class="text-slate-200 italic mb-6 font-semibold text-sm"></p>
+
+                <button id="restart-btn" class="w-full bg-gradient-to-r from-sky-400 to-blue-500 text-slate-950 font-extrabold py-3.5 px-6 rounded-xl shadow-lg shadow-sky-500/20 transform transition active:scale-95 text-lg playful-font touch-action-none">
+                    Launch New Mission
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard HUD Header -->
+        <header class="bg-gradient-to-r from-slate-900 via-stone-950 to-slate-900 px-4 py-3 border-b-2 border-sky-500/30 flex flex-wrap justify-between items-center gap-2 z-10">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-bounce">🎈</span>
+                <h1 class="text-lg md:text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-sky-100 to-blue-400 playful-font">
+                    SKY NAVIGATOR
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-2 md:gap-3 text-xs md:text-sm font-semibold">
+                <div class="bg-slate-950/90 px-2.5 py-1 rounded-full border border-sky-500/20">
+                    Altitude: <span id="level-display" class="text-sky-400 font-bold">1</span>
+                </div>
+                <div class="bg-slate-950/90 px-2.5 py-1 rounded-full border border-sky-500/20">
+                    Mission: <span id="question-index" class="text-cyan-300 font-bold">1/10</span>
+                </div>
+                <div class="bg-slate-950/90 px-2.5 py-1 rounded-full border border-sky-500/20">
+                    Points: <span id="score" class="text-amber-300 font-bold">0</span>
+                </div>
+                <div class="bg-slate-950/90 px-2.5 py-1 rounded-full border border-sky-500/20">
+                    Streak: <span id="streak" class="text-emerald-400 font-bold">🔥 0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Interactive Sentence Board with blanks -->
+        <section class="bg-gradient-to-b from-slate-900 to-slate-950 p-4 border-b border-sky-500/10 flex flex-col items-center justify-center text-center z-10 relative">
+            <p class="text-[10px] md:text-xs uppercase tracking-widest text-sky-400 font-bold mb-2">
+                Navigate your balloon into the correct spatial coordinate ring!
+            </p>
+            <div id="sentence-container" class="flex flex-wrap items-center justify-center gap-2 text-white font-semibold text-sm md:text-xl bg-slate-950/80 px-6 py-4 rounded-2xl border border-sky-500/20 shadow-inner w-full max-w-4xl">
+                <!-- Slices of the sentence with blinking blank gap injected dynamically -->
+            </div>
+        </section>
+
+        <!-- Flight deck Canvas viewport -->
+        <main class="relative flex-grow bg-slate-950 overflow-hidden min-h-[350px] h-[45vh] md:h-[420px]">
+            <canvas id="gameCanvas" class="w-full h-full block touch-none"></canvas>
+
+            <!-- Interactive HUD Action Alerts -->
+            <div id="hit-notification" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 opacity-0 scale-75 z-20">
+                <div id="hud-text" class="text-4xl md:text-6xl font-black tracking-wider drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] text-center playful-font">
+                    COORDINATE VERIFIED!
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer Coordinates HUD panel -->
+        <footer class="bg-slate-950 border-t border-slate-900 px-6 py-3 flex flex-col sm:flex-row justify-between items-center gap-2 z-10 text-xs text-sky-500">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-sky-400 inline-block animate-ping"></span>
+                <span>Highly touch-responsive coordinate navigation</span>
+            </div>
+            <div class="text-center">
+                Punctuation &amp; Preposition Sky Navigator &bull; Grade 3 Flight Deck
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Set up preloaded audio configurations
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3')
+        };
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            // Fire preloads
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+            audioInitialized = true;
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => {
+                    playSynthFallback('correct');
+                });
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => {
+                    playSynthFallback('wrong');
+                });
+            }
+        }
+
+        // Web Audio Synthesizer fallback for low connection stability
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    osc.frequency.exponentialRampToValueAtTime(880.00, audioCtx.currentTime + 0.15); // A5
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(170, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.28);
+                    gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.28);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.28);
+                }
+            } catch (e) {
+                console.warn("Synth module error: ", e);
+            }
+        }
+
+        // Strictly tested prepositions
+        const ALLOWED_PREPOSITIONS = [
+            "under", "near", "next to", "between", "in", "inside", "behind", "on", "in front of", "at", "among", "over"
+        ];
+
+        // Level 1 questions (Simple, active everyday sentences)
+        const level1Bank = [
+            { left: "The sleepy brown dog napped", right: "the shady wooden table.", ans: "under" },
+            { left: "The excited children stood", right: "the busy school bus stop.", ans: "at" },
+            { left: "The pretty bird built its nest", right: "the tall apple tree.", ans: "near" },
+            { left: "The shiny gold key was kept", right: "the tiny blue box.", ans: "inside" },
+            { left: "Our new classroom stands", right: "the big computer lab.", ans: "next to" },
+            { left: "A funny little monkey sat", right: "the two tall trees.", ans: "between" },
+            { left: "The juicy red apples fell", right: "the soft green grass.", ans: "on" },
+            { left: "Many colorful fish swam happily", right: "the warm blue lake.", ans: "in" },
+            { left: "The school principal stood", right: "all the quiet students.", ans: "in front of" },
+            { left: "A single white daisy grew", right: "the bright yellow flowers.", ans: "among" },
+            { left: "The bright yellow plane flew", right: "the quiet little town.", ans: "over" },
+            { left: "The shy gray rabbit hid", right: "the thick green bush.", ans: "behind" },
+            { left: "The happy family gathered", right: "the park picnic table.", ans: "at" },
+            { left: "The delicious chocolate chip cookie sat", right: "the cookie jar.", ans: "inside" },
+            { left: "The little red crab crawled", right: "the soft golden sand.", ans: "under" }
+        ];
+
+        // Level 2 questions (A bit more descriptive but highly readable)
+        const level2Bank = [
+            { left: "The brave horse jumped cleanly", right: "the high wooden fence.", ans: "over" },
+            { left: "The busy birds built a cozy nest", right: "the leafy oak tree.", ans: "in" },
+            { left: "The smiling teacher stood", right: "the large green chalkboard.", ans: "next to" },
+            { left: "A playful little puppy ran", right: "the friendly kittens.", ans: "among" },
+            { left: "The shiny magic wand was placed", right: "the velvet hat.", ans: "inside" },
+            { left: "The camp counselor sat comfortably", right: "the warm campfire.", ans: "near" },
+            { left: "The fast runners lined up", right: "the starting line.", ans: "at" },
+            { left: "The bright yellow sun hid", right: "the fluffy white clouds.", ans: "behind" },
+            { left: "A narrow dirt path ran", right: "the two high mountains.", ans: "between" },
+            { left: "The big toy spaceship landed safely", right: "the flat dusty ground.", ans: "on" },
+            { left: "The sweet dog sat patiently", right: "its empty food bowl.", ans: "in front of" },
+            { left: "The cold children stood", right: "the large blue umbrella.", ans: "under" },
+            { left: "The busy doctor kept her tools", right: "the small black bag.", ans: "inside" },
+            { left: "The sweet little cat waited", right: "the closed back door.", ans: "at" },
+            { left: "A beautiful rainbow stretched", right: "the deep blue ocean.", ans: "over" }
+        ];
+
+        let activeQuestions = [];
+        let currentLevel = 1;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let correctAnswersCount = 0;
+        const totalQuestionsLimit = 10;
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // UI overlays references
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const levelScreen = document.getElementById("level-screen");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const startBtn = document.getElementById("start-btn");
+        const nextLevelBtn = document.getElementById("next-level-btn");
+        const restartBtn = document.getElementById("restart-btn");
+        const hitNotification = document.getElementById("hit-notification");
+        const hudText = document.getElementById("hud-text");
+        const sentenceContainer = document.getElementById("sentence-container");
+
+        const levelDisplayEl = document.getElementById("level-display");
+        const questionIndexEl = document.getElementById("question-index");
+        const scoreEl = document.getElementById("score");
+        const streakEl = document.getElementById("streak");
+        const finalScoreEl = document.getElementById("final-score");
+        const finalAccuracyEl = document.getElementById("final-accuracy");
+        const performanceMessageEl = document.getElementById("performance-message");
+
+        // Engine states
+        let isGameRunning = false;
+        let scaleFactor = 1;
+        let particles = [];
+        let weatherClouds = []; // Dynamic floating clouds
+        let portals = []; // Glowing sky targets containing options
+        
+        // Touch coordination tracking
+        const balloon = {
+            x: 0,
+            y: 0,
+            startX: 0,
+            startY: 0,
+            targetX: 0,
+            targetY: 0,
+            r: 32,
+            isDragging: false,
+            pointerId: null,
+            glow: 0,
+            isDocking: false
+        };
+
+        function prepareLevelQuestions(levelNum) {
+            const sourceBank = levelNum === 1 ? level1Bank : level2Bank;
+            const shuffled = [...sourceBank].sort(() => 0.5 - Math.random());
+            activeQuestions = shuffled.slice(0, totalQuestionsLimit);
+            currentQuestionIndex = 0;
+        }
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            scaleFactor = Math.min(1, canvas.width / 800);
+
+            balloon.r = 34 * scaleFactor;
+            
+            // Re-dock balloon to starting dock
+            if (!balloon.isDragging && !balloon.isDocking) {
+                resetBalloonToBase();
+            }
+
+            // Create weather clouds once
+            if (weatherClouds.length === 0) {
+                for (let i = 0; i < 5; i++) {
+                    weatherClouds.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height * 0.4,
+                        r: (Math.random() * 30 + 25) * scaleFactor,
+                        speed: (0.1 + Math.random() * 0.2)
+                    });
+                }
+            }
+
+            // Reposition current portals relative to layout
+            recalculatePortals();
+        }
+
+        function resetBalloonToBase() {
+            balloon.x = canvas.width / 2;
+            balloon.y = canvas.height - 60 * scaleFactor;
+            balloon.targetX = balloon.x;
+            balloon.targetY = balloon.y;
+            balloon.isDocking = false;
+        }
+
+        function recalculatePortals() {
+            if (portals.length === 0) return;
+            const spacing = canvas.width / (portals.length + 1);
+            portals.forEach((p, idx) => {
+                p.x = spacing * (idx + 1);
+                p.y = 120 * scaleFactor;
+                p.r = 45 * scaleFactor;
+            });
+        }
+
+        function createExplosion(x, y, color, count = 15) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 1,
+                    radius: Math.random() * 5 + 2,
+                    color: color,
+                    alpha: 1,
+                    decay: Math.random() * 0.03 + 0.02
+                });
+            }
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= totalQuestionsLimit) {
+                if (currentLevel === 1) {
+                    isGameRunning = false;
+                    levelScreen.classList.remove("hidden");
+                } else {
+                    endGameSession();
+                }
+                return;
+            }
+
+            questionIndexEl.textContent = `${currentQuestionIndex + 1}/${totalQuestionsLimit}`;
+            const currentQ = activeQuestions[currentQuestionIndex];
+
+            // Render sentence gap display
+            sentenceContainer.innerHTML = "";
+            const leftSpan = document.createElement("span");
+            leftSpan.textContent = currentQ.left;
+            leftSpan.className = "text-slate-100";
+            sentenceContainer.appendChild(leftSpan);
+
+            const gapBox = document.createElement("div");
+            gapBox.id = "sentence-gap";
+            gapBox.className = "px-4 py-1 mx-2 bg-sky-500/10 border-2 border-dashed border-sky-400 rounded-xl inline-block text-sky-300 font-bold tracking-widest min-w-[100px] text-center animate-pulse uppercase text-xs md:text-sm";
+            gapBox.textContent = "Dock Balloon";
+            sentenceContainer.appendChild(gapBox);
+
+            const rightSpan = document.createElement("span");
+            rightSpan.textContent = currentQ.right;
+            rightSpan.className = "text-slate-100";
+            sentenceContainer.appendChild(rightSpan);
+
+            // Establish floating sky portal options
+            const otherOptions = ALLOWED_PREPOSITIONS.filter(p => p !== currentQ.ans);
+            const shuffledOthers = [...otherOptions].sort(() => 0.5 - Math.random());
+            
+            const choices = [currentQ.ans, shuffledOthers[0], shuffledOthers[1]];
+            const shuffledChoices = choices.sort(() => 0.5 - Math.random());
+
+            const colors = ['#38bdf8', '#f472b6', '#34d399'];
+            portals = shuffledChoices.map((choice, index) => ({
+                text: choice,
+                x: 0,
+                y: 0,
+                r: 0,
+                color: colors[index % colors.length]
+            }));
+
+            recalculatePortals();
+            resetBalloonToBase();
+        }
+
+        function triggerHUDNotification(text, isCorrect) {
+            hudText.textContent = text;
+            if (isCorrect) {
+                hudText.className = "text-4xl md:text-5xl font-black text-sky-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] playful-font uppercase tracking-wider";
+            } else {
+                hudText.className = "text-4xl md:text-5xl font-black text-rose-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] playful-font uppercase tracking-wider";
+            }
+            hitNotification.style.opacity = "1";
+            hitNotification.style.transform = "translate(-50%, -50%) scale(1.1)";
+            
+            setTimeout(() => {
+                hitNotification.style.opacity = "0";
+                hitNotification.style.transform = "translate(-50%, -50%) scale(0.75)";
+            }, 1200);
+        }
+
+        function validateOption(selectedPreposition) {
+            const currentQ = activeQuestions[currentQuestionIndex];
+            const isCorrect = (selectedPreposition === currentQ.ans);
+            const gapBox = document.getElementById("sentence-gap");
+
+            if (isCorrect) {
+                gapBox.textContent = selectedPreposition.toUpperCase();
+                gapBox.className = "px-4 py-1 mx-2 bg-emerald-500/20 border-2 border-emerald-400 rounded-xl inline-block text-emerald-400 font-extrabold tracking-widest min-w-[100px] text-center uppercase text-xs md:text-sm scale-105 transition-transform";
+                
+                score += 100 + (streak * 20);
+                streak++;
+                correctAnswersCount++;
+                playSound('correct');
+                triggerHUDNotification("ALIGNMENT SECURED!", true);
+
+                scoreEl.textContent = score;
+                streakEl.textContent = "🔥 " + streak;
+
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                }, 1600);
+            } else {
+                gapBox.textContent = selectedPreposition.toUpperCase();
+                gapBox.className = "px-4 py-1 mx-2 bg-rose-500/20 border-2 border-rose-400 rounded-xl inline-block text-rose-400 font-extrabold tracking-widest min-w-[100px] text-center uppercase text-xs md:text-sm scale-105 transition-transform";
+                
+                streak = 0;
+                playSound('wrong');
+                triggerHUDNotification("CORRECTING CO-ORDINATES", false);
+
+                streakEl.textContent = "🔥 " + streak;
+
+                setTimeout(() => {
+                    loadQuestion();
+                }, 1600);
+            }
+        }
+
+        function endGameSession() {
+            isGameRunning = false;
+            gameoverScreen.classList.remove("hidden");
+            
+            finalScoreEl.textContent = score;
+            const accuracy = Math.round((correctAnswersCount / (totalQuestionsLimit * 2)) * 100);
+            finalAccuracyEl.textContent = accuracy + "%";
+
+            let msg = "";
+            if (accuracy >= 85) {
+                msg = "🏆 Exceptional flight! Your advanced calculations have charted the entire atmospheric sector perfectly!";
+            } else if (accuracy >= 65) {
+                msg = "🥈 Great patrol! The preposition patterns are successfully secured across the sky coordinate maps!";
+            } else {
+                msg = "🌲 Flight Recalibrating: Let's run the weather scans again to improve our altitude calculations!";
+            }
+            performanceMessageEl.textContent = msg;
+        }
+
+        // --- STREAMING_CHUNK: Setting up pointer controls for phones and tablets ---
+        // Pointer tracking listeners
+        canvas.addEventListener('pointerdown', (e) => {
+            if (!isGameRunning || balloon.isDocking) return;
+            initAudio();
+
+            const rect = canvas.getBoundingClientRect();
+            const px = e.clientX - rect.left;
+            const py = e.clientY - rect.top;
+
+            // Check if player touched near the hot air balloon
+            const dist = Math.hypot(px - balloon.x, py - balloon.y);
+            if (dist < balloon.r * 1.5) {
+                balloon.isDragging = true;
+                balloon.pointerId = e.pointerId;
+                canvas.setPointerCapture(e.pointerId);
+                balloon.startX = px;
+                balloon.startY = py;
+            } else {
+                // Support quick-tap to fly for smaller screen interfaces
+                portals.forEach(p => {
+                    const portalDist = Math.hypot(px - p.x, py - p.y);
+                    if (portalDist < p.r) {
+                        balloon.isDocking = true;
+                        balloon.targetX = p.x;
+                        balloon.targetY = p.y;
+                    }
+                });
+            }
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            if (!balloon.isDragging || e.pointerId !== balloon.pointerId) return;
+            const rect = canvas.getBoundingClientRect();
+            const px = e.clientX - rect.left;
+            const py = e.clientY - rect.top;
+
+            balloon.x = Math.max(balloon.r, Math.min(canvas.width - balloon.r, px));
+            balloon.y = Math.max(balloon.r, Math.min(canvas.height - balloon.r, py));
+        });
+
+        canvas.addEventListener('pointerup', (e) => {
+            if (!balloon.isDragging || e.pointerId !== balloon.pointerId) return;
+            balloon.isDragging = false;
+            canvas.releasePointerCapture(e.pointerId);
+
+            // Check if balloon was released over/inside a target portal
+            let docked = false;
+            portals.forEach(p => {
+                const dist = Math.hypot(balloon.x - p.x, balloon.y - p.y);
+                if (dist < p.r * 1.2) {
+                    docked = true;
+                    balloon.isDocking = true;
+                    balloon.x = p.x;
+                    balloon.y = p.y;
+                    createExplosion(p.x, p.y, p.color);
+                    validateOption(p.text);
+                }
+            });
+
+            if (!docked) {
+                resetBalloonToBase();
+            }
+        });
+
+        // --- STREAMING_CHUNK: Coding the background scenery & vector designs ---
+        function drawScene() {
+            // Gradient Sky
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGrad.addColorStop(0, '#020617'); // Cosmic slate night top
+            skyGrad.addColorStop(1, '#0f172a'); // Sky blue horizon base
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Weather Clouds
+            ctx.fillStyle = 'rgba(224, 242, 254, 0.05)';
+            weatherClouds.forEach(c => {
+                c.x += c.speed;
+                if (c.x > canvas.width + c.r) {
+                    c.x = -c.r;
+                }
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+                ctx.arc(c.x + c.r * 0.6, c.y - c.r * 0.2, c.r * 0.8, 0, Math.PI * 2);
+                ctx.arc(c.x - c.r * 0.6, c.y - c.r * 0.1, c.r * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw Mountain Silhouettes in deep distance
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height);
+            ctx.lineTo(canvas.width * 0.2, canvas.height - 120 * scaleFactor);
+            ctx.lineTo(canvas.width * 0.5, canvas.height);
+            ctx.moveTo(canvas.width * 0.4, canvas.height);
+            ctx.lineTo(canvas.width * 0.75, canvas.height - 150 * scaleFactor);
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // Ground base strip
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, canvas.height - 15 * scaleFactor, canvas.width, 15 * scaleFactor);
+
+            if (isGameRunning) {
+                // Auto-docking movement calculations
+                if (balloon.isDocking) {
+                    const dx = balloon.targetX - balloon.x;
+                    const dy = balloon.targetY - balloon.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist > 4) {
+                        balloon.x += (dx / dist) * 12 * scaleFactor;
+                        balloon.y += (dy / dist) * 12 * scaleFactor;
+                    } else {
+                        balloon.x = balloon.targetX;
+                        balloon.y = balloon.targetY;
+                        balloon.isDocking = false;
+
+                        // Retrieve docked validation option
+                        portals.forEach(p => {
+                            if (p.x === balloon.x && p.y === balloon.y) {
+                                createExplosion(p.x, p.y, p.color);
+                                validateOption(p.text);
+                            }
+                        });
+                    }
+                }
+
+                // Render Option Portals
+                portals.forEach(p => {
+                    ctx.save();
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = p.color;
+
+                    // Neon glowing outer portal ring
+                    ctx.strokeStyle = p.color;
+                    ctx.lineWidth = 4 * scaleFactor;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Semi-transparent center portal fill
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r - 2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Option Label
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = `bold ${Math.max(12, Math.floor(15 * scaleFactor))}px 'Fredoka One'`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(p.text.toUpperCase(), p.x, p.y);
+
+                    ctx.restore();
+                });
+
+                // Render Explorer Hot Air Balloon
+                ctx.save();
+                ctx.translate(balloon.x, balloon.y);
+
+                // Glow hover aura when dragging
+                if (balloon.isDragging) {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#38bdf8';
+                }
+
+                // Balloon envelope basket connector ropes
+                ctx.strokeStyle = '#94a3b8';
+                ctx.lineWidth = 1.5 * scaleFactor;
+                ctx.beginPath();
+                ctx.moveTo(-10 * scaleFactor, 10 * scaleFactor);
+                ctx.lineTo(-6 * scaleFactor, 26 * scaleFactor);
+                ctx.moveTo(10 * scaleFactor, 10 * scaleFactor);
+                ctx.lineTo(6 * scaleFactor, 26 * scaleFactor);
+                ctx.stroke();
+
+                // Small passenger basket
+                ctx.fillStyle = '#b45309'; // Wicker brown
+                ctx.fillRect(-8 * scaleFactor, 25 * scaleFactor, 16 * scaleFactor, 12 * scaleFactor);
+
+                // Striped main envelope balloon bulb
+                const bulbGrad = ctx.createRadialGradient(-5, -5, 2, 0, 0, balloon.r);
+                bulbGrad.addColorStop(0, '#f43f5e'); // Rose glow highlights
+                bulbGrad.addColorStop(0.5, '#e11d48');
+                bulbGrad.addColorStop(1, '#9f1239');
+                ctx.fillStyle = bulbGrad;
+
+                ctx.beginPath();
+                ctx.arc(0, 0, balloon.r, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Decorative golden middle stripe
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 10 * scaleFactor, balloon.r, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+
+            // Animate and draw explosion particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            requestAnimationFrame(drawScene);
+        }
+
+        // --- STREAMING_CHUNK: Event binds and application setup ---
+        // UI action listeners
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            isGameRunning = true;
+            score = 0;
+            streak = 0;
+            currentLevel = 1;
+            correctAnswersCount = 0;
+            levelDisplayEl.textContent = currentLevel;
+            scoreEl.textContent = score;
+            streakEl.textContent = "🔥 " + streak;
+            
+            prepareLevelQuestions(currentLevel);
+            loadQuestion();
+        });
+
+        nextLevelBtn.addEventListener('click', () => {
+            initAudio();
+            currentLevel = 2;
+            levelScreen.classList.add("hidden");
+            levelDisplayEl.textContent = currentLevel;
+            prepareLevelQuestions(currentLevel);
+            isGameRunning = true;
+            loadQuestion();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            initAudio();
+            gameoverScreen.classList.add("hidden");
+            isGameRunning = true;
+            score = 0;
+            streak = 0;
+            currentLevel = 1;
+            correctAnswersCount = 0;
+            levelDisplayEl.textContent = currentLevel;
+            scoreEl.textContent = score;
+            streakEl.textContent = "🔥 " + streak;
+            
+            prepareLevelQuestions(currentLevel);
+            loadQuestion();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Run application on window load
+        window.onload = function() {
+            resizeCanvas();
+            drawScene();
+
+            // Show brand splash screen strictly for 5 seconds
+            setTimeout(() => {
+                logoScreen.classList.add("fade-out");
+                setTimeout(() => {
+                    logoScreen.classList.add("hidden");
+                    startScreen.classList.remove("hidden");
+                }, 800);
+            }, 5000);
+        };
+    </script>
+</body>
+</html>
