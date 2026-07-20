@@ -22,161 +22,161 @@
         }
         /* Custom neon glowing animations */
         @keyframes pulse-glow {
-            0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 5px rgba(99, 102, 241, 0.6)); }
-            50% { opacity: 1; filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.9)); }
+            0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 3px rgba(99, 102, 241, 0.6)); }
+            50% { opacity: 1; filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.9)); }
         }
         .glow-active {
             animation: pulse-glow 2s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-1 md:p-4 text-slate-100">
+<body class="flex flex-col items-center justify-center min-h-screen p-1 text-slate-100">
 
-    <div class="relative w-full max-w-5xl bg-slate-950 rounded-3xl border-4 border-indigo-500 shadow-2xl shadow-indigo-500/10 overflow-hidden flex flex-col h-[98vh] md:h-[90vh]">
+    <!-- Main Container styled to fit 100% viewport height cleanly on mobile without vertical scrolling -->
+    <div class="relative w-full max-w-md md:max-w-4xl bg-slate-950 rounded-2xl border-2 md:border-4 border-indigo-500 shadow-2xl shadow-indigo-500/10 overflow-hidden flex flex-col h-[98vh] md:h-[90vh]">
 
         <!-- Pure White Splash Screen (Exactly 5-seconds display) -->
         <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
-            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[280px] w-4/5 h-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[220px] w-4/5 h-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
             <div id="logo-fallback" class="hidden text-center">
-                <div class="text-5xl font-black tracking-wider text-slate-900 uppercase">INNOVINE</div>
-                <div class="text-sm text-indigo-600 font-semibold uppercase tracking-widest mt-1">Learning Games</div>
+                <div class="text-4xl font-black tracking-wider text-slate-900 uppercase">INNOVINE</div>
+                <div class="text-xs text-indigo-600 font-semibold uppercase tracking-widest mt-1">Learning Games</div>
             </div>
         </div>
 
         <!-- Start Screen / Instructions Overlay -->
-        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 md:p-6 text-center z-40 hidden overflow-y-auto">
-            <div class="max-w-md bg-slate-900/90 p-5 md:p-8 rounded-2xl border-2 border-indigo-500/40 backdrop-blur-md shadow-2xl my-auto">
-                <div class="text-6xl mb-4 animate-bounce">⏳🛰️</div>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-indigo-400 mb-1 uppercase playful-font">Time Crypt</h2>
-                <h3 class="text-md text-slate-300 font-semibold mb-4">Past Tense Rule Decoder (Grade 3)</h3>
+        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-3 md:p-6 text-center z-40 hidden overflow-y-auto">
+            <div class="max-w-sm bg-slate-900/90 p-4 md:p-6 rounded-xl border border-indigo-500/40 backdrop-blur-md shadow-2xl my-auto">
+                <div class="text-4xl mb-2 animate-bounce">⏳🛰️</div>
+                <h2 class="text-xl md:text-2xl font-extrabold text-indigo-400 mb-0.5 uppercase playful-font">Time Crypt</h2>
+                <h3 class="text-xs text-slate-300 font-semibold mb-3">Past Tense Rule Decoder (Grade 3)</h3>
                 
-                <div class="text-sm text-slate-300 text-left space-y-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800 mb-6 max-h-[220px] overflow-y-auto">
-                    <p>🛸 <strong>Grammar Core Offline:</strong> A time glitch has locked our verbs in their base form! You must apply past tense conjugation rules to decode them.</p>
+                <div class="text-[11px] md:text-xs text-slate-300 text-left space-y-2 bg-slate-950/60 p-3 rounded-lg border border-slate-800 mb-4 max-h-[180px] overflow-y-auto">
+                    <p>🛸 <strong>Grammar Core Offline:</strong> Apply past tense rules to decode the base verbs before the timeline glitches out!</p>
                     <p class="font-bold text-indigo-400">⚡ Rules to Practice:</p>
-                    <ul class="list-disc pl-5 space-y-1.5 text-xs text-slate-300">
-                        <li><strong>Simple Past irregulars:</strong> e.g., <em>write</em> becomes <strong>wrote</strong>, <em>go</em> becomes <strong>went</strong>.</li>
+                    <ul class="list-disc pl-4 space-y-1 text-[10px] md:text-xs text-slate-300">
+                        <li><strong>Simple Past irregulars:</strong> e.g., <em>write</em> becomes <strong>wrote</strong>.</li>
                         <li><strong>Spelling Shifts:</strong> e.g., <em>cry</em> $\rightarrow$ <strong>cried</strong>, <em>pop</em> $\rightarrow$ <strong>popped</strong>.</li>
-                        <li><strong>Past Continuous Helpers:</strong> Match singular/plural helper verbs correctly, e.g., <strong>was napping</strong> or <strong>were singing</strong>.</li>
-                        <li>Avoid wrong guesses! Each error drains your shield battery.</li>
+                        <li><strong>Past Continuous Helpers:</strong> Match helper verbs correctly, e.g., <strong>was napping</strong> or <strong>were singing</strong>.</li>
                     </ul>
                 </div>
 
-                <button id="start-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 active:from-indigo-700 text-white font-extrabold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-500/20 transform transition active:scale-95 text-md uppercase tracking-wide playful-font">
-                    Initialize Grammar Engine
+                <button id="start-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 active:from-indigo-700 text-white font-extrabold py-2.5 px-4 rounded-lg shadow-lg transform transition active:scale-95 text-xs uppercase tracking-wide playful-font">
+                    Initialize Engine
                 </button>
             </div>
         </div>
 
         <!-- Game Over / Victory Screen -->
-        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40 hidden">
-            <div class="max-w-md bg-slate-900/90 p-8 rounded-2xl border-2 border-indigo-500/40 backdrop-blur-md shadow-2xl">
-                <div class="text-6xl mb-4">✨🛸</div>
-                <h2 id="victory-title" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-2 playful-font">MISSION SECURED!</h2>
-                <p id="victory-desc" class="text-slate-300 text-sm mb-6">You successfully corrected all tense anomalies!</p>
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-40 hidden">
+            <div class="max-w-sm bg-slate-900/90 p-6 rounded-xl border border-indigo-500/40 backdrop-blur-md shadow-2xl">
+                <div class="text-4xl mb-2">✨🛸</div>
+                <h2 id="victory-title" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-1 playful-font">MISSION SECURED!</h2>
+                <p id="victory-desc" class="text-slate-400 text-xs mb-4">You successfully corrected all tense anomalies!</p>
 
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800">
-                        <span class="block text-xs text-slate-400 font-bold uppercase tracking-widest">Decoded by You</span>
-                        <span id="final-player-score" class="text-2xl font-black text-indigo-400">0</span>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Decoded</span>
+                        <span id="final-player-score" class="text-xl font-black text-indigo-400">0</span>
                     </div>
-                    <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800">
-                        <span class="block text-xs text-slate-400 font-bold uppercase tracking-widest">Lost to Glitch</span>
-                        <span id="final-rival-score" class="text-2xl font-black text-slate-400 font-semibold">0</span>
+                    <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Glitch</span>
+                        <span id="final-rival-score" class="text-xl font-black text-slate-400">0</span>
                     </div>
                 </div>
 
-                <p id="performance-feedback" class="text-sm text-slate-200 italic mb-6 px-2 font-medium"></p>
+                <p id="performance-feedback" class="text-xs text-slate-200 italic mb-4 px-1 font-medium"></p>
 
-                <button id="restart-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg transform transition active:scale-95 text-lg uppercase tracking-wide playful-font">
-                    Reset Crypt Engine
+                <button id="restart-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-extrabold py-3 px-4 rounded-lg shadow-lg transform transition active:scale-95 text-sm uppercase tracking-wide playful-font">
+                    Reset Engine
                 </button>
             </div>
         </div>
 
-        <header class="bg-slate-900/95 px-4 py-3 border-b-2 border-indigo-500/30 flex flex-wrap justify-between items-center gap-2 z-10 backdrop-blur-sm">
-            <div class="flex items-center gap-2">
-                <span class="text-2xl">⏳</span>
-                <h1 class="text-lg md:text-xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-purple-400 playful-font">
-                    TIME CRYPT CODES
+        <!-- Header Panel -->
+        <header class="bg-slate-900/95 px-3 py-2 border-b border-indigo-500/30 flex justify-between items-center z-10">
+            <div class="flex items-center gap-1.5">
+                <span class="text-lg">⏳</span>
+                <h1 class="text-xs md:text-sm font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-purple-400 playful-font">
+                    TIME CRYPT
                 </h1>
             </div>
             
-            <div class="flex items-center gap-2 text-xs md:text-sm font-semibold">
-                <div class="bg-slate-950/80 px-2.5 py-1 rounded-full border border-slate-800">
+            <div class="flex items-center gap-1.5 text-[10px] md:text-xs font-semibold">
+                <div class="bg-slate-950/80 px-2 py-0.5 rounded-full border border-slate-800">
                     Cap: <span id="question-index" class="text-indigo-400 font-bold">1/10</span>
                 </div>
-                <div class="bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-500/30">
+                <div class="bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-500/30">
                     YOU: <span id="player-score" class="text-indigo-400 font-bold">0</span>
                 </div>
-                <div class="bg-rose-950/60 px-3 py-1 rounded-full border border-rose-500/30">
-                    GLITCH (COM): <span id="rival-score" class="text-rose-400 font-bold">0</span>
+                <div class="bg-rose-950/60 px-2 py-0.5 rounded-full border border-rose-500/30">
+                    GLITCH: <span id="rival-score" class="text-rose-400 font-bold">0</span>
                 </div>
             </div>
         </header>
 
         <!-- Dynamic Question Instructions and Verb Sentence Banner -->
-        <section class="bg-slate-950 px-4 py-3 border-b border-slate-900 flex flex-col items-center justify-center text-center z-10">
-            <p id="target-tense-label" class="text-[10px] md:text-xs uppercase tracking-widest text-indigo-400 font-black mb-1.5">
+        <section class="bg-slate-950 px-3 py-2 border-b border-slate-900 flex flex-col items-center justify-center text-center z-10 gap-1">
+            <p id="target-tense-label" class="text-[9px] md:text-xs uppercase tracking-widest text-indigo-400 font-black">
                 GUESS THE LETTERS FOR: SIMPLE PAST TENSE
             </p>
             
-            <div class="w-full max-w-3xl flex flex-col gap-2">
-                <div id="sentence-card" class="text-sm md:text-base font-bold text-white leading-relaxed px-4 py-3 bg-slate-900/80 rounded-xl border border-indigo-500/20 shadow-inner playful-font">
+            <div class="w-full max-w-xl flex flex-col gap-1">
+                <div id="sentence-card" class="text-xs md:text-sm font-bold text-white leading-snug px-3 py-2 bg-slate-900/80 rounded-lg border border-indigo-500/10 shadow-inner playful-font">
                     Initializing spatial communications...
                 </div>
                 <!-- Interactive Rules Panel displaying base verb and grammar target -->
-                <div class="flex justify-center gap-4 text-xs">
-                    <div class="bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-                        <span class="text-slate-400 mr-1.5 uppercase font-semibold">Base Verb:</span>
+                <div class="flex justify-center gap-2 text-[10px]">
+                    <div class="bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                        <span class="text-slate-400 mr-1 uppercase font-semibold">Base:</span>
                         <span id="base-verb-indicator" class="text-indigo-400 font-black uppercase tracking-wide">WRITE</span>
                     </div>
-                    <div class="bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-                        <span class="text-slate-400 mr-1.5 uppercase font-semibold">Tense Rule:</span>
+                    <div class="bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                        <span class="text-slate-400 mr-1 uppercase font-semibold">Rule:</span>
                         <span id="conjugate-rule-indicator" class="text-amber-400 font-black uppercase tracking-wide">SIMPLE PAST</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Main Crypt Decoder Area -->
-        <main class="relative flex-grow bg-slate-950 overflow-hidden flex flex-col md:flex-row p-3 gap-3">
+        <!-- Main Crypt Decoder Area - Compact Layout for Phone Compatibility -->
+        <main class="relative flex-grow bg-slate-950 overflow-hidden flex flex-col md:flex-row p-2 gap-2">
             
-            <div class="w-full md:w-1/3 flex flex-col items-center justify-center bg-slate-900/40 border border-slate-800 rounded-2xl p-2 relative">
-                <div class="absolute top-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest">Chrono-Shield Integrity</div>
-                <canvas id="clockCanvas" class="w-full max-w-[200px] h-[200px] md:max-w-none md:h-full max-h-[250px] md:max-h-none block"></canvas>
-                <div id="battery-status" class="text-xs font-black uppercase text-indigo-400 animate-pulse mt-2">Shield Fully Charged</div>
+            <!-- Compact Left Side: Small Shield Integrity Circle -->
+            <div class="w-full md:w-1/4 flex flex-row md:flex-col items-center justify-between md:justify-center bg-slate-900/40 border border-slate-800 rounded-xl p-2 relative gap-1">
+                <div class="text-[8px] md:text-[10px] text-slate-500 font-bold uppercase tracking-widest">Chrono-Shield</div>
+                <div class="relative w-[50px] h-[50px] md:w-[90px] md:h-[90px]">
+                    <canvas id="clockCanvas" class="w-full h-full block"></canvas>
+                </div>
+                <div id="battery-status" class="text-[9px] font-black uppercase text-indigo-400 animate-pulse text-right md:text-center">Shield Charged</div>
             </div>
 
             <!-- Decryption Board & Interactive Hidden Characters -->
-            <div class="flex-grow flex flex-col justify-between items-center bg-slate-900/40 border border-slate-800 rounded-2xl p-4 gap-4">
+            <div class="flex-grow flex flex-col justify-between items-center bg-slate-900/40 border border-slate-800 rounded-xl p-2 md:p-3 gap-2">
                 
                 <!-- Underlines showing hidden characters -->
-                <div class="flex flex-col items-center justify-center gap-2 my-auto">
-                    <div id="word-container" class="flex flex-wrap justify-center gap-1.5 md:gap-3 text-3xl md:text-4xl font-black tracking-wide playful-font">
+                <div class="flex flex-col items-center justify-center gap-1.5 my-auto">
+                    <div id="word-container" class="flex flex-wrap justify-center gap-1 text-xl md:text-2xl font-black tracking-wide playful-font">
                         <!-- Instantiated by JS -->
                     </div>
-                    <div id="feedback-msg" class="text-xs text-indigo-400 uppercase tracking-widest font-bold mt-2 h-4">
-                        GUESS A LETTER TO START REVEALING!
+                    <div id="feedback-msg" class="text-[9px] md:text-xs text-indigo-400 uppercase tracking-widest font-bold h-3">
+                        SELECT JUMBLED LETTERS BELOW
                     </div>
                 </div>
 
-                <!-- On-Screen Alphabet Keyboard -->
-                <div class="w-full max-w-lg">
-                    <div id="keyboard" class="grid grid-cols-7 gap-1.5 md:gap-2">
-                        <!-- Injected via script dynamically -->
+                <!-- On-Screen Compact Jumbled Keyboard (Fits perfectly on phone) -->
+                <div class="w-full max-w-sm">
+                    <div id="keyboard" class="grid grid-cols-5 gap-1.5">
+                        <!-- Injected via script dynamically (only 10-12 buttons max!) -->
                     </div>
                 </div>
             </div>
 
         </main>
 
-        <footer class="bg-slate-900/95 border-t border-slate-800 px-4 py-2 flex justify-between items-center gap-1 z-10 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-            <div class="flex items-center gap-1.5 text-slate-400">
-                <span>⏳ Time Crypt Decoder &bull; Grade 3 past tense grammar rules</span>
-            </div>
-            <div>
-                Innovine Learning Games &bull; Core Decryptor
-            </div>
+        <footer class="bg-slate-900/95 border-t border-slate-800 px-3 py-1 flex justify-between items-center gap-1 z-10 text-[8px] text-slate-500 uppercase tracking-widest font-semibold">
+            <div>⏳ Time Crypt Decoder &bull; Grade 3</div>
+            <div>Innovine Learning Games</div>
         </footer>
     </div>
 
@@ -251,18 +251,18 @@
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
                     osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
-                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.4);
-                } else {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-                    osc.frequency.linearRampToValueAtTime(120, audioCtx.currentTime + 0.3);
-                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
                     osc.start();
                     osc.stop(audioCtx.currentTime + 0.3);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
                 }
             } catch (e) {
                 console.warn("Synthesizer failed", e);
@@ -307,7 +307,7 @@
 
         let clockRotation = 0;
 
-        // Render Canvas - Dynamic Shield Battery Projector
+        // Render Canvas - Dynamic Shield Battery Projector (Tuned for Smaller Container)
         function renderClockGraph() {
             const width = clockCanvas.width;
             const height = clockCanvas.height;
@@ -319,9 +319,9 @@
 
             // Draw outer glowing force field ring
             clockCtx.strokeStyle = "rgba(99, 102, 241, 0.15)";
-            clockCtx.lineWidth = 12;
+            clockCtx.lineWidth = 4;
             clockCtx.beginPath();
-            clockCtx.arc(cx, cy, r + 15, 0, Math.PI * 2);
+            clockCtx.arc(cx, cy, r + 6, 0, Math.PI * 2);
             clockCtx.stroke();
 
             // Render Chrono Reactor Base
@@ -340,10 +340,10 @@
             }
 
             clockCtx.strokeStyle = shieldColor;
-            clockCtx.lineWidth = 8;
+            clockCtx.lineWidth = 4;
             clockCtx.lineCap = "round";
             clockCtx.beginPath();
-            clockCtx.arc(cx, cy, r - 5, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * remainingRatio));
+            clockCtx.arc(cx, cy, r - 2, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * remainingRatio));
             clockCtx.stroke();
 
             // Draw Central temporal gears
@@ -353,25 +353,18 @@
             
             // Gear teeth
             clockCtx.fillStyle = "rgba(99, 102, 241, 0.3)";
-            for (let i = 0; i < 8; i++) {
-                clockCtx.rotate(Math.PI / 4);
-                clockCtx.fillRect(-10, -r/1.8, 20, 15);
+            for (let i = 0; i < 6; i++) {
+                clockCtx.rotate(Math.PI / 3);
+                clockCtx.fillRect(-3, -r/1.6, 6, 6);
             }
 
             // Gear center wheel
             clockCtx.fillStyle = "#161445";
             clockCtx.strokeStyle = shieldColor;
-            clockCtx.lineWidth = 4;
+            clockCtx.lineWidth = 2;
             clockCtx.beginPath();
             clockCtx.arc(0, 0, r / 2, 0, Math.PI * 2);
             clockCtx.fill();
-            clockCtx.stroke();
-
-            // Inner design cross
-            clockCtx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-            clockCtx.beginPath();
-            clockCtx.moveTo(-r/3, 0); clockCtx.lineTo(r/3, 0);
-            clockCtx.moveTo(0, -r/3); clockCtx.lineTo(0, r/3);
             clockCtx.stroke();
 
             clockCtx.restore();
@@ -379,12 +372,12 @@
             // Draw fractured red glitch crack lines if wrong guesses are made
             if (wrongAttempts > 0) {
                 clockCtx.strokeStyle = "#f43f5e";
-                clockCtx.lineWidth = 3;
+                clockCtx.lineWidth = 1.5;
                 clockCtx.beginPath();
                 for (let i = 0; i < wrongAttempts; i++) {
-                    clockCtx.moveTo(cx - 30 + (i * 12), cy - 25);
-                    clockCtx.lineTo(cx + (i * 8), cy + 10);
-                    clockCtx.lineTo(cx - 10 + (i * 15), cy + 30);
+                    clockCtx.moveTo(cx - 10 + (i * 4), cy - 10);
+                    clockCtx.lineTo(cx + (i * 3), cy + 4);
+                    clockCtx.lineTo(cx - 4 + (i * 5), cy + 10);
                 }
                 clockCtx.stroke();
             }
@@ -397,12 +390,12 @@
         // Setup Canvas Sizing
         function resizeCanvas() {
             const container = clockCanvas.parentElement;
-            clockCanvas.width = container.clientWidth || 250;
-            clockCanvas.height = container.clientHeight || 250;
+            clockCanvas.width = container.clientWidth || 60;
+            clockCanvas.height = container.clientHeight || 60;
         }
 
         function prepareQuestions() {
-            // Select 10 randomized questions from bank (equal mix of simple and continuous)
+            // Select 10 randomized questions from bank
             const simples = questionBank.filter(q => q.target === "SIMPLE PAST").sort(() => 0.5 - Math.random()).slice(0, 5);
             const conts = questionBank.filter(q => q.target === "PAST CONTINUOUS").sort(() => 0.5 - Math.random()).slice(0, 5);
             
@@ -432,19 +425,19 @@
             conjugateRuleIndicator.textContent = q.target;
             
             // Render sentence block with underscores
-            sentenceCard.innerHTML = q.sentence.replace("________", "<span class='text-indigo-400 font-extrabold underline decoration-wavy px-1 decoration-2'>________</span>");
+            sentenceCard.innerHTML = q.sentence.replace("________", "<span class='text-indigo-400 font-extrabold underline decoration-wavy px-1 decoration-1'>________</span>");
 
             currentAns = q.ans.toLowerCase();
             guessedLetters = [];
             wrongAttempts = 0;
 
-            feedbackMsg.textContent = "TAP THE KEYBOARD TO DECRYPT THE VERB";
-            feedbackMsg.className = "text-xs text-indigo-400 uppercase tracking-widest font-bold mt-2 h-4 animate-pulse";
-            batteryStatus.textContent = "Shield Active (6/6 Charges)";
-            batteryStatus.className = "text-xs font-black uppercase text-indigo-400 animate-pulse mt-2";
+            feedbackMsg.textContent = "SELECT THE JUMBLED KEYPAD LETTERS";
+            feedbackMsg.className = "text-[9px] md:text-xs text-indigo-400 uppercase tracking-widest font-bold mt-1 h-3 animate-pulse";
+            batteryStatus.textContent = "Shield: 6/6 Charges";
+            batteryStatus.className = "text-[9px] font-black uppercase text-indigo-400 animate-pulse";
 
             buildHiddenWordUI();
-            buildKeyboardUI();
+            buildJumbledKeyboardUI();
         }
 
         function buildHiddenWordUI() {
@@ -454,11 +447,11 @@
                 
                 if (char === " ") {
                     // Auto-reveal spaces to keep game fluid and focus strictly on spelling and helper rules
-                    charEl.className = "w-6 h-11 md:w-8 md:h-14 flex items-center justify-center text-slate-100 font-black text-xl md:text-2xl select-none";
+                    charEl.className = "w-4 h-7 md:w-6 md:h-10 flex items-center justify-center text-slate-100 font-black text-sm md:text-lg select-none";
                     charEl.textContent = " ";
                     charEl.dataset.char = " ";
                 } else {
-                    charEl.className = "w-9 h-11 md:w-11 md:h-14 flex items-center justify-center border-b-4 border-slate-700 text-slate-900 transition-all text-xl md:text-2xl font-black bg-slate-900/60 rounded-t-lg select-none";
+                    charEl.className = "w-6 h-8 md:w-8 md:h-11 flex items-center justify-center border-b-2 border-slate-700 text-slate-900 transition-all text-sm md:text-lg font-black bg-slate-900/60 rounded-t select-none";
                     charEl.textContent = "";
                     charEl.dataset.char = char;
                 }
@@ -467,13 +460,29 @@
             }
         }
 
-        function buildKeyboardUI() {
+        // Generate a dynamic selection of jumbled letters instead of the entire 26-key keyboard
+        function buildJumbledKeyboardUI() {
             keyboard.innerHTML = "";
-            const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+            
+            // Clean space characters from the target word
+            const answerLettersOnly = currentAns.replace(/\s+/g, '').split("");
+            const uniqueAnsLetters = Array.from(new Set(answerLettersOnly));
+            
+            // Generate some random distractors to reach a standard clean grid size (exactly 10 keys total)
+            const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
+            const filteredAlphabet = alphabet.filter(l => !uniqueAnsLetters.includes(l));
+            
+            const targetPoolSize = Math.max(10, uniqueAnsLetters.length + 3); // minimum of 10 letters
+            const neededDistractors = targetPoolSize - uniqueAnsLetters.length;
+            const chosenDistractors = filteredAlphabet.sort(() => 0.5 - Math.random()).slice(0, neededDistractors);
+            
+            // Combine correct keys and distractors, then shuffle
+            const finalJumbledPool = [...uniqueAnsLetters, ...chosenDistractors].sort(() => 0.5 - Math.random());
 
-            letters.forEach(letter => {
+            // Render keys dynamically
+            finalJumbledPool.forEach(letter => {
                 const btn = document.createElement("button");
-                btn.className = "bg-slate-800 hover:bg-slate-700 active:bg-indigo-500 hover:border-indigo-500/50 text-slate-100 font-extrabold py-2.5 md:py-3.5 rounded-xl border border-slate-700 transition transform active:scale-90 text-sm md:text-base uppercase tracking-wider select-none touch-manipulation";
+                btn.className = "bg-slate-800 hover:bg-slate-700 active:bg-indigo-500 text-slate-100 font-extrabold py-2 rounded-lg border border-slate-700 transition transform active:scale-90 text-xs md:text-sm uppercase tracking-wider select-none touch-manipulation";
                 btn.textContent = letter;
 
                 btn.addEventListener("click", () => handleLetterGuess(letter, btn));
@@ -488,23 +497,23 @@
             buttonElement.disabled = true;
 
             if (currentAns.includes(letter)) {
-                // Correct guess
+                // Correct guess - remains uniform cyan to challenge kids, preventing any colorful tells!
                 playSound('correct');
-                buttonElement.className = "bg-emerald-950 text-emerald-400 border-2 border-emerald-500/50 font-black py-2.5 md:py-3.5 rounded-xl text-sm md:text-base uppercase cursor-not-allowed select-none opacity-90";
+                buttonElement.className = "bg-emerald-950 text-emerald-400 border border-emerald-500/50 font-black py-2 rounded-lg text-xs md:text-sm uppercase cursor-not-allowed select-none opacity-90";
                 revealMatchingLetters(letter);
                 checkMatchWin();
             } else {
                 // Incorrect guess
                 playSound('wrong');
-                buttonElement.className = "bg-slate-900 text-slate-600 border border-slate-800 font-semibold py-2.5 md:py-3.5 rounded-xl text-sm md:text-base uppercase cursor-not-allowed select-none opacity-40";
+                buttonElement.className = "bg-slate-900 text-slate-600 border border-slate-800 font-semibold py-2 rounded-lg text-xs md:text-sm uppercase cursor-not-allowed select-none opacity-40";
                 wrongAttempts++;
                 
                 const chargesLeft = maxAttempts - wrongAttempts;
-                batteryStatus.textContent = chargesLeft > 0 ? `Shield Weakened (${chargesLeft}/6 Charges)` : "Shield Short-Circuited!";
-                batteryStatus.className = chargesLeft > 2 ? "text-xs font-black uppercase text-amber-400 mt-2" : "text-xs font-black uppercase text-rose-500 animate-pulse mt-2";
+                batteryStatus.textContent = chargesLeft > 0 ? `Shield: ${chargesLeft}/6 Charges` : "Shield Shorted!";
+                batteryStatus.className = chargesLeft > 2 ? "text-[9px] font-black uppercase text-amber-400" : "text-[9px] font-black uppercase text-rose-500 animate-pulse";
 
                 feedbackMsg.textContent = "INCORRECT DECRYPTION KEY!";
-                feedbackMsg.className = "text-xs text-rose-400 uppercase tracking-widest font-bold mt-2 h-4";
+                feedbackMsg.className = "text-[9px] md:text-xs text-rose-400 uppercase tracking-widest font-bold mt-1 h-3";
 
                 if (wrongAttempts >= maxAttempts) {
                     processRoundLoss();
@@ -517,7 +526,7 @@
             letterSlots.forEach(slot => {
                 if (slot.dataset.char === letter) {
                     slot.textContent = letter.toUpperCase();
-                    slot.className = "w-9 h-11 md:w-11 md:h-14 flex items-center justify-center border-b-4 border-indigo-400 text-indigo-300 transition-all text-xl md:text-2xl font-black bg-indigo-950/40 rounded-t-lg select-none scale-105";
+                    slot.className = "w-6 h-8 md:w-8 md:h-11 flex items-center justify-center border-b-2 border-indigo-400 text-indigo-300 transition-all text-sm md:text-lg font-black bg-indigo-950/40 rounded-t select-none scale-105";
                 }
             });
         }
@@ -530,18 +539,18 @@
                 playerScore++;
                 playerScoreEl.textContent = playerScore;
 
-                feedbackMsg.textContent = "CORRECT TENSE SPELLED! TIME JUMP ACTIVE! 🚀";
-                feedbackMsg.className = "text-xs text-emerald-400 uppercase tracking-widest font-bold mt-2 h-4";
+                feedbackMsg.textContent = "CORRECT TENSE SPELLED! JUMP ACTIVE! 🚀";
+                feedbackMsg.className = "text-[9px] md:text-xs text-emerald-400 uppercase tracking-widest font-bold mt-1 h-3";
 
                 // Swap sentence underscore with corrected verb to let student see their work in action!
                 const q = activeQuestions[currentQuestionIdx];
-                sentenceCard.innerHTML = q.sentence.replace("________", `<span class='text-emerald-400 font-black px-1 underline decoration-2'>${q.ans.toUpperCase()}</span>`);
+                sentenceCard.innerHTML = q.sentence.replace("________", `<span class='text-emerald-400 font-black px-1 underline decoration-1'>${q.ans.toUpperCase()}</span>`);
 
                 disableAllKeys();
                 setTimeout(() => {
                     currentQuestionIdx++;
                     loadQuestion();
-                }, 2400);
+                }, 2200);
             }
         }
 
@@ -549,19 +558,19 @@
             rivalScore++;
             rivalScoreEl.textContent = rivalScore;
 
-            feedbackMsg.textContent = `GLITCH OVERRIDE! VERB WAS: "${currentAns.toUpperCase()}"`;
-            feedbackMsg.className = "text-xs text-rose-500 uppercase tracking-widest font-black mt-2 h-4";
+            feedbackMsg.textContent = `GLITCH OVERRIDE! IT WAS: "${currentAns.toUpperCase()}"`;
+            feedbackMsg.className = "text-[9px] md:text-xs text-rose-500 uppercase tracking-widest font-black mt-1 h-3";
 
             // Swap sentence underscore with the corrected spelling
             const q = activeQuestions[currentQuestionIdx];
-            sentenceCard.innerHTML = q.sentence.replace("________", `<span class='text-rose-400 font-black px-1 underline decoration-2 decoration-rose-500'>${q.ans.toUpperCase()}</span>`);
+            sentenceCard.innerHTML = q.sentence.replace("________", `<span class='text-rose-400 font-black px-1 underline decoration-1 decoration-rose-500'>${q.ans.toUpperCase()}</span>`);
 
             // Reveal correct letters in Red
             const letterSlots = wordContainer.querySelectorAll("span");
             letterSlots.forEach(slot => {
                 if (slot.textContent === "") {
                     slot.textContent = slot.dataset.char.toUpperCase();
-                    slot.className = "w-9 h-11 md:w-11 md:h-14 flex items-center justify-center border-b-4 border-rose-500 text-rose-400 transition-all text-xl md:text-2xl font-black bg-rose-950/20 rounded-t-lg select-none";
+                    slot.className = "w-6 h-8 md:w-8 md:h-11 flex items-center justify-center border-b-2 border-rose-500 text-rose-400 transition-all text-sm md:text-lg font-black bg-rose-950/20 rounded-t select-none";
                 }
             });
 
@@ -569,7 +578,7 @@
             setTimeout(() => {
                 currentQuestionIdx++;
                 loadQuestion();
-            }, 3000);
+            }, 2600);
         }
 
         function disableAllKeys() {
@@ -588,15 +597,15 @@
             if (playerScore > rivalScore) {
                 msg = "🏆 Exceptional Work! You applied spelling transformations and helping verbs perfectly to defeat the Time Glitch!";
                 document.getElementById("victory-title").textContent = "TIMELINE SECURED!";
-                document.getElementById("victory-title").className = "text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400 mb-2 playful-font";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400 mb-1 playful-font";
             } else if (playerScore === rivalScore) {
                 msg = "🤝 Parallel Synchronicity! The temporal portals are stabilized, but you should practice continuous spelling rules once more!";
                 document.getElementById("victory-title").textContent = "PORTAL STABILIZED";
-                document.getElementById("victory-title").className = "text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-amber-400 mb-2 playful-font";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-amber-400 mb-1 playful-font";
             } else {
                 msg = "⚠️ Glitch Detected! The past tense spelling rules got corrupted. Re-study regular/irregular forms and try again!";
                 document.getElementById("victory-title").textContent = "TIMELINE CORRUPTED";
-                document.getElementById("victory-title").className = "text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-indigo-400 mb-2 playful-font";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-indigo-400 mb-1 playful-font";
             }
             performanceFeedback.textContent = msg;
         }
