@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Adjective Magic Crystal Alchemist</title>
+    <!-- Tailwind CSS for responsive UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for playful typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #050814;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            overflow: hidden;
+        }
+        .playful-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+        canvas {
+            touch-action: none;
+        }
+        .glow-banner {
+            box-shadow: 0 0 20px rgba(129, 140, 248, 0.3);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-1 text-slate-100">
+
+    <div class="relative w-full max-w-md md:max-w-4xl bg-slate-950 rounded-2xl border-2 md:border-4 border-indigo-500/80 shadow-2xl overflow-hidden flex flex-col h-[98vh] md:h-[92vh]">
+
+        <!-- Intro Logo Overlay Screen -->
+        <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[220px] w-4/5 h-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <div id="logo-fallback" class="hidden text-center">
+                <div class="text-4xl font-black tracking-wider text-slate-900 uppercase font-sans">INNOVINE</div>
+                <div class="text-xs text-indigo-600 font-semibold uppercase tracking-widest mt-1 font-sans">Learning Games</div>
+            </div>
+        </div>
+
+        <!-- Start / Instructions Screen -->
+        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-3 md:p-6 text-center z-40 hidden overflow-y-auto">
+            <div class="max-w-md bg-slate-900/90 p-5 md:p-6 rounded-2xl border-2 border-indigo-500/50 backdrop-blur-md shadow-2xl my-auto">
+                <div class="text-5xl mb-2 animate-bounce">🔮✨</div>
+                <h2 class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-amber-300 to-sky-400 mb-0.5 uppercase playful-font">
+                    Adjective Crystal Arcade
+                </h2>
+                <h3 class="text-xs text-slate-300 font-semibold mb-3">Grade 3 Grammar Action Challenge</h3>
+                
+                <div class="text-[11px] md:text-xs text-slate-300 text-left space-y-2 bg-slate-950/80 p-3 rounded-xl border border-slate-800 mb-4">
+                    <p class="font-bold text-indigo-300">🎮 How to Play:</p>
+                    <p class="text-slate-300">Read the highlighted sentence adjective. Floating crystal ingredients will bounce around the screen!</p>
+                    <div class="grid grid-cols-2 gap-1.5 text-[10px] font-bold my-2">
+                        <div class="bg-pink-950/60 border border-pink-500/40 p-1.5 rounded text-pink-300">💎 QUALITY (What kind?)</div>
+                        <div class="bg-amber-950/60 border border-amber-500/40 p-1.5 rounded text-amber-300">🧪 QUANTITY (How much?)</div>
+                        <div class="bg-emerald-950/60 border border-emerald-500/40 p-1.5 rounded text-emerald-300">🔢 NUMBER (How many?)</div>
+                        <div class="bg-sky-950/60 border border-sky-500/40 p-1.5 rounded text-sky-300">👉 DEMONSTRATIVE (Which?)</div>
+                    </div>
+                    <p class="text-amber-300 font-semibold text-[10px]">✨ TAP floating crystals to zap them with your wand OR DRAG them straight into the bubbling Cauldron!</p>
+                </div>
+
+                <button id="start-btn" class="w-full bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 hover:opacity-95 active:scale-95 text-white font-black py-3.5 px-4 rounded-xl shadow-lg transition text-xs md:text-sm uppercase tracking-wide playful-font">
+                    ⚡ LAUNCH ALCHEMY ARCADE
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-40 hidden">
+            <div class="max-w-sm bg-slate-900/90 p-6 rounded-2xl border-2 border-indigo-500/50 backdrop-blur-md shadow-2xl">
+                <div class="text-5xl mb-2">🏆🧙‍♂️</div>
+                <h2 id="victory-title" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-sky-300 mb-1 playful-font">SPELL MASTERY COMPLETE!</h2>
+                <p id="victory-desc" class="text-slate-400 text-xs mb-4">You brewed all magical adjective formulas!</p>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Final Score</span>
+                        <span id="final-player-score" class="text-2xl font-black text-amber-400 font-mono">0</span>
+                    </div>
+                    <div class="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Max Combo</span>
+                        <span id="final-combo-score" class="text-2xl font-black text-pink-400 font-mono">0x</span>
+                    </div>
+                </div>
+
+                <p id="performance-feedback" class="text-xs text-slate-200 italic mb-4 px-1 font-medium"></p>
+
+                <button id="restart-btn" class="w-full bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 hover:opacity-90 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg transform transition active:scale-95 text-xs md:text-sm uppercase tracking-wide playful-font">
+                    🔄 PLAY AGAIN
+                </button>
+            </div>
+        </div>
+
+        <!-- HUD Navigation Bar -->
+        <header class="bg-slate-900 px-3 py-2 border-b border-indigo-500/30 flex justify-between items-center z-10">
+            <div class="flex items-center gap-1.5">
+                <span class="text-lg animate-pulse">🔮</span>
+                <h1 class="text-xs md:text-sm font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-amber-300 to-sky-400 playful-font">
+                    ADJECTIVE ALCHEMIST
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-1.5 text-[10px] md:text-xs font-semibold">
+                <div class="bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800 font-mono">
+                    SPELL: <span id="question-index" class="text-indigo-400 font-bold">1/10</span>
+                </div>
+                <div class="bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-500/40 font-mono">
+                    SCORE: <span id="player-score" class="text-amber-400 font-bold">0</span>
+                </div>
+                <div id="combo-badge" class="bg-pink-950/80 px-2 py-1 rounded-full border border-pink-500/40 font-mono text-pink-300 font-extrabold hidden animate-bounce">
+                    <span id="combo-count">2x</span> COMBO!
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Sentence Banner Header -->
+        <section class="bg-slate-900/95 px-3 py-2 border-b border-slate-800 flex flex-col items-center justify-center text-center z-10 gap-1 glow-banner">
+            <div class="flex items-center justify-between w-full max-w-xl px-1">
+                <span class="text-[9px] md:text-[10px] uppercase tracking-widest text-indigo-300 font-black">
+                    TARGET ADJECTIVE TYPE
+                </span>
+                <span id="scale-rule-indicator" class="text-[9px] md:text-[10px] text-amber-300 font-extrabold uppercase font-mono bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">
+                    CLUE: -
+                </span>
+            </div>
+            
+            <div class="w-full max-w-xl">
+                <div id="sentence-card" class="text-xs md:text-sm font-bold text-white leading-snug px-3 py-2 bg-slate-950 rounded-xl border border-indigo-500/30 shadow-inner playful-font min-h-[44px] flex items-center justify-center">
+                    Loading magical formula...
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Arcade Game Canvas Area -->
+        <main class="relative flex-grow bg-slate-950 overflow-hidden flex flex-col p-0">
+            <div class="flex-grow relative w-full h-full">
+                <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+                
+                <!-- Onscreen guidance overlay banner -->
+                <div id="feedback-msg" class="absolute top-2 left-1/2 transform -translate-x-1/2 text-[9px] md:text-xs text-indigo-200 uppercase tracking-widest font-black bg-slate-900/90 px-3 py-1 rounded-full border border-indigo-500/30 text-center shadow-lg pointer-events-none transition-all">
+                    🎯 Tap or drag the correct crystal ingredient into the cauldron!
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-slate-900 border-t border-slate-800 px-3 py-1.5 flex justify-between items-center gap-1 z-10 text-[8px] text-indigo-400 uppercase tracking-widest font-bold">
+            <div>✨ Bounce, Zap & Drag Elements</div>
+            <div>Innovine Learning Games</div>
+        </footer>
+    </div>
+
+    <script>
+        // Question Bank with all 4 Adjective Types
+        const questionBank = [
+            // ADJECTIVES OF QUALITY
+            { sentence: "She wore a **shiny** silver crown to the grand party.", word: "shiny", rule: "TELLS WHAT KIND", ans: "QUALITY", hint: "Quality describes color, appearance, or state." },
+            { sentence: "We ate a **delicious** warm pizza for dinner.", word: "delicious", rule: "TELLS WHAT KIND", ans: "QUALITY", hint: "Delicious describes what kind of food it is." },
+            { sentence: "The **brave** knight guarded the high castle wall.", word: "brave", rule: "TELLS WHAT KIND", ans: "QUALITY", hint: "Brave describes character qualities." },
+            { sentence: "A **fluffy** white rabbit hopped into the quiet garden.", word: "fluffy", rule: "TELLS WHAT KIND", ans: "QUALITY", hint: "Fluffy describes texture and appearance." },
+            { sentence: "The **noisy** parrot squawked inside its cage.", word: "noisy", rule: "TELLS WHAT KIND", ans: "QUALITY", hint: "Noisy describes sound qualities." },
+
+            // ADJECTIVES OF QUANTITY
+            { sentence: "There is **some** cold milk left in the pitcher.", word: "some", rule: "TELLS HOW MUCH (UNCOUNTABLE)", ans: "QUANTITY", hint: "Some measures uncountable amounts." },
+            { sentence: "He didn't drink **much** water after running.", word: "much", rule: "TELLS HOW MUCH (UNCOUNTABLE)", ans: "QUANTITY", hint: "Much tells an uncountable quantity." },
+            { sentence: "We have **enough** craft paper to finish our project.", word: "enough", rule: "TELLS HOW MUCH (UNCOUNTABLE)", ans: "QUANTITY", hint: "Enough describes adequate quantity." },
+            { sentence: "She drank the **whole** glass of fresh orange juice.", word: "whole", rule: "TELLS HOW MUCH (UNCOUNTABLE)", ans: "QUANTITY", hint: "Whole describes a complete amount." },
+            { sentence: "Add a **little** sugar to sweeten the tea.", word: "little", rule: "TELLS HOW MUCH (UNCOUNTABLE)", ans: "QUANTITY", hint: "Little indicates a small amount." },
+
+            // ADJECTIVES OF NUMBER
+            { sentence: "The dragon has **three** sharp glowing horns.", word: "three", rule: "TELLS HOW MANY (EXACT COUNT)", ans: "NUMBER", hint: "Three gives an exact count." },
+            { sentence: "She won **first** prize in the science fair.", word: "first", rule: "TELLS ORDER / RANK", ans: "NUMBER", hint: "First tells exact position order." },
+            { sentence: "There are **many** colorful pencils inside the box.", word: "many", rule: "TELLS HOW MANY (COUNTABLE)", ans: "NUMBER", hint: "Many describes a countable plural amount." },
+            { sentence: "There were **several** ducks floating on the pond.", word: "several", rule: "TELLS HOW MANY (COUNTABLE)", ans: "NUMBER", hint: "Several counts multiple items." },
+            { sentence: "I ate **two** juicy red apples during recess.", word: "two", rule: "TELLS HOW MANY (EXACT COUNT)", ans: "NUMBER", hint: "Two specifies exact count." },
+
+            // DEMONSTRATIVE ADJECTIVES
+            { sentence: "**This** storybook belongs to my primary teacher.", word: "This", rule: "POINTS OUT NEAR NOUN", ans: "DEMONSTRATIVE", hint: "This points to a nearby item." },
+            { sentence: "**Those** birds are flying towards the high mountains.", word: "Those", rule: "POINTS OUT FAR NOUNS", ans: "DEMONSTRATIVE", hint: "Those points out distant items." },
+            { sentence: "**These** shoes are very comfortable for running.", word: "These", rule: "POINTS OUT NEAR NOUNS", ans: "DEMONSTRATIVE", hint: "These points to nearby plural items." },
+            { sentence: "**That** bright star shines more than the others.", word: "That", rule: "POINTS OUT FAR NOUN", ans: "DEMONSTRATIVE", hint: "That points to a specific distant item." },
+            { sentence: "Do you see **those** colorful kites high in the sky?", word: "those", rule: "POINTS OUT FAR NOUNS", ans: "DEMONSTRATIVE", hint: "Those points out distant kites." }
+        ];
+
+        let audioCtx = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            audioInitialized = true;
+        }
+
+        function playSynthSound(type) {
+            initAudio();
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'zap') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                    osc.start(now);
+                    osc.stop(now + 0.45);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(280, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.3);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'pop') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.08);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                }
+            } catch (e) {
+                console.warn("Audio error:", e);
+            }
+        }
+
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+
+        const sentenceCard = document.getElementById("sentence-card");
+        const feedbackMsg = document.getElementById("feedback-msg");
+        const scaleRuleIndicator = document.getElementById("scale-rule-indicator");
+
+        const questionIndexEl = document.getElementById("question-index");
+        const playerScoreEl = document.getElementById("player-score");
+        const comboBadge = document.getElementById("combo-badge");
+        const comboCountEl = document.getElementById("combo-count");
+        
+        const finalPlayerScoreEl = document.getElementById("final-player-score");
+        const finalComboScoreEl = document.getElementById("final-combo-score");
+        const performanceFeedback = document.getElementById("performance-feedback");
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Game State Variables
+        let currentQuestionIdx = 0;
+        let playerScore = 0;
+        let comboMultiplier = 1;
+        let maxCombo = 1;
+        let activeQuestions = [];
+        let correctAnswer = "";
+        let roundActive = false;
+
+        // Animated Physics Entities
+        let crystals = [];
+        let particles = [];
+        let wandBeams = [];
+        let floatingTexts = [];
+        let draggedCrystal = null;
+        let touchTrail = [];
+
+        // Cauldron object state
+        let cauldron = {
+            x: 0,
+            y: 0,
+            radius: 45,
+            bubbleTimer: 0,
+            bubbles: []
+        };
+
+        const CATEGORIES = [
+            { id: "QUALITY", label: "QUALITY", sub: "What kind?", color: "#ec4899", darkColor: "#831843" },
+            { id: "QUANTITY", label: "QUANTITY", sub: "How much?", color: "#f59e0b", darkColor: "#78350f" },
+            { id: "NUMBER", label: "NUMBER", sub: "How many?", color: "#10b981", darkColor: "#064e3b" },
+            { id: "DEMONSTRATIVE", label: "DEMONSTRATIVE", sub: "Which one?", color: "#0ea5e9", darkColor: "#0c4a6e" }
+        ];
+
+        function addSparks(x, y, color, count = 25) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 2;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    radius: Math.random() * 4 + 2,
+                    color: color,
+                    alpha: 1.0,
+                    decay: Math.random() * 0.03 + 0.02
+                });
+            }
+        }
+
+        function addFloatingText(x, y, text, color) {
+            floatingTexts.push({
+                x: x,
+                y: y,
+                text: text,
+                color: color,
+                alpha: 1.0,
+                vy: -2
+            });
+        }
+
+        function prepareQuestions() {
+            activeQuestions = [...questionBank].sort(() => 0.5 - Math.random()).slice(0, 10);
+            currentQuestionIdx = 0;
+            playerScore = 0;
+            comboMultiplier = 1;
+            maxCombo = 1;
+
+            playerScoreEl.textContent = playerScore;
+            updateComboUI();
+            loadQuestion();
+        }
+
+        function updateComboUI() {
+            if (comboMultiplier > 1) {
+                comboBadge.classList.remove("hidden");
+                comboCountEl.textContent = `${comboMultiplier}x`;
+            } else {
+                comboBadge.classList.add("hidden");
+            }
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIdx >= activeQuestions.length) {
+                concludeGame();
+                return;
+            }
+
+            roundActive = true;
+            questionIndexEl.textContent = `${currentQuestionIdx + 1}/10`;
+            const q = activeQuestions[currentQuestionIdx];
+
+            scaleRuleIndicator.textContent = `CLUE: ${q.rule}`;
+
+            // Highlight target word in sentence card
+            const formattedSentence = q.sentence.replace(
+                `**${q.word}**`, 
+                `<span class='text-amber-300 font-black px-2 py-0.5 rounded bg-amber-950/90 border border-amber-500/50 underline decoration-wavy'>${q.word.toUpperCase()}</span>`
+            );
+            sentenceCard.innerHTML = formattedSentence;
+
+            correctAnswer = q.ans.toUpperCase();
+
+            spawnCrystals();
+
+            feedbackMsg.textContent = "🎯 Tap or drag the matching crystal into the cauldron!";
+            feedbackMsg.className = "absolute top-2 left-1/2 transform -translate-x-1/2 text-[9px] md:text-xs text-indigo-200 uppercase tracking-widest font-black bg-slate-900/90 px-3 py-1 rounded-full border border-indigo-500/30 text-center shadow-lg pointer-events-none transition-all";
+        }
+
+        function spawnCrystals() {
+            crystals = [];
+            draggedCrystal = null;
+
+            // Spawn 4 floating crystal items (1 of each type)
+            CATEGORIES.forEach((cat, idx) => {
+                const padding = 60;
+                const spawnW = canvas.width - padding * 2;
+                const spawnH = (canvas.height * 0.5) - padding;
+
+                const posX = padding + (spawnW / 3) * (idx % 3) + (Math.random() * 20 - 10);
+                const posY = padding + Math.floor(idx / 3) * 70 + (Math.random() * 20 - 10);
+
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 1.5 + 1.2;
+
+                crystals.push({
+                    id: cat.id,
+                    label: cat.label,
+                    sub: cat.sub,
+                    color: cat.color,
+                    darkColor: cat.darkColor,
+                    x: Math.max(padding, Math.min(canvas.width - padding, posX)),
+                    y: Math.max(padding, Math.min(canvas.height - 150, posY)),
+                    radius: 36,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    pulse: Math.random() * Math.PI,
+                    isDragged: false
+                });
+            });
+        }
+
+        function handleInteractionStart(clientX, clientY) {
+            if (!roundActive) return;
+            initAudio();
+
+            const rect = canvas.getBoundingClientRect();
+            const clickX = clientX - rect.left;
+            const clickY = clientY - rect.top;
+
+            // Check if user clicked/tapped directly on a floating crystal to drag or zap
+            for (let i = 0; i < crystals.length; i++) {
+                const c = crystals[i];
+                const dist = Math.hypot(clickX - c.x, clickY - c.y);
+                if (dist < c.radius + 10) {
+                    draggedCrystal = c;
+                    c.isDragged = true;
+                    playSynthSound('pop');
+                    addSparks(c.x, c.y, c.color, 10);
+                    return;
+                }
+            }
+
+            // Otherwise, fire a laser spell beam from cauldron/wand towards the tap
+            wandBeams.push({
+                startX: cauldron.x,
+                startY: cauldron.y,
+                targetX: clickX,
+                targetY: clickY,
+                alpha: 1.0,
+                color: '#6366f1'
+            });
+            playSynthSound('zap');
+
+            // Check if laser beam hits any crystal
+            for (let i = 0; i < crystals.length; i++) {
+                const c = crystals[i];
+                const dist = Math.hypot(clickX - c.x, clickY - c.y);
+                if (dist < c.radius + 15) {
+                    processCrystalSelection(c);
+                    break;
+                }
+            }
+        }
+
+        function handleInteractionMove(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = clientX - rect.left;
+            const mouseY = clientY - rect.top;
+
+            // Touch / Cursor sparkle trail
+            touchTrail.push({ x: mouseX, y: mouseY, alpha: 1.0, radius: 6 });
+            if (touchTrail.length > 12) touchTrail.shift();
+
+            if (draggedCrystal) {
+                draggedCrystal.x = mouseX;
+                draggedCrystal.y = mouseY;
+                draggedCrystal.vx = 0;
+                draggedCrystal.vy = 0;
+            }
+        }
+
+        function handleInteractionEnd() {
+            if (draggedCrystal) {
+                draggedCrystal.isDragged = false;
+                
+                // Check if dropped into cauldron
+                const distToCauldron = Math.hypot(draggedCrystal.x - cauldron.x, draggedCrystal.y - cauldron.y);
+                if (distToCauldron < cauldron.radius + 30) {
+                    processCrystalSelection(draggedCrystal);
+                } else {
+                    // Give bounce speed on release
+                    draggedCrystal.vx = (Math.random() - 0.5) * 3;
+                    draggedCrystal.vy = (Math.random() - 0.5) * 3;
+                }
+                draggedCrystal = null;
+            }
+        }
+
+        function processCrystalSelection(crystal) {
+            if (!roundActive) return;
+            roundActive = false;
+
+            const isCorrect = (crystal.id === correctAnswer);
+            const q = activeQuestions[currentQuestionIdx];
+
+            if (isCorrect) {
+                playSynthSound('correct');
+                addSparks(crystal.x, crystal.y, crystal.color, 45);
+                
+                const points = 100 * comboMultiplier;
+                playerScore += points;
+                comboMultiplier++;
+                if (comboMultiplier > maxCombo) maxCombo = comboMultiplier;
+
+                playerScoreEl.textContent = playerScore;
+                updateComboUI();
+
+                addFloatingText(crystal.x, crystal.y - 20, `+${points} ALCHEMY!`, '#10b981');
+
+                feedbackMsg.textContent = `✨ PERFECT ALCHEMY! ${q.word.toUpperCase()} IS AN ADJECTIVE OF ${q.ans}!`;
+                feedbackMsg.className = "absolute top-2 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-emerald-300 uppercase tracking-widest font-black bg-emerald-950/95 px-4 py-1.5 rounded-full border border-emerald-500/50 text-center shadow-lg animate-bounce";
+
+                sentenceCard.innerHTML = q.sentence.replace(
+                    `**${q.word}**`, 
+                    `<span class='text-emerald-400 font-black px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500'>${q.word.toUpperCase()} (${q.ans})</span>`
+                );
+
+                setTimeout(() => {
+                    currentQuestionIdx++;
+                    loadQuestion();
+                }, 1800);
+
+            } else {
+                playSynthSound('wrong');
+                addSparks(crystal.x, crystal.y, '#ef4444', 30);
+
+                comboMultiplier = 1;
+                updateComboUI();
+
+                addFloatingText(crystal.x, crystal.y - 20, `MISFIRE!`, '#f43f5e');
+
+                feedbackMsg.textContent = `💥 MISFIRE! ${q.word.toUpperCase()} IS AN ADJECTIVE OF ${q.ans}!`;
+                feedbackMsg.className = "absolute top-2 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-rose-300 uppercase tracking-widest font-black bg-rose-950/95 px-4 py-1.5 rounded-full border border-rose-500/50 text-center shadow-lg";
+
+                sentenceCard.innerHTML = q.sentence.replace(
+                    `**${q.word}**`, 
+                    `<span class='text-rose-400 font-black px-2 py-0.5 rounded bg-rose-950 border border-rose-500'>${q.word.toUpperCase()} (${q.ans})</span>`
+                );
+
+                setTimeout(() => {
+                    currentQuestionIdx++;
+                    loadQuestion();
+                }, 2200);
+            }
+        }
+
+        function updatePhysics() {
+            cauldron.x = canvas.width / 2;
+            cauldron.y = canvas.height - 55;
+
+            // Update floating crystals bouncy movement
+            crystals.forEach(c => {
+                if (!c.isDragged) {
+                    c.x += c.vx;
+                    c.y += c.vy;
+
+                    // Bounce off walls
+                    const pad = c.radius + 5;
+                    if (c.x < pad) { c.x = pad; c.vx *= -1; }
+                    if (c.x > canvas.width - pad) { c.x = canvas.width - pad; c.vx *= -1; }
+                    if (c.y < pad) { c.y = pad; c.vy *= -1; }
+                    if (c.y > canvas.height - 120) { c.y = canvas.height - 120; c.vy *= -1; }
+                }
+
+                c.pulse += 0.05;
+            });
+
+            // Cauldron boiling bubbles
+            cauldron.bubbleTimer++;
+            if (cauldron.bubbleTimer % 12 === 0) {
+                cauldron.bubbles.push({
+                    x: cauldron.x + (Math.random() - 0.5) * (cauldron.radius * 1.2),
+                    y: cauldron.y - 10,
+                    radius: Math.random() * 5 + 3,
+                    vy: -Math.random() * 1.5 - 0.8,
+                    alpha: 0.8
+                });
+            }
+
+            for (let i = cauldron.bubbles.length - 1; i >= 0; i--) {
+                const b = cauldron.bubbles[i];
+                b.y += b.vy;
+                b.alpha -= 0.02;
+                if (b.alpha <= 0) cauldron.bubbles.splice(i, 1);
+            }
+
+            // Update particle explosions
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+                if (p.alpha <= 0) particles.splice(i, 1);
+            }
+
+            // Update spell laser beams
+            for (let i = wandBeams.length - 1; i >= 0; i--) {
+                const beam = wandBeams[i];
+                beam.alpha -= 0.08;
+                if (beam.alpha <= 0) wandBeams.splice(i, 1);
+            }
+
+            // Update floating score indicators
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i];
+                ft.y += ft.vy;
+                ft.alpha -= 0.025;
+                if (ft.alpha <= 0) floatingTexts.splice(i, 1);
+            }
+        }
+
+        function renderCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Animated Starfield Background Grid
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.08)';
+            ctx.lineWidth = 1;
+            const gridStep = 40;
+            for (let x = 0; x < canvas.width; x += gridStep) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridStep) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Render Cauldron at center bottom
+            ctx.save();
+            // Cauldron glow aura
+            const cauldronGlow = ctx.createRadialGradient(cauldron.x, cauldron.y, 5, cauldron.x, cauldron.y, 70);
+            cauldronGlow.addColorStop(0, 'rgba(168, 85, 247, 0.4)');
+            cauldronGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = cauldronGlow;
+            ctx.beginPath();
+            ctx.arc(cauldron.x, cauldron.y, 70, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cauldron body
+            ctx.fillStyle = '#1e1b4b';
+            ctx.strokeStyle = '#818cf8';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(cauldron.x, cauldron.y + 10, cauldron.radius, 0, Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            // Cauldron Rim
+            ctx.fillStyle = '#312e81';
+            ctx.beginPath();
+            ctx.ellipse(cauldron.x, cauldron.y - 5, cauldron.radius + 5, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Liquid inside cauldron
+            ctx.fillStyle = '#c084fc';
+            ctx.beginPath();
+            ctx.ellipse(cauldron.x, cauldron.y - 5, cauldron.radius - 2, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cauldron Bubbles
+            cauldron.bubbles.forEach(b => {
+                ctx.fillStyle = `rgba(244, 211, 255, ${b.alpha})`;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.restore();
+
+            // Draw Laser Spell Beams
+            wandBeams.forEach(b => {
+                ctx.save();
+                ctx.globalAlpha = b.alpha;
+                ctx.strokeStyle = '#a855f7';
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(b.startX, b.startY);
+                ctx.lineTo(b.targetX, b.targetY);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(b.startX, b.startY);
+                ctx.lineTo(b.targetX, b.targetY);
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            // Draw Floating Crystal Orbs
+            crystals.forEach(c => {
+                ctx.save();
+                ctx.translate(c.x, c.y);
+
+                const scale = 1 + Math.sin(c.pulse) * 0.05 + (c.isDragged ? 0.15 : 0);
+                ctx.scale(scale, scale);
+
+                // Outer Crystal Glow
+                const glow = ctx.createRadialGradient(0, 0, 5, 0, 0, c.radius + 10);
+                glow.addColorStop(0, c.color);
+                glow.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = glow;
+                ctx.beginPath();
+                ctx.arc(0, 0, c.radius + 10, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Main Orb Body
+                ctx.fillStyle = c.darkColor;
+                ctx.strokeStyle = c.color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, c.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Inner Diamond Shape
+                ctx.fillStyle = c.color;
+                ctx.beginPath();
+                ctx.moveTo(0, -18);
+                ctx.lineTo(12, 0);
+                ctx.lineTo(0, 18);
+                ctx.lineTo(-12, 0);
+                ctx.closePath();
+                ctx.fill();
+
+                // Label Text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 11px "Fredoka"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(c.label, 0, 2);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.font = '600 8px "Outfit"';
+                ctx.fillText(c.sub, 0, 12);
+
+                ctx.restore();
+            });
+
+            // Draw Spark Particles
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // Draw Touch Sparkle Trail
+            touchTrail.forEach((t, i) => {
+                ctx.save();
+                ctx.globalAlpha = (i / touchTrail.length) * 0.6;
+                ctx.fillStyle = '#a855f7';
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.radius * (i / touchTrail.length), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // Draw Floating Score / Text Popups
+            floatingTexts.forEach(ft => {
+                ctx.save();
+                ctx.globalAlpha = ft.alpha;
+                ctx.fillStyle = ft.color;
+                ctx.font = 'black 14px "Fredoka"';
+                ctx.textAlign = 'center';
+                ctx.fillText(ft.text, ft.x, ft.y);
+                ctx.restore();
+            });
+        }
+
+        canvas.addEventListener('mousedown', (e) => handleInteractionStart(e.clientX, e.clientY));
+        canvas.addEventListener('mousemove', (e) => handleInteractionMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', handleInteractionEnd);
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                handleInteractionMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', handleInteractionEnd);
+
+        function concludeGame() {
+            gameoverScreen.classList.remove("hidden");
+            playSynthSound('correct');
+
+            finalPlayerScoreEl.textContent = playerScore;
+            finalComboScoreEl.textContent = `${maxCombo}x`;
+
+            let msg = "";
+            if (playerScore >= 800) {
+                msg = "🌟 Supreme Alchemist! You mastered Quality, Quantity, Number, and Demonstrative adjectives!";
+                document.getElementById("victory-title").textContent = "GRAND ALCHEMIST!";
+            } else if (playerScore >= 400) {
+                msg = "🤝 Great progress! Keep practicing to get higher streak combos!";
+                document.getElementById("victory-title").textContent = "POTION CRAFTSMAN";
+            } else {
+                msg = "⚠️ Remember: Quality = What kind? Quantity = How much? Number = How many? Demonstrative = Which one?";
+                document.getElementById("victory-title").textContent = "SPELL RE-STUDY";
+            }
+            performanceFeedback.textContent = msg;
+        }
+
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            prepareQuestions();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            prepareQuestions();
+        });
+
+        // 5-second initial intro transition
+        setTimeout(() => {
+            logoScreen.style.opacity = "0";
+            setTimeout(() => {
+                logoScreen.classList.add("hidden");
+                startScreen.classList.remove("hidden");
+            }, 1000);
+        }, 5000);
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth || 360;
+            canvas.height = container.clientHeight || 300;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function gameLoop() {
+            updatePhysics();
+            renderCanvas();
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = function () {
+            resizeCanvas();
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
