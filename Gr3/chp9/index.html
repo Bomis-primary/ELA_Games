@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Adjective Comparison Quest</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for playful and legibly structured educational typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0b0f19;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            overflow: hidden;
+        }
+        .playful-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-1 text-slate-100">
+
+    <!-- Main Viewport Container styled for clean mobile and desktop layouts without vertical scrolling -->
+    <div class="relative w-full max-w-md md:max-w-4xl bg-slate-950 rounded-2xl border-2 md:border-4 border-indigo-500 shadow-2xl shadow-indigo-500/10 overflow-hidden flex flex-col h-[98vh] md:h-[90vh]">
+
+        <!-- Pure White Splash Screen (Exactly 5 seconds duration aligned with project assets) -->
+        <div id="logo-screen" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-50 transition-opacity duration-1000">
+            <img id="intro-logo" src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-[220px] w-4/5 h-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <div id="logo-fallback" class="hidden text-center">
+                <div class="text-4xl font-black tracking-wider text-slate-900 uppercase font-sans">INNOVINE</div>
+                <div class="text-xs text-indigo-600 font-semibold uppercase tracking-widest mt-1 font-sans">Learning Games</div>
+            </div>
+        </div>
+
+        <!-- Start Screen / Rules Overlay -->
+        <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-3 md:p-6 text-center z-40 hidden overflow-y-auto">
+            <div class="max-w-md bg-slate-900/90 p-4 md:p-6 rounded-xl border border-indigo-500/40 backdrop-blur-md shadow-2xl my-auto">
+                <div class="text-5xl mb-2 animate-bounce">📈✨</div>
+                <h2 class="text-xl md:text-2xl font-extrabold text-indigo-400 mb-0.5 uppercase playful-font">Adjective Scale Quest</h2>
+                <h3 class="text-xs text-slate-300 font-semibold mb-3">Degrees of Comparison (Grade 3)</h3>
+                
+                <div class="text-[11px] md:text-xs text-slate-300 text-left space-y-2 bg-slate-950/70 p-3 rounded-lg border border-slate-800 mb-4 max-h-[200px] overflow-y-auto">
+                    <p>🎯 <strong>Objective:</strong> Read each sentence carefully and identify the correct degree of comparison!</p>
+                    <p class="font-bold text-indigo-400">📊 Three Degrees of Adjectives:</p>
+                    <ul class="list-disc pl-4 space-y-1 text-[10px] md:text-xs text-slate-300">
+                        <li><strong>Positive Degree:</strong> Describes 1 noun without comparing (e.g., <em>fast, bright, happy</em>).</li>
+                        <li><strong>Comparative Degree:</strong> Compares 2 nouns (adds <em>-er</em>, <em>-ier</em>, or <em>more</em>) (e.g., <em>faster, happier, more helpful</em>).</li>
+                        <li><strong>Superlative Degree:</strong> Compares 3+ nouns (adds <em>-est</em>, <em>-iest</em>, or <em>most</em>) (e.g., <em>fastest, happiest, most helpful</em>).</li>
+                    </ul>
+                    <p class="text-amber-400 font-semibold">🎮 Controls: Tap or click the launching pod on the interactive arena that correctly completes the sentence!</p>
+                </div>
+
+                <button id="start-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 active:from-indigo-700 text-white font-extrabold py-2.5 px-4 rounded-lg shadow-lg transform transition active:scale-95 text-xs md:text-sm uppercase tracking-wide playful-font">
+                    Enter Scale Arena
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over / Victory Screen -->
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-40 hidden">
+            <div class="max-w-sm bg-slate-900/90 p-6 rounded-xl border border-indigo-500/40 backdrop-blur-md shadow-2xl">
+                <div class="text-5xl mb-2">🏆🌟</div>
+                <h2 id="victory-title" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300 mb-1 playful-font">MISSION COMPLETED!</h2>
+                <p id="victory-desc" class="text-slate-400 text-xs mb-4">You mastered adjective comparison scale!</p>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Correct Pods</span>
+                        <span id="final-player-score" class="text-xl font-black text-emerald-400">0</span>
+                    </div>
+                    <div class="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">Missed Pods</span>
+                        <span id="final-rival-score" class="text-xl font-black text-rose-400">0</span>
+                    </div>
+                </div>
+
+                <p id="performance-feedback" class="text-xs text-slate-200 italic mb-4 px-1 font-medium"></p>
+
+                <button id="restart-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-extrabold py-3 px-4 rounded-lg shadow-lg transform transition active:scale-95 text-sm uppercase tracking-wide playful-font">
+                    Play Again
+                </button>
+            </div>
+        </div>
+
+        <!-- Header Panel -->
+        <header class="bg-slate-900/95 px-3 py-2 border-b border-indigo-500/30 flex justify-between items-center z-10">
+            <div class="flex items-center gap-1.5">
+                <span class="text-lg">📊</span>
+                <h1 class="text-xs md:text-sm font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-purple-400 playful-font">
+                    DEGREE SCALE QUEST
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-1.5 text-[10px] md:text-xs font-semibold">
+                <div class="bg-slate-950/80 px-2 py-0.5 rounded-full border border-slate-800 font-mono">
+                    Round: <span id="question-index" class="text-indigo-400 font-bold">1/10</span>
+                </div>
+                <div class="bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30 font-mono">
+                    HITS: <span id="player-score" class="text-emerald-400 font-bold">0</span>
+                </div>
+                <div class="bg-rose-950/60 px-2 py-0.5 rounded-full border border-rose-500/30 font-mono">
+                    MISSES: <span id="rival-score" class="text-rose-400 font-bold">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sentence Display & Target Rule Banner -->
+        <section class="bg-slate-900 px-3 py-2 border-b border-slate-850 flex flex-col items-center justify-center text-center z-10 gap-1">
+            <p id="target-degree-label" class="text-[9px] md:text-xs uppercase tracking-widest text-indigo-400 font-black">
+                TARGET DEGREE: COMPARATIVE (-ER / MORE)
+            </p>
+            
+            <div class="w-full max-w-xl flex flex-col gap-1">
+                <div id="sentence-card" class="text-xs md:text-sm font-bold text-white leading-snug px-3 py-2 bg-slate-950/80 rounded-lg border border-indigo-500/10 shadow-inner playful-font">
+                    Preparing adjective scaling canvas...
+                </div>
+
+                <div class="flex justify-center gap-2 text-[10px]">
+                    <div class="bg-slate-950 px-2 py-1 rounded border border-slate-800">
+                        <span class="text-slate-400 mr-1 uppercase font-semibold">Base Adjective:</span>
+                        <span id="base-adj-indicator" class="text-indigo-400 font-black uppercase tracking-wide">TALL</span>
+                    </div>
+                    <div class="bg-slate-950 px-2 py-1 rounded border border-slate-800 font-mono">
+                        <span class="text-slate-400 mr-1 uppercase font-semibold">Rule:</span>
+                        <span id="scale-rule-indicator" class="text-sky-400 font-black uppercase tracking-wide">COMPARING 2 THINGS</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Arena Canvas -->
+        <main class="relative flex-grow bg-slate-950/40 overflow-hidden flex flex-col p-1">
+            <div class="flex-grow relative bg-slate-950 border border-slate-800/60 rounded-xl overflow-hidden min-h-[180px]">
+                <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+                
+                <!-- Feedback overlay message -->
+                <div id="feedback-msg" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[9px] md:text-xs text-indigo-300 uppercase tracking-widest font-black bg-slate-900/90 px-3 py-1 rounded-full border border-indigo-500/20 text-center animate-pulse shadow-md">
+                    Tap the launcher pod with the correct adjective form!
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-slate-900 border-t border-slate-800 px-3 py-1.5 flex justify-between items-center gap-1 z-10 text-[8px] text-indigo-500 uppercase tracking-widest font-bold">
+            <div>📊 Degrees of Comparison &bull; Grade 3 ELA</div>
+            <div>Innovine Learning Games</div>
+        </footer>
+    </div>
+
+    <script>
+        // Grade 3 Degrees of Comparison Question Bank
+        const questionBank = [
+            // Regular -er / -est
+            { sentence: "A giraffe is ________ than a horse.", targetDegree: "COMPARATIVE DEGREE", baseAdj: "tall", rule: "COMPARING 2 NOUNS (-ER)", ans: "taller", opts: ["tall", "taller", "tallest"] },
+            { sentence: "Mount Everest is the ________ mountain in the entire world.", targetDegree: "SUPERLATIVE DEGREE", baseAdj: "high", rule: "COMPARING 3+ NOUNS (-EST)", ans: "highest", opts: ["high", "higher", "highest"] },
+            { sentence: "A cheetah is ________ than a garden snail.", targetDegree: "COMPARATIVE DEGREE", baseAdj: "fast", rule: "COMPARING 2 NOUNS (-ER)", ans: "faster", opts: ["fast", "faster", "fastest"] },
+            { sentence: "Yesterday was cold, but today is even ________.", targetDegree: "COMPARATIVE DEGREE", baseAdj: "cold", rule: "COMPARING 2 DAYS (-ER)", ans: "colder", opts: ["cold", "colder", "coldest"] },
+
+            // Consonant Doubling & -y to -ier / -iest
+            { sentence: "The sun is ________ than the bright glowing moon.", targetDegree: "COMPARATIVE DEGREE", baseAdj: "hot", rule: "DOUBLE CONSONANT + ER", ans: "hotter", opts: ["hot", "hotter", "hottest"] },
+            { sentence: "My cat is the ________ pet in our neighborhood.", targetDegree: "SUPERLATIVE DEGREE", baseAdj: "happy", rule: "Y TO I + EST", ans: "happiest", opts: ["happy", "happier", "happiest"] },
+            { sentence: "An elephant is ________ than a tiny mouse.", targetDegree: "COMPARATIVE DEGREE", baseAdj: "big", rule: "DOUBLE CONSONANT + ER", ans: "bigger", opts: ["big", "bigger", "biggest"] },
+            { sentence: "This math puzzle was the ________ one on the worksheet.", targetDegree: "SUPERLATIVE DEGREE", baseAdj: "easy", rule: "Y TO I + EST", ans: "easiest", opts: ["easy", "easier", "easiest"] },
+
+            // More / Most
+            { sentence: "A butterfly is ________ than a caterpillar.", targetDegree: "COMPARATIVE DEGREE", baseAdj: "beautiful", rule: "USE 'MORE' BEFORE ADJ", ans: "more beautiful", opts: ["beautiful", "more beautiful", "most beautiful"] },
+            { sentence: "This is the ________ storybook in the school library.", targetDegree: "SUPERLATIVE DEGREE", baseAdj: "interesting", rule: "USE 'MOST' BEFORE ADJ", ans: "most interesting", opts: ["interesting", "more interesting", "most interesting"] },
+
+            // Irregular Forms (Good / Better / Best)
+            { sentence: "Fresh fruit tastes ________ than stale vegetables.", targetDegree: "COMPARATIVE DEGREE", baseAdj: "good", rule: "IRREGULAR FORM (BETTER)", ans: "better", opts: ["good", "better", "best"] },
+            { sentence: "Sam earned the ________ grade in the whole class!", targetDegree: "SUPERLATIVE DEGREE", baseAdj: "good", rule: "IRREGULAR FORM (BEST)", ans: "best", opts: ["good", "better", "best"] },
+
+            // Positive Degree focus
+            { sentence: "The big yellow bus is very ________.", targetDegree: "POSITIVE DEGREE", baseAdj: "bright", rule: "DESCRIBING 1 NOUN (BASE)", ans: "bright", opts: ["bright", "brighter", "brightest"] },
+            { sentence: "My little sister has a ________ teddy bear.", targetDegree: "POSITIVE DEGREE", baseAdj: "soft", rule: "DESCRIBING 1 NOUN (BASE)", ans: "soft", opts: ["soft", "softer", "softest"] }
+        ];
+
+        // Audio Assets integrated with assets directory
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3')
+        };
+        let audioCtx = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            for (const key in audioAssets) {
+                audioAssets[key].load();
+            }
+            audioInitialized = true;
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (type === 'correct') {
+                audioAssets.correct.play().catch(() => playSynthFallback('correct'));
+            } else if (type === 'wrong') {
+                audioAssets.wrong.play().catch(() => playSynthFallback('wrong'));
+            }
+        }
+
+        function playSynthFallback(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(120, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                }
+            } catch (e) {
+                console.warn("Audio fallback execution note:", e);
+            }
+        }
+
+        // DOM elements
+        const logoScreen = document.getElementById("logo-screen");
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const gameoverScreen = document.getElementById("gameover-screen");
+        const restartBtn = document.getElementById("restart-btn");
+
+        const targetDegreeLabel = document.getElementById("target-degree-label");
+        const sentenceCard = document.getElementById("sentence-card");
+        const feedbackMsg = document.getElementById("feedback-msg");
+        
+        const baseAdjIndicator = document.getElementById("base-adj-indicator");
+        const scaleRuleIndicator = document.getElementById("scale-rule-indicator");
+
+        const questionIndexEl = document.getElementById("question-index");
+        const playerScoreEl = document.getElementById("player-score");
+        const rivalScoreEl = document.getElementById("rival-score");
+        const finalPlayerScoreEl = document.getElementById("final-player-score");
+        const finalRivalScoreEl = document.getElementById("final-rival-score");
+        const performanceFeedback = document.getElementById("performance-feedback");
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Game state variables
+        let currentQuestionIdx = 0;
+        let playerScore = 0;
+        let rivalScore = 0;
+        let activeQuestions = [];
+        
+        let correctAnswer = "";
+        let roundActive = false;
+
+        // Visual interactive pods array
+        let pods = [];
+        let particles = [];
+
+        function createParticles(x, y, color, isCorrect) {
+            const count = isCorrect ? 30 : 15;
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * (isCorrect ? 7 : 4),
+                    vy: (Math.random() - 0.5) * (isCorrect ? 7 : 4) - 2,
+                    r: Math.random() * 4 + 2,
+                    color: color,
+                    alpha: 1.0,
+                    life: Math.random() * 30 + 20
+                });
+            }
+        }
+
+        function prepareQuestions() {
+            activeQuestions = [...questionBank].sort(() => 0.5 - Math.random()).slice(0, 10);
+            currentQuestionIdx = 0;
+            playerScore = 0;
+            rivalScore = 0;
+
+            playerScoreEl.textContent = playerScore;
+            rivalScoreEl.textContent = rivalScore;
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIdx >= activeQuestions.length) {
+                concludeGame();
+                return;
+            }
+
+            roundActive = true;
+            questionIndexEl.textContent = `${currentQuestionIdx + 1}/10`;
+            const q = activeQuestions[currentQuestionIdx];
+
+            targetDegreeLabel.textContent = `TARGET: ${q.targetDegree}`;
+            baseAdjIndicator.textContent = q.baseAdj;
+            scaleRuleIndicator.textContent = q.rule;
+
+            sentenceCard.innerHTML = q.sentence.replace("________", "<span class='text-indigo-400 font-extrabold underline decoration-wavy px-1 decoration-1'>________</span>");
+
+            correctAnswer = q.ans.toLowerCase();
+
+            generateInteractivePods(q.opts);
+
+            feedbackMsg.textContent = "Tap the launcher pod with the correct adjective form!";
+            feedbackMsg.className = "absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[9px] md:text-xs text-indigo-300 uppercase tracking-widest font-black bg-slate-900/90 px-3 py-1 rounded-full border border-indigo-500/20 text-center animate-pulse shadow-md";
+        }
+
+        function generateInteractivePods(options) {
+            pods = [];
+            const labels = ["POSITIVE", "COMPARATIVE", "SUPERLATIVE"];
+            const podWidth = canvas.width / 3.4;
+            const podHeight = 70;
+            const startY = canvas.height - podHeight - 15;
+
+            options.forEach((opt, idx) => {
+                const posX = (canvas.width / 3) * idx + (canvas.width / 6);
+                pods.push({
+                    x: posX,
+                    y: startY,
+                    w: podWidth,
+                    h: podHeight,
+                    degreeLabel: labels[idx],
+                    text: opt,
+                    scaleAnim: 1.0,
+                    color: idx === 0 ? '#38bdf8' : (idx === 1 ? '#818cf8' : '#c084fc'),
+                    hovered: false
+                });
+            });
+        }
+
+        function handlePodSelect(podIdx) {
+            if (!roundActive) return;
+            roundActive = false;
+
+            const selectedPod = pods[podIdx];
+            const isCorrect = (selectedPod.text.toLowerCase() === correctAnswer);
+            const q = activeQuestions[currentQuestionIdx];
+
+            if (isCorrect) {
+                playSound('correct');
+                createParticles(selectedPod.x, selectedPod.y, '#10b981', true);
+                
+                playerScore++;
+                playerScoreEl.textContent = playerScore;
+
+                feedbackMsg.textContent = "EXCELLENT! PERFECT DEGREE MATCH! 🌟";
+                feedbackMsg.className = "absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-emerald-400 uppercase tracking-widest font-black bg-slate-950/95 px-4 py-1 rounded-full border border-emerald-500/30 text-center shadow-lg";
+
+                sentenceCard.innerHTML = q.sentence.replace("________", `<span class='text-emerald-400 font-black px-1 underline decoration-1'>${q.ans.toUpperCase()}</span>`);
+
+                setTimeout(() => {
+                    currentQuestionIdx++;
+                    loadQuestion();
+                }, 2000);
+
+            } else {
+                playSound('wrong');
+                createParticles(selectedPod.x, selectedPod.y, '#ef4444', false);
+
+                rivalScore++;
+                rivalScoreEl.textContent = rivalScore;
+
+                feedbackMsg.textContent = "INCORRECT DEGREE! WATCH THE SCALE! ⚠️";
+                feedbackMsg.className = "absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-rose-400 uppercase tracking-widest font-black bg-slate-950/95 px-4 py-1 rounded-full border border-rose-500/30 text-center shadow-lg";
+
+                sentenceCard.innerHTML = q.sentence.replace("________", `<span class='text-rose-400 font-black px-1 underline decoration-1 decoration-rose-500'>${q.ans.toUpperCase()}</span>`);
+
+                // Find and highlight correct pod location
+                const correctPodIdx = pods.findIndex(p => p.text.toLowerCase() === correctAnswer);
+                if (correctPodIdx !== -1) {
+                    createParticles(pods[correctPodIdx].x, pods[correctPodIdx].y, '#10b981', true);
+                }
+
+                setTimeout(() => {
+                    currentQuestionIdx++;
+                    loadQuestion();
+                }, 2400);
+            }
+        }
+
+        function drawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Background subtle grid
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.05)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 30) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+
+            // Draw comparison scale pedestals and pods
+            pods.forEach((p, idx) => {
+                const pedestalHeight = 20 + (idx * 16); // Height increases visually for positive -> comparative -> superlative
+                const baseLineY = canvas.height - 10;
+
+                // Draw pedestal support beam
+                ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = 2;
+                ctx.fillRect(p.x - p.w / 2 + 10, baseLineY - pedestalHeight, p.w - 20, pedestalHeight);
+                ctx.strokeRect(p.x - p.w / 2 + 10, baseLineY - pedestalHeight, p.w - 20, pedestalHeight);
+
+                // Draw pod body
+                const podY = baseLineY - pedestalHeight - p.h / 2;
+                p.y = podY; // Sync Y position
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+
+                // Pod glow background
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = 3;
+
+                ctx.beginPath();
+                ctx.roundRect(-p.w / 2, -p.h / 2, p.w, p.h, 12);
+                ctx.fill();
+                ctx.stroke();
+
+                // Degree label tag
+                ctx.fillStyle = p.color;
+                ctx.font = 'bold 9px "Outfit"';
+                ctx.textAlign = 'center';
+                ctx.fillText(p.degreeLabel, 0, -p.h / 2 + 14);
+
+                // Adjective option text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 13px "Fredoka"';
+                ctx.fillText(p.text.toUpperCase(), 0, 10);
+
+                ctx.restore();
+            });
+
+            // Draw dynamic particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const pt = particles[i];
+                pt.x += pt.vx;
+                pt.y += pt.vy;
+                pt.alpha -= 0.03;
+                pt.life--;
+
+                if (pt.alpha <= 0 || pt.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = pt.alpha;
+                ctx.fillStyle = pt.color;
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function handleInput(clientX, clientY) {
+            if (!roundActive) return;
+            const rect = canvas.getBoundingClientRect();
+            const clickX = clientX - rect.left;
+            const clickY = clientY - rect.top;
+
+            for (let i = 0; i < pods.length; i++) {
+                const p = pods[i];
+                if (clickX >= p.x - p.w / 2 && clickX <= p.x + p.w / 2 &&
+                    clickY >= p.y - p.h / 2 && clickY <= p.y + p.h / 2 + 20) {
+                    handlePodSelect(i);
+                    break;
+                }
+            }
+        }
+
+        canvas.addEventListener('click', (e) => {
+            handleInput(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                handleInput(touch.clientX, touch.clientY);
+            }
+        }, { passive: true });
+
+        function concludeGame() {
+            gameoverScreen.classList.remove("hidden");
+            playSound('correct');
+
+            finalPlayerScoreEl.textContent = playerScore;
+            finalRivalScoreEl.textContent = rivalScore;
+
+            let msg = "";
+            if (playerScore > rivalScore) {
+                msg = "🌟 Degree Master! You perfectly identified Positive, Comparative, and Superlative adjectives!";
+                document.getElementById("victory-title").textContent = "SCALE CHAMPION!";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300 mb-1 playful-font";
+            } else if (playerScore === rivalScore) {
+                msg = "🤝 Great effort! Review the rules for '-er/-est' and 'more/most' to boost your score!";
+                document.getElementById("victory-title").textContent = "KNOWLEDGE BALANCED";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-amber-300 mb-1 playful-font";
+            } else {
+                msg = "⚠️ Practice again! Remember: Comparative compares 2 things (-er/more), Superlative compares 3+ (-est/most).";
+                document.getElementById("victory-title").textContent = "SCALE RE-ALIGNMENT";
+                document.getElementById("victory-title").className = "text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-purple-400 mb-1 playful-font";
+            }
+            performanceFeedback.textContent = msg;
+        }
+
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.add("hidden");
+            prepareQuestions();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameoverScreen.classList.add("hidden");
+            prepareQuestions();
+        });
+
+        // Exact 5-second splash screen sequence matching project assets
+        setTimeout(() => {
+            logoScreen.style.opacity = "0";
+            setTimeout(() => {
+                logoScreen.classList.add("hidden");
+                startScreen.classList.remove("hidden");
+            }, 1000);
+        }, 5000);
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth || 320;
+            canvas.height = container.clientHeight || 200;
+            if (roundActive && activeQuestions.length > 0) {
+                generateInteractivePods(activeQuestions[currentQuestionIdx].opts);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+        function gameLoop() {
+            drawCanvas();
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = function () {
+            resizeCanvas();
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
