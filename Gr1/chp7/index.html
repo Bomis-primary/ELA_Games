@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pronoun Power Quest - Grammar Game</title>
+    <title>Pronoun Power Quest - ELA Grammar Game</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Canvas Confetti CDN for victory celebration -->
+    <!-- Canvas Confetti CDN for celebration -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <!-- Google Fonts for vibrant kid-friendly typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +20,16 @@
             font-family: 'Fredoka', 'Nunito', cursive, sans-serif;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        /* Mobile Viewport Optimization */
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
         }
 
         /* Theme Background Styling */
@@ -36,37 +46,32 @@
             background: linear-gradient(180deg, #f97316 0%, #fdba74 50%, #ea580c 100%);
         }
 
-        /* Bounce & Floating Animations */
+        /* Splash Screen Fade Effect */
+        #splash-screen {
+            transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+        }
+        .splash-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Floating & Pulse Animations */
         @keyframes floatSlow {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(2deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
         }
         .animate-float {
             animation: floatSlow 3s ease-in-out infinite;
         }
 
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); }
-            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.9); }
-        }
-        .pulse-glow {
-            animation: pulseGlow 2s infinite;
-        }
-
         @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            80% { transform: scale(1.08); opacity: 1; }
-            100% { transform: scale(1); }
+            0% { transform: scale(0.6); opacity: 0; }
+            80% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
         }
         .pop-in {
             animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        /* Card Draggable & Drag-over styles */
-        .drag-over {
-            transform: scale(1.05);
-            border-color: #f59e0b !important;
-            background-color: rgba(254, 243, 199, 0.9) !important;
         }
 
         /* Floating Bubble animation for Arcade Mode */
@@ -77,70 +82,95 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: inset -5px -5px 12px rgba(0,0,0,0.15), inset 5px 5px 12px rgba(255,255,255,0.8), 0 8px 15px rgba(0,0,0,0.15);
+            box-shadow: inset -4px -4px 10px rgba(0,0,0,0.15), inset 4px 4px 10px rgba(255,255,255,0.8), 0 6px 12px rgba(0,0,0,0.15);
             transition: transform 0.1s;
         }
         .bubble-item:active {
             transform: scale(0.9);
         }
 
-        /* Drag & Drop Visual Styles */
+        /* Touch Dragging Target Styles */
         .drop-target-active {
             border-color: #3b82f6 !important;
             background-color: #dbeafe !important;
             transform: scale(1.04);
         }
 
-        /* Custom scrollbar for modern feel */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
+        /* Touch Device Responsive Adjustments */
+        @media (max-width: 640px) {
+            .btn-touch {
+                min-height: 48px;
+            }
         }
     </style>
 </head>
-<body class="theme-beach min-h-screen text-slate-800 transition-colors duration-700 flex flex-col justify-between overflow-x-hidden">
+<body class="theme-beach min-h-screen text-slate-800 transition-colors duration-700 flex flex-col justify-between">
+
+    <!-- SPLASH SCREEN: Innovine Logo for 5 seconds -->
+    <div id="splash-screen" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-6 text-center shadow-2xl">
+        <div class="max-w-md w-full flex flex-col items-center space-y-6 pop-in">
+            <!-- Innovine Logo Image with fallback -->
+            <div class="relative w-64 h-32 sm:w-80 sm:h-40 flex items-center justify-center p-4">
+                <img src="assets/innovine-logo.png" 
+                     alt="Innovine Logo" 
+                     class="max-w-full max-h-full object-contain filter drop-shadow-md"
+                     onerror="this.onerror=null; this.classList.add('hidden'); document.getElementById('logo-fallback').classList.remove('hidden');" />
+                
+                <!-- Fallback branding if logo image fails on low connectivity -->
+                <div id="logo-fallback" class="hidden text-center">
+                    <span class="text-4xl font-black tracking-wider text-indigo-700 block">INNOVINE</span>
+                    <span class="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1 block">Learning Games</span>
+                </div>
+            </div>
+
+            <!-- Loader Progress Bar -->
+            <div class="w-64 bg-slate-100 rounded-full h-3 border border-slate-200 overflow-hidden shadow-inner">
+                <div id="splash-progress" class="bg-gradient-to-r from-indigo-500 to-amber-400 h-full w-0 transition-all duration-100 ease-linear rounded-full"></div>
+            </div>
+
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Loading Grammar Quest...</p>
+
+            <!-- Skip Intro Button for Low Connectivity / Quick Access -->
+            <button onclick="hideSplashScreen()" class="text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-4 py-2 rounded-xl transition active:scale-95">
+                Skip Intro <i class="fa-solid fa-forward ml-1"></i>
+            </button>
+        </div>
+    </div>
 
     <!-- Top Navigation Header -->
-    <header class="w-full bg-white/80 backdrop-blur-md border-b-4 border-yellow-400 p-3 px-4 sm:px-8 shadow-md sticky top-0 z-40">
+    <header class="w-full bg-white/85 backdrop-blur-md border-b-4 border-yellow-400 p-2.5 px-4 sm:px-8 shadow-md sticky top-0 z-40">
         <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
             
             <!-- Game Title & Avatar -->
-            <div class="flex items-center gap-3">
-                <div id="header-hero-avatar" class="w-12 h-12 rounded-full bg-yellow-300 border-2 border-yellow-500 flex items-center justify-center text-2xl shadow-inner cursor-pointer hover:scale-105 transition" onclick="openHeroModal()" title="Change Character">
+            <div class="flex items-center gap-2.5">
+                <div id="header-hero-avatar" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-yellow-300 border-2 border-yellow-500 flex items-center justify-center text-2xl shadow-inner cursor-pointer hover:scale-105 transition" onclick="openHeroModal()" title="Change Character">
                     👧⚡
                 </div>
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-black tracking-wide text-indigo-900 leading-tight flex items-center gap-2">
+                    <h1 class="text-lg sm:text-2xl font-black tracking-wide text-indigo-900 leading-tight flex items-center gap-1.5">
                         <span>Pronoun Power</span>
-                        <span class="bg-yellow-400 text-indigo-950 text-xs px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Grammar Quest</span>
+                        <span class="bg-yellow-400 text-indigo-950 text-[10px] sm:text-xs px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Quest</span>
                     </h1>
-                    <p class="text-xs text-slate-600 font-semibold hidden sm:block">Master Singular & Plural Personal Pronouns!</p>
+                    <p class="text-[11px] sm:text-xs text-slate-600 font-semibold hidden sm:block">Master Personal Pronouns</p>
                 </div>
             </div>
 
             <!-- Stats Bar -->
-            <div class="flex items-center gap-3 sm:gap-6">
+            <div class="flex items-center gap-2 sm:gap-5">
                 <!-- Score Display -->
-                <div class="flex items-center gap-1.5 bg-indigo-50 border-2 border-indigo-200 px-3 py-1 rounded-2xl shadow-sm">
-                    <i class="fa-solid fa-trophy text-amber-500 text-lg"></i>
-                    <span id="score-text" class="font-extrabold text-indigo-900 text-lg sm:text-xl">0</span>
+                <div class="flex items-center gap-1 bg-indigo-50 border-2 border-indigo-200 px-2.5 py-1 rounded-2xl shadow-sm">
+                    <i class="fa-solid fa-trophy text-amber-500 text-base sm:text-lg"></i>
+                    <span id="score-text" class="font-extrabold text-indigo-900 text-base sm:text-xl">0</span>
                 </div>
 
                 <!-- Stars Display -->
-                <div class="flex items-center gap-1.5 bg-amber-50 border-2 border-amber-200 px-3 py-1 rounded-2xl shadow-sm">
-                    <i class="fa-solid fa-star text-yellow-500 text-lg animate-pulse"></i>
-                    <span id="stars-text" class="font-extrabold text-amber-900 text-lg sm:text-xl">0</span>
+                <div class="flex items-center gap-1 bg-amber-50 border-2 border-amber-200 px-2.5 py-1 rounded-2xl shadow-sm">
+                    <i class="fa-solid fa-star text-yellow-500 text-base sm:text-lg"></i>
+                    <span id="stars-text" class="font-extrabold text-amber-900 text-base sm:text-xl">0</span>
                 </div>
 
                 <!-- Audio Toggle Button -->
-                <button id="audio-toggle-btn" onclick="toggleAudio()" class="w-10 h-10 rounded-full bg-indigo-100 hover:bg-indigo-200 border-2 border-indigo-300 flex items-center justify-center text-indigo-700 text-lg transition shadow-sm" title="Mute/Unmute Audio">
+                <button id="audio-toggle-btn" onclick="toggleAudio()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-100 hover:bg-indigo-200 border-2 border-indigo-300 flex items-center justify-center text-indigo-700 text-base sm:text-lg transition shadow-sm" title="Mute/Unmute Audio">
                     <i id="audio-icon" class="fa-solid fa-volume-high"></i>
                 </button>
             </div>
@@ -148,30 +178,29 @@
     </header>
 
     <!-- Main Content Container -->
-    <main class="max-w-4xl mx-auto w-full px-4 py-6 flex-1 flex flex-col justify-center">
+    <main class="max-w-4xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6 flex-1 flex flex-col justify-center">
 
         <!-- SCREEN 1: WELCOME & SELECTION SCREEN -->
-        <section id="screen-welcome" class="space-y-6 pop-in">
+        <section id="screen-welcome" class="space-y-4 sm:space-y-6 pop-in">
             <!-- Hero Title Banner -->
-            <div class="bg-white/90 backdrop-blur-md border-4 border-indigo-400 rounded-3xl p-6 text-center shadow-xl relative overflow-hidden">
-                <div class="absolute -right-6 -top-6 w-24 h-24 bg-yellow-300/40 rounded-full blur-xl"></div>
-                <div class="inline-block bg-indigo-100 text-indigo-800 text-sm font-black px-4 py-1 rounded-full mb-3 uppercase tracking-wider">
+            <div class="bg-white/90 backdrop-blur-md border-4 border-indigo-400 rounded-3xl p-5 sm:p-6 text-center shadow-xl relative overflow-hidden">
+                <div class="inline-block bg-indigo-100 text-indigo-800 text-xs font-black px-3 py-1 rounded-full mb-2 uppercase tracking-wider">
                     ⚡ Grammar Adventure Mission
                 </div>
-                <h2 class="text-3xl sm:text-4xl font-black text-indigo-950 mb-3">Become a Pronoun Superhero!</h2>
-                <p class="text-base sm:text-lg text-slate-700 font-medium max-w-2xl mx-auto">
-                    Pronouns are helper words that take the place of nouns like <span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded">he, she, it, we, they</span>. Help our heroes restore grammar power across the realm!
+                <h2 class="text-2xl sm:text-4xl font-black text-indigo-950 mb-2">Become a Pronoun Superhero!</h2>
+                <p class="text-sm sm:text-base text-slate-700 font-medium max-w-2xl mx-auto leading-snug">
+                    Pronouns are helper words that take the place of nouns like <span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded">he, she, it, we, they, him, her</span>.
                 </p>
             </div>
 
             <!-- Character & Theme Customization Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 
                 <!-- Character Selection Box -->
-                <div class="bg-white/90 backdrop-blur-md border-4 border-amber-300 rounded-3xl p-5 shadow-lg flex flex-col justify-between">
+                <div class="bg-white/90 backdrop-blur-md border-4 border-amber-300 rounded-3xl p-4 sm:p-5 shadow-lg flex flex-col justify-between">
                     <div>
-                        <h3 class="text-lg font-extrabold text-amber-900 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-user-ninja text-amber-500"></i> Choose Your Hero
+                        <h3 class="text-base sm:text-lg font-extrabold text-amber-900 mb-2.5 flex items-center gap-2">
+                            <i class="fa-solid fa-user-ninja text-amber-500"></i> Choose Hero
                         </h3>
                         <div class="grid grid-cols-2 gap-2" id="hero-selection-grid">
                             <!-- Populated dynamically via JS -->
@@ -180,10 +209,10 @@
                 </div>
 
                 <!-- World / Background Theme Selection -->
-                <div class="bg-white/90 backdrop-blur-md border-4 border-cyan-300 rounded-3xl p-5 shadow-lg flex flex-col justify-between">
+                <div class="bg-white/90 backdrop-blur-md border-4 border-cyan-300 rounded-3xl p-4 sm:p-5 shadow-lg flex flex-col justify-between">
                     <div>
-                        <h3 class="text-lg font-extrabold text-cyan-900 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-map-location-dot text-cyan-500"></i> Select Quest World
+                        <h3 class="text-base sm:text-lg font-extrabold text-cyan-900 mb-2.5 flex items-center gap-2">
+                            <i class="fa-solid fa-map-location-dot text-cyan-500"></i> Select World
                         </h3>
                         <div class="grid grid-cols-2 gap-2" id="world-selection-grid">
                             <!-- Populated dynamically via JS -->
@@ -193,45 +222,45 @@
             </div>
 
             <!-- Game Mode Buttons -->
-            <div class="bg-white/90 backdrop-blur-md border-4 border-emerald-400 rounded-3xl p-6 shadow-xl text-center space-y-4">
-                <h3 class="text-xl font-black text-emerald-950 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-gamepad text-emerald-600"></i> Pick Your Pronoun Game Mode:
+            <div class="bg-white/90 backdrop-blur-md border-4 border-emerald-400 rounded-3xl p-5 sm:p-6 shadow-xl text-center space-y-3 sm:space-y-4">
+                <h3 class="text-lg sm:text-xl font-black text-emerald-950 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-gamepad text-emerald-600"></i> Pick Game Mode:
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     
                     <!-- Mode 1 Button -->
-                    <button onclick="startGame('replace')" class="group relative bg-gradient-to-b from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 text-white p-5 rounded-2xl border-b-8 border-indigo-900 shadow-lg active:border-b-2 active:translate-y-1 transition text-left flex flex-col justify-between">
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                    <button onclick="startGame('replace')" class="btn-touch group relative bg-gradient-to-b from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 text-white p-4 sm:p-5 rounded-2xl border-b-4 border-indigo-900 shadow-lg active:translate-y-1 transition text-left flex flex-col justify-between">
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
                             ✍️
                         </div>
                         <div>
-                            <span class="block text-xs uppercase font-bold text-indigo-200">Mode 1</span>
-                            <span class="text-lg font-black block leading-tight">Noun Replacer</span>
-                            <span class="text-xs text-indigo-100 font-normal mt-1 block">Swap underlined words with the right pronoun!</span>
+                            <span class="block text-[10px] uppercase font-bold text-indigo-200">Mode 1</span>
+                            <span class="text-base sm:text-lg font-black block leading-tight">Noun Replacer</span>
+                            <span class="text-xs text-indigo-100 font-normal mt-1 block">Swap words with correct pronouns!</span>
                         </div>
                     </button>
 
                     <!-- Mode 2 Button -->
-                    <button onclick="startGame('sort')" class="group relative bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white p-5 rounded-2xl border-b-8 border-amber-900 shadow-lg active:border-b-2 active:translate-y-1 transition text-left flex flex-col justify-between">
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                    <button onclick="startGame('sort')" class="btn-touch group relative bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white p-4 sm:p-5 rounded-2xl border-b-4 border-amber-900 shadow-lg active:translate-y-1 transition text-left flex flex-col justify-between">
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
                             📦
                         </div>
                         <div>
-                            <span class="block text-xs uppercase font-bold text-amber-200">Mode 2</span>
-                            <span class="text-lg font-black block leading-tight">Singular vs Plural</span>
-                            <span class="text-xs text-amber-100 font-normal mt-1 block">Sort pronouns into 1 person or Many boxes!</span>
+                            <span class="block text-[10px] uppercase font-bold text-amber-200">Mode 2</span>
+                            <span class="text-base sm:text-lg font-black block leading-tight">Singular vs Plural</span>
+                            <span class="text-xs text-amber-100 font-normal mt-1 block">Sort into 1 person or Many boxes!</span>
                         </div>
                     </button>
 
                     <!-- Mode 3 Button -->
-                    <button onclick="startGame('arcade')" class="group relative bg-gradient-to-b from-rose-500 to-rose-700 hover:from-rose-600 hover:to-rose-800 text-white p-5 rounded-2xl border-b-8 border-rose-900 shadow-lg active:border-b-2 active:translate-y-1 transition text-left flex flex-col justify-between">
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                    <button onclick="startGame('arcade')" class="btn-touch group relative bg-gradient-to-b from-rose-500 to-rose-700 hover:from-rose-600 hover:to-rose-800 text-white p-4 sm:p-5 rounded-2xl border-b-4 border-rose-900 shadow-lg active:translate-y-1 transition text-left flex flex-col justify-between">
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
                             🎈
                         </div>
                         <div>
-                            <span class="block text-xs uppercase font-bold text-rose-200">Mode 3</span>
-                            <span class="text-lg font-black block leading-tight">Pronoun Pop Arcade</span>
-                            <span class="text-xs text-rose-100 font-normal mt-1 block">Pop floating bubbles that hold personal pronouns!</span>
+                            <span class="block text-[10px] uppercase font-bold text-rose-200">Mode 3</span>
+                            <span class="text-base sm:text-lg font-black block leading-tight">Pronoun Pop Arcade</span>
+                            <span class="text-xs text-rose-100 font-normal mt-1 block">Pop floating pronoun bubbles!</span>
                         </div>
                     </button>
 
@@ -240,22 +269,22 @@
         </section>
 
         <!-- SCREEN 2: GAMEPLAY ARENA -->
-        <section id="screen-gameplay" class="hidden space-y-4">
+        <section id="screen-gameplay" class="hidden space-y-3 sm:space-y-4">
             
             <!-- Game Top Status Bar -->
-            <div class="bg-white/90 backdrop-blur-md border-3 border-indigo-300 rounded-2xl p-3 px-5 flex items-center justify-between shadow-md">
-                <button onclick="returnToMenu()" class="text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-700 bg-slate-100 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-slate-300 transition flex items-center gap-1.5">
+            <div class="bg-white/90 backdrop-blur-md border-3 border-indigo-300 rounded-2xl p-2.5 px-4 flex items-center justify-between shadow-md">
+                <button onclick="returnToMenu()" class="text-xs font-bold text-slate-600 hover:text-indigo-700 bg-slate-100 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-slate-300 transition flex items-center gap-1.5">
                     <i class="fa-solid fa-arrow-left"></i> Menu
                 </button>
                 <div class="text-center">
-                    <span id="game-mode-badge" class="bg-indigo-600 text-white text-xs px-3 py-1 rounded-full uppercase font-black tracking-wider">
+                    <span id="game-mode-badge" class="bg-indigo-600 text-white text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full uppercase font-black tracking-wider">
                         Noun Replacer
                     </span>
-                    <span id="level-indicator" class="text-sm font-extrabold text-slate-700 block mt-0.5">Question 1 of 8</span>
+                    <span id="level-indicator" class="text-xs sm:text-sm font-extrabold text-slate-700 block mt-0.5">Question 1 of 8</span>
                 </div>
                 <div class="flex items-center gap-1">
-                    <span class="text-xs text-slate-500 font-bold uppercase hidden sm:inline">Streak:</span>
-                    <span id="streak-counter" class="bg-orange-500 text-white text-xs font-black px-2.5 py-1 rounded-lg flex items-center gap-1">
+                    <span class="text-[10px] text-slate-500 font-bold uppercase hidden sm:inline">Streak:</span>
+                    <span id="streak-counter" class="bg-orange-500 text-white text-xs font-black px-2 py-0.5 rounded-lg flex items-center gap-1">
                         🔥 0
                     </span>
                 </div>
@@ -263,22 +292,22 @@
 
             <!-- Progress Bar -->
             <div class="w-full bg-slate-200/80 rounded-full h-3 border border-white/60 overflow-hidden shadow-inner">
-                <div id="progress-bar-fill" class="bg-gradient-to-r from-amber-400 to-emerald-500 h-full w-0 transition-all duration-500 rounded-full"></div>
+                <div id="progress-bar-fill" class="bg-gradient-to-r from-amber-400 to-emerald-500 h-full w-0 transition-all duration-300 rounded-full"></div>
             </div>
 
             <!-- DYNAMIC GAME CONTAINER -->
-            <div id="game-container" class="bg-white/95 backdrop-blur-md border-4 border-indigo-400 rounded-3xl p-4 sm:p-8 shadow-2xl min-h-[380px] flex flex-col justify-between relative overflow-hidden">
+            <div id="game-container" class="bg-white/95 backdrop-blur-md border-4 border-indigo-400 rounded-3xl p-4 sm:p-6 shadow-2xl min-h-[340px] flex flex-col justify-between relative overflow-hidden">
                 <!-- Content dynamically injected here -->
             </div>
 
             <!-- Feedback Message Banner -->
-            <div id="feedback-banner" class="hidden rounded-2xl p-4 text-center font-bold text-base sm:text-lg shadow-lg transition-all duration-300 pop-in">
+            <div id="feedback-banner" class="hidden rounded-2xl p-3.5 text-center font-bold text-sm sm:text-base shadow-lg transition-all duration-300 pop-in">
                 <!-- Injected via JS -->
             </div>
 
             <!-- Action / Next Button Container -->
             <div class="flex justify-end">
-                <button id="next-btn" onclick="nextQuestion()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg px-8 py-3.5 rounded-2xl border-b-4 border-emerald-700 shadow-lg active:translate-y-0.5 transition flex items-center gap-2">
+                <button id="next-btn" onclick="nextQuestion()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-black text-base sm:text-lg px-6 py-3 rounded-2xl border-b-4 border-emerald-700 shadow-lg active:translate-y-0.5 transition flex items-center gap-2">
                     <span>Next Quest</span> <i class="fa-solid fa-circle-arrow-right"></i>
                 </button>
             </div>
@@ -286,54 +315,54 @@
         </section>
 
         <!-- SCREEN 3: VICTORY & SUMMARY SCREEN -->
-        <section id="screen-victory" class="hidden space-y-6 pop-in">
+        <section id="screen-victory" class="hidden space-y-4 sm:space-y-6 pop-in">
             <div class="bg-white/95 backdrop-blur-md border-4 border-amber-400 rounded-3xl p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden">
-                <!-- Trophy Icon with glow -->
-                <div class="w-24 h-24 mx-auto bg-amber-100 border-4 border-amber-300 rounded-full flex items-center justify-center text-5xl mb-4 text-amber-500 shadow-inner animate-bounce">
+                <!-- Trophy Icon -->
+                <div class="w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-amber-100 border-4 border-amber-300 rounded-full flex items-center justify-center text-4xl sm:text-5xl mb-3 text-amber-500 shadow-inner animate-bounce">
                     🏆
                 </div>
 
-                <h2 class="text-3xl sm:text-4xl font-black text-indigo-950 mb-1">Quest Completed!</h2>
-                <p class="text-slate-600 font-bold mb-6">You are an official Pronoun Power Hero!</p>
+                <h2 class="text-2xl sm:text-4xl font-black text-indigo-950 mb-1">Quest Completed!</h2>
+                <p class="text-slate-600 font-bold text-xs sm:text-sm mb-4">You are an official Pronoun Superhero!</p>
 
                 <!-- Stars Rating Display -->
-                <div class="flex justify-center gap-3 text-4xl text-amber-400 mb-6" id="final-stars-container">
+                <div class="flex justify-center gap-2 sm:gap-3 text-3xl sm:text-4xl text-amber-400 mb-5" id="final-stars-container">
                     <i class="fa-solid fa-star"></i>
                     <i class="fa-solid fa-star"></i>
                     <i class="fa-solid fa-star"></i>
                 </div>
 
                 <!-- Stats Summary Box -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-lg mx-auto mb-6">
-                    <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-3">
-                        <span class="block text-xs font-bold text-indigo-500 uppercase">Final Score</span>
-                        <span id="final-score" class="text-2xl font-black text-indigo-900">0</span>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-w-lg mx-auto mb-5">
+                    <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-2.5">
+                        <span class="block text-[10px] font-bold text-indigo-500 uppercase">Final Score</span>
+                        <span id="final-score" class="text-xl sm:text-2xl font-black text-indigo-900">0</span>
                     </div>
-                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-3">
-                        <span class="block text-xs font-bold text-emerald-500 uppercase">Accuracy</span>
-                        <span id="final-accuracy" class="text-2xl font-black text-emerald-900">100%</span>
+                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-2.5">
+                        <span class="block text-[10px] font-bold text-emerald-500 uppercase">Accuracy</span>
+                        <span id="final-accuracy" class="text-xl sm:text-2xl font-black text-emerald-900">100%</span>
                     </div>
-                    <div class="bg-orange-50 border-2 border-orange-200 rounded-2xl p-3 col-span-2 sm:col-span-1">
-                        <span class="block text-xs font-bold text-orange-500 uppercase">Best Streak</span>
-                        <span id="final-streak" class="text-2xl font-black text-orange-900">0</span>
+                    <div class="bg-orange-50 border-2 border-orange-200 rounded-2xl p-2.5 col-span-2 sm:col-span-1">
+                        <span class="block text-[10px] font-bold text-orange-500 uppercase">Best Streak</span>
+                        <span id="final-streak" class="text-xl sm:text-2xl font-black text-orange-900">0</span>
                     </div>
                 </div>
 
-                <!-- Printable Learning Certificate Summary -->
-                <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-dashed border-amber-300 rounded-2xl p-4 max-w-md mx-auto mb-6 text-left text-xs sm:text-sm space-y-1.5 text-amber-950">
-                    <div class="flex items-center gap-2 font-black text-amber-900 text-base mb-1 border-b border-amber-200 pb-1">
+                <!-- Learning Cheat Sheet -->
+                <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-dashed border-amber-300 rounded-2xl p-3.5 max-w-md mx-auto mb-5 text-left text-xs space-y-1 text-amber-950">
+                    <div class="flex items-center gap-1.5 font-black text-amber-900 text-sm mb-1 border-b border-amber-200 pb-1">
                         <span>📜 Pronoun Cheat Sheet Mastered:</span>
                     </div>
-                    <p>• <strong>Singular Pronouns (1 person/thing):</strong> I, me, he, him, she, her, it, you</p>
-                    <p>• <strong>Plural Pronouns (2 or more):</strong> we, us, they, them, you</p>
+                    <p>• <strong>Singular Pronouns (1 person/thing):</strong> I, me, he, him, she, her, it</p>
+                    <p>• <strong>Plural Pronouns (Group):</strong> we, us, they, them, you</p>
                 </div>
 
-                <!-- Buttons -->
-                <div class="flex flex-wrap justify-center gap-4">
-                    <button onclick="restartCurrentGame()" class="bg-amber-500 hover:bg-amber-600 text-white font-black text-lg px-6 py-3 rounded-2xl border-b-4 border-amber-700 shadow-md active:translate-y-0.5 transition flex items-center gap-2">
-                        <i class="fa-solid fa-rotate-right"></i> Play Mode Again
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button onclick="restartCurrentGame()" class="btn-touch bg-amber-500 hover:bg-amber-600 text-white font-black text-base px-5 py-2.5 rounded-2xl border-b-4 border-amber-700 shadow-md active:translate-y-0.5 transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Play Again
                     </button>
-                    <button onclick="returnToMenu()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg px-6 py-3 rounded-2xl border-b-4 border-indigo-900 shadow-md active:translate-y-0.5 transition flex items-center gap-2">
+                    <button onclick="returnToMenu()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white font-black text-base px-5 py-2.5 rounded-2xl border-b-4 border-indigo-900 shadow-md active:translate-y-0.5 transition flex items-center gap-2">
                         <i class="fa-solid fa-house"></i> Main Menu
                     </button>
                 </div>
@@ -343,25 +372,52 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="w-full text-center py-4 text-xs font-semibold text-slate-700/80">
-        <p>Pronoun Power Quest • Designed for Elementary ELA Standards (CCSS.ELA-LITERACY.L.1.1.D & L.2.1)</p>
-    </footer>
-
     <script>
-        /* Web Audio API Sound Generator for reliable browser sound FX without external files */
-        class SoundEngine {
+        /* State Variables */
+        const HEROES = [
+            { id: 'girl', name: 'Girl Hero', emoji: '👧⚡', img: 'assets/girl-hero.png' },
+            { id: 'boy', name: 'Boy Hero', emoji: '👦⚡', img: 'assets/boy-hero.png' }
+        ];
+
+        const WORLDS = [
+            { id: 'beach', name: 'Sunny Beach', icon: '🏖️', class: 'theme-beach', img: 'assets/beach.png' },
+            { id: 'forest', name: 'Green Forest', icon: '🌲', class: 'theme-forest', img: 'assets/forest.png' },
+            { id: 'city', name: 'City Night', icon: '🏙️', class: 'theme-city', img: 'assets/city.png' },
+            { id: 'desert', name: 'Desert Dune', icon: '🏜️', class: 'theme-desert', img: 'assets/desert.png' }
+        ];
+
+        const gameState = {
+            selectedHero: 'girl',
+            selectedWorld: 'beach',
+            currentMode: 'replace',
+            currentQuestionIndex: 0,
+            score: 0,
+            stars: 0,
+            streak: 0,
+            maxStreak: 0,
+            totalAnswered: 0,
+            correctCount: 0,
+            arcadeScore: 0,
+            arcadeTargetCount: 8,
+            arcadeInterval: null
+        };
+
+        /* Hybrid Sound Engine: Tries path audio (assets/correct.mp3 & assets/wrong.mp3) with Web Audio synth fallback for low connectivity */
+        class HybridSoundEngine {
             constructor() {
                 this.ctx = null;
                 this.muted = false;
+                
+                // Preload HTML5 Audio objects
+                this.audioCorrect = new Audio('assets/correct.mp3');
+                this.audioWrong = new Audio('assets/wrong.mp3');
+                this.audioClapping = new Audio('assets/clapping.mp3');
             }
 
-            init() {
+            initCtx() {
                 if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (AudioContext) {
-                        this.ctx = new AudioContext();
-                    }
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
                 }
                 if (this.ctx && this.ctx.state === 'suspended') {
                     this.ctx.resume();
@@ -370,115 +426,139 @@
 
             playCorrect() {
                 if (this.muted) return;
-                this.init();
-                if (!this.ctx) return;
+                this.initCtx();
 
-                const now = this.ctx.currentTime;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
-                osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
-
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                osc.start(now);
-                osc.stop(now + 0.5);
+                // Try playing audio file from path
+                this.audioCorrect.currentTime = 0;
+                const promise = this.audioCorrect.play();
+                
+                if (promise !== undefined) {
+                    promise.catch(() => {
+                        // Fallback synthesizer if file fails to load or low connectivity
+                        this.synthCorrect();
+                    });
+                }
             }
 
             playWrong() {
                 if (this.muted) return;
-                this.init();
-                if (!this.ctx) return;
+                this.initCtx();
 
-                const now = this.ctx.currentTime;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
+                this.audioWrong.currentTime = 0;
+                const promise = this.audioWrong.play();
 
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(220, now); // A3
-                osc.frequency.setValueAtTime(174.61, now + 0.15); // F3
-
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                osc.start(now);
-                osc.stop(now + 0.4);
-            }
-
-            playPop() {
-                if (this.muted) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const now = this.ctx.currentTime;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, now);
-                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
-
-                gain.gain.setValueAtTime(0.25, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                osc.start(now);
-                osc.stop(now + 0.08);
+                if (promise !== undefined) {
+                    promise.catch(() => {
+                        // Fallback synthesizer
+                        this.synthWrong();
+                    });
+                }
             }
 
             playCheer() {
                 if (this.muted) return;
-                this.init();
-                if (!this.ctx) return;
+                this.initCtx();
 
+                this.audioClapping.currentTime = 0;
+                const promise = this.audioClapping.play();
+
+                if (promise !== undefined) {
+                    promise.catch(() => {
+                        this.synthCheer();
+                    });
+                }
+            }
+
+            playPop() {
+                if (this.muted) return;
+                this.initCtx();
+                this.synthPop();
+            }
+
+            /* Web Audio Synthesizer Fallbacks */
+            synthCorrect() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.08);
+                osc.frequency.setValueAtTime(783.99, now + 0.16);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+
+            synthWrong() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.setValueAtTime(174.61, now + 0.15);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+
+            synthPop() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            }
+
+            synthCheer() {
+                if (!this.ctx) return;
                 const notes = [523.25, 659.25, 783.99, 1046.50];
                 notes.forEach((freq, idx) => {
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
                     const now = this.ctx.currentTime + (idx * 0.1);
-
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(freq, now);
-
-                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.setValueAtTime(0.2, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-
                     osc.connect(gain);
                     gain.connect(this.ctx.destination);
-
                     osc.start(now);
                     osc.stop(now + 0.3);
                 });
             }
         }
 
-        const sounds = new SoundEngine();
+        const sounds = new HybridSoundEngine();
 
+        // Speech synthesis for question reading
         function speakSentence(text) {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Stop current speech
-                const cleanText = text.replace(/<[^>]*>/g, ''); // Strip HTML tags
+                window.speechSynthesis.cancel();
+                const cleanText = text.replace(/<[^>]*>/g, '');
                 const utterance = new SpeechSynthesisUtterance(cleanText);
-                utterance.rate = 0.85; // Slower rate for clear speech
-                utterance.pitch = 1.1; // Slightly higher friendly pitch
+                utterance.rate = 0.85;
+                utterance.pitch = 1.1;
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        // Audio toggle handler
+        // Toggle Audio
         function toggleAudio() {
             sounds.muted = !sounds.muted;
             const icon = document.getElementById('audio-icon');
@@ -520,7 +600,7 @@
                 targetNoun: "The cute puppy",
                 options: [
                     { text: "It", correct: true, hint: "1 animal or object -> It" },
-                    { text: "We", correct: false, hint: "Are you the puppy? 'We' includes you!" },
+                    { text: "We", correct: false, hint: "'We' includes you!" },
                     { text: "Them", correct: false, hint: "There is only 1 puppy!" }
                 ],
                 explanation: "We use 'It' for 1 animal or object!"
@@ -531,7 +611,7 @@
                 options: [
                     { text: "He", correct: true, hint: "Ben is 1 boy -> He" },
                     { text: "She", correct: false, hint: "Ben is a boy's name!" },
-                    { text: "They", correct: false, hint: "Ben is just 1 person!" }
+                    { text: "They", correct: false, hint: "Ben is 1 person!" }
                 ],
                 explanation: "We use 'He' to replace 1 boy/male noun!"
             },
@@ -549,7 +629,7 @@
                 sentence: "Please give the colored pencils to <u>Emma and Jake</u>.",
                 targetNoun: "Emma and Jake",
                 options: [
-                    { text: "them", correct: true, hint: "To more than one person -> them" },
+                    { text: "them", correct: true, hint: "To more than 1 person -> them" },
                     { text: "him", correct: false, hint: "There are two kids, not one!" },
                     { text: "it", correct: false, hint: "Emma and Jake are people!" }
                 ],
@@ -574,30 +654,9 @@
                     { text: "He", correct: false, hint: "Apples aren't boys!" }
                 ],
                 explanation: "We use 'It' to replace a singular object!"
-            },
-            {
-                sentence: "<u>Mia and you</u> need to get your raincoats.",
-                targetNoun: "Mia and you",
-                options: [
-                    { text: "You", correct: true, hint: "Talking to group including you -> You" },
-                    { text: "They", correct: false, hint: "You are speaking directly to them!" },
-                    { text: "She", correct: false, hint: "There are two people!" }
-                ],
-                explanation: "We use 'You' when talking directly to 1 or more people!"
-            },
-            {
-                sentence: "Grandma invited <u>my family and me</u> to dinner.",
-                targetNoun: "my family and me",
-                options: [
-                    { text: "us", correct: true, hint: "Group receiving action including me -> us" },
-                    { text: "them", correct: false, hint: "Remember 'me' is included!" },
-                    { text: "him", correct: false, hint: "There are multiple people!" }
-                ],
-                explanation: "We use 'us' when receiving an action as a group that includes 'me'!"
             }
         ];
 
-        // MODE 2 DATA: Sorting Pronouns into Singular vs Plural
         const SORT_PRONOUNS_POOL = [
             { text: 'He', type: 'singular', desc: '1 Boy' },
             { text: 'She', type: 'singular', desc: '1 Girl' },
@@ -609,10 +668,9 @@
             { text: 'They', type: 'plural', desc: 'Group of people' },
             { text: 'We', type: 'plural', desc: 'Group including me' },
             { text: 'Them', type: 'plural', desc: 'Group receiving action' },
-            { text: 'Us', type: 'plural', desc: 'Group including me (Object)' }
+            { text: 'Us', type: 'plural', desc: 'Group including me' }
         ];
 
-        // MODE 3 DATA: Floating Arcade Bubbles
         const ARCADE_WORDS = [
             { text: 'He', isPronoun: true },
             { text: 'She', isPronoun: true },
@@ -624,46 +682,68 @@
             { text: 'Them', isPronoun: true },
             { text: 'Us', isPronoun: true },
             { text: 'Me', isPronoun: true },
-            // Distractors (Nouns/Verbs/Adjectives)
             { text: 'Dog', isPronoun: false },
             { text: 'Run', isPronoun: false },
             { text: 'Happy', isPronoun: false },
             { text: 'Ball', isPronoun: false },
             { text: 'Teacher', isPronoun: false },
-            { text: 'Blue', isPronoun: false },
-            { text: 'Cat', isPronoun: false }
+            { text: 'Blue', isPronoun: false }
         ];
 
-        // Initialize UI Elements on page load
         window.addEventListener('DOMContentLoaded', () => {
+            initSplashScreen();
             renderHeroSelection();
             renderWorldSelection();
             updateHeaderAvatar();
         });
 
-        // Render Hero Grid Selection
+        // 5-Second Innovine Splash Screen Logic
+        let splashTimer = null;
+        function initSplashScreen() {
+            const progressBar = document.getElementById('splash-progress');
+            let duration = 5000; // 5 seconds
+            let interval = 50; // Update every 50ms
+            let elapsed = 0;
+
+            splashTimer = setInterval(() => {
+                elapsed += interval;
+                let percentage = Math.min((elapsed / duration) * 100, 100);
+                if (progressBar) progressBar.style.width = `${percentage}%`;
+
+                if (elapsed >= duration) {
+                    hideSplashScreen();
+                }
+            }, interval);
+        }
+
+        function hideSplashScreen() {
+            if (splashTimer) clearInterval(splashTimer);
+            const splash = document.getElementById('splash-screen');
+            if (splash) splash.classList.add('splash-hidden');
+        }
+
+        // Render Hero Grid
         function renderHeroSelection() {
             const grid = document.getElementById('hero-selection-grid');
             grid.innerHTML = HEROES.map(hero => `
-                <button onclick="selectHero('${hero.id}')" id="hero-btn-${hero.id}" class="flex items-center gap-2 p-2.5 rounded-2xl border-2 ${hero.id === gameState.selectedHero ? 'border-amber-500 bg-amber-100 ring-2 ring-amber-400' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'} transition">
-                    <span class="text-2xl">${hero.emoji}</span>
+                <button onclick="selectHero('${hero.id}')" id="hero-btn-${hero.id}" class="btn-touch flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl border-2 ${hero.id === gameState.selectedHero ? 'border-amber-500 bg-amber-100 ring-2 ring-amber-400' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'} transition">
+                    <span class="text-xl sm:text-2xl">${hero.emoji}</span>
                     <span class="text-xs sm:text-sm font-extrabold text-slate-800">${hero.name}</span>
                 </button>
             `).join('');
         }
 
-        // Render World Grid Selection
+        // Render World Grid
         function renderWorldSelection() {
             const grid = document.getElementById('world-selection-grid');
             grid.innerHTML = WORLDS.map(world => `
-                <button onclick="selectWorld('${world.id}')" id="world-btn-${world.id}" class="flex items-center gap-2 p-2.5 rounded-2xl border-2 ${world.id === gameState.selectedWorld ? 'border-cyan-500 bg-cyan-100 ring-2 ring-cyan-400' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'} transition">
-                    <span class="text-2xl">${world.icon}</span>
+                <button onclick="selectWorld('${world.id}')" id="world-btn-${world.id}" class="btn-touch flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl border-2 ${world.id === gameState.selectedWorld ? 'border-cyan-500 bg-cyan-100 ring-2 ring-cyan-400' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'} transition">
+                    <span class="text-xl sm:text-2xl">${world.icon}</span>
                     <span class="text-xs sm:text-sm font-extrabold text-slate-800">${world.name}</span>
                 </button>
             `).join('');
         }
 
-        // Select Hero
         function selectHero(heroId) {
             sounds.playPop();
             gameState.selectedHero = heroId;
@@ -671,18 +751,15 @@
             updateHeaderAvatar();
         }
 
-        // Select World Theme
         function selectWorld(worldId) {
             sounds.playPop();
             gameState.selectedWorld = worldId;
             renderWorldSelection();
             
-            // Update Body Background class
             const selectedObj = WORLDS.find(w => w.id === worldId);
-            document.body.className = `${selectedObj.class} min-h-screen text-slate-800 transition-colors duration-700 flex flex-col justify-between overflow-x-hidden`;
+            document.body.className = `${selectedObj.class} min-h-screen text-slate-800 transition-colors duration-700 flex flex-col justify-between`;
         }
 
-        // Update top-left avatar icon
         function updateHeaderAvatar() {
             const heroObj = HEROES.find(h => h.id === gameState.selectedHero);
             document.getElementById('header-hero-avatar').innerHTML = heroObj.emoji;
@@ -693,52 +770,45 @@
             returnToMenu();
         }
 
-        // Start Game with Mode
         function startGame(mode) {
             sounds.playPop();
             gameState.currentMode = mode;
             gameState.currentQuestionIndex = 0;
             gameState.totalAnswered = 0;
             gameState.correctCount = 0;
+            gameState.score = 0;
+            gameState.stars = 0;
+            gameState.streak = 0;
+            gameState.maxStreak = 0;
             
-            // Toggle Screen Visibility
+            updateStatsHeader();
+
             document.getElementById('screen-welcome').classList.add('hidden');
             document.getElementById('screen-victory').classList.add('hidden');
             document.getElementById('screen-gameplay').classList.remove('hidden');
 
-            // Set Mode Badge Text
             const modeBadge = document.getElementById('game-mode-badge');
             if (mode === 'replace') modeBadge.textContent = 'Mode 1: Noun Replacer';
             if (mode === 'sort') modeBadge.textContent = 'Mode 2: Singular vs Plural';
             if (mode === 'arcade') modeBadge.textContent = 'Mode 3: Pronoun Pop Arcade';
 
-            // Load Game Mode Content
-            if (mode === 'replace') {
-                loadReplaceQuestion();
-            } else if (mode === 'sort') {
-                loadSortGame();
-            } else if (mode === 'arcade') {
-                loadArcadeGame();
-            }
+            if (mode === 'replace') loadReplaceQuestion();
+            else if (mode === 'sort') loadSortGame();
+            else if (mode === 'arcade') loadArcadeGame();
         }
 
-        // Return to Welcome Menu
         function returnToMenu() {
             sounds.playPop();
-            if (gameState.arcadeInterval) {
-                clearInterval(gameState.arcadeInterval);
-            }
+            if (gameState.arcadeInterval) clearInterval(gameState.arcadeInterval);
             document.getElementById('screen-gameplay').classList.add('hidden');
             document.getElementById('screen-victory').classList.add('hidden');
             document.getElementById('screen-welcome').classList.remove('hidden');
         }
 
-        // Restart current mode
         function restartCurrentGame() {
             startGame(gameState.currentMode);
         }
 
-        // MODE 1: Noun Replacer Logic
         function loadReplaceQuestion() {
             const container = document.getElementById('game-container');
             const feedback = document.getElementById('feedback-banner');
@@ -751,41 +821,36 @@
             const qIndex = gameState.currentQuestionIndex;
             const q = REPLACE_QUESTIONS[qIndex];
 
-            // Update Level & Progress
             document.getElementById('level-indicator').textContent = `Question ${qIndex + 1} of ${total}`;
             document.getElementById('progress-bar-fill').style.width = `${((qIndex) / total) * 100}%`;
 
             const currentHero = HEROES.find(h => h.id === gameState.selectedHero);
 
             container.innerHTML = `
-                <div class="space-y-6">
-                    <!-- Hero Quest Banner -->
-                    <div class="flex items-center justify-between bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-3">
-                        <div class="flex items-center gap-3">
-                            <span class="text-3xl animate-bounce">${currentHero.emoji}</span>
+                <div class="space-y-4 sm:space-y-6">
+                    <div class="flex items-center justify-between bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-2.5 sm:p-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-2xl sm:text-3xl animate-bounce">${currentHero.emoji}</span>
                             <div>
-                                <span class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Mission Challenge</span>
-                                <p class="text-sm font-black text-indigo-950">Which pronoun replaces the underlined noun?</p>
+                                <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wide">Mission Challenge</span>
+                                <p class="text-xs sm:text-sm font-black text-indigo-950">Replace the underlined word with a pronoun!</p>
                             </div>
                         </div>
 
-                        <!-- Speech Read Aloud Button -->
-                        <button onclick="speakSentence('${q.sentence.replace(/'/g, "\\'")}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs sm:text-sm px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-md transition active:scale-95" title="Read Sentence Aloud">
+                        <button onclick="speakSentence('${q.sentence.replace(/'/g, "\\'")}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-md transition active:scale-95">
                             <i class="fa-solid fa-volume-high"></i> <span class="hidden sm:inline">Listen</span>
                         </button>
                     </div>
 
-                    <!-- Question Sentence Display -->
-                    <div class="bg-amber-50/80 border-3 border-amber-300 rounded-2xl p-6 text-center shadow-inner">
-                        <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-snug">
+                    <div class="bg-amber-50/80 border-3 border-amber-300 rounded-2xl p-4 sm:p-6 text-center shadow-inner">
+                        <p class="text-xl sm:text-3xl font-extrabold text-slate-800 leading-snug">
                             "${q.sentence}"
                         </p>
                     </div>
 
-                    <!-- Options Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="options-container">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="options-container">
                         ${q.options.map((opt, idx) => `
-                            <button onclick="checkReplaceAnswer(${idx})" class="option-btn bg-white hover:bg-indigo-50 border-3 border-indigo-300 hover:border-indigo-500 rounded-2xl p-5 font-black text-xl text-indigo-900 shadow-md active:scale-95 transition flex flex-col items-center justify-center gap-1">
+                            <button onclick="checkReplaceAnswer(${idx})" class="option-btn btn-touch bg-white hover:bg-indigo-50 border-3 border-indigo-300 hover:border-indigo-500 rounded-2xl p-4 font-black text-lg sm:text-xl text-indigo-900 shadow-md active:scale-95 transition flex items-center justify-center">
                                 <span>${opt.text}</span>
                             </button>
                         `).join('')}
@@ -801,13 +866,10 @@
             const feedback = document.getElementById('feedback-banner');
             const nextBtn = document.getElementById('next-btn');
 
-            // Disable all option buttons
             buttons.forEach(btn => btn.disabled = true);
-
             gameState.totalAnswered++;
 
             if (selectedOpt.correct) {
-                // Correct Answer
                 sounds.playCorrect();
                 gameState.score += 100;
                 gameState.stars += 1;
@@ -816,36 +878,28 @@
                 if (gameState.streak > gameState.maxStreak) gameState.maxStreak = gameState.streak;
 
                 buttons[selectedIdx].classList.remove('bg-white', 'border-indigo-300');
-                buttons[selectedIdx].classList.add('bg-emerald-500', 'text-white', 'border-emerald-700', 'scale-105');
+                buttons[selectedIdx].classList.add('bg-emerald-500', 'text-white', 'border-emerald-700');
 
-                feedback.className = 'rounded-2xl p-4 text-center font-bold text-lg shadow-lg bg-emerald-100 border-2 border-emerald-400 text-emerald-950 block pop-in';
+                feedback.className = 'rounded-2xl p-3.5 text-center font-bold text-sm sm:text-base shadow-lg bg-emerald-100 border-2 border-emerald-400 text-emerald-950 block pop-in';
                 feedback.innerHTML = `
-                    <div class="flex items-center justify-center gap-2 font-black text-emerald-800 text-xl">
-                        <span>🎉 Super Job!</span>
-                    </div>
-                    <p class="text-sm font-semibold mt-1">${q.explanation}</p>
+                    <div class="font-black text-emerald-800 text-base sm:text-lg">🎉 Super Job!</div>
+                    <p class="text-xs sm:text-sm font-semibold mt-0.5">${q.explanation}</p>
                 `;
             } else {
-                // Wrong Answer
                 sounds.playWrong();
                 gameState.streak = 0;
 
                 buttons[selectedIdx].classList.remove('bg-white', 'border-indigo-300');
                 buttons[selectedIdx].classList.add('bg-rose-500', 'text-white', 'border-rose-700');
 
-                // Highlight correct button
                 q.options.forEach((opt, i) => {
-                    if (opt.correct) {
-                        buttons[i].classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
-                    }
+                    if (opt.correct) buttons[i].classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
                 });
 
-                feedback.className = 'rounded-2xl p-4 text-center font-bold text-lg shadow-lg bg-rose-100 border-2 border-rose-400 text-rose-950 block pop-in';
+                feedback.className = 'rounded-2xl p-3.5 text-center font-bold text-sm sm:text-base shadow-lg bg-rose-100 border-2 border-rose-400 text-rose-950 block pop-in';
                 feedback.innerHTML = `
-                    <div class="flex items-center justify-center gap-2 font-black text-rose-800 text-xl">
-                        <span>💡 Good Try!</span>
-                    </div>
-                    <p class="text-sm font-semibold mt-1">Hint: ${selectedOpt.hint}. ${q.explanation}</p>
+                    <div class="font-black text-rose-800 text-base sm:text-lg">💡 Good Try!</div>
+                    <p class="text-xs sm:text-sm font-semibold mt-0.5">Hint: ${selectedOpt.hint}. ${q.explanation}</p>
                 `;
             }
 
@@ -853,21 +907,12 @@
             nextBtn.classList.remove('hidden');
         }
 
-        // MODE 2: Pronoun Sorter Logic (Drag & Drop / Tap to Sort)
         let sortPool = [];
         let currentSortItem = null;
 
         function loadSortGame() {
-            const container = document.getElementById('game-container');
-            const feedback = document.getElementById('feedback-banner');
-            const nextBtn = document.getElementById('next-btn');
-
-            feedback.classList.add('hidden');
-            nextBtn.classList.add('hidden');
-
             sortPool = [...SORT_PRONOUNS_POOL].sort(() => Math.random() - 0.5).slice(0, 8);
             gameState.currentQuestionIndex = 0;
-
             renderNextSortCard();
         }
 
@@ -877,6 +922,7 @@
             const nextBtn = document.getElementById('next-btn');
 
             feedback.classList.add('hidden');
+            nextBtn.classList.add('hidden');
 
             const total = sortPool.length;
             const idx = gameState.currentQuestionIndex;
@@ -892,125 +938,81 @@
             document.getElementById('progress-bar-fill').style.width = `${((idx) / total) * 100}%`;
 
             container.innerHTML = `
-                <div class="space-y-6">
-                    <div class="flex items-center justify-between text-center">
-                        <div class="w-full text-center">
-                            <span class="text-xs font-black uppercase text-amber-600 bg-amber-100 px-3 py-1 rounded-full">Sorting Mission</span>
-                            <h3 class="text-2xl font-extrabold text-slate-800 mt-1">Drag or Tap to sort: Singular or Plural?</h3>
-                        </div>
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <span class="text-[10px] font-black uppercase text-amber-600 bg-amber-100 px-2.5 py-0.5 rounded-full">Sorting Mission</span>
+                        <h3 class="text-lg sm:text-2xl font-extrabold text-slate-800 mt-1">Tap or Drag: Singular or Plural?</h3>
                     </div>
 
-                    <!-- Pronoun Card to Sort (HTML5 Drag & Drop enabled) -->
                     <div class="flex justify-center">
-                        <div id="drag-pronoun-card" draggable="true" ondragstart="handleDragStart(event)" class="bg-gradient-to-r from-amber-400 to-yellow-400 border-4 border-amber-600 rounded-3xl p-6 sm:p-8 text-center shadow-xl cursor-grab active:cursor-grabbing transform hover:scale-105 transition max-w-xs w-full animate-float select-none">
-                            <span class="text-4xl sm:text-5xl font-black text-amber-950 block pointer-events-none">${currentSortItem.text}</span>
-                            <span class="text-xs font-extrabold text-amber-900/80 mt-2 block pointer-events-none">"${currentSortItem.desc}"</span>
-                            <span class="text-[10px] font-black uppercase text-amber-950/60 mt-1 block">✋ Drag Me!</span>
+                        <div id="drag-card" 
+                             draggable="true" 
+                             ondragstart="handleDragStart(event)" 
+                             class="bg-gradient-to-r from-amber-400 to-yellow-400 border-4 border-amber-600 rounded-3xl p-5 sm:p-6 text-center shadow-xl cursor-grab max-w-xs w-full animate-float select-none">
+                            <span class="text-3xl sm:text-4xl font-black text-amber-950 block pointer-events-none">${currentSortItem.text}</span>
+                            <span class="text-xs font-extrabold text-amber-900/80 mt-1 block pointer-events-none">"${currentSortItem.desc}"</span>
                         </div>
                     </div>
 
-                    <!-- Drop Zones / Choice Baskets -->
-                    <div class="grid grid-cols-2 gap-4 pt-2">
-                        <!-- Singular Box -->
-                        <button onclick="handleSortChoice('singular')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'singular')" id="box-singular" class="bg-blue-50 border-4 border-dashed border-blue-400 hover:border-blue-600 rounded-3xl p-5 text-center transition flex flex-col items-center justify-center gap-2 group active:scale-95 shadow-md">
-                            <span class="text-3xl sm:text-4xl group-hover:scale-110 transition pointer-events-none">🧑</span>
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="handleSortChoice('singular')" 
+                                ondragover="handleDragOver(event)" 
+                                ondragleave="handleDragLeave(event)" 
+                                ondrop="handleDrop(event, 'singular')" 
+                                class="btn-touch bg-blue-50 border-3 border-dashed border-blue-400 hover:border-blue-600 rounded-3xl p-4 text-center transition flex flex-col items-center justify-center gap-1 active:scale-95 shadow-md">
+                            <span class="text-3xl pointer-events-none">🧑</span>
                             <div class="pointer-events-none">
-                                <span class="text-lg font-black text-blue-900 block">SINGULAR</span>
-                                <span class="text-xs font-bold text-blue-600 block">Only 1 Person/Thing</span>
+                                <span class="text-base font-black text-blue-900 block">SINGULAR</span>
+                                <span class="text-[10px] font-bold text-blue-600 block">Only 1 Person/Thing</span>
                             </div>
                         </button>
 
-                        <!-- Plural Box -->
-                        <button onclick="handleSortChoice('plural')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'plural')" id="box-plural" class="bg-purple-50 border-4 border-dashed border-purple-400 hover:border-purple-600 rounded-3xl p-5 text-center transition flex flex-col items-center justify-center gap-2 group active:scale-95 shadow-md">
-                            <span class="text-3xl sm:text-4xl group-hover:scale-110 transition pointer-events-none">🧑‍🤝‍🧑</span>
+                        <button onclick="handleSortChoice('plural')" 
+                                ondragover="handleDragOver(event)" 
+                                ondragleave="handleDragLeave(event)" 
+                                ondrop="handleDrop(event, 'plural')" 
+                                class="btn-touch bg-purple-50 border-3 border-dashed border-purple-400 hover:border-purple-600 rounded-3xl p-4 text-center transition flex flex-col items-center justify-center gap-1 active:scale-95 shadow-md">
+                            <span class="text-3xl pointer-events-none">🧑‍🤝‍🧑</span>
                             <div class="pointer-events-none">
-                                <span class="text-lg font-black text-purple-900 block">PLURAL</span>
-                                <span class="text-xs font-bold text-purple-600 block">More than 1 (Group)</span>
+                                <span class="text-base font-black text-purple-900 block">PLURAL</span>
+                                <span class="text-[10px] font-bold text-purple-600 block">More than 1 (Group)</span>
                             </div>
                         </button>
                     </div>
                 </div>
             `;
+
+            setupTouchDragSupport();
         }
 
-        /* HTML5 Drag & Drop Listeners */
+        // HTML5 & Touch Drag Handlers
         function handleDragStart(e) {
             e.dataTransfer.setData('text/plain', currentSortItem.type);
-            e.dataTransfer.effectAllowed = 'move';
         }
-
         function handleDragOver(e) {
             e.preventDefault();
             e.currentTarget.classList.add('drop-target-active');
         }
-
         function handleDragLeave(e) {
             e.currentTarget.classList.remove('drop-target-active');
         }
-
         function handleDrop(e, targetType) {
             e.preventDefault();
             e.currentTarget.classList.remove('drop-target-active');
             handleSortChoice(targetType);
         }
 
-        function renderNextSortCard() {
-            const container = document.getElementById('game-container');
-            const feedback = document.getElementById('feedback-banner');
-            const nextBtn = document.getElementById('next-btn');
+        function setupTouchDragSupport() {
+            const card = document.getElementById('drag-card');
+            if (!card) return;
 
-            feedback.classList.add('hidden');
+            card.addEventListener('touchstart', (e) => {
+                card.style.opacity = '0.7';
+            }, { passive: true });
 
-            const total = sortPool.length;
-            const idx = gameState.currentQuestionIndex;
-
-            if (idx >= total) {
-                showVictoryScreen();
-                return;
-            }
-
-            currentSortItem = sortPool[idx];
-
-            document.getElementById('level-indicator').textContent = `Card ${idx + 1} of ${total}`;
-            document.getElementById('progress-bar-fill').style.width = `${((idx) / total) * 100}%`;
-
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <div class="text-center">
-                        <span class="text-xs font-black uppercase text-amber-600 bg-amber-100 px-3 py-1 rounded-full">Sorting Mission</span>
-                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">Is this pronoun Singular or Plural?</h3>
-                    </div>
-
-                    <!-- Pronoun Card to Sort -->
-                    <div class="flex justify-center">
-                        <div id="drag-pronoun-card" class="bg-gradient-to-r from-amber-400 to-yellow-400 border-4 border-amber-600 rounded-3xl p-6 sm:p-8 text-center shadow-xl cursor-grab active:cursor-grabbing transform hover:scale-105 transition max-w-xs w-full animate-float">
-                            <span class="text-4xl sm:text-5xl font-black text-amber-950 block">${currentSortItem.text}</span>
-                            <span class="text-xs font-extrabold text-amber-900/80 mt-2 block">"${currentSortItem.desc}"</span>
-                        </div>
-                    </div>
-
-                    <!-- Drop Zones / Choice Baskets -->
-                    <div class="grid grid-cols-2 gap-4 pt-2">
-                        <!-- Singular Box -->
-                        <button onclick="handleSortChoice('singular')" id="box-singular" class="bg-blue-50 border-4 border-dashed border-blue-400 hover:border-blue-600 rounded-3xl p-5 text-center transition flex flex-col items-center justify-center gap-2 group active:scale-95 shadow-md">
-                            <span class="text-3xl sm:text-4xl group-hover:scale-110 transition">🧑</span>
-                            <div>
-                                <span class="text-lg font-black text-blue-900 block">SINGULAR</span>
-                                <span class="text-xs font-bold text-blue-600 block">Only 1 Person/Thing</span>
-                            </div>
-                        </button>
-
-                        <!-- Plural Box -->
-                        <button onclick="handleSortChoice('plural')" id="box-plural" class="bg-purple-50 border-4 border-dashed border-purple-400 hover:border-purple-600 rounded-3xl p-5 text-center transition flex flex-col items-center justify-center gap-2 group active:scale-95 shadow-md">
-                            <span class="text-3xl sm:text-4xl group-hover:scale-110 transition">🧑‍🤝‍🧑</span>
-                            <div>
-                                <span class="text-lg font-black text-purple-900 block">PLURAL</span>
-                                <span class="text-xs font-bold text-purple-600 block">More than 1 (Group)</span>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-            `;
+            card.addEventListener('touchend', (e) => {
+                card.style.opacity = '1';
+            }, { passive: true });
         }
 
         function handleSortChoice(chosenType) {
@@ -1020,7 +1022,6 @@
             gameState.totalAnswered++;
 
             if (chosenType === currentSortItem.type) {
-                // Correct
                 sounds.playCorrect();
                 gameState.score += 100;
                 gameState.stars += 1;
@@ -1028,20 +1029,19 @@
                 gameState.correctCount++;
                 if (gameState.streak > gameState.maxStreak) gameState.maxStreak = gameState.streak;
 
-                feedback.className = 'rounded-2xl p-4 text-center font-bold text-lg shadow-lg bg-emerald-100 border-2 border-emerald-400 text-emerald-950 block pop-in';
+                feedback.className = 'rounded-2xl p-3.5 text-center font-bold text-sm shadow-lg bg-emerald-100 border-2 border-emerald-400 text-emerald-950 block pop-in';
                 feedback.innerHTML = `
-                    <div class="font-black text-emerald-800 text-xl">✨ Correct Sorting!</div>
-                    <p class="text-sm mt-1"><strong>'${currentSortItem.text}'</strong> is a <strong>${currentSortItem.type.toUpperCase()}</strong> pronoun (${currentSortItem.desc}).</p>
+                    <div class="font-black text-emerald-800 text-base">✨ Correct Sorting!</div>
+                    <p class="text-xs mt-0.5"><strong>'${currentSortItem.text}'</strong> is a <strong>${currentSortItem.type.toUpperCase()}</strong> pronoun (${currentSortItem.desc}).</p>
                 `;
             } else {
-                // Incorrect
                 sounds.playWrong();
                 gameState.streak = 0;
 
-                feedback.className = 'rounded-2xl p-4 text-center font-bold text-lg shadow-lg bg-rose-100 border-2 border-rose-400 text-rose-950 block pop-in';
+                feedback.className = 'rounded-2xl p-3.5 text-center font-bold text-sm shadow-lg bg-rose-100 border-2 border-rose-400 text-rose-950 block pop-in';
                 feedback.innerHTML = `
-                    <div class="font-black text-rose-800 text-xl">💡 Almost!</div>
-                    <p class="text-sm mt-1"><strong>'${currentSortItem.text}'</strong> belongs in the <strong>${currentSortItem.type.toUpperCase()}</strong> box (${currentSortItem.desc}).</p>
+                    <div class="font-black text-rose-800 text-base">💡 Almost!</div>
+                    <p class="text-xs mt-0.5"><strong>'${currentSortItem.text}'</strong> belongs in the <strong>${currentSortItem.type.toUpperCase()}</strong> box (${currentSortItem.desc}).</p>
                 `;
             }
 
@@ -1049,7 +1049,6 @@
             nextBtn.classList.remove('hidden');
         }
 
-        // MODE 3: Pronoun Pop Arcade Game
         function loadArcadeGame() {
             const container = document.getElementById('game-container');
             const feedback = document.getElementById('feedback-banner');
@@ -1061,15 +1060,15 @@
             gameState.arcadeScore = 0;
             gameState.currentQuestionIndex = 0;
 
-            document.getElementById('level-indicator').textContent = `Target: Pop ${gameState.arcadeTargetCount} Personal Pronouns!`;
+            document.getElementById('level-indicator').textContent = `Target: Pop ${gameState.arcadeTargetCount} Pronouns!`;
             document.getElementById('progress-bar-fill').style.width = `0%`;
 
             container.innerHTML = `
-                <div class="relative w-full h-[320px] bg-gradient-to-b from-sky-100 to-indigo-100 rounded-2xl overflow-hidden border-2 border-indigo-200" id="arcade-arena">
-                    <div class="absolute top-2 left-3 z-10 bg-white/80 backdrop-blur px-3 py-1 rounded-full text-xs font-black text-indigo-900 border border-indigo-200">
+                <div class="relative w-full h-[280px] sm:h-[320px] bg-gradient-to-b from-sky-100 to-indigo-100 rounded-2xl overflow-hidden border-2 border-indigo-200" id="arcade-arena">
+                    <div class="absolute top-2 left-2 z-10 bg-white/80 backdrop-blur px-2.5 py-1 rounded-full text-[11px] font-black text-indigo-900 border border-indigo-200">
                         Pop ONLY Pronouns! 🎈
                     </div>
-                    <div class="absolute top-2 right-3 z-10 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-black" id="arcade-counter-badge">
+                    <div class="absolute top-2 right-2 z-10 bg-emerald-500 text-white px-2.5 py-1 rounded-full text-[11px] font-black" id="arcade-counter-badge">
                         Popped: 0 / ${gameState.arcadeTargetCount}
                     </div>
                 </div>
@@ -1081,7 +1080,6 @@
         function startSpawningBubbles() {
             if (gameState.arcadeInterval) clearInterval(gameState.arcadeInterval);
 
-            // Spawn bubble every 1.2 seconds
             gameState.arcadeInterval = setInterval(() => {
                 const arena = document.getElementById('arcade-arena');
                 if (!arena) {
@@ -1089,11 +1087,9 @@
                     return;
                 }
 
-                // Pick random word
                 const wordObj = ARCADE_WORDS[Math.floor(Math.random() * ARCADE_WORDS.length)];
-
                 const bubble = document.createElement('div');
-                const size = Math.floor(Math.random() * 20) + 65; // 65px - 85px
+                const size = Math.floor(Math.random() * 15) + 60;
                 const posX = Math.floor(Math.random() * (arena.clientWidth - size - 20)) + 10;
                 
                 const colors = [
@@ -1105,27 +1101,25 @@
                 ];
                 const colorClass = colors[Math.floor(Math.random() * colors.length)];
 
-                bubble.className = `bubble-item border-3 font-black text-lg ${colorClass}`;
+                bubble.className = `bubble-item border-3 font-black text-base sm:text-lg ${colorClass}`;
                 bubble.style.width = `${size}px`;
                 bubble.style.height = `${size}px`;
                 bubble.style.left = `${posX}px`;
-                bubble.style.bottom = `-80px`;
+                bubble.style.bottom = `-70px`;
                 bubble.innerHTML = `<span>${wordObj.text}</span>`;
 
-                // Pop Click Event
                 bubble.onclick = () => popBubble(bubble, wordObj);
 
                 arena.appendChild(bubble);
 
-                // Animate upwards
-                let currentBottom = -80;
+                let currentBottom = -70;
                 const floatSpeed = Math.random() * 1.5 + 1.2;
 
                 const floatInterval = setInterval(() => {
                     currentBottom += floatSpeed;
                     bubble.style.bottom = `${currentBottom}px`;
 
-                    if (currentBottom > arena.clientHeight + 80) {
+                    if (currentBottom > arena.clientHeight + 70) {
                         clearInterval(floatInterval);
                         if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
                     }
@@ -1137,11 +1131,7 @@
         function popBubble(bubbleEl, wordObj) {
             sounds.playPop();
 
-            // Remove bubble with visual burst
-            if (bubbleEl.parentNode) {
-                bubbleEl.parentNode.removeChild(bubbleEl);
-            }
-
+            if (bubbleEl.parentNode) bubbleEl.parentNode.removeChild(bubbleEl);
             gameState.totalAnswered++;
 
             if (wordObj.isPronoun) {
@@ -1158,7 +1148,7 @@
 
                 if (gameState.arcadeScore >= gameState.arcadeTargetCount) {
                     clearInterval(gameState.arcadeInterval);
-                    setTimeout(showVictoryScreen, 500);
+                    setTimeout(showVictoryScreen, 400);
                 }
             } else {
                 sounds.playWrong();
@@ -1168,7 +1158,6 @@
             updateStatsHeader();
         }
 
-        // Next Question Navigation
         function nextQuestion() {
             sounds.playPop();
             gameState.currentQuestionIndex++;
@@ -1184,25 +1173,20 @@
             }
         }
 
-        // Update Header Stats
         function updateStatsHeader() {
             document.getElementById('score-text').textContent = gameState.score;
             document.getElementById('stars-text').textContent = gameState.stars;
             document.getElementById('streak-counter').innerHTML = `🔥 ${gameState.streak}`;
         }
 
-        // Victory Screen Display & Confetti
         function showVictoryScreen() {
             sounds.playCheer();
 
-            if (gameState.arcadeInterval) {
-                clearInterval(gameState.arcadeInterval);
-            }
+            if (gameState.arcadeInterval) clearInterval(gameState.arcadeInterval);
 
             document.getElementById('screen-gameplay').classList.add('hidden');
             document.getElementById('screen-victory').classList.remove('hidden');
 
-            // Calculate accuracy
             const accuracy = gameState.totalAnswered > 0 
                 ? Math.round((gameState.correctCount / gameState.totalAnswered) * 100) 
                 : 100;
@@ -1211,7 +1195,6 @@
             document.getElementById('final-accuracy').textContent = `${accuracy}%`;
             document.getElementById('final-streak').textContent = gameState.maxStreak;
 
-            // Stars Rating Calculation
             const starsContainer = document.getElementById('final-stars-container');
             let starCount = 3;
             if (accuracy < 60) starCount = 1;
@@ -1221,11 +1204,10 @@
                 <i class="fa-solid fa-star ${i < starCount ? 'text-amber-400 animate-pulse' : 'text-slate-300'}"></i>
             `).join('');
 
-            // Trigger Confetti Blast
             if (window.confetti) {
                 confetti({
-                    particleCount: 100,
-                    spread: 70,
+                    particleCount: 90,
+                    spread: 60,
                     origin: { y: 0.6 }
                 });
             }
