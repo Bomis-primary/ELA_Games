@@ -1,434 +1,1143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Secret Identity Heroes LMS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pronoun Power Quest - Grade 2 Grammar Game</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN for victory celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts for vibrant kid-friendly typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<style>
-*{box-sizing:border-box;font-family:Arial;margin:0;padding:0;}
+    <style>
+        * {
+            font-family: 'Fredoka', 'Nunito', cursive, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-body{overflow:hidden;background:#000;}
+        /* Theme Background Styling */
+        .theme-beach {
+            background: linear-gradient(180deg, #38bdf8 0%, #7dd3fc 50%, #fde047 85%, #fef08a 100%);
+        }
+        .theme-forest {
+            background: linear-gradient(180deg, #38bdf8 0%, #4ade80 40%, #15803d 100%);
+        }
+        .theme-city {
+            background: linear-gradient(180deg, #818cf8 0%, #c084fc 45%, #312e81 100%);
+        }
+        .theme-desert {
+            background: linear-gradient(180deg, #f97316 0%, #fdba74 50%, #ea580c 100%);
+        }
 
-/* BACKGROUND (FULL IMAGE SAFE) */
-#bg{
-position:fixed;
-width:100%;
-height:100%;
-background-size:contain;
-background-repeat:no-repeat;
-background-position:center;
-background-color:#000;
-z-index:-2;
-}
+        /* Bounce & Floating Animations */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: floatSlow 3s ease-in-out infinite;
+        }
 
-#overlay{
-position:fixed;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.35);
-z-index:-1;
-}
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.9); }
+        }
+        .pulse-glow {
+            animation: pulseGlow 2s infinite;
+        }
 
-/* SPLASH */
-#splash{
-position:fixed;
-inset:0;
-background:white;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:9999;
-}
-#splash img{width:220px;}
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        .pop-in {
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
 
-/* LEVEL GRID (2x2 BIG CARDS) */
-#levels{
-display:grid;
-grid-template-columns:1fr 1fr;
-grid-template-rows:1fr 1fr;
-gap:20px;
-height:100vh;
-padding:30px;
-justify-items:center;
-align-items:center;
-}
+        /* Card Draggable & Drag-over styles */
+        .drag-over {
+            transform: scale(1.05);
+            border-color: #f59e0b !important;
+            background-color: rgba(254, 243, 199, 0.9) !important;
+        }
 
-.level{
-width:95%;
-height:200px;
-border-radius:16px;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-font-weight:900;
-font-size:26px;
-color:black;
-text-align:center;
-background-size:contain;
-background-repeat:no-repeat;
-background-position:center;
-background-color:white;
-box-shadow:0 6px 18px rgba(0,0,0,0.4);
-position:relative;
-cursor:pointer;
-}
+        /* Floating Bubble animation for Arcade Mode */
+        .bubble-item {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: inset -5px -5px 12px rgba(0,0,0,0.15), inset 5px 5px 12px rgba(255,255,255,0.8), 0 8px 15px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+        }
+        .bubble-item:active {
+            transform: scale(0.9);
+        }
 
-.lock{
-position:absolute;
-top:10px;
-right:10px;
-font-size:28px;
-}
-
-/* SCREENS */
-.screen{
-display:none;
-height:100vh;
-width:100%;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
-color:white;
-padding:20px;
-}
-
-/* INPUT */
-input{
-padding:12px;
-border-radius:10px;
-border:none;
-width:220px;
-margin:10px;
-text-align:center;
-}
-
-/* BUTTON */
-button{
-padding:12px 18px;
-border:none;
-border-radius:10px;
-background:#4caf50;
-color:white;
-font-size:16px;
-margin:5px;
-cursor:pointer;
-}
-
-/* GAME */
-#game{
-display:none;
-height:100vh;
-flex-direction:column;
-}
-
-#top{
-display:flex;
-justify-content:space-between;
-padding:10px;
-background:rgba(255,255,255,0.9);
-font-weight:bold;
-}
-
-/* HERO */
-#hero{
-position:absolute;
-bottom:20px;
-left:10%;
-width:120px;
-transition:all 0.8s ease;
-}
-
-/* CARD */
-#card{
-margin:auto;
-margin-top:70px;
-background:white;
-padding:18px;
-border-radius:16px;
-width:90%;
-max-width:520px;
-text-align:center;
-}
-
-/* DROP BLANK */
-.blank{
-border-bottom:3px dashed #333;
-display:inline-block;
-min-width:60px;
-padding:5px;
-}
-
-/* OPTIONS */
-.option{
-padding:10px;
-margin:5px;
-background:#e3f2fd;
-border-radius:10px;
-display:inline-block;
-cursor:grab;
-}
-
-/* RESULT */
-#result{
-display:none;
-height:100vh;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-color:white;
-}
-
-/* CONFETTI */
-.confetti{
-position:fixed;
-width:8px;
-height:8px;
-top:0;
-animation:fall 2s linear;
-}
-
-@keyframes fall{
-0%{transform:translateY(-10px)}
-100%{transform:translateY(100vh)}
-}
-
-/* MOBILE */
-@media(max-width:600px){
-.level{height:160px;font-size:20px;}
-#hero{width:95px;}
-}
-</style>
+        /* Custom scrollbar for modern feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+    </style>
 </head>
+<body class="theme-beach min-h-screen text-slate-800 transition-colors duration-700 flex flex-col justify-between overflow-x-hidden">
 
-<body>
+    <!-- Top Navigation Header -->
+    <header class="w-full bg-white/80 backdrop-blur-md border-b-4 border-yellow-400 p-3 px-4 sm:px-8 shadow-md sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
+            
+            <!-- Game Title & Avatar -->
+            <div class="flex items-center gap-3">
+                <div id="header-hero-avatar" class="w-12 h-12 rounded-full bg-yellow-300 border-2 border-yellow-500 flex items-center justify-center text-2xl shadow-inner cursor-pointer hover:scale-105 transition" onclick="openHeroModal()" title="Change Character">
+                    👧⚡
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black tracking-wide text-indigo-900 leading-tight flex items-center gap-2">
+                        <span>Pronoun Power</span>
+                        <span class="bg-yellow-400 text-indigo-950 text-xs px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Grade 2</span>
+                    </h1>
+                    <p class="text-xs text-slate-600 font-semibold hidden sm:block">Master Singular & Plural Personal Pronouns!</p>
+                </div>
+            </div>
 
-<div id="bg"></div>
-<div id="overlay"></div>
+            <!-- Stats Bar -->
+            <div class="flex items-center gap-3 sm:gap-6">
+                <!-- Score Display -->
+                <div class="flex items-center gap-1.5 bg-indigo-50 border-2 border-indigo-200 px-3 py-1 rounded-2xl shadow-sm">
+                    <i class="fa-solid fa-trophy text-amber-500 text-lg"></i>
+                    <span id="score-text" class="font-extrabold text-indigo-900 text-lg sm:text-xl">0</span>
+                </div>
 
-<!-- SPLASH -->
-<div id="splash">
-<img src="assets/innovine-logo.png">
-</div>
+                <!-- Stars Display -->
+                <div class="flex items-center gap-1.5 bg-amber-50 border-2 border-amber-200 px-3 py-1 rounded-2xl shadow-sm">
+                    <i class="fa-solid fa-star text-yellow-500 text-lg animate-pulse"></i>
+                    <span id="stars-text" class="font-extrabold text-amber-900 text-lg sm:text-xl">0</span>
+                </div>
 
-<!-- LEVELS -->
-<div id="levels"></div>
+                <!-- Audio Toggle Button -->
+                <button id="audio-toggle-btn" onclick="toggleAudio()" class="w-10 h-10 rounded-full bg-indigo-100 hover:bg-indigo-200 border-2 border-indigo-300 flex items-center justify-center text-indigo-700 text-lg transition shadow-sm" title="Mute/Unmute Audio">
+                    <i id="audio-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </header>
 
-<!-- GAME -->
-<div id="game">
-<div id="top">
-<div id="player"></div>
-<div>Score: <span id="score">0</span></div>
-<div>Lives: <span id="lives">3</span></div>
-<div>Q: <span id="qno">1</span></div>
-</div>
+    <!-- Main Content Container -->
+    <main class="max-w-4xl mx-auto w-full px-4 py-6 flex-1 flex flex-col justify-center">
 
-<img id="hero">
+        <!-- SCREEN 1: WELCOME & SELECTION SCREEN -->
+        <section id="screen-welcome" class="space-y-6 pop-in">
+            <!-- Hero Title Banner -->
+            <div class="bg-white/90 backdrop-blur-md border-4 border-indigo-400 rounded-3xl p-6 text-center shadow-xl relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-yellow-300/40 rounded-full blur-xl"></div>
+                <div class="inline-block bg-indigo-100 text-indigo-800 text-sm font-black px-4 py-1 rounded-full mb-3 uppercase tracking-wider">
+                    ⚡ Grammar Adventure Mission
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-black text-indigo-950 mb-3">Become a Pronoun Superhero!</h2>
+                <p class="text-base sm:text-lg text-slate-700 font-medium max-w-2xl mx-auto">
+                    Pronouns are helper words that take the place of nouns like <span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded">he, she, it, we, they</span>. Help our heroes restore grammar power across the realm!
+                </p>
+            </div>
 
-<div id="card">
-<h2 id="question"></h2>
-<div id="options"></div>
-<div id="hint"></div>
-</div>
-</div>
+            <!-- Character & Theme Customization Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- Character Selection Box -->
+                <div class="bg-white/90 backdrop-blur-md border-4 border-amber-300 rounded-3xl p-5 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-extrabold text-amber-900 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-user-ninja text-amber-500"></i> Choose Your Hero
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2" id="hero-selection-grid">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
 
-<!-- RESULT -->
-<div id="result">
-<h1 id="final"></h1>
-<button onclick="location.reload()">Play Again</button>
-</div>
+                <!-- World / Background Theme Selection -->
+                <div class="bg-white/90 backdrop-blur-md border-4 border-cyan-300 rounded-3xl p-5 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-extrabold text-cyan-900 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-map-location-dot text-cyan-500"></i> Select Quest World
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2" id="world-selection-grid">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<audio id="correct" src="assets/correct.mp3"></audio>
-<audio id="wrong" src="assets/wrong.mp3"></audio>
-<audio id="clapping" src="assets/clapping.mp3"></audio>
+            <!-- Game Mode Buttons -->
+            <div class="bg-white/90 backdrop-blur-md border-4 border-emerald-400 rounded-3xl p-6 shadow-xl text-center space-y-4">
+                <h3 class="text-xl font-black text-emerald-950 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-gamepad text-emerald-600"></i> Pick Your Pronoun Game Mode:
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    
+                    <!-- Mode 1 Button -->
+                    <button onclick="startGame('replace')" class="group relative bg-gradient-to-b from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 text-white p-5 rounded-2xl border-b-8 border-indigo-900 shadow-lg active:border-b-2 active:translate-y-1 transition text-left flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                            ✍️
+                        </div>
+                        <div>
+                            <span class="block text-xs uppercase font-bold text-indigo-200">Mode 1</span>
+                            <span class="text-lg font-black block leading-tight">Noun Replacer</span>
+                            <span class="text-xs text-indigo-100 font-normal mt-1 block">Swap underlined words with the right pronoun!</span>
+                        </div>
+                    </button>
 
-<script>
+                    <!-- Mode 2 Button -->
+                    <button onclick="startGame('sort')" class="group relative bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white p-5 rounded-2xl border-b-8 border-amber-900 shadow-lg active:border-b-2 active:translate-y-1 transition text-left flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                            📦
+                        </div>
+                        <div>
+                            <span class="block text-xs uppercase font-bold text-amber-200">Mode 2</span>
+                            <span class="text-lg font-black block leading-tight">Singular vs Plural</span>
+                            <span class="text-xs text-amber-100 font-normal mt-1 block">Sort pronouns into 1 person or Many boxes!</span>
+                        </div>
+                    </button>
 
-/* BACKGROUNDS */
-const themes={
-0:"assets/beach.png",
-1:"assets/desert.png",
-2:"assets/forest.png",
-3:"assets/city.png"
-};
+                    <!-- Mode 3 Button -->
+                    <button onclick="startGame('arcade')" class="group relative bg-gradient-to-b from-rose-500 to-rose-700 hover:from-rose-600 hover:to-rose-800 text-white p-5 rounded-2xl border-b-8 border-rose-900 shadow-lg active:border-b-2 active:translate-y-1 transition text-left flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                            🎈
+                        </div>
+                        <div>
+                            <span class="block text-xs uppercase font-bold text-rose-200">Mode 3</span>
+                            <span class="text-lg font-black block leading-tight">Pronoun Pop Arcade</span>
+                            <span class="text-xs text-rose-100 font-normal mt-1 block">Pop floating bubbles that hold personal pronouns!</span>
+                        </div>
+                    </button>
 
-/* LEVEL STORIES */
-const story=[
-"🌊 Beach: Sea monsters are attacking! Save the shore using pronouns!",
-"🏜 Desert: Sandstorm confusion! Restore identities!",
-"🌲 Forest: Magical creatures lost identity!",
-"🏙 City: Emergency chaos! Fix all pronouns!"
-];
+                </div>
+            </div>
+        </section>
 
-/* DATA (ALL PRONOUNS ALWAYS PRESENT) */
-const levels=[
-[
-{q:"___ am happy",a:"I"},
-{q:"___ are playing",a:"You"},
-{q:"___ is a boy",a:"He"},
-{q:"___ is a girl",a:"She"},
-{q:"___ is a cat",a:"It"}
-],
-[
-{q:"___ is a doctor",a:"He"},
-{q:"___ is a nurse",a:"She"},
-{q:"___ are friends",a:"They"},
-{q:"___ is strong",a:"He"},
-{q:"___ is kind",a:"She"}
-],
-[
-{q:"___ is a bird",a:"It"},
-{q:"___ are running",a:"They"},
-{q:"___ is a tree",a:"It"},
-{q:"___ are playing",a:"They"},
-{q:"___ is sleeping",a:"It"}
-],
-[
-{q:"___ am ready",a:"I"},
-{q:"___ are listening",a:"You"},
-{q:"___ is a hero",a:"He"},
-{q:"___ is a leader",a:"She"},
-{q:"___ are saving city",a:"They"}
-]
-];
+        <!-- SCREEN 2: GAMEPLAY ARENA -->
+        <section id="screen-gameplay" class="hidden space-y-4">
+            
+            <!-- Game Top Status Bar -->
+            <div class="bg-white/90 backdrop-blur-md border-3 border-indigo-300 rounded-2xl p-3 px-5 flex items-center justify-between shadow-md">
+                <button onclick="returnToMenu()" class="text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-700 bg-slate-100 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-slate-300 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrow-left"></i> Menu
+                </button>
+                <div class="text-center">
+                    <span id="game-mode-badge" class="bg-indigo-600 text-white text-xs px-3 py-1 rounded-full uppercase font-black tracking-wider">
+                        Noun Replacer
+                    </span>
+                    <span id="level-indicator" class="text-sm font-extrabold text-slate-700 block mt-0.5">Question 1 of 8</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <span class="text-xs text-slate-500 font-bold uppercase hidden sm:inline">Streak:</span>
+                    <span id="streak-counter" class="bg-orange-500 text-white text-xs font-black px-2.5 py-1 rounded-lg flex items-center gap-1">
+                        🔥 0
+                    </span>
+                </div>
+            </div>
 
-let level=0;
-let index=0;
-let score=0;
-let lives=3;
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200/80 rounded-full h-3 border border-white/60 overflow-hidden shadow-inner">
+                <div id="progress-bar-fill" class="bg-gradient-to-r from-amber-400 to-emerald-500 h-full w-0 transition-all duration-500 rounded-full"></div>
+            </div>
 
-/* SPLASH */
-setTimeout(()=>{
-document.getElementById("splash").style.display="none";
-showLevels();
-},5000);
+            <!-- DYNAMIC GAME CONTAINER -->
+            <div id="game-container" class="bg-white/95 backdrop-blur-md border-4 border-indigo-400 rounded-3xl p-4 sm:p-8 shadow-2xl min-h-[380px] flex flex-col justify-between relative overflow-hidden">
+                <!-- Content dynamically injected here -->
+            </div>
 
-/* LEVEL GRID */
-function showLevels(){
-let box=document.getElementById("levels");
-box.innerHTML="";
-box.style.display="grid";
+            <!-- Feedback Message Banner -->
+            <div id="feedback-banner" class="hidden rounded-2xl p-4 text-center font-bold text-base sm:text-lg shadow-lg transition-all duration-300 pop-in">
+                <!-- Injected via JS -->
+            </div>
 
-for(let i=0;i<4;i++){
-let d=document.createElement("div");
-d.className="level";
-d.style.backgroundImage=`url('${themes[i]}')`;
-d.innerHTML=`Level ${i+1}<br><small>Tap to start</small>`;
+            <!-- Action / Next Button Container -->
+            <div class="flex justify-end">
+                <button id="next-btn" onclick="nextQuestion()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg px-8 py-3.5 rounded-2xl border-b-4 border-emerald-700 shadow-lg active:translate-y-0.5 transition flex items-center gap-2">
+                    <span>Next Quest</span> <i class="fa-solid fa-circle-arrow-right"></i>
+                </button>
+            </div>
 
-let lock=document.createElement("div");
-lock.className="lock";
-lock.innerHTML="🔓";
+        </section>
 
-d.appendChild(lock);
+        <!-- SCREEN 3: VICTORY & SUMMARY SCREEN -->
+        <section id="screen-victory" class="hidden space-y-6 pop-in">
+            <div class="bg-white/95 backdrop-blur-md border-4 border-amber-400 rounded-3xl p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden">
+                <!-- Trophy Icon with glow -->
+                <div class="w-24 h-24 mx-auto bg-amber-100 border-4 border-amber-300 rounded-full flex items-center justify-center text-5xl mb-4 text-amber-500 shadow-inner animate-bounce">
+                    🏆
+                </div>
 
-d.onclick=()=>startLevel(i);
-box.appendChild(d);
-}
+                <h2 class="text-3xl sm:text-4xl font-black text-indigo-950 mb-1">Quest Completed!</h2>
+                <p class="text-slate-600 font-bold mb-6">You are an official Pronoun Power Hero!</p>
 
-document.getElementById("bg").style.backgroundImage="url('assets/background.jpg')";
-}
+                <!-- Stars Rating Display -->
+                <div class="flex justify-center gap-3 text-4xl text-amber-400 mb-6" id="final-stars-container">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
 
-/* START LEVEL */
-function startLevel(lv){
+                <!-- Stats Summary Box -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-lg mx-auto mb-6">
+                    <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-3">
+                        <span class="block text-xs font-bold text-indigo-500 uppercase">Final Score</span>
+                        <span id="final-score" class="text-2xl font-black text-indigo-900">0</span>
+                    </div>
+                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-3">
+                        <span class="block text-xs font-bold text-emerald-500 uppercase">Accuracy</span>
+                        <span id="final-accuracy" class="text-2xl font-black text-emerald-900">100%</span>
+                    </div>
+                    <div class="bg-orange-50 border-2 border-orange-200 rounded-2xl p-3 col-span-2 sm:col-span-1">
+                        <span class="block text-xs font-bold text-orange-500 uppercase">Best Streak</span>
+                        <span id="final-streak" class="text-2xl font-black text-orange-900">0</span>
+                    </div>
+                </div>
 
-level=lv;
-index=0;
-score=0;
-lives=3;
+                <!-- Printable Learning Certificate Summary -->
+                <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-dashed border-amber-300 rounded-2xl p-4 max-w-md mx-auto mb-6 text-left text-xs sm:text-sm space-y-1.5 text-amber-950">
+                    <div class="flex items-center gap-2 font-black text-amber-900 text-base mb-1 border-b border-amber-200 pb-1">
+                        <span>📜 Pronoun Cheat Sheet Mastered:</span>
+                    </div>
+                    <p>• <strong>Singular Pronouns (1 person/thing):</strong> I, me, he, him, she, her, it, you</p>
+                    <p>• <strong>Plural Pronouns (2 or more):</strong> we, us, they, them, you</p>
+                </div>
 
-document.getElementById("levels").style.display="none";
-document.getElementById("game").style.display="flex";
+                <!-- Buttons -->
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="restartCurrentGame()" class="bg-amber-500 hover:bg-amber-600 text-white font-black text-lg px-6 py-3 rounded-2xl border-b-4 border-amber-700 shadow-md active:translate-y-0.5 transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Play Mode Again
+                    </button>
+                    <button onclick="returnToMenu()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg px-6 py-3 rounded-2xl border-b-4 border-indigo-900 shadow-md active:translate-y-0.5 transition flex items-center gap-2">
+                        <i class="fa-solid fa-house"></i> Main Menu
+                    </button>
+                </div>
 
-document.getElementById("bg").style.backgroundImage=`url('${themes[lv]}')`;
+            </div>
+        </section>
 
-loadQ();
-}
+    </main>
 
-/* LOAD */
-function loadQ(){
+    <!-- Footer -->
+    <footer class="w-full text-center py-4 text-xs font-semibold text-slate-700/80">
+        <p>Pronoun Power Quest • Designed for Grade 2 ELA Standards (CCSS.ELA-LITERACY.L.1.1.D & L.2.1)</p>
+    </footer>
 
-if(index>=levels[level].length){
-endLevel();
-return;
-}
+    <script>
+        /* Web Audio API Sound Generator for reliable browser sound FX without external files */
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
 
-let q=levels[level][index];
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
 
-document.getElementById("question").innerHTML=q.q.replace("___","<span class='blank'>___</span>");
-document.getElementById("score").innerText=score;
-document.getElementById("lives").innerText=lives;
-document.getElementById("qno").innerText=index+1;
+            playCorrect() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
 
-let box=document.getElementById("options");
-box.innerHTML="";
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
 
-["I","You","He","She","It","They"].forEach(p=>{
-let d=document.createElement("div");
-d.className="option";
-d.innerText=p;
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
 
-d.onclick=()=>check(p);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
 
-box.appendChild(d);
-});
-}
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
 
-/* CHECK */
-function check(ans){
+                osc.start(now);
+                osc.stop(now + 0.5);
+            }
 
-let q=levels[level][index];
+            playWrong() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
 
-if(ans===q.a){
-score++;
-play("correct");
-play("clapping");
-moveHero();
-index++;
-loadQ();
-}
-else{
-lives--;
-play("wrong");
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
 
-if(lives<=0){
-startLevel(level);
-}
-}
-}
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.setValueAtTime(174.61, now + 0.15); // F3
 
-/* HERO MOVE */
-function moveHero(){
-let h=document.getElementById("hero");
-if(!h.src){
-h.src="assets/boy-hero.png";
-}
-h.style.left=(10+index*15)+"%";
-}
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
 
-/* END LEVEL */
-function endLevel(){
-document.getElementById("game").style.display="none";
-document.getElementById("levels").style.display="grid";
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
 
-if(score>=4){
-alert("Awesome! Level Complete");
-}
-else{
-alert("Try again!");
-}
-showLevels();
-}
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
 
-/* AUDIO */
-function play(id){
-let a=document.getElementById(id);
-a.currentTime=0;
-a.play().catch(()=>{});
-}
+            playPop() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
 
-</script>
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
 
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.08);
+            }
+
+            playCheer() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                // Fanfare notes
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const now = this.ctx.currentTime + (idx * 0.1);
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                });
+            }
+        }
+
+        const sounds = new SoundEngine();
+
+        // Audio toggle handler
+        function toggleAudio() {
+            sounds.muted = !sounds.muted;
+            const icon = document.getElementById('audio-icon');
+            const btn = document.getElementById('audio-toggle-btn');
+            if (sounds.muted) {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+                btn.classList.add('bg-slate-100');
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-indigo-700';
+                btn.classList.remove('bg-slate-100');
+                sounds.playPop();
+            }
+        }
+
+        // Game State
+        let gameState = {
+            score: 0,
+            stars: 0,
+            currentMode: null, // 'replace', 'sort', 'arcade'
+            currentQuestionIndex: 0,
+            streak: 0,
+            maxStreak: 0,
+            correctCount: 0,
+            totalAnswered: 0,
+            selectedHero: 'girl',
+            selectedWorld: 'beach',
+            arcadeInterval: null,
+            arcadeScore: 0,
+            arcadeTargetCount: 10
+        };
+
+        // Hero Options
+        const HEROES = [
+            { id: 'girl', name: 'Girl Hero', emoji: '👧⚡', color: 'border-pink-400 bg-pink-50' },
+            { id: 'boy', name: 'Boy Hero', emoji: '👦⚡', color: 'border-blue-400 bg-blue-50' },
+            { id: 'astro', name: 'Astro Kid', emoji: '🧑‍🚀⭐', color: 'border-purple-400 bg-purple-50' },
+            { id: 'pup', name: 'Super Pup', emoji: '🐶🦸', color: 'border-amber-400 bg-amber-50' }
+        ];
+
+        // World Themes
+        const WORLDS = [
+            { id: 'beach', name: 'Sunny Beach', icon: '🏖️', class: 'theme-beach' },
+            { id: 'forest', name: 'Magic Forest', icon: '🌲', class: 'theme-forest' },
+            { id: 'city', name: 'Hero City', icon: '🏙️', class: 'theme-city' },
+            { id: 'desert', name: 'Dune Desert', icon: '🏜️', class: 'theme-desert' }
+        ];
+
+        /* Grade 2 Question Database */
+        // MODE 1 QUESTIONS: Replace underlined Nouns with Personal Pronouns
+        const REPLACE_QUESTIONS = [
+            {
+                sentence: "<u>Sarah</u> loves to play soccer in the park.",
+                targetNoun: "Sarah",
+                options: [
+                    { text: "She", correct: true, hint: "Sarah is 1 girl -> She" },
+                    { text: "They", correct: false, hint: "Sarah is only 1 person!" },
+                    { text: "He", correct: false, hint: "Sarah is a girl's name!" }
+                ],
+                explanation: "We use 'She' to replace 1 girl/female noun!"
+            },
+            {
+                sentence: "<u>Liam and Leo</u> built a tall Lego tower.",
+                targetNoun: "Liam and Leo",
+                options: [
+                    { text: "He", correct: false, hint: "Liam and Leo are 2 people!" },
+                    { text: "They", correct: true, hint: "2 or more people -> They" },
+                    { text: "It", correct: false, hint: "'It' is for things or animals!" }
+                ],
+                explanation: "We use 'They' for more than one person!"
+            },
+            {
+                sentence: "<u>The cute puppy</u> wagged its tail happily.",
+                targetNoun: "The cute puppy",
+                options: [
+                    { text: "It", correct: true, hint: "1 animal or object -> It" },
+                    { text: "We", correct: false, hint: "Are you the puppy? 'We' includes you!" },
+                    { text: "Them", correct: false, hint: "There is only 1 puppy!" }
+                ],
+                explanation: "We use 'It' for 1 animal or object!"
+            },
+            {
+                sentence: "<u>Ben</u> rides his shiny blue bicycle to school.",
+                targetNoun: "Ben",
+                options: [
+                    { text: "He", correct: true, hint: "Ben is 1 boy -> He" },
+                    { text: "She", correct: false, hint: "Ben is a boy's name!" },
+                    { text: "They", correct: false, hint: "Ben is just 1 person!" }
+                ],
+                explanation: "We use 'He' to replace 1 boy/male noun!"
+            },
+            {
+                sentence: "<u>My mom and I</u> baked yummy chocolate cookies.",
+                targetNoun: "My mom and I",
+                options: [
+                    { text: "We", correct: true, hint: "Mom + I = We!" },
+                    { text: "They", correct: false, hint: "Since 'I' am included, use We!" },
+                    { text: "She", correct: false, hint: "There are 2 people!" }
+                ],
+                explanation: "When a group includes 'I', use 'We'!"
+            },
+            {
+                sentence: "Please give the colored pencils to <u>Emma and Jake</u>.",
+                targetNoun: "Emma and Jake",
+                options: [
+                    { text: "them", correct: true, hint: "To more than one person -> them" },
+                    { text: "him", correct: false, hint: "There are two kids, not one!" },
+                    { text: "it", correct: false, hint: "Emma and Jake are people!" }
+                ],
+                explanation: "We use 'them' when receiving an action in plural!"
+            },
+            {
+                sentence: "The teacher asked <u>Mr. Davis</u> a fun question.",
+                targetNoun: "Mr. Davis",
+                options: [
+                    { text: "him", correct: true, hint: "1 man receiving action -> him" },
+                    { text: "her", correct: false, hint: "Mr. Davis is a man!" },
+                    { text: "us", correct: false, hint: "Mr. Davis is 1 person!" }
+                ],
+                explanation: "We use 'him' when 1 male receives an action!"
+            },
+            {
+                sentence: "<u>The giant apple</u> fell from the tree.",
+                targetNoun: "The giant apple",
+                options: [
+                    { text: "It", correct: true, hint: "1 object -> It" },
+                    { text: "They", correct: false, hint: "There is only 1 apple!" },
+                    { text: "He", correct: false, hint: "Apples aren't boys!" }
+                ],
+                explanation: "We use 'It' to replace a singular object!"
+            }
+        ];
+
+        // MODE 2 DATA: Sorting Pronouns into Singular vs Plural
+        const SORT_PRONOUNS_POOL = [
+            { text: 'He', type: 'singular', desc: '1 Boy' },
+            { text: 'She', type: 'singular', desc: '1 Girl' },
+            { text: 'It', type: 'singular', desc: '1 Thing/Animal' },
+            { text: 'I', type: 'singular', desc: '1 Person (Myself)' },
+            { text: 'Him', type: 'singular', desc: '1 Boy (Object)' },
+            { text: 'Her', type: 'singular', desc: '1 Girl (Object)' },
+            { text: 'Me', type: 'singular', desc: '1 Person (Object)' },
+            { text: 'They', type: 'plural', desc: 'Group of people' },
+            { text: 'We', type: 'plural', desc: 'Group including me' },
+            { text: 'Them', type: 'plural', desc: 'Group receiving action' },
+            { text: 'Us', type: 'plural', desc: 'Group including me (Object)' }
+        ];
+
+        // MODE 3 DATA: Floating Arcade Bubbles
+        const ARCADE_WORDS = [
+            { text: 'He', isPronoun: true },
+            { text: 'She', isPronoun: true },
+            { text: 'It', isPronoun: true },
+            { text: 'They', isPronoun: true },
+            { text: 'We', isPronoun: true },
+            { text: 'Him', isPronoun: true },
+            { text: 'Her', isPronoun: true },
+            { text: 'Them', isPronoun: true },
+            { text: 'Us', isPronoun: true },
+            { text: 'Me', isPronoun: true },
+            // Distractors (Nouns/Verbs/Adjectives)
+            { text: 'Dog', isPronoun: false },
+            { text: 'Run', isPronoun: false },
+            { text: 'Happy', isPronoun: false },
+            { text: 'Ball', isPronoun: false },
+            { text: 'Teacher', isPronoun: false },
+            { text: 'Blue', isPronoun: false },
+            { text: 'Cat', isPronoun: false }
+        ];
+
+        // Initialize UI Elements on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderHeroSelection();
+            renderWorldSelection();
+            updateHeaderAvatar();
+        });
+
+        // Render Hero Grid Selection
+        function renderHeroSelection() {
+            const grid = document.getElementById('hero-selection-grid');
+            grid.innerHTML = HEROES.map(hero => `
+                <button onclick="selectHero('${hero.id}')" id="hero-btn-${hero.id}" class="flex items-center gap-2 p-2.5 rounded-2xl border-2 ${hero.id === gameState.selectedHero ? 'border-amber-500 bg-amber-100 ring-2 ring-amber-400' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'} transition">
+                    <span class="text-2xl">${hero.emoji}</span>
+                    <span class="text-xs sm:text-sm font-extrabold text-slate-800">${hero.name}</span>
+                </button>
+            `).join('');
+        }
+
+        // Render World Grid Selection
+        function renderWorldSelection() {
+            const grid = document.getElementById('world-selection-grid');
+            grid.innerHTML = WORLDS.map(world => `
+                <button onclick="selectWorld('${world.id}')" id="world-btn-${world.id}" class="flex items-center gap-2 p-2.5 rounded-2xl border-2 ${world.id === gameState.selectedWorld ? 'border-cyan-500 bg-cyan-100 ring-2 ring-cyan-400' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'} transition">
+                    <span class="text-2xl">${world.icon}</span>
+                    <span class="text-xs sm:text-sm font-extrabold text-slate-800">${world.name}</span>
+                </button>
+            `).join('');
+        }
+
+        // Select Hero
+        function selectHero(heroId) {
+            sounds.playPop();
+            gameState.selectedHero = heroId;
+            renderHeroSelection();
+            updateHeaderAvatar();
+        }
+
+        // Select World Theme
+        function selectWorld(worldId) {
+            sounds.playPop();
+            gameState.selectedWorld = worldId;
+            renderWorldSelection();
+            
+            // Update Body Background class
+            const selectedObj = WORLDS.find(w => w.id === worldId);
+            document.body.className = `${selectedObj.class} min-h-screen text-slate-800 transition-colors duration-700 flex flex-col justify-between overflow-x-hidden`;
+        }
+
+        // Update top-left avatar icon
+        function updateHeaderAvatar() {
+            const heroObj = HEROES.find(h => h.id === gameState.selectedHero);
+            document.getElementById('header-hero-avatar').innerHTML = heroObj.emoji;
+        }
+
+        function openHeroModal() {
+            sounds.playPop();
+            returnToMenu();
+        }
+
+        // Start Game with Mode
+        function startGame(mode) {
+            sounds.playPop();
+            gameState.currentMode = mode;
+            gameState.currentQuestionIndex = 0;
+            gameState.totalAnswered = 0;
+            gameState.correctCount = 0;
+            
+            // Toggle Screen Visibility
+            document.getElementById('screen-welcome').classList.add('hidden');
+            document.getElementById('screen-victory').classList.add('hidden');
+            document.getElementById('screen-gameplay').classList.remove('hidden');
+
+            // Set Mode Badge Text
+            const modeBadge = document.getElementById('game-mode-badge');
+            if (mode === 'replace') modeBadge.textContent = 'Mode 1: Noun Replacer';
+            if (mode === 'sort') modeBadge.textContent = 'Mode 2: Singular vs Plural';
+            if (mode === 'arcade') modeBadge.textContent = 'Mode 3: Pronoun Pop Arcade';
+
+            // Load Game Mode Content
+            if (mode === 'replace') {
+                loadReplaceQuestion();
+            } else if (mode === 'sort') {
+                loadSortGame();
+            } else if (mode === 'arcade') {
+                loadArcadeGame();
+            }
+        }
+
+        // Return to Welcome Menu
+        function returnToMenu() {
+            sounds.playPop();
+            if (gameState.arcadeInterval) {
+                clearInterval(gameState.arcadeInterval);
+            }
+            document.getElementById('screen-gameplay').classList.add('hidden');
+            document.getElementById('screen-victory').classList.add('hidden');
+            document.getElementById('screen-welcome').classList.remove('hidden');
+        }
+
+        // Restart current mode
+        function restartCurrentGame() {
+            startGame(gameState.currentMode);
+        }
+
+        // MODE 1: Noun Replacer Logic
+        function loadReplaceQuestion() {
+            const container = document.getElementById('game-container');
+            const feedback = document.getElementById('feedback-banner');
+            const nextBtn = document.getElementById('next-btn');
+
+            feedback.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+
+            const total = REPLACE_QUESTIONS.length;
+            const qIndex = gameState.currentQuestionIndex;
+            const q = REPLACE_QUESTIONS[qIndex];
+
+            // Update Level & Progress
+            document.getElementById('level-indicator').textContent = `Question ${qIndex + 1} of ${total}`;
+            document.getElementById('progress-bar-fill').style.width = `${((qIndex) / total) * 100}%`;
+
+            const currentHero = HEROES.find(h => h.id === gameState.selectedHero);
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Hero Quest Banner -->
+                    <div class="flex items-center gap-3 bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-3">
+                        <span class="text-3xl animate-bounce">${currentHero.emoji}</span>
+                        <div>
+                            <span class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Mission Challenge</span>
+                            <p class="text-sm font-black text-indigo-950">Which pronoun replaces the underlined noun?</p>
+                        </div>
+                    </div>
+
+                    <!-- Question Sentence Display -->
+                    <div class="bg-amber-50/80 border-3 border-amber-300 rounded-2xl p-6 text-center shadow-inner">
+                        <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-snug">
+                            "${q.sentence}"
+                        </p>
+                    </div>
+
+                    <!-- Options Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="options-container">
+                        ${q.options.map((opt, idx) => `
+                            <button onclick="checkReplaceAnswer(${idx})" class="option-btn bg-white hover:bg-indigo-50 border-3 border-indigo-300 hover:border-indigo-500 rounded-2xl p-5 font-black text-xl text-indigo-900 shadow-md active:scale-95 transition flex flex-col items-center justify-center gap-1">
+                                <span>${opt.text}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkReplaceAnswer(selectedIdx) {
+            const q = REPLACE_QUESTIONS[gameState.currentQuestionIndex];
+            const selectedOpt = q.options[selectedIdx];
+            const buttons = document.querySelectorAll('.option-btn');
+            const feedback = document.getElementById('feedback-banner');
+            const nextBtn = document.getElementById('next-btn');
+
+            // Disable all option buttons
+            buttons.forEach(btn => btn.disabled = true);
+
+            gameState.totalAnswered++;
+
+            if (selectedOpt.correct) {
+                // Correct Answer
+                sounds.playCorrect();
+                gameState.score += 100;
+                gameState.stars += 1;
+                gameState.streak++;
+                gameState.correctCount++;
+                if (gameState.streak > gameState.maxStreak) gameState.maxStreak = gameState.streak;
+
+                buttons[selectedIdx].classList.remove('bg-white', 'border-indigo-300');
+                buttons[selectedIdx].classList.add('bg-emerald-500', 'text-white', 'border-emerald-700', 'scale-105');
+
+                feedback.className = 'rounded-2xl p-4 text-center font-bold text-lg shadow-lg bg-emerald-100 border-2 border-emerald-400 text-emerald-950 block pop-in';
+                feedback.innerHTML = `
+                    <div class="flex items-center justify-center gap-2 font-black text-emerald-800 text-xl">
+                        <span>🎉 Super Job!</span>
+                    </div>
+                    <p class="text-sm font-semibold mt-1">${q.explanation}</p>
+                `;
+            } else {
+                // Wrong Answer
+                sounds.playWrong();
+                gameState.streak = 0;
+
+                buttons[selectedIdx].classList.remove('bg-white', 'border-indigo-300');
+                buttons[selectedIdx].classList.add('bg-rose-500', 'text-white', 'border-rose-700');
+
+                // Highlight correct button
+                q.options.forEach((opt, i) => {
+                    if (opt.correct) {
+                        buttons[i].classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                    }
+                });
+
+                feedback.className = 'rounded-2xl p-4 text-center font-bold text-lg shadow-lg bg-rose-100 border-2 border-rose-400 text-rose-950 block pop-in';
+                feedback.innerHTML = `
+                    <div class="flex items-center justify-center gap-2 font-black text-rose-800 text-xl">
+                        <span>💡 Good Try!</span>
+                    </div>
+                    <p class="text-sm font-semibold mt-1">Hint: ${selectedOpt.hint}. ${q.explanation}</p>
+                `;
+            }
+
+            updateStatsHeader();
+            nextBtn.classList.remove('hidden');
+        }
+
+        // MODE 2: Pronoun Sorter Logic (Drag & Drop / Tap to Sort)
+        let sortPool = [];
+        let currentSortItem = null;
+
+        function loadSortGame() {
+            const container = document.getElementById('game-container');
+            const feedback = document.getElementById('feedback-banner');
+            const nextBtn = document.getElementById('next-btn');
+
+            feedback.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+
+            // Clone and shuffle pool
+            sortPool = [...SORT_PRONOUNS_POOL].sort(() => Math.random() - 0.5).slice(0, 8);
+            gameState.currentQuestionIndex = 0;
+
+            renderNextSortCard();
+        }
+
+        function renderNextSortCard() {
+            const container = document.getElementById('game-container');
+            const feedback = document.getElementById('feedback-banner');
+            const nextBtn = document.getElementById('next-btn');
+
+            feedback.classList.add('hidden');
+
+            const total = sortPool.length;
+            const idx = gameState.currentQuestionIndex;
+
+            if (idx >= total) {
+                showVictoryScreen();
+                return;
+            }
+
+            currentSortItem = sortPool[idx];
+
+            document.getElementById('level-indicator').textContent = `Card ${idx + 1} of ${total}`;
+            document.getElementById('progress-bar-fill').style.width = `${((idx) / total) * 100}%`;
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="text-center">
+                        <span class="text-xs font-black uppercase text-amber-600 bg-amber-100 px-3 py-1 rounded-full">Sorting Mission</span>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">Is this pronoun Singular or Plural?</h3>
+                    </div>
+
+                    <!-- Pronoun Card to Sort -->
+                    <div class="flex justify-center">
+                        <div id="drag-pronoun-card" class="bg-gradient-to-r from-amber-400 to-yellow-400 border-4 border-amber-600 rounded-3xl p-6 sm:p-8 text-center shadow-xl cursor-grab active:cursor-grabbing transform hover:scale-105 transition max-w-xs w-full animate-float">
+                            <span class="text-4xl sm:text-5xl font-black text-amber-950 block">${currentSortItem.text}</span>
+                            <span class="text-xs font-extrabold text-amber-900/80 mt-2 block">"${currentSortItem.desc}"</span>
+                        </div>
+                    </div>
+
+                    <!-- Drop Zones / Choice Baskets -->
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <!-- Singular Box -->
+                        <button onclick="handleSortChoice('singular')" id="box-singular" class="bg-blue-50 border-4 border-dashed border-blue-400 hover:border-blue-600 rounded-3xl p-5 text-center transition flex flex-col items-center justify-center gap-2 group active:scale-95 shadow-md">
+                            <span class="text-3xl sm:text-4xl group-hover:scale-110 transition">🧑</span>
+                            <div>
+                                <span class="text-lg font-black text-blue-900 block">SINGULAR</span>
+                                <span class="text-xs font-bold text-blue-600 block">Only 1 Person/Thing</span>
+                            </div>
+                        </button>
+
+                        <!-- Plural Box -->
+                        <button onclick="handleSortChoice('plural')" id="box-plural" class="bg-purple-50 border-4 border-dashed border-purple-400 hover:border-purple-600 rounded-3xl p-5 text-center transition flex flex-col items-center justify-center gap-2 group active:scale-95 shadow-md">
+                            <span class="text-3xl sm:text-4xl group-hover:scale-110 transition">🧑‍🤝‍🧑</span>
+                            <div>
+                                <span class="text-lg font-black text-purple-900 block">PLURAL</span>
+                                <span class="text-xs font-bold text-purple-600 block">More than 1 (Group)</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleSortChoice(chosenType) {
+            const feedback = document.getElementById('feedback-banner');
+            const nextBtn = document.getElementById('next-btn');
+
+            gameState.totalAnswered++;
+
+            if (chosenType === currentSortItem.type) {
+                // Correct
+                sounds.playCorrect();
+                gameState.score += 100;
+                gameState.stars += 1;
+                gameState.streak++;
+                gameState.correctCount++;
+                if (gameState.streak > gameState.maxStreak) gameState.maxStreak = gameState.streak;
+
+                feedback.className = 'rounded-2xl p-4 text-center font-bold text-lg shadow-lg bg-emerald-100 border-2 border-emerald-400 text-emerald-950 block pop-in';
+                feedback.innerHTML = `
+                    <div class="font-black text-emerald-800 text-xl">✨ Correct Sorting!</div>
+                    <p class="text-sm mt-1"><strong>'${currentSortItem.text}'</strong> is a <strong>${currentSortItem.type.toUpperCase()}</strong> pronoun (${currentSortItem.desc}).</p>
+                `;
+            } else {
+                // Incorrect
+                sounds.playWrong();
+                gameState.streak = 0;
+
+                feedback.className = 'rounded-2xl p-4 text-center font-bold text-lg shadow-lg bg-rose-100 border-2 border-rose-400 text-rose-950 block pop-in';
+                feedback.innerHTML = `
+                    <div class="font-black text-rose-800 text-xl">💡 Almost!</div>
+                    <p class="text-sm mt-1"><strong>'${currentSortItem.text}'</strong> belongs in the <strong>${currentSortItem.type.toUpperCase()}</strong> box (${currentSortItem.desc}).</p>
+                `;
+            }
+
+            updateStatsHeader();
+            nextBtn.classList.remove('hidden');
+        }
+
+        // MODE 3: Pronoun Pop Arcade Game
+        function loadArcadeGame() {
+            const container = document.getElementById('game-container');
+            const feedback = document.getElementById('feedback-banner');
+            const nextBtn = document.getElementById('next-btn');
+
+            feedback.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+
+            gameState.arcadeScore = 0;
+            gameState.currentQuestionIndex = 0;
+
+            document.getElementById('level-indicator').textContent = `Target: Pop ${gameState.arcadeTargetCount} Personal Pronouns!`;
+            document.getElementById('progress-bar-fill').style.width = `0%`;
+
+            container.innerHTML = `
+                <div class="relative w-full h-[320px] bg-gradient-to-b from-sky-100 to-indigo-100 rounded-2xl overflow-hidden border-2 border-indigo-200" id="arcade-arena">
+                    <div class="absolute top-2 left-3 z-10 bg-white/80 backdrop-blur px-3 py-1 rounded-full text-xs font-black text-indigo-900 border border-indigo-200">
+                        Pop ONLY Pronouns! 🎈
+                    </div>
+                    <div class="absolute top-2 right-3 z-10 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-black" id="arcade-counter-badge">
+                        Popped: 0 / ${gameState.arcadeTargetCount}
+                    </div>
+                </div>
+            `;
+
+            startSpawningBubbles();
+        }
+
+        function startSpawningBubbles() {
+            if (gameState.arcadeInterval) clearInterval(gameState.arcadeInterval);
+
+            // Spawn bubble every 1.2 seconds
+            gameState.arcadeInterval = setInterval(() => {
+                const arena = document.getElementById('arcade-arena');
+                if (!arena) {
+                    clearInterval(gameState.arcadeInterval);
+                    return;
+                }
+
+                // Pick random word
+                const wordObj = ARCADE_WORDS[Math.floor(Math.random() * ARCADE_WORDS.length)];
+
+                const bubble = document.createElement('div');
+                const size = Math.floor(Math.random() * 20) + 65; // 65px - 85px
+                const posX = Math.floor(Math.random() * (arena.clientWidth - size - 20)) + 10;
+                
+                const colors = [
+                    'bg-pink-400 text-white border-pink-500',
+                    'bg-cyan-400 text-white border-cyan-500',
+                    'bg-amber-400 text-amber-950 border-amber-500',
+                    'bg-purple-400 text-white border-purple-500',
+                    'bg-emerald-400 text-white border-emerald-500'
+                ];
+                const colorClass = colors[Math.floor(Math.random() * colors.length)];
+
+                bubble.className = `bubble-item border-3 font-black text-lg ${colorClass}`;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${posX}px`;
+                bubble.style.bottom = `-80px`;
+                bubble.innerHTML = `<span>${wordObj.text}</span>`;
+
+                // Pop Click Event
+                bubble.onclick = () => popBubble(bubble, wordObj);
+
+                arena.appendChild(bubble);
+
+                // Animate upwards
+                let currentBottom = -80;
+                const floatSpeed = Math.random() * 1.5 + 1.2;
+
+                const floatInterval = setInterval(() => {
+                    currentBottom += floatSpeed;
+                    bubble.style.bottom = `${currentBottom}px`;
+
+                    if (currentBottom > arena.clientHeight + 80) {
+                        clearInterval(floatInterval);
+                        if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
+                    }
+                }, 20);
+
+            }, 1100);
+        }
+
+        function popBubble(bubbleEl, wordObj) {
+            sounds.playPop();
+
+            // Remove bubble with visual burst
+            if (bubbleEl.parentNode) {
+                bubbleEl.parentNode.removeChild(bubbleEl);
+            }
+
+            gameState.totalAnswered++;
+
+            if (wordObj.isPronoun) {
+                sounds.playCorrect();
+                gameState.arcadeScore++;
+                gameState.score += 50;
+                gameState.stars += 1;
+                gameState.streak++;
+                gameState.correctCount++;
+                if (gameState.streak > gameState.maxStreak) gameState.maxStreak = gameState.streak;
+
+                document.getElementById('arcade-counter-badge').textContent = `Popped: ${gameState.arcadeScore} / ${gameState.arcadeTargetCount}`;
+                document.getElementById('progress-bar-fill').style.width = `${(gameState.arcadeScore / gameState.arcadeTargetCount) * 100}%`;
+
+                if (gameState.arcadeScore >= gameState.arcadeTargetCount) {
+                    clearInterval(gameState.arcadeInterval);
+                    setTimeout(showVictoryScreen, 500);
+                }
+            } else {
+                sounds.playWrong();
+                gameState.streak = 0;
+            }
+
+            updateStatsHeader();
+        }
+
+        // Next Question Navigation
+        function nextQuestion() {
+            sounds.playPop();
+            gameState.currentQuestionIndex++;
+
+            if (gameState.currentMode === 'replace') {
+                if (gameState.currentQuestionIndex >= REPLACE_QUESTIONS.length) {
+                    showVictoryScreen();
+                } else {
+                    loadReplaceQuestion();
+                }
+            } else if (gameState.currentMode === 'sort') {
+                renderNextSortCard();
+            }
+        }
+
+        // Update Header Stats
+        function updateStatsHeader() {
+            document.getElementById('score-text').textContent = gameState.score;
+            document.getElementById('stars-text').textContent = gameState.stars;
+            document.getElementById('streak-counter').innerHTML = `🔥 ${gameState.streak}`;
+        }
+
+        // Victory Screen Display & Confetti
+        function showVictoryScreen() {
+            sounds.playCheer();
+
+            if (gameState.arcadeInterval) {
+                clearInterval(gameState.arcadeInterval);
+            }
+
+            document.getElementById('screen-gameplay').classList.add('hidden');
+            document.getElementById('screen-victory').classList.remove('hidden');
+
+            // Calculate accuracy
+            const accuracy = gameState.totalAnswered > 0 
+                ? Math.round((gameState.correctCount / gameState.totalAnswered) * 100) 
+                : 100;
+
+            document.getElementById('final-score').textContent = gameState.score;
+            document.getElementById('final-accuracy').textContent = `${accuracy}%`;
+            document.getElementById('final-streak').textContent = gameState.maxStreak;
+
+            // Stars Rating Calculation
+            const starsContainer = document.getElementById('final-stars-container');
+            let starCount = 3;
+            if (accuracy < 60) starCount = 1;
+            else if (accuracy < 85) starCount = 2;
+
+            starsContainer.innerHTML = Array(3).fill(0).map((_, i) => `
+                <i class="fa-solid fa-star ${i < starCount ? 'text-amber-400 animate-pulse' : 'text-slate-300'}"></i>
+            `).join('');
+
+            // Trigger Confetti Blast
+            if (window.confetti) {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+    </script>
 </body>
 </html>
