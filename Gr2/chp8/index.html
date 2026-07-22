@@ -3,257 +3,625 @@
 <head>
 <meta charset="UTF-8">
 <title>Pronoun Meteor Shooter</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
 html, body {
-margin:0;
-padding:0;
-overflow:hidden;
-background: radial-gradient(circle at bottom, #000814, #000000);
-font-family: Arial;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle at bottom, #0d1b2a, #000814, #000000);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    user-select: none;
+    touch-action: manipulation;
 }
 
 /* 🌌 STARFIELD */
-.star{
-position:absolute;
-width:2px;
-height:2px;
-background:white;
-border-radius:50%;
-opacity:0.7;
-animation: fall 4s linear infinite;
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: fall linear infinite;
 }
 
-@keyframes fall{
-from{transform:translateY(-10vh);}
-to{transform:translateY(110vh);}
+@keyframes fall {
+    from { transform: translateY(-10vh); }
+    to { transform: translateY(110vh); }
 }
 
-/* HUD */
-#hud{
-position:absolute;
-top:10px;
-left:10px;
-z-index:50;
-background:rgba(0,0,0,0.5);
-color:white;
-padding:8px 12px;
-border-radius:10px;
+/* ☄️ METEOR ANIMATION */
+@keyframes drop {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(115vh); }
 }
 
-/* QUESTION */
-#sentence{
-position:absolute;
-top:10%;
-width:100%;
-text-align:center;
-font-size:24px;
-color:white;
-z-index:50;
+/* 🎮 UI / HUD */
+#hud {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 50;
+    background: rgba(0, 15, 30, 0.85);
+    color: #00e5ff;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    font-weight: bold;
+    font-size: 14px;
 }
 
-/* ASTRONAUT */
-#ship{
-position:absolute;
-bottom:40px;
-left:50%;
-width:110px;
-transform:translateX(-50%);
-z-index:100;
-filter:drop-shadow(0 0 12px #00e5ff);
+#scoreBoard {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 50;
+    background: rgba(0, 15, 30, 0.85);
+    color: #ff007f;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 0, 127, 0.4);
+    font-weight: bold;
+    font-size: 16px;
 }
 
-/* LASER */
-.laser{
-position:absolute;
-width:4px;
-height:20px;
-background:yellow;
-bottom:80px;
-left:50%;
-transform:translateX(-50%);
+/* QUESTION BOX */
+#sentence-container {
+    position: absolute;
+    top: 60px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 50;
+    padding: 0 10px;
 }
 
-/* METEOR */
-.meteor{
-position:absolute;
-top:-50px;
-padding:10px 15px;
-background:white;
-color:black;
-border-radius:12px;
-font-size:20px;
-font-weight:bold;
-z-index:20;
-animation: drop linear;
+#sentence {
+    background: rgba(10, 20, 40, 0.9);
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 18px;
+    text-align: center;
+    border: 2px solid #00e5ff;
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+    max-width: 95%;
 }
 
-@keyframes drop{
-from{transform:translateY(-50px);}
-to{transform:translateY(110vh);}
+/* 🚀 SPACESHIP */
+#ship {
+    position: absolute;
+    bottom: 90px;
+    left: 50%;
+    width: 70px;
+    height: 70px;
+    transform: translateX(-50%);
+    z-index: 100;
+    transition: left 0.05s ease-out;
+    filter: drop-shadow(0 0 10px #00e5ff);
 }
 
-/* SCORE */
-#scoreBoard{
-position:absolute;
-top:10px;
-right:10px;
-z-index:50;
-background:rgba(0,0,0,0.5);
-color:white;
-padding:8px 12px;
-border-radius:10px;
+/* 💥 LASER */
+.laser {
+    position: absolute;
+    width: 5px;
+    height: 22px;
+    background: #fff;
+    border-radius: 3px;
+    box-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
+    z-index: 40;
 }
 
-/* END */
-#end{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-color:white;
-font-size:28px;
-display:none;
-text-align:center;
+/* ☄️ METEOR */
+.meteor {
+    position: absolute;
+    top: -60px;
+    padding: 10px 18px;
+    background: radial-gradient(circle at 30% 30%, #4a4e69, #22223b, #000000);
+    color: #ffd166;
+    border-radius: 40px;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 30;
+    border: 2px solid #ffb703;
+    box-shadow: 0 0 12px rgba(255, 183, 3, 0.5);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+/* 📱 MOBILE TOUCH CONTROLS */
+#mobile-controls {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    z-index: 120;
+}
+
+.touch-btn {
+    background: rgba(0, 229, 255, 0.2);
+    border: 2px solid #00e5ff;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    width: 65px;
+    height: 55px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+.touch-btn:active {
+    background: rgba(0, 229, 255, 0.6);
+}
+
+#fire-btn {
+    background: rgba(255, 0, 127, 0.3);
+    border-color: #ff007f;
+    width: 100px;
+    font-size: 16px;
+}
+
+#fire-btn:active {
+    background: rgba(255, 0, 127, 0.7);
+}
+
+/* OVERLAYS & SCREENS */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000814;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* 🌟 SPLASH SCREEN LOGO */
+#splash-logo {
+    max-width: 75%;
+    max-height: 35vh;
+    object-fit: contain;
+    animation: fadeIn 0.8s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.overlay h1 {
+    font-size: 32px;
+    color: #00e5ff;
+    margin-bottom: 10px;
+    text-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+}
+
+.instructions {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 450px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    font-size: 15px;
+}
+
+.btn {
+    background: linear-gradient(45deg, #ff007f, #7928ca);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+}
+
+/* EXPLOSION EFFECT */
+.explosion {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff, #ffb703, #ff007f, transparent);
+    animation: explode 0.3s forwards;
+    z-index: 60;
+    pointer-events: none;
+}
+
+@keyframes explode {
+    0% { transform: scale(0.2); opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; }
 }
 </style>
 </head>
 
 <body>
 
-<div id="hud"></div>
-<div id="scoreBoard">Score: 0</div>
-<div id="sentence"></div>
+<!-- 🏷️ 5-SECOND SPLASH SCREEN LOGO (Tap anywhere to skip) -->
+<div id="splash-screen" class="overlay" onclick="hideSplash()">
+    <img id="splash-logo" src="assets/innovine-logo.png" alt="Innovine Logo" onerror="handleLogoError(this)">
+    <h2 id="logo-fallback" style="display:none; color:#00e5ff; font-size:32px; letter-spacing:2px;">INNOVINE</h2>
+    <p style="position:absolute; bottom:20px; opacity:0.5; font-size:12px;">Tap anywhere to skip</p>
+</div>
 
-<img id="ship"
-src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png">
+<!-- START SCREEN OVERLAY -->
+<div id="start-screen" class="overlay" style="display:none;">
+    <h1>🪐 Pronoun Meteor Shooter</h1>
+    <div class="instructions">
+        <p><strong>How to Play:</strong></p>
+        <p>1. Read the sentence at the top.</p>
+        <p>2. Move your ship with <strong>Arrow Keys / Buttons / Dragging</strong>.</p>
+        <p>3. Shoot the meteor containing the correct pronoun!</p>
+    </div>
+    <button class="btn" onclick="startGame()">Launch Mission 🚀</button>
+</div>
 
-<div id="end"></div>
+<!-- END SCREEN OVERLAY -->
+<div id="end-screen" class="overlay" style="display:none;">
+    <h1>🚀 Mission Complete!</h1>
+    <div class="instructions">
+        <p id="final-stats" style="font-size: 20px; font-weight: bold;"></p>
+    </div>
+    <button class="btn" onclick="restartGame()">Play Again 🔄</button>
+</div>
 
-<audio id="correctSound" src="correct.mp3"></audio>
-<audio id="wrongSound" src="wrong.mp3"></audio>
+<!-- HUD -->
+<div id="hud">Progress: <span id="progress">1</span>/15</div>
+<div id="scoreBoard">Score: <span id="score">0</span></div>
+
+<div id="sentence-container">
+    <div id="sentence">Prepare for Launch...</div>
+</div>
+
+<!-- SPACESHIP SVG -->
+<svg id="ship" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M32 2L42 22L54 38L60 52L46 48L32 62L18 48L4 52L10 38L22 22L32 2Z" fill="#00E5FF" stroke="#FFFFFF" stroke-width="2"/>
+    <path d="M32 12L38 26L32 50L26 26L32 12Z" fill="#FF007F"/>
+    <circle cx="32" cy="24" r="4" fill="#FFFFFF"/>
+</svg>
+
+<!-- 📱 MOBILE ON-SCREEN CONTROLS -->
+<div id="mobile-controls">
+    <div class="touch-btn" id="btn-left">◀</div>
+    <div class="touch-btn" id="fire-btn">🚀 FIRE</div>
+    <div class="touch-btn" id="btn-right">▶</div>
+</div>
+
+<!-- 🔊 AUDIO ASSETS -->
+<audio id="correctSound" src="assets/correct.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="assets/wrong.mp3" preload="auto"></audio>
+<audio id="clappingSound" src="assets/clapping.mp3" preload="auto"></audio>
 
 <script>
-
-let score=0;
-let current=0;
-
-const sentences=[
-{q:"Ravi is playing. ___ is happy.",a:"He"},
-{q:"Sita is singing. ___ is joyful.",a:"She"},
-{q:"The dog is barking. ___ is loud.",a:"It"},
-{q:"Rahul and Amit are friends. ___ are playing.",a:"They"},
-{q:"The cat is sleeping. ___ is on bed.",a:"It"},
-{q:"Meena is dancing. ___ is on stage.",a:"She"},
-{q:"Bird is flying. ___ is in sky.",a:"It"},
-{q:"Aarav is running. ___ is fast.",a:"He"},
-{q:"Teacher is teaching students. ___ helps them.",a:"He/She"},
-{q:"Cars are moving. ___ are fast.",a:"They"},
-{q:"Riya is drawing. ___ is creative.",a:"She"},
-{q:"Elephant is big. ___ is strong.",a:"It"},
-{q:"John and Tom are here. ___ are late.",a:"They"},
-{q:"Boy is hungry. ___ wants food.",a:"He"},
-{q:"Sun is bright. ___ is hot.",a:"It"}
+// --- GAME DATA ---
+const sentences = [
+    {q:"Ravi is playing. ___ is happy.", a:"He"},
+    {q:"Sita is singing. ___ is joyful.", a:"She"},
+    {q:"The dog is barking. ___ is loud.", a:"It"},
+    {q:"Rahul and Amit are friends. ___ are playing.", a:"They"},
+    {q:"The cat is sleeping. ___ is on bed.", a:"It"},
+    {q:"Meena is dancing. ___ is on stage.", a:"She"},
+    {q:"Bird is flying. ___ is in sky.", a:"It"},
+    {q:"Aarav is running. ___ is fast.", a:"He"},
+    {q:"Teacher is teaching students. ___ helps them.", a:"He/She"},
+    {q:"Cars are moving. ___ are fast.", a:"They"},
+    {q:"Riya is drawing. ___ is creative.", a:"She"},
+    {q:"Elephant is big. ___ is strong.", a:"It"},
+    {q:"John and Tom are here. ___ are late.", a:"They"},
+    {q:"Boy is hungry. ___ wants food.", a:"He"},
+    {q:"Sun is bright. ___ is hot.", a:"It"}
 ];
 
-const options=["He","She","It","They"];
+const options = ["He", "She", "It", "They"];
 
-let activeMeteors=[];
+let current = 0;
+let score = 0;
+let shipX = window.innerWidth / 2;
+let activeMeteors = [];
+let gameActive = false;
 
-/* STAR BACKGROUND */
-for(let i=0;i<80;i++){
-let s=document.createElement("div");
-s.className="star";
-s.style.left=Math.random()*100+"vw";
-s.style.animationDuration=(2+Math.random()*3)+"s";
-document.body.appendChild(s);
+// Audio references
+const correctAudio = document.getElementById("correctSound");
+const wrongAudio = document.getElementById("wrongSound");
+const clappingAudio = document.getElementById("clappingSound");
+
+function playAudio(audioEl) {
+    if (audioEl) {
+        audioEl.currentTime = 0;
+        audioEl.play().catch(() => {});
+    }
 }
 
-function load(){
-if(current>=sentences.length){
-document.getElementById("end").style.display="block";
-document.getElementById("end").innerHTML="🚀 Mission Complete!<br>Score: "+score;
-return;
+// --- LOGO IMAGE ERROR HANDLING (PREVENTS INFINITE LOOP) ---
+function handleLogoError(img) {
+    img.onerror = null; // Stops loop if secondary image also fails
+    img.src = "assets/innovinelogo.png";
+    
+    img.addEventListener("error", () => {
+        img.style.display = "none";
+        const fallback = document.getElementById("logo-fallback");
+        if (fallback) fallback.style.display = "block";
+    });
 }
 
-document.getElementById("sentence").innerText=sentences[current].q;
+// --- SPLASH SCREEN LOGIC (EXACT 5 SECONDS FAILSAFE) ---
+let splashTimer = null;
+let splashHidden = false;
 
-spawnMeteors();
+function hideSplash() {
+    if (splashHidden) return;
+    splashHidden = true;
+    if (splashTimer) clearTimeout(splashTimer);
+
+    const splash = document.getElementById("splash-screen");
+    if (!splash) return;
+
+    splash.style.transition = "opacity 0.6s ease";
+    splash.style.opacity = "0";
+    setTimeout(() => {
+        splash.style.display = "none";
+        document.getElementById("start-screen").style.display = "flex";
+    }, 600);
 }
 
-function spawnMeteors(){
-activeMeteors.forEach(m=>m.remove());
-activeMeteors=[];
+// Start 5-second countdown immediately on DOM load
+splashTimer = setTimeout(hideSplash, 5000);
 
-options.forEach(opt=>{
-let m=document.createElement("div");
-m.className="meteor";
-m.innerText=opt;
+// --- STARFIELD BACKGROUND ---
+for (let i = 0; i < 50; i++) {
+    let s = document.createElement("div");
+    s.className = "star";
+    s.style.left = Math.random() * 100 + "vw";
+    s.style.animationDuration = (2 + Math.random() * 3) + "s";
+    s.style.animationDelay = Math.random() * 3 + "s";
+    document.body.appendChild(s);
+}
 
-m.style.left=Math.random()*90+"vw";
-m.style.animationDuration=(5+Math.random()*3)+"s";
+// --- GAME LOGIC ---
+function startGame() {
+    document.getElementById("start-screen").style.display = "none";
+    document.getElementById("end-screen").style.display = "none";
+    current = 0;
+    score = 0;
+    gameActive = true;
+    updateHUD();
+    loadQuestion();
+}
 
-m.onclick=()=>check(opt);
+function restartGame() {
+    startGame();
+}
 
-document.body.appendChild(m);
-activeMeteors.push(m);
+function updateHUD() {
+    document.getElementById("score").innerText = score;
+    document.getElementById("progress").innerText = Math.min(current + 1, sentences.length);
+}
 
-setTimeout(()=>m.remove(),8000);
+function loadQuestion() {
+    if (current >= sentences.length) {
+        endGame();
+        return;
+    }
+
+    updateHUD();
+    document.getElementById("sentence").innerText = sentences[current].q;
+    spawnMeteors();
+}
+
+function spawnMeteors() {
+    activeMeteors.forEach(m => m.el.remove());
+    activeMeteors = [];
+
+    let shuffledOptions = [...options].sort(() => Math.random() - 0.5);
+    let sectionWidth = window.innerWidth / options.length;
+
+    shuffledOptions.forEach((opt, index) => {
+        let m = document.createElement("div");
+        m.className = "meteor";
+        m.innerText = opt;
+
+        let minX = index * sectionWidth + 10;
+        let maxX = (index + 1) * sectionWidth - 80;
+        let posX = Math.max(10, minX + Math.random() * (maxX - minX));
+
+        m.style.left = posX + "px";
+
+        let duration = 8 + Math.random() * 3;
+        m.style.animation = `drop ${duration}s linear forwards`;
+
+        m.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            if (!gameActive) return;
+            shipX = posX + 25;
+            updateShipPosition();
+            shoot();
+        });
+
+        m.onclick = () => {
+            if (!gameActive) return;
+            shipX = posX + 25;
+            updateShipPosition();
+            shoot();
+        };
+
+        document.body.appendChild(m);
+        activeMeteors.push({ el: m, text: opt });
+    });
+}
+
+function shoot() {
+    if (!gameActive) return;
+
+    let ship = document.getElementById("ship");
+    let shipRect = ship.getBoundingClientRect();
+
+    let laser = document.createElement("div");
+    laser.className = "laser";
+    laser.style.left = (shipRect.left + shipRect.width / 2 - 2.5) + "px";
+    laser.style.bottom = "150px";
+    document.body.appendChild(laser);
+
+    let laserPos = 150;
+    let laserInterval = setInterval(() => {
+        laserPos += 20;
+        laser.style.bottom = laserPos + "px";
+
+        let laserRect = laser.getBoundingClientRect();
+
+        for (let i = 0; i < activeMeteors.length; i++) {
+            let meteorObj = activeMeteors[i];
+            let meteorRect = meteorObj.el.getBoundingClientRect();
+
+            if (isColliding(laserRect, meteorRect)) {
+                clearInterval(laserInterval);
+                laser.remove();
+                createExplosion(meteorRect.left + meteorRect.width/2, meteorRect.top + meteorRect.height/2);
+                checkAnswer(meteorObj.text);
+                return;
+            }
+        }
+
+        if (laserPos > window.innerHeight) {
+            clearInterval(laserInterval);
+            laser.remove();
+        }
+    }, 16);
+}
+
+function isColliding(rect1, rect2) {
+    return !(
+        rect1.top > rect2.bottom ||
+        rect1.bottom < rect2.top ||
+        rect1.right < rect2.left ||
+        rect1.left > rect2.right
+    );
+}
+
+function createExplosion(x, y) {
+    let exp = document.createElement("div");
+    exp.className = "explosion";
+    exp.style.left = (x - 25) + "px";
+    exp.style.top = (y - 25) + "px";
+    document.body.appendChild(exp);
+    setTimeout(() => exp.remove(), 300);
+}
+
+function checkAnswer(selectedOpt) {
+    let correctAns = sentences[current].a;
+    let isCorrect = false;
+
+    if (correctAns === "He/She") {
+        if (selectedOpt === "He" || selectedOpt === "She") isCorrect = true;
+    } else if (selectedOpt === correctAns) {
+        isCorrect = true;
+    }
+
+    if (isCorrect) {
+        score += 10;
+        playAudio(correctAudio);
+    } else {
+        playAudio(wrongAudio);
+    }
+
+    current++;
+    setTimeout(loadQuestion, 400);
+}
+
+function endGame() {
+    gameActive = false;
+    activeMeteors.forEach(m => m.el.remove());
+    activeMeteors = [];
+    
+    playAudio(clappingAudio);
+    
+    document.getElementById("end-screen").style.display = "flex";
+    document.getElementById("final-stats").innerHTML = `
+        Final Score: <span style="color:#00e5ff">${score}</span> / ${sentences.length * 10}<br>
+        Accuracy: <span style="color:#ff007f">${Math.round((score / (sentences.length * 10)) * 100)}%</span>
+    `;
+}
+
+// --- CONTROLS & BINDINGS ---
+function updateShipPosition() {
+    let ship = document.getElementById("ship");
+    shipX = Math.max(35, Math.min(window.innerWidth - 35, shipX));
+    ship.style.left = shipX + "px";
+}
+
+// Keyboard Controls
+document.addEventListener("keydown", (e) => {
+    if (!gameActive) return;
+
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        shipX -= 30;
+        updateShipPosition();
+    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        shipX += 30;
+        updateShipPosition();
+    } else if (e.key === " " || e.key === "ArrowUp") {
+        e.preventDefault();
+        shoot();
+    }
 });
-}
 
-function check(opt){
-
-let ans=sentences[current].a;
-
-if(ans==="He/She"){
-if(opt==="He"||opt==="She") correct();
-else wrong();
-}
-else if(opt===ans){
-correct();
-}
-else wrong();
-
-current++;
-load();
-}
-
-function correct(){
-score++;
-document.getElementById("scoreBoard").innerText="Score: "+score;
-document.getElementById("correctSound").play().catch(()=>{});
-}
-
-function wrong(){
-document.getElementById("wrongSound").play().catch(()=>{});
-}
-
-/* MOVEMENT */
-let ship=document.getElementById("ship");
-
-document.addEventListener("keydown",(e)=>{
-let left=ship.offsetLeft;
-
-if(e.key==="ArrowLeft") ship.style.left=(left-20)+"px";
-if(e.key==="ArrowRight") ship.style.left=(left+20)+"px";
-
-if(e.key===" "){
-shoot();
-}
+// Touch Controls for Mobile Buttons
+document.getElementById("btn-left").addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    shipX -= 40;
+    updateShipPosition();
 });
 
-function shoot(){
-let laser=document.createElement("div");
-laser.className="laser";
-document.body.appendChild(laser);
+document.getElementById("btn-right").addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    shipX += 40;
+    updateShipPosition();
+});
 
-setTimeout(()=>laser.remove(),300);
-}
+document.getElementById("fire-btn").addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    shoot();
+});
 
-load();
+// Touch Drag Support directly on Ship
+document.addEventListener("touchmove", (e) => {
+    if (!gameActive || e.touches.length === 0) return;
+    let touchX = e.touches[0].clientX;
+    shipX = touchX;
+    updateShipPosition();
+});
 
+// Window Resize
+window.addEventListener("resize", () => {
+    shipX = window.innerWidth / 2;
+    updateShipPosition();
+});
 </script>
 
 </body>
