@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pronoun Power Quest - Grade 2 Grammar Game</title>
+    <title>Pronoun Power Quest - Grammar Game</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Canvas Confetti CDN for victory celebration -->
@@ -84,6 +84,13 @@
             transform: scale(0.9);
         }
 
+        /* Drag & Drop Visual Styles */
+        .drop-target-active {
+            border-color: #3b82f6 !important;
+            background-color: #dbeafe !important;
+            transform: scale(1.04);
+        }
+
         /* Custom scrollbar for modern feel */
         ::-webkit-scrollbar {
             width: 8px;
@@ -112,7 +119,7 @@
                 <div>
                     <h1 class="text-xl sm:text-2xl font-black tracking-wide text-indigo-900 leading-tight flex items-center gap-2">
                         <span>Pronoun Power</span>
-                        <span class="bg-yellow-400 text-indigo-950 text-xs px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Grade 2</span>
+                        <span class="bg-yellow-400 text-indigo-950 text-xs px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Grammar Quest</span>
                     </h1>
                     <p class="text-xs text-slate-600 font-semibold hidden sm:block">Master Singular & Plural Personal Pronouns!</p>
                 </div>
@@ -338,7 +345,7 @@
 
     <!-- Footer -->
     <footer class="w-full text-center py-4 text-xs font-semibold text-slate-700/80">
-        <p>Pronoun Power Quest • Designed for Grade 2 ELA Standards (CCSS.ELA-LITERACY.L.1.1.D & L.2.1)</p>
+        <p>Pronoun Power Quest • Designed for Elementary ELA Standards (CCSS.ELA-LITERACY.L.1.1.D & L.2.1)</p>
     </footer>
 
     <script>
@@ -437,7 +444,6 @@
                 this.init();
                 if (!this.ctx) return;
 
-                // Fanfare notes
                 const notes = [523.25, 659.25, 783.99, 1046.50];
                 notes.forEach((freq, idx) => {
                     const osc = this.ctx.createOscillator();
@@ -461,6 +467,17 @@
 
         const sounds = new SoundEngine();
 
+        function speakSentence(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop current speech
+                const cleanText = text.replace(/<[^>]*>/g, ''); // Strip HTML tags
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.rate = 0.85; // Slower rate for clear speech
+                utterance.pitch = 1.1; // Slightly higher friendly pitch
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
         // Audio toggle handler
         function toggleAudio() {
             sounds.muted = !sounds.muted;
@@ -469,6 +486,7 @@
             if (sounds.muted) {
                 icon.className = 'fa-solid fa-volume-xmark text-slate-400';
                 btn.classList.add('bg-slate-100');
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             } else {
                 icon.className = 'fa-solid fa-volume-high text-indigo-700';
                 btn.classList.remove('bg-slate-100');
@@ -476,41 +494,6 @@
             }
         }
 
-        // Game State
-        let gameState = {
-            score: 0,
-            stars: 0,
-            currentMode: null, // 'replace', 'sort', 'arcade'
-            currentQuestionIndex: 0,
-            streak: 0,
-            maxStreak: 0,
-            correctCount: 0,
-            totalAnswered: 0,
-            selectedHero: 'girl',
-            selectedWorld: 'beach',
-            arcadeInterval: null,
-            arcadeScore: 0,
-            arcadeTargetCount: 10
-        };
-
-        // Hero Options
-        const HEROES = [
-            { id: 'girl', name: 'Girl Hero', emoji: '👧⚡', color: 'border-pink-400 bg-pink-50' },
-            { id: 'boy', name: 'Boy Hero', emoji: '👦⚡', color: 'border-blue-400 bg-blue-50' },
-            { id: 'astro', name: 'Astro Kid', emoji: '🧑‍🚀⭐', color: 'border-purple-400 bg-purple-50' },
-            { id: 'pup', name: 'Super Pup', emoji: '🐶🦸', color: 'border-amber-400 bg-amber-50' }
-        ];
-
-        // World Themes
-        const WORLDS = [
-            { id: 'beach', name: 'Sunny Beach', icon: '🏖️', class: 'theme-beach' },
-            { id: 'forest', name: 'Magic Forest', icon: '🌲', class: 'theme-forest' },
-            { id: 'city', name: 'Hero City', icon: '🏙️', class: 'theme-city' },
-            { id: 'desert', name: 'Dune Desert', icon: '🏜️', class: 'theme-desert' }
-        ];
-
-        /* Grade 2 Question Database */
-        // MODE 1 QUESTIONS: Replace underlined Nouns with Personal Pronouns
         const REPLACE_QUESTIONS = [
             {
                 sentence: "<u>Sarah</u> loves to play soccer in the park.",
@@ -591,6 +574,26 @@
                     { text: "He", correct: false, hint: "Apples aren't boys!" }
                 ],
                 explanation: "We use 'It' to replace a singular object!"
+            },
+            {
+                sentence: "<u>Mia and you</u> need to get your raincoats.",
+                targetNoun: "Mia and you",
+                options: [
+                    { text: "You", correct: true, hint: "Talking to group including you -> You" },
+                    { text: "They", correct: false, hint: "You are speaking directly to them!" },
+                    { text: "She", correct: false, hint: "There are two people!" }
+                ],
+                explanation: "We use 'You' when talking directly to 1 or more people!"
+            },
+            {
+                sentence: "Grandma invited <u>my family and me</u> to dinner.",
+                targetNoun: "my family and me",
+                options: [
+                    { text: "us", correct: true, hint: "Group receiving action including me -> us" },
+                    { text: "them", correct: false, hint: "Remember 'me' is included!" },
+                    { text: "him", correct: false, hint: "There are multiple people!" }
+                ],
+                explanation: "We use 'us' when receiving an action as a group that includes 'me'!"
             }
         ];
 
@@ -757,12 +760,19 @@
             container.innerHTML = `
                 <div class="space-y-6">
                     <!-- Hero Quest Banner -->
-                    <div class="flex items-center gap-3 bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-3">
-                        <span class="text-3xl animate-bounce">${currentHero.emoji}</span>
-                        <div>
-                            <span class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Mission Challenge</span>
-                            <p class="text-sm font-black text-indigo-950">Which pronoun replaces the underlined noun?</p>
+                    <div class="flex items-center justify-between bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl animate-bounce">${currentHero.emoji}</span>
+                            <div>
+                                <span class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Mission Challenge</span>
+                                <p class="text-sm font-black text-indigo-950">Which pronoun replaces the underlined noun?</p>
+                            </div>
                         </div>
+
+                        <!-- Speech Read Aloud Button -->
+                        <button onclick="speakSentence('${q.sentence.replace(/'/g, "\\'")}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs sm:text-sm px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-md transition active:scale-95" title="Read Sentence Aloud">
+                            <i class="fa-solid fa-volume-high"></i> <span class="hidden sm:inline">Listen</span>
+                        </button>
                     </div>
 
                     <!-- Question Sentence Display -->
@@ -855,11 +865,93 @@
             feedback.classList.add('hidden');
             nextBtn.classList.add('hidden');
 
-            // Clone and shuffle pool
             sortPool = [...SORT_PRONOUNS_POOL].sort(() => Math.random() - 0.5).slice(0, 8);
             gameState.currentQuestionIndex = 0;
 
             renderNextSortCard();
+        }
+
+        function renderNextSortCard() {
+            const container = document.getElementById('game-container');
+            const feedback = document.getElementById('feedback-banner');
+            const nextBtn = document.getElementById('next-btn');
+
+            feedback.classList.add('hidden');
+
+            const total = sortPool.length;
+            const idx = gameState.currentQuestionIndex;
+
+            if (idx >= total) {
+                showVictoryScreen();
+                return;
+            }
+
+            currentSortItem = sortPool[idx];
+
+            document.getElementById('level-indicator').textContent = `Card ${idx + 1} of ${total}`;
+            document.getElementById('progress-bar-fill').style.width = `${((idx) / total) * 100}%`;
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between text-center">
+                        <div class="w-full text-center">
+                            <span class="text-xs font-black uppercase text-amber-600 bg-amber-100 px-3 py-1 rounded-full">Sorting Mission</span>
+                            <h3 class="text-2xl font-extrabold text-slate-800 mt-1">Drag or Tap to sort: Singular or Plural?</h3>
+                        </div>
+                    </div>
+
+                    <!-- Pronoun Card to Sort (HTML5 Drag & Drop enabled) -->
+                    <div class="flex justify-center">
+                        <div id="drag-pronoun-card" draggable="true" ondragstart="handleDragStart(event)" class="bg-gradient-to-r from-amber-400 to-yellow-400 border-4 border-amber-600 rounded-3xl p-6 sm:p-8 text-center shadow-xl cursor-grab active:cursor-grabbing transform hover:scale-105 transition max-w-xs w-full animate-float select-none">
+                            <span class="text-4xl sm:text-5xl font-black text-amber-950 block pointer-events-none">${currentSortItem.text}</span>
+                            <span class="text-xs font-extrabold text-amber-900/80 mt-2 block pointer-events-none">"${currentSortItem.desc}"</span>
+                            <span class="text-[10px] font-black uppercase text-amber-950/60 mt-1 block">✋ Drag Me!</span>
+                        </div>
+                    </div>
+
+                    <!-- Drop Zones / Choice Baskets -->
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <!-- Singular Box -->
+                        <button onclick="handleSortChoice('singular')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'singular')" id="box-singular" class="bg-blue-50 border-4 border-dashed border-blue-400 hover:border-blue-600 rounded-3xl p-5 text-center transition flex flex-col items-center justify-center gap-2 group active:scale-95 shadow-md">
+                            <span class="text-3xl sm:text-4xl group-hover:scale-110 transition pointer-events-none">🧑</span>
+                            <div class="pointer-events-none">
+                                <span class="text-lg font-black text-blue-900 block">SINGULAR</span>
+                                <span class="text-xs font-bold text-blue-600 block">Only 1 Person/Thing</span>
+                            </div>
+                        </button>
+
+                        <!-- Plural Box -->
+                        <button onclick="handleSortChoice('plural')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'plural')" id="box-plural" class="bg-purple-50 border-4 border-dashed border-purple-400 hover:border-purple-600 rounded-3xl p-5 text-center transition flex flex-col items-center justify-center gap-2 group active:scale-95 shadow-md">
+                            <span class="text-3xl sm:text-4xl group-hover:scale-110 transition pointer-events-none">🧑‍🤝‍🧑</span>
+                            <div class="pointer-events-none">
+                                <span class="text-lg font-black text-purple-900 block">PLURAL</span>
+                                <span class="text-xs font-bold text-purple-600 block">More than 1 (Group)</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        /* HTML5 Drag & Drop Listeners */
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', currentSortItem.type);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drop-target-active');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drop-target-active');
+        }
+
+        function handleDrop(e, targetType) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drop-target-active');
+            handleSortChoice(targetType);
         }
 
         function renderNextSortCard() {
