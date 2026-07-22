@@ -106,7 +106,6 @@ html, body {
     height: 70px;
     transform: translateX(-50%);
     z-index: 100;
-    transition: left 0.05s ease-out;
     filter: drop-shadow(0 0 10px #00e5ff);
 }
 
@@ -138,7 +137,7 @@ html, body {
     touch-action: manipulation;
 }
 
-/* 📱 MOBILE TOUCH CONTROLS */
+/* 📱 ON-SCREEN CONTROLS */
 #mobile-controls {
     position: absolute;
     bottom: 10px;
@@ -165,6 +164,7 @@ html, body {
     justify-content: center;
     align-items: center;
     user-select: none;
+    cursor: pointer;
 }
 
 .touch-btn:active {
@@ -174,7 +174,7 @@ html, body {
 #fire-btn {
     background: rgba(255, 0, 127, 0.3);
     border-color: #ff007f;
-    width: 100px;
+    width: 110px;
     font-size: 16px;
 }
 
@@ -264,7 +264,7 @@ html, body {
 
 <body>
 
-<!-- 🏷️ 5-SECOND SPLASH SCREEN LOGO (Tap anywhere to skip) -->
+<!-- 🏷️ 5-SECOND SPLASH SCREEN LOGO -->
 <div id="splash-screen" class="overlay" onclick="hideSplash()">
     <img id="splash-logo" src="assets/innovine-logo.png" alt="Innovine Logo" onerror="handleLogoError(this)">
     <h2 id="logo-fallback" style="display:none; color:#00e5ff; font-size:32px; letter-spacing:2px;">INNOVINE</h2>
@@ -273,12 +273,12 @@ html, body {
 
 <!-- START SCREEN OVERLAY -->
 <div id="start-screen" class="overlay" style="display:none;">
-    <h1>🪐 Pronoun Meteor Shooter</h1>
+    <h1>🪐 Personal Pronoun Meteor Shooter</h1>
     <div class="instructions">
         <p><strong>How to Play:</strong></p>
         <p>1. Read the sentence at the top.</p>
-        <p>2. Move your ship with <strong>Arrow Keys / Buttons / Dragging</strong>.</p>
-        <p>3. Shoot the meteor containing the correct pronoun!</p>
+        <p>2. Move your ship with <strong>Arrow Keys / On-Screen Buttons / Dragging</strong>.</p>
+        <p>3. Shoot the meteor containing the correct personal pronoun before it falls past!</p>
     </div>
     <button class="btn" onclick="startGame()">Launch Mission 🚀</button>
 </div>
@@ -307,7 +307,7 @@ html, body {
     <circle cx="32" cy="24" r="4" fill="#FFFFFF"/>
 </svg>
 
-<!-- 📱 MOBILE ON-SCREEN CONTROLS -->
+<!-- 📱 ON-SCREEN CONTROLS -->
 <div id="mobile-controls">
     <div class="touch-btn" id="btn-left">◀</div>
     <div class="touch-btn" id="fire-btn">🚀 FIRE</div>
@@ -320,32 +320,36 @@ html, body {
 <audio id="clappingSound" src="assets/clapping.mp3" preload="auto"></audio>
 
 <script>
-// --- GAME DATA ---
-const sentences = [
-    {q:"Ravi is playing. ___ is happy.", a:"He"},
-    {q:"Sita is singing. ___ is joyful.", a:"She"},
-    {q:"The dog is barking. ___ is loud.", a:"It"},
-    {q:"Rahul and Amit are friends. ___ are playing.", a:"They"},
-    {q:"The cat is sleeping. ___ is on bed.", a:"It"},
-    {q:"Meena is dancing. ___ is on stage.", a:"She"},
-    {q:"Bird is flying. ___ is in sky.", a:"It"},
-    {q:"Aarav is running. ___ is fast.", a:"He"},
-    {q:"Teacher is teaching students. ___ helps them.", a:"He/She"},
-    {q:"Cars are moving. ___ are fast.", a:"They"},
-    {q:"Riya is drawing. ___ is creative.", a:"She"},
-    {q:"Elephant is big. ___ is strong.", a:"It"},
-    {q:"John and Tom are here. ___ are late.", a:"They"},
-    {q:"Boy is hungry. ___ wants food.", a:"He"},
-    {q:"Sun is bright. ___ is hot.", a:"It"}
-];
+// --- ALL PERSONAL PRONOUNS DATASET ---
+const allPronouns = ["I", "You", "He", "She", "It", "We", "They", "Me", "Him", "Her", "Us", "Them"];
 
-const options = ["He", "She", "It", "They"];
+const sentences = [
+    {q:"My name is Sam. ___ am a student.", a:"I"},
+    {q:"Tom, ___ are a very good friend.", a:"You"},
+    {q:"Ravi is playing outside. ___ is happy.", a:"He"},
+    {q:"Sita is singing nicely. ___ is joyful.", a:"She"},
+    {q:"The dog is barking. ___ is loud.", a:"It"},
+    {q:"Anna and I are cooking. ___ are making dinner.", a:"We"},
+    {q:"Rahul and Amit are classmates. ___ are studying.", a:"They"},
+    {q:"Listen carefully to ___.", a:"Me"},
+    {q:"Look at David. Please give the book to ___.", a:"Him"},
+    {q:"Mary is tired. Can you help ___?", a:"Her"},
+    {q:"Join John and me. Come with ___.", a:"Us"},
+    {q:"The kids are playing outside. Watch ___.", a:"Them"},
+    {q:"The bird is in the nest. ___ is sleeping.", a:"It"},
+    {q:"My family and I live here. ___ love this house.", a:"We"},
+    {q:"Teacher asked John a question and praised ___.", a:"Him"}
+];
 
 let current = 0;
 let score = 0;
 let shipX = window.innerWidth / 2;
 let activeMeteors = [];
 let gameActive = false;
+
+// Flags for tracking question resolution & missed chances
+let questionHandled = false;
+let missedCount = 0;
 
 // Audio references
 const correctAudio = document.getElementById("correctSound");
@@ -359,11 +363,10 @@ function playAudio(audioEl) {
     }
 }
 
-// --- LOGO IMAGE ERROR HANDLING (PREVENTS INFINITE LOOP) ---
+// --- LOGO ERROR HANDLING ---
 function handleLogoError(img) {
-    img.onerror = null; // Stops loop if secondary image also fails
+    img.onerror = null;
     img.src = "assets/innovinelogo.png";
-    
     img.addEventListener("error", () => {
         img.style.display = "none";
         const fallback = document.getElementById("logo-fallback");
@@ -371,7 +374,7 @@ function handleLogoError(img) {
     });
 }
 
-// --- SPLASH SCREEN LOGIC (EXACT 5 SECONDS FAILSAFE) ---
+// --- SPLASH SCREEN LOGIC ---
 let splashTimer = null;
 let splashHidden = false;
 
@@ -391,7 +394,6 @@ function hideSplash() {
     }, 600);
 }
 
-// Start 5-second countdown immediately on DOM load
 splashTimer = setTimeout(hideSplash, 5000);
 
 // --- STARFIELD BACKGROUND ---
@@ -410,6 +412,8 @@ function startGame() {
     document.getElementById("end-screen").style.display = "none";
     current = 0;
     score = 0;
+    shipX = window.innerWidth / 2;
+    updateShipPosition();
     gameActive = true;
     updateHUD();
     loadQuestion();
@@ -430,19 +434,34 @@ function loadQuestion() {
         return;
     }
 
+    questionHandled = false;
+    missedCount = 0;
     updateHUD();
     document.getElementById("sentence").innerText = sentences[current].q;
     spawnMeteors();
+}
+
+function generateOptionsForQuestion(correctAns) {
+    let options = [correctAns];
+    let pool = allPronouns.filter(p => p.toLowerCase() !== correctAns.toLowerCase());
+    
+    pool.sort(() => Math.random() - 0.5);
+    for (let i = 0; i < 3; i++) {
+        options.push(pool[i]);
+    }
+    
+    return options.sort(() => Math.random() - 0.5);
 }
 
 function spawnMeteors() {
     activeMeteors.forEach(m => m.el.remove());
     activeMeteors = [];
 
-    let shuffledOptions = [...options].sort(() => Math.random() - 0.5);
-    let sectionWidth = window.innerWidth / options.length;
+    let currentAnswer = sentences[current].a;
+    let currentOptions = generateOptionsForQuestion(currentAnswer);
+    let sectionWidth = window.innerWidth / currentOptions.length;
 
-    shuffledOptions.forEach((opt, index) => {
+    currentOptions.forEach((opt, index) => {
         let m = document.createElement("div");
         m.className = "meteor";
         m.innerText = opt;
@@ -456,16 +475,30 @@ function spawnMeteors() {
         let duration = 8 + Math.random() * 3;
         m.style.animation = `drop ${duration}s linear forwards`;
 
+        // Detect when meteor falls off-screen (missed chance)
+        m.addEventListener("animationend", () => {
+            if (!gameActive || questionHandled) return;
+            missedCount++;
+            
+            // When all meteors fall off screen without being shot
+            if (missedCount >= currentOptions.length) {
+                questionHandled = true;
+                playAudio(wrongAudio);
+                current++;
+                setTimeout(loadQuestion, 400);
+            }
+        });
+
         m.addEventListener("touchstart", (e) => {
             e.preventDefault();
-            if (!gameActive) return;
+            if (!gameActive || questionHandled) return;
             shipX = posX + 25;
             updateShipPosition();
             shoot();
         });
 
         m.onclick = () => {
-            if (!gameActive) return;
+            if (!gameActive || questionHandled) return;
             shipX = posX + 25;
             updateShipPosition();
             shoot();
@@ -477,7 +510,7 @@ function spawnMeteors() {
 }
 
 function shoot() {
-    if (!gameActive) return;
+    if (!gameActive || questionHandled) return;
 
     let ship = document.getElementById("ship");
     let shipRect = ship.getBoundingClientRect();
@@ -490,7 +523,7 @@ function shoot() {
 
     let laserPos = 150;
     let laserInterval = setInterval(() => {
-        laserPos += 20;
+        laserPos += 22;
         laser.style.bottom = laserPos + "px";
 
         let laserRect = laser.getBoundingClientRect();
@@ -534,14 +567,11 @@ function createExplosion(x, y) {
 }
 
 function checkAnswer(selectedOpt) {
-    let correctAns = sentences[current].a;
-    let isCorrect = false;
+    if (questionHandled) return;
+    questionHandled = true;
 
-    if (correctAns === "He/She") {
-        if (selectedOpt === "He" || selectedOpt === "She") isCorrect = true;
-    } else if (selectedOpt === correctAns) {
-        isCorrect = true;
-    }
+    let correctAns = sentences[current].a;
+    let isCorrect = (selectedOpt.toLowerCase() === correctAns.toLowerCase());
 
     if (isCorrect) {
         score += 10;
@@ -568,48 +598,90 @@ function endGame() {
     `;
 }
 
-// --- CONTROLS & BINDINGS ---
+// --- SMOOTH MOVEMENT CONTROLS ---
 function updateShipPosition() {
     let ship = document.getElementById("ship");
     shipX = Math.max(35, Math.min(window.innerWidth - 35, shipX));
     ship.style.left = shipX + "px";
 }
 
-// Keyboard Controls
+let keysPressed = {};
+let moveInterval = null;
+
+function startContinuousMove() {
+    if (moveInterval) return;
+    moveInterval = setInterval(() => {
+        if (!gameActive) return;
+        if (keysPressed["ArrowLeft"] || keysPressed["a"] || keysPressed["A"] || keysPressed["btnLeft"]) {
+            shipX -= 12;
+            updateShipPosition();
+        }
+        if (keysPressed["ArrowRight"] || keysPressed["d"] || keysPressed["D"] || keysPressed["btnRight"]) {
+            shipX += 12;
+            updateShipPosition();
+        }
+    }, 16);
+}
+
+function stopContinuousMove() {
+    if (!keysPressed["ArrowLeft"] && !keysPressed["a"] && !keysPressed["A"] && 
+        !keysPressed["ArrowRight"] && !keysPressed["d"] && !keysPressed["D"] &&
+        !keysPressed["btnLeft"] && !keysPressed["btnRight"]) {
+        clearInterval(moveInterval);
+        moveInterval = null;
+    }
+}
+
+// Keyboard Listeners
 document.addEventListener("keydown", (e) => {
     if (!gameActive) return;
-
-    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
-        shipX -= 30;
-        updateShipPosition();
-    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
-        shipX += 30;
-        updateShipPosition();
-    } else if (e.key === " " || e.key === "ArrowUp") {
+    if (e.key === " " || e.key === "ArrowUp") {
         e.preventDefault();
         shoot();
+        return;
     }
+    keysPressed[e.key] = true;
+    startContinuousMove();
 });
 
-// Touch Controls for Mobile Buttons
-document.getElementById("btn-left").addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    shipX -= 40;
-    updateShipPosition();
+document.addEventListener("keyup", (e) => {
+    delete keysPressed[e.key];
+    stopContinuousMove();
 });
 
-document.getElementById("btn-right").addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    shipX += 40;
-    updateShipPosition();
-});
+// Button Controls (Mouse + Touch Support)
+function bindButtonControls(btnId, keyName) {
+    const btn = document.getElementById(btnId);
+    
+    const pressHandler = (e) => {
+        e.preventDefault();
+        if (!gameActive) return;
+        keysPressed[keyName] = true;
+        startContinuousMove();
+    };
 
-document.getElementById("fire-btn").addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    shoot();
-});
+    const releaseHandler = (e) => {
+        e.preventDefault();
+        delete keysPressed[keyName];
+        stopContinuousMove();
+    };
 
-// Touch Drag Support directly on Ship
+    btn.addEventListener("mousedown", pressHandler);
+    btn.addEventListener("mouseup", releaseHandler);
+    btn.addEventListener("mouseleave", releaseHandler);
+    btn.addEventListener("touchstart", pressHandler);
+    btn.addEventListener("touchend", releaseHandler);
+}
+
+bindButtonControls("btn-left", "btnLeft");
+bindButtonControls("btn-right", "btnRight");
+
+// Fire Button
+const fireBtn = document.getElementById("fire-btn");
+fireBtn.addEventListener("click", (e) => { e.preventDefault(); shoot(); });
+fireBtn.addEventListener("touchstart", (e) => { e.preventDefault(); shoot(); });
+
+// Touch Drag Support directly across the screen
 document.addEventListener("touchmove", (e) => {
     if (!gameActive || e.touches.length === 0) return;
     let touchX = e.touches[0].clientX;
@@ -617,7 +689,7 @@ document.addEventListener("touchmove", (e) => {
     updateShipPosition();
 });
 
-// Window Resize
+// Window Resize Handling
 window.addEventListener("resize", () => {
     shipX = window.innerWidth / 2;
     updateShipPosition();
