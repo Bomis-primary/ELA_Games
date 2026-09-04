@@ -1,574 +1,2220 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Star, Trophy, RefreshCw, Zap, Shield, ShieldAlert, ChevronRight, Volume2 } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Article Asteroids - Grade 3</title>
 
-// --- RICH, HIGH-ORDER LEVEL QUESTIONS (15+ per level) ---
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: #020617;
+    color: white;
+    overflow-x: hidden;
+}
+
+button {
+    font-family: inherit;
+}
+
+/* =========================================================
+   GENERAL
+========================================================= */
+
+.hidden {
+    display: none !important;
+}
+
+.screen {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   SPLASH SCREEN
+========================================================= */
+
+#splashScreen {
+    position: fixed;
+    inset: 0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.splash-content {
+    text-align: center;
+    width: 100%;
+}
+
+.splash-logo {
+    width: min(70%, 420px);
+    max-height: 250px;
+    object-fit: contain;
+    display: block;
+    margin: auto;
+    animation: pulse 1.5s infinite;
+}
+
+.entering {
+    margin-top: 28px;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    animation: bounce 1.5s infinite;
+}
+
+
+/* =========================================================
+   START SCREEN
+========================================================= */
+
+#startScreen {
+    min-height: 100vh;
+    background: #020617;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 25px;
+    text-align: center;
+}
+
+.grid-background {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right, #1e293b 1px, transparent 1px),
+        linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+    background-size: 4rem 4rem;
+    opacity: 0.3;
+}
+
+.grid-background::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        ellipse 60% 50% at 50% 50%,
+        transparent 20%,
+        #020617 100%
+    );
+}
+
+.start-stars span {
+    position: absolute;
+    border-radius: 50%;
+}
+
+.star1 {
+    width: 8px;
+    height: 8px;
+    background: #60a5fa;
+    top: 25%;
+    left: 25%;
+    animation: ping 1.5s infinite;
+}
+
+.star2 {
+    width: 12px;
+    height: 12px;
+    background: #c084fc;
+    top: 33%;
+    right: 25%;
+    animation: pulse 1.5s infinite;
+}
+
+.star3 {
+    width: 8px;
+    height: 8px;
+    background: #f472b6;
+    bottom: 25%;
+    right: 33%;
+    animation: ping 1.5s infinite;
+}
+
+.start-content {
+    position: relative;
+    z-index: 5;
+    max-width: 800px;
+    width: 100%;
+}
+
+.mission-badge {
+    display: inline-block;
+    padding: 10px 18px;
+    background: rgba(30, 64, 175, 0.35);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: 30px;
+    color: #60a5fa;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 25px;
+    animation: pulse 2s infinite;
+}
+
+.start-title {
+    font-size: clamp(42px, 8vw, 78px);
+    line-height: 1;
+    font-weight: 900;
+    margin-bottom: 25px;
+}
+
+.start-title span {
+    color: #22d3ee;
+    text-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
+}
+
+.start-description {
+    color: #94a3b8;
+    font-size: clamp(16px, 2vw, 20px);
+    line-height: 1.6;
+    margin: 0 auto 30px;
+    max-width: 700px;
+}
+
+.article-a {
+    color: #22d3ee;
+    font-weight: bold;
+}
+
+.article-an {
+    color: #f472b6;
+    font-weight: bold;
+}
+
+.article-the {
+    color: #facc15;
+    font-weight: bold;
+}
+
+.sound-button {
+    background: #1e293b;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+    padding: 11px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.sound-button:hover {
+    background: #334155;
+}
+
+.launch-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 18px 35px;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(90deg, #22d3ee, #3b82f6);
+    color: #020617;
+    font-size: 20px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(34, 211, 238, 0.35);
+    transition: 0.2s;
+}
+
+.launch-button:hover {
+    transform: scale(1.05);
+}
+
+.launch-button:active {
+    transform: scale(0.96);
+}
+
+
+/* =========================================================
+   GAME SCREEN
+========================================================= */
+
+#gameScreen {
+    min-height: 100vh;
+    background: #020617;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.starfield {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.45;
+    background-image:
+        radial-gradient(circle at 10% 20%, white 1px, transparent 2px),
+        radial-gradient(circle at 25% 70%, white 1px, transparent 2px),
+        radial-gradient(circle at 40% 30%, white 1px, transparent 2px),
+        radial-gradient(circle at 60% 80%, white 1px, transparent 2px),
+        radial-gradient(circle at 75% 20%, white 1px, transparent 2px),
+        radial-gradient(circle at 90% 60%, white 1px, transparent 2px);
+    background-size: 220px 220px;
+}
+
+
+/* =========================================================
+   HUD
+========================================================= */
+
+.hud {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 16px 22px;
+    background: rgba(15, 23, 42, 0.92);
+    border-bottom: 1px solid #1e293b;
+}
+
+.sector-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sector-number {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #082f49;
+    border: 1px solid #0e7490;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #22d3ee;
+    font-weight: 900;
+}
+
+.hud-label {
+    color: #94a3b8;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+.question-counter {
+    color: #22d3ee;
+    font-weight: bold;
+    margin-top: 3px;
+}
+
+.shields {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    background: #020617;
+    padding: 9px 13px;
+    border-radius: 12px;
+    border: 1px solid #1e293b;
+}
+
+.shield {
+    font-size: 22px;
+    transition: 0.2s;
+}
+
+.shield.active {
+    filter: drop-shadow(0 0 5px #22d3ee);
+}
+
+.shield.empty {
+    opacity: 0.15;
+}
+
+.score-box {
+    text-align: right;
+}
+
+.score-value {
+    color: #facc15;
+    font-size: 22px;
+    font-weight: 900;
+    margin-top: 3px;
+}
+
+
+/* =========================================================
+   QUESTION BOARD
+========================================================= */
+
+.question-area {
+    position: relative;
+    z-index: 5;
+    width: min(92%, 900px);
+    margin: 25px auto 0;
+}
+
+.question-board {
+    background: rgba(15, 23, 42, 0.85);
+    border: 2px solid rgba(6, 182, 212, 0.25);
+    border-radius: 25px;
+    padding: 28px;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(6, 182, 212, 0.08);
+}
+
+.target-label {
+    color: #0891b2;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+}
+
+.question-text {
+    font-size: clamp(20px, 3vw, 32px);
+    line-height: 1.5;
+    font-weight: bold;
+}
+
+.blank {
+    display: inline-block;
+    min-width: 70px;
+    color: #22d3ee;
+    border-bottom: 3px solid #22d3ee;
+    padding: 0 10px 3px;
+}
+
+.blank.correct {
+    color: #34d399;
+    border-color: #34d399;
+}
+
+.blank.wrong {
+    color: #f87171;
+    border-color: #f87171;
+}
+
+
+/* =========================================================
+   BATTLEFIELD
+========================================================= */
+
+.battlefield {
+    position: relative;
+    z-index: 5;
+    width: min(92%, 900px);
+    flex: 1;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.asteroid-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    align-items: center;
+    margin: auto 0;
+    padding: 30px 0;
+}
+
+.asteroid {
+    width: min(150px, 90%);
+    aspect-ratio: 1;
+    margin: auto;
+    border-radius: 50%;
+    border: 4px solid #334155;
+    background: #1e293b;
+    color: white;
+    font-size: clamp(25px, 5vw, 42px);
+    font-weight: 900;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 8px 0 #0f172a;
+    transition: 0.3s;
+    animation: floatAsteroid 4s ease-in-out infinite alternate;
+}
+
+.asteroid:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.asteroid:nth-child(3) {
+    animation-delay: 1s;
+}
+
+.asteroid:hover:not(:disabled) {
+    transform: translateY(-10px) scale(1.06);
+    border-color: #22d3ee;
+}
+
+.asteroid:active:not(:disabled) {
+    transform: translateY(3px);
+}
+
+.asteroid:disabled {
+    cursor: default;
+}
+
+.asteroid.target-correct {
+    border-color: #10b981;
+    background: #064e3b;
+    color: #6ee7b7;
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
+    transform: scale(1.1);
+}
+
+.asteroid.target-wrong {
+    border-color: #ef4444;
+    background: #450a0a;
+    color: #fca5a5;
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+    transform: scale(0.9);
+}
+
+.asteroid.dimmed {
+    opacity: 0.35;
+    transform: scale(0.95);
+}
+
+
+/* =========================================================
+   FEEDBACK
+========================================================= */
+
+.feedback-area {
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.feedback {
+    padding: 12px 22px;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.feedback.correct-feedback {
+    color: #34d399;
+    background: rgba(6, 78, 59, 0.8);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    animation: bounce 0.8s;
+}
+
+.feedback.wrong-feedback {
+    color: #f87171;
+    background: rgba(69, 10, 10, 0.8);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    animation: bounce 0.8s;
+}
+
+
+/* =========================================================
+   SHIP
+========================================================= */
+
+.ship-area {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0 25px;
+}
+
+.ship {
+    font-size: 75px;
+    filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.6));
+    transition: transform 0.3s;
+}
+
+.ship.left {
+    transform: rotate(-25deg);
+}
+
+.ship.right {
+    transform: rotate(25deg);
+}
+
+
+/* =========================================================
+   END SCREENS
+========================================================= */
+
+.end-screen {
+    min-height: 100vh;
+    background: #020617;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 25px;
+}
+
+.end-icon {
+    font-size: 75px;
+    margin-bottom: 20px;
+    animation: bounce 1.5s infinite;
+}
+
+.end-title {
+    font-size: clamp(38px, 7vw, 60px);
+    font-weight: 900;
+    color: #22d3ee;
+    margin-bottom: 10px;
+}
+
+.end-text {
+    color: #94a3b8;
+    max-width: 550px;
+    font-size: 18px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+.score-card {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid #1e293b;
+    border-radius: 22px;
+    padding: 25px 50px;
+    margin-bottom: 25px;
+}
+
+.score-card-label {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.final-score {
+    color: #facc15;
+    font-size: 48px;
+    font-weight: 900;
+    margin-top: 8px;
+}
+
+.end-button {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 14px;
+    background: #22d3ee;
+    color: #020617;
+    font-size: 17px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.end-button:hover {
+    transform: scale(1.05);
+}
+
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+.particle {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes floatAsteroid {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(3deg);
+    }
+
+    100% {
+        transform: translateY(8px) rotate(-3deg);
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.04);
+    }
+}
+
+@keyframes ping {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    75%,
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+@keyframes bounce {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20%,
+    60% {
+        transform: translateX(-10px);
+    }
+
+    40%,
+    80% {
+        transform: translateX(10px);
+    }
+}
+
+.shake {
+    animation: shake 0.4s ease-in-out;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .hud {
+        padding: 12px;
+    }
+
+    .sector-number {
+        display: none;
+    }
+
+    .hud-label {
+        font-size: 9px;
+    }
+
+    .question-counter,
+    .score-value {
+        font-size: 14px;
+    }
+
+    .shields {
+        padding: 7px;
+    }
+
+    .shield {
+        font-size: 17px;
+    }
+
+    .question-area {
+        margin-top: 15px;
+    }
+
+    .question-board {
+        padding: 20px 12px;
+        border-radius: 18px;
+    }
+
+    .asteroid-row {
+        gap: 8px;
+        padding: 15px 0;
+    }
+
+    .asteroid {
+        width: 95px;
+        border-width: 3px;
+    }
+
+    .ship {
+        font-size: 60px;
+    }
+
+    .feedback {
+        font-size: 12px;
+        padding: 10px 15px;
+    }
+
+    .start-description {
+        font-size: 15px;
+    }
+}
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     SPLASH SCREEN
+========================================================= -->
+
+<div id="splashScreen">
+
+    <div class="splash-content">
+
+        <img
+            src="assets/innovine-logo.png"
+            alt="Innovine Logo"
+            class="splash-logo"
+        >
+
+        <div class="entering">
+            Entering Orbit...
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     START SCREEN
+========================================================= -->
+
+<div id="startScreen" class="hidden">
+
+    <div class="grid-background"></div>
+
+    <div class="start-stars">
+
+        <span class="star1"></span>
+
+        <span class="star2"></span>
+
+        <span class="star3"></span>
+
+    </div>
+
+
+    <div class="start-content">
+
+        <div class="mission-badge">
+            ⚡ GRADE 3 ARCADE MISSION
+        </div>
+
+
+        <h1 class="start-title">
+            ARTICLE <span>ASTEROIDS</span>
+        </h1>
+
+
+        <p class="start-description">
+
+            Command your plasma ship!
+            Target and blast the correct
+            Asteroids representing
+
+            <span class="article-a">A</span>,
+
+            <span class="article-an">An</span>,
+
+            or
+
+            <span class="article-the">The</span>
+
+            to power your warp drive!
+
+        </p>
+
+
+        <button
+            id="soundButton"
+            class="sound-button"
+            onclick="toggleSound()"
+        >
+            🔊 Sound: ON
+        </button>
+
+
+        <br>
+
+
+        <button
+            class="launch-button"
+            onclick="startGame()"
+        >
+            🚀 LAUNCH MISSION →
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     GAME SCREEN
+========================================================= -->
+
+<div id="gameScreen" class="hidden">
+
+    <div class="starfield"></div>
+
+
+    <!-- HUD -->
+
+    <header class="hud">
+
+
+        <div class="sector-box">
+
+            <div
+                class="sector-number"
+                id="sectorNumber"
+            >
+                S-1
+            </div>
+
+
+            <div>
+
+                <div class="hud-label">
+                    Sector Orbit
+                </div>
+
+
+                <div class="question-counter">
+
+                    Asteroid
+                    <span id="questionNumber">1</span>
+                    / 10
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="shields">
+
+            <span class="hud-label">
+                Shields:
+            </span>
+
+            <span
+                id="shield1"
+                class="shield active"
+            >
+                🛡️
+            </span>
+
+            <span
+                id="shield2"
+                class="shield active"
+            >
+                🛡️
+            </span>
+
+            <span
+                id="shield3"
+                class="shield active"
+            >
+                🛡️
+            </span>
+
+        </div>
+
+
+        <div class="score-box">
+
+            <div class="hud-label">
+                Score
+            </div>
+
+            <div class="score-value">
+                <span id="score">0</span>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- QUESTION -->
+
+    <section class="question-area">
+
+        <div class="question-board">
+
+            <div class="target-label">
+                TARGET SCAN:
+            </div>
+
+
+            <div
+                id="questionText"
+                class="question-text"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- BATTLEFIELD -->
+
+    <main class="battlefield">
+
+
+        <div
+            id="asteroidRow"
+            class="asteroid-row"
+        >
+
+
+            <button
+                class="asteroid"
+                data-option="A"
+                onclick="shoot('A')"
+            >
+                A
+            </button>
+
+
+            <button
+                class="asteroid"
+                data-option="An"
+                onclick="shoot('An')"
+            >
+                An
+            </button>
+
+
+            <button
+                class="asteroid"
+                data-option="The"
+                onclick="shoot('The')"
+            >
+                The
+            </button>
+
+
+        </div>
+
+
+        <div
+            id="feedbackArea"
+            class="feedback-area"
+        ></div>
+
+
+        <div class="ship-area">
+
+            <div
+                id="ship"
+                class="ship"
+            >
+                🚀
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     LEVEL COMPLETE
+========================================================= -->
+
+<div
+    id="levelComplete"
+    class="hidden end-screen"
+>
+
+    <div class="end-icon">
+        ⭐
+    </div>
+
+
+    <h2 class="end-title">
+        SECTOR 1 CLEAR!
+    </h2>
+
+
+    <p class="end-text">
+
+        Your article shields held strong!
+        Prepare for trickier article missions
+        in Sector 2.
+
+    </p>
+
+
+    <div class="score-card">
+
+        <div class="score-card-label">
+            Warp Points Earned
+        </div>
+
+
+        <div
+            id="levelScore"
+            class="final-score"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <button
+        class="end-button"
+        onclick="loadLevel(2)"
+    >
+        ENTER SECTOR 2 →
+    </button>
+
+</div>
+
+
+<!-- =========================================================
+     GAME COMPLETE
+========================================================= -->
+
+<div
+    id="gameComplete"
+    class="hidden end-screen"
+>
+
+    <div class="end-icon">
+        🏆
+    </div>
+
+
+    <h2 class="end-title">
+        GALAXY CONQUERED!
+    </h2>
+
+
+    <p class="end-text">
+
+        You have mastered the grammar galaxy.
+        Asteroids stand no chance against
+        your quick article reflexes!
+
+    </p>
+
+
+    <div class="score-card">
+
+        <div class="score-card-label">
+            Final Warp Score
+        </div>
+
+
+        <div
+            id="finalScore"
+            class="final-score"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <button
+        class="end-button"
+        onclick="startGame()"
+    >
+        🔄 START NEW RECON
+    </button>
+
+</div>
+
+
+<script>
+
+
+/* =========================================================
+   LEVEL 1 QUESTIONS
+========================================================= */
+
 const LEVEL_1_QUESTIONS = [
-  { text: "We saw ___ owl hunting in the dark forest.", answer: "An", hint: "Vowel sound 'o'" },
-  { text: "She wants to be ___ astronaut when she grows up.", answer: "An", hint: "Vowel sound 'a'" },
-  { text: "I need ___ new pair of shoes for the big race.", answer: "A", hint: "Consonant sound 'n'" },
-  { text: "He found ___ old silver coin buried in the backyard.", answer: "An", hint: "Vowel sound 'o'" },
-  { text: "I ate ___ apple and two bananas for breakfast.", answer: "An", hint: "Vowel sound 'a'" },
-  { text: "There is ___ huge elephant sleeping at the zoo.", answer: "A", hint: "Consonant sound 'h' (not silent)" },
-  { text: "I watched ___ interesting movie about space travel.", answer: "An", hint: "Vowel sound 'i'" },
-  { text: "She keeps ___ umbrella in her backpack just in case.", answer: "An", hint: "Vowel sound 'u'" },
-  { text: "We stayed at ___ nice hotel by the beach.", answer: "A", hint: "Consonant sound 'n'" },
-  { text: "Please give me ___ honest answer to my question.", answer: "An", hint: "Silent 'h' makes a vowel sound 'o'" },
-  { text: "It took us ___ hour to finish the difficult puzzle.", answer: "An", hint: "Silent 'h' makes a vowel sound" },
-  { text: "My brother is ___ university student in the city.", answer: "A", hint: "Starts with consonant sound 'y'" },
-  { text: "I saw ___ one-eyed pirate in the cartoon.", answer: "A", hint: "Starts with consonant sound 'w'" },
-  { text: "We need ___ united team to win the championship.", answer: "A", hint: "Starts with consonant sound 'y'" },
-  { text: "Can you pass me ___ red pen that is on your desk?", answer: "The", hint: "Specific object" },
-  { text: "___ sun is shining brightly in the sky today.", answer: "The", hint: "Unique object" },
-  { text: "We are going to ___ park near our house later.", answer: "The", hint: "Specific place" }
+
+    {
+        text: "We saw ___ owl hunting in the dark forest.",
+        answer: "An",
+        hint: "The word owl begins with a vowel sound."
+    },
+
+    {
+        text: "She wants to be ___ astronaut when she grows up.",
+        answer: "An",
+        hint: "The word astronaut begins with a vowel sound."
+    },
+
+    {
+        text: "I need ___ new pair of shoes for the big race.",
+        answer: "A",
+        hint: "New begins with a consonant sound."
+    },
+
+    {
+        text: "He found ___ old silver coin buried in the backyard.",
+        answer: "An",
+        hint: "Old begins with a vowel sound."
+    },
+
+    {
+        text: "I ate ___ apple and two bananas for breakfast.",
+        answer: "An",
+        hint: "Apple begins with a vowel sound."
+    },
+
+    {
+        text: "There is ___ huge elephant sleeping at the zoo.",
+        answer: "A",
+        hint: "Huge begins with a consonant sound."
+    },
+
+    {
+        text: "I watched ___ interesting movie about space travel.",
+        answer: "An",
+        hint: "Interesting begins with a vowel sound."
+    },
+
+    {
+        text: "She keeps ___ umbrella in her backpack just in case.",
+        answer: "An",
+        hint: "Umbrella begins with a vowel sound."
+    },
+
+    {
+        text: "We stayed at ___ nice hotel by the beach.",
+        answer: "A",
+        hint: "Nice begins with a consonant sound."
+    },
+
+    {
+        text: "Please give me ___ honest answer to my question.",
+        answer: "An",
+        hint: "The h in honest is silent."
+    },
+
+    {
+        text: "It took us ___ hour to finish the difficult puzzle.",
+        answer: "An",
+        hint: "The h in hour is silent."
+    },
+
+    {
+        text: "My brother is ___ university student in the city.",
+        answer: "A",
+        hint: "University begins with a 'yoo' sound."
+    },
+
+    {
+        text: "I saw ___ one-eyed pirate in the cartoon.",
+        answer: "A",
+        hint: "One begins with a 'w' sound."
+    },
+
+    {
+        text: "We need ___ united team to win the championship.",
+        answer: "A",
+        hint: "United begins with a 'yoo' sound."
+    },
+
+    {
+        text: "Can you pass me ___ red pen that is on your desk?",
+        answer: "The",
+        hint: "We are talking about a specific pen."
+    },
+
+    {
+        text: "___ sun is shining brightly in the sky today.",
+        answer: "The",
+        hint: "There is one sun in our solar system."
+    },
+
+    {
+        text: "We are going to ___ park near our house later.",
+        answer: "The",
+        hint: "We mean a particular park."
+    }
+
 ];
+
+
+/* =========================================================
+   LEVEL 2 QUESTIONS
+========================================================= */
 
 const LEVEL_2_QUESTIONS = [
-  { text: "___ honest mistake can happen to anyone.", answer: "An", hint: "Silent 'h' sound" },
-  { text: "He is ___ European expert on ancient dinosaurs.", answer: "A", hint: "Starts with consonant sound 'y'" },
-  { text: "Let's meet at ___ cafe where we had lunch yesterday.", answer: "The", hint: "Specific place we both know" },
-  { text: "___ water in this bottle is very cold.", answer: "The", hint: "Specific water, not water in general" },
-  { text: "I need to buy ___ uniform for my new soccer team.", answer: "A", hint: "Starts with consonant sound 'y'" },
-  { text: "She was crowned as ___ Queen of the spring festival.", answer: "The", hint: "A specific, unique title" },
-  { text: "We waited for over ___ hour in the freezing rain.", answer: "An", hint: "Silent 'h'" },
-  { text: "___ Amazon River is the longest river in South America.", answer: "The", hint: "Geographical name rule" },
-  { text: "Do you have ___ idea how to solve this tricky puzzle?", answer: "An", hint: "Vowel sound 'i'" },
-  { text: "He plays ___ piano beautifully at every concert.", answer: "The", hint: "Musical instrument rule" },
-  { text: "___ Himalayas are a massive mountain range covered in snow.", answer: "The", hint: "Plural mountain range rule" },
-  { text: "She is wearing ___ unique dress to the party today.", answer: "A", hint: "Starts with consonant sound 'y'" },
-  { text: "We adopted ___ puppy that we found in the alley.", answer: "The", hint: "A specific puppy" },
-  { text: "It is such ___ honor to finally meet you!", answer: "An", hint: "Silent 'h'" },
-  { text: "I bought a book and a pen. ___ book is very heavy.", answer: "The", hint: "Referring back to a specific item" },
-  { text: "Look at ___ moon; it's a full moon tonight!", answer: "The", hint: "Unique object in the sky" }
+
+    {
+        text: "___ honest mistake can happen to anyone.",
+        answer: "An",
+        hint: "The h in honest is silent."
+    },
+
+    {
+        text: "He is ___ European expert on ancient dinosaurs.",
+        answer: "A",
+        hint: "European begins with a 'yoo' sound."
+    },
+
+    {
+        text: "Let's meet at ___ cafe where we had lunch yesterday.",
+        answer: "The",
+        hint: "It is a specific cafe."
+    },
+
+    {
+        text: "___ water in this bottle is very cold.",
+        answer: "The",
+        hint: "We mean the specific water in this bottle."
+    },
+
+    {
+        text: "I need to buy ___ uniform for my new soccer team.",
+        answer: "A",
+        hint: "Uniform begins with a 'yoo' sound."
+    },
+
+    {
+        text: "She was crowned as ___ Queen of the spring festival.",
+        answer: "The",
+        hint: "We mean a specific title."
+    },
+
+    {
+        text: "We waited for over ___ hour in the freezing rain.",
+        answer: "An",
+        hint: "The h in hour is silent."
+    },
+
+    {
+        text: "___ Amazon River is the longest river in South America.",
+        answer: "The",
+        hint: "Use 'the' with this geographical name."
+    },
+
+    {
+        text: "Do you have ___ idea how to solve this tricky puzzle?",
+        answer: "An",
+        hint: "Idea begins with a vowel sound."
+    },
+
+    {
+        text: "He plays ___ piano beautifully at every concert.",
+        answer: "The",
+        hint: "We commonly use 'the' with musical instruments."
+    },
+
+    {
+        text: "___ Himalayas are a massive mountain range covered in snow.",
+        answer: "The",
+        hint: "Use 'the' with this mountain range."
+    },
+
+    {
+        text: "She is wearing ___ unique dress to the party today.",
+        answer: "A",
+        hint: "Unique begins with a 'yoo' sound."
+    },
+
+    {
+        text: "We adopted ___ puppy that we found in the alley.",
+        answer: "The",
+        hint: "We mean a particular puppy."
+    },
+
+    {
+        text: "It is such ___ honor to finally meet you!",
+        answer: "An",
+        hint: "The h in honor is silent."
+    },
+
+    {
+        text: "I bought a book and a pen. ___ book is very heavy.",
+        answer: "The",
+        hint: "We are referring back to a specific book."
+    },
+
+    {
+        text: "Look at ___ moon; it's a full moon tonight!",
+        answer: "The",
+        hint: "We mean the unique moon in our sky."
+    }
+
 ];
 
-const shuffleArray = (array) => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
 
-export default function App() {
-  const [gameState, setGameState] = useState('splash'); // splash, start, playing, levelComplete, gameComplete
-  const [currentLevel, setCurrentLevel] = useState(1);
-  const [score, setScore] = useState(0);
-  const [levelQuestions, setLevelQuestions] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [feedback, setFeedback] = useState(null); // 'correct', 'wrong', or null
-  const [streak, setStreak] = useState(0);
-  const [shields, setShields] = useState(3);
-  const [shakeScreen, setShakeScreen] = useState(false);
-  const [audioMuted, setAudioMuted] = useState(false);
+/* =========================================================
+   GAME VARIABLES
+========================================================= */
 
-  // FX state for Laser & Particles
-  const [laserEffect, setLaserEffect] = useState(null); // { target: 'A'|'An'|'The', color: string }
-  const [particles, setParticles] = useState([]);
+let currentLevel = 1;
 
-  // Audio References
-  const correctAudio = useRef(null);
-  const wrongAudio = useRef(null);
+let score = 0;
 
-  // Initialize Audio
-  useEffect(() => {
-    correctAudio.current = new Audio('assets/correct.mp3');
-    wrongAudio.current = new Audio('assets/wrong.mp3');
-  }, []);
+let streak = 0;
 
-  // Splash Screen timer (5 seconds)
-  useEffect(() => {
-    if (gameState === 'splash') {
-      const timer = setTimeout(() => {
-        setGameState('start');
-      }, 5000);
-      return () => clearTimeout(timer);
+let shields = 3;
+
+let currentQuestionIndex = 0;
+
+let levelQuestions = [];
+
+let feedbackLocked = false;
+
+let audioMuted = false;
+
+
+/* =========================================================
+   AUDIO
+========================================================= */
+
+const correctAudio =
+    new Audio("assets/correct.mp3");
+
+const wrongAudio =
+    new Audio("assets/wrong.mp3");
+
+
+correctAudio.preload = "auto";
+wrongAudio.preload = "auto";
+
+
+function playSound(isCorrect) {
+
+    if (audioMuted) {
+        return;
     }
-  }, [gameState]);
 
-  // Particle updates
-  useEffect(() => {
-    if (particles.length === 0) return;
-    const interval = setInterval(() => {
-      setParticles((prev) =>
-        prev
-          .map((p) => ({
-            ...p,
-            x: p.x + p.vx,
-            y: p.y + p.vy,
-            life: p.life - 0.1,
-          }))
-          .filter((p) => p.life > 0)
-      );
-    }, 30);
-    return () => clearInterval(interval);
-  }, [particles]);
+    const audio =
+        isCorrect
+            ? correctAudio
+            : wrongAudio;
 
-  const loadLevel = (levelNum) => {
-    const bank = levelNum === 1 ? LEVEL_1_QUESTIONS : LEVEL_2_QUESTIONS;
-    const selected = shuffleArray(bank).slice(0, 10);
-    setLevelQuestions(selected);
-    setCurrentQuestionIndex(0);
-    setCurrentLevel(levelNum);
-    setGameState('playing');
-    setFeedback(null);
-    setLaserEffect(null);
-  };
+    audio.currentTime = 0;
 
-  const startGame = () => {
-    setScore(0);
-    setStreak(0);
-    setShields(3);
-    loadLevel(1);
-  };
-
-  const playSound = (isCorrect) => {
-    if (audioMuted) return;
-    const audio = isCorrect ? correctAudio.current : wrongAudio.current;
-    if (audio) {
-      audio.currentTime = 0;
-      audio.play().catch(e => console.log('Audio prevented:', e));
-    }
-  };
-
-  const createExplosion = (x, y, color) => {
-    const newParticles = [];
-    for (let i = 0; i < 15; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 2 + Math.random() * 5;
-      newParticles.push({
-        id: Math.random(),
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        color,
-        life: 1.0,
-      });
-    }
-    setParticles(newParticles);
-  };
-
-  const handleShoot = (selectedOption) => {
-    if (feedback !== null) return;
-
-    const currentQ = levelQuestions[currentQuestionIndex];
-    const isCorrect = selectedOption === currentQ.answer;
-
-    // Trigger Laser Visual toward target coordinates (approximate based on button tapped)
-    setLaserEffect({
-      target: selectedOption,
-      color: isCorrect ? '#22c55e' : '#ef4444',
+    audio.play().catch(function() {
+        /*
+           Browser audio restrictions are normal.
+           Sound will work after the user interacts
+           with the game.
+        */
     });
+}
 
-    setTimeout(() => {
-      playSound(isCorrect);
-      setFeedback(isCorrect ? 'correct' : 'wrong');
 
-      if (isCorrect) {
-        // Explode correct asteroid
-        createExplosion(50, 50, '#10b981');
-        setScore((prev) => prev + 10 + streak * 3);
-        setStreak((prev) => prev + 1);
-      } else {
-        // Asteroid hits ship! Damage shield
-        setShakeScreen(true);
-        setTimeout(() => setShakeScreen(false), 500);
-        setShields((prev) => Math.max(0, prev - 1));
-        setStreak(0);
-      }
+/* =========================================================
+   SOUND TOGGLE
+========================================================= */
 
-      // Proceed to next action
-      setTimeout(() => {
-        setLaserEffect(null);
-        if (currentQuestionIndex < 9) {
-          setCurrentQuestionIndex((prev) => prev + 1);
-          setFeedback(null);
+function toggleSound() {
+
+    audioMuted =
+        !audioMuted;
+
+    const button =
+        document.getElementById(
+            "soundButton"
+        );
+
+    if (audioMuted) {
+
+        button.innerHTML =
+            "🔇 Sound: OFF";
+
+    } else {
+
+        button.innerHTML =
+            "🔊 Sound: ON";
+
+    }
+}
+
+
+/* =========================================================
+   SCREEN CONTROL
+========================================================= */
+
+function hideAllScreens() {
+
+    document
+        .getElementById("splashScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("startScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("gameScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("levelComplete")
+        .classList.add("hidden");
+
+    document
+        .getElementById("gameComplete")
+        .classList.add("hidden");
+}
+
+
+/* =========================================================
+   5 SECOND LOGO SPLASH
+========================================================= */
+
+setTimeout(function() {
+
+    hideAllScreens();
+
+    document
+        .getElementById("startScreen")
+        .classList
+        .remove("hidden");
+
+}, 5000);
+
+
+/* =========================================================
+   SHUFFLE QUESTIONS
+========================================================= */
+
+function shuffleArray(array) {
+
+    const shuffled =
+        [...array];
+
+    for (
+        let i = shuffled.length - 1;
+        i > 0;
+        i--
+    ) {
+
+        const j =
+            Math.floor(
+                Math.random() * (i + 1)
+            );
+
+        [
+            shuffled[i],
+            shuffled[j]
+        ] =
+        [
+            shuffled[j],
+            shuffled[i]
+        ];
+    }
+
+    return shuffled;
+}
+
+
+/* =========================================================
+   START GAME
+========================================================= */
+
+function startGame() {
+
+    score = 0;
+
+    streak = 0;
+
+    shields = 3;
+
+    currentLevel = 1;
+
+    loadLevel(1);
+}
+
+
+/* =========================================================
+   LOAD LEVEL
+========================================================= */
+
+function loadLevel(level) {
+
+    currentLevel =
+        level;
+
+    const bank =
+        level === 1
+            ? LEVEL_1_QUESTIONS
+            : LEVEL_2_QUESTIONS;
+
+
+    /*
+       Randomly select 10 questions
+       from the level question bank.
+    */
+
+    levelQuestions =
+        shuffleArray(bank)
+        .slice(0, 10);
+
+
+    currentQuestionIndex = 0;
+
+    feedbackLocked = false;
+
+
+    hideAllScreens();
+
+
+    document
+        .getElementById("gameScreen")
+        .classList
+        .remove("hidden");
+
+
+    updateHUD();
+
+    showQuestion();
+}
+
+
+/* =========================================================
+   UPDATE HUD
+========================================================= */
+
+function updateHUD() {
+
+    document
+        .getElementById("sectorNumber")
+        .textContent =
+            "S-" + currentLevel;
+
+
+    document
+        .getElementById("questionNumber")
+        .textContent =
+            currentQuestionIndex + 1;
+
+
+    document
+        .getElementById("score")
+        .textContent =
+            score;
+
+
+    updateShields();
+}
+
+
+/* =========================================================
+   UPDATE SHIELDS
+========================================================= */
+
+function updateShields() {
+
+    for (
+        let i = 1;
+        i <= 3;
+        i++
+    ) {
+
+        const shield =
+            document.getElementById(
+                "shield" + i
+            );
+
+
+        if (i <= shields) {
+
+            shield.classList.add(
+                "active"
+            );
+
+            shield.classList.remove(
+                "empty"
+            );
+
         } else {
-          if (currentLevel === 1) {
-            setGameState('levelComplete');
-          } else {
-            setGameState('gameComplete');
-          }
+
+            shield.classList.remove(
+                "active"
+            );
+
+            shield.classList.add(
+                "empty"
+            );
+
         }
-      }, 1500);
-    }, 400); // laser travel delay
-  };
+    }
+}
 
-  // --- RENDERING VIEWS ---
 
-  if (gameState === 'splash') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
-        <div className="text-center">
-          <img 
-            src="assets/innovine-logo.png" 
-            alt="Innovine Logo" 
-            className="max-w-[70%] md:max-w-sm h-auto mx-auto animate-pulse"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgNDAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Jbm5vdmluZSBMb2dvPC90ZXh0IHg+PC9zdmc+';
-            }}
-          />
-          <div className="mt-8 text-slate-400 font-bold tracking-widest uppercase animate-bounce text-sm">
-            Entering Orbit...
-          </div>
-        </div>
-      </div>
+/* =========================================================
+   SHOW QUESTION
+========================================================= */
+
+function showQuestion() {
+
+    feedbackLocked = false;
+
+
+    const question =
+        levelQuestions[
+            currentQuestionIndex
+        ];
+
+
+    const parts =
+        question.text.split("___");
+
+
+    const questionElement =
+        document.getElementById(
+            "questionText"
+        );
+
+
+    questionElement.innerHTML = "";
+
+
+    questionElement.appendChild(
+        document.createTextNode(
+            parts[0]
+        )
     );
-  }
 
-  if (gameState === 'start') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white p-6 relative overflow-hidden">
-        {/* Retro Space grid background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-35"></div>
-        
-        {/* Floating background stars */}
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 rounded-full animate-ping"></div>
-        <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/3 w-2 h-2 bg-pink-400 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
 
-        <div className="z-10 text-center max-w-xl w-full">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-900/40 border border-blue-500/30 rounded-full text-blue-400 font-bold text-sm mb-6 animate-pulse">
-            <Zap className="w-4 h-4 fill-blue-400" /> GRADE 3 ARCADE MISSION
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">
-            ARTICLE <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]">ASTEROIDS</span>
-          </h1>
+    const blank =
+        document.createElement(
+            "span"
+        );
 
-          <p className="text-lg md:text-xl text-slate-400 mb-8 px-4">
-            Command your plasma ship! Target and blast the correct Asteroids representing <span className="text-cyan-400 font-bold">A</span>, <span className="text-pink-400 font-bold">An</span>, or <span className="text-yellow-400 font-bold">The</span> to power your warp drive!
-          </p>
 
-          {/* Sound Control inside menu */}
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <button 
-              onClick={() => setAudioMuted(!audioMuted)}
-              className="flex items-center gap-2 bg-slate-800/80 hover:bg-slate-700/80 px-4 py-2 rounded-xl text-sm border border-slate-700 text-slate-300"
-            >
-              <Volume2 className={`w-4 h-4 ${audioMuted ? 'text-red-400 line-through' : 'text-green-400'}`} />
-              Sound: {audioMuted ? 'OFF' : 'ON'}
-            </button>
-          </div>
+    blank.className =
+        "blank";
 
-          <button 
-            onClick={startGame}
-            className="group relative inline-flex items-center justify-center px-10 py-5 text-xl font-bold text-slate-950 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl hover:scale-105 active:scale-95 transition-all duration-200 shadow-[0_0_30px_rgba(34,211,238,0.4)]"
-          >
-            LAUNCH MISSION
-            <ChevronRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </div>
-      </div>
+
+    blank.textContent =
+        "___";
+
+
+    blank.id =
+        "answerBlank";
+
+
+    questionElement.appendChild(
+        blank
     );
-  }
 
-  if (gameState === 'levelComplete') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white p-6 text-center">
-        <div className="w-24 h-24 bg-blue-500/20 border-2 border-blue-400 rounded-full flex items-center justify-center mb-6 animate-bounce">
-          <Star className="w-12 h-12 text-yellow-400 fill-yellow-400" />
-        </div>
-        <h2 className="text-4xl md:text-5xl font-black mb-2 text-cyan-400">SECTOR 1 CLEAR!</h2>
-        <p className="text-lg text-slate-300 mb-8 max-w-md">
-          Your article shields held strong! Prep your plasma blasters for trickier space phonetic sounds ahead.
-        </p>
-        <div className="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 min-w-[280px] mb-8">
-          <span className="text-sm text-slate-400 uppercase font-bold tracking-widest">Warp Points Earned</span>
-          <p className="text-4xl font-black text-yellow-400 mt-1">{score}</p>
-        </div>
-        <button 
-          onClick={() => loadLevel(2)}
-          className="px-8 py-4 font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-xl hover:scale-105 active:scale-95 transition-transform shadow-[0_0_20px_rgba(34,211,238,0.3)]"
-        >
-          ENTER SECTOR 2
-        </button>
-      </div>
+
+    if (parts[1]) {
+
+        questionElement.appendChild(
+            document.createTextNode(
+                parts[1]
+            )
+        );
+    }
+
+
+    document
+        .getElementById(
+            "feedbackArea"
+        )
+        .innerHTML = "";
+
+
+    document
+        .getElementById("ship")
+        .className = "ship";
+
+
+    resetAsteroids();
+}
+
+
+/* =========================================================
+   RESET ASTEROIDS
+========================================================= */
+
+function resetAsteroids() {
+
+    const buttons =
+        document.querySelectorAll(
+            ".asteroid"
+        );
+
+
+    buttons.forEach(
+        function(button) {
+
+            button.disabled =
+                false;
+
+            button.classList.remove(
+                "target-correct",
+                "target-wrong",
+                "dimmed"
+            );
+
+        }
     );
-  }
+}
 
-  if (gameState === 'gameComplete') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white p-6 text-center">
-        <Trophy className="w-28 h-28 text-yellow-400 mb-6 animate-pulse drop-shadow-[0_0_20px_rgba(234,179,8,0.5)]" />
-        <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-600 mb-2">
-          GALAXY CONQUERED!
-        </h2>
-        <p className="text-lg text-slate-400 mb-8 max-w-md">
-          You have mastered the grammar galaxy. Asteroids stand no chance against your quick article reflexes!
-        </p>
-        
-        <div className="bg-slate-900/80 p-8 rounded-3xl border border-slate-800 min-w-[300px] mb-8 shadow-2xl">
-          <span className="text-sm text-slate-500 uppercase font-bold tracking-widest">Final Warp Score</span>
-          <p className="text-5xl font-black text-white mt-2">{score}</p>
-        </div>
 
-        <button 
-          onClick={startGame}
-          className="inline-flex items-center justify-center px-8 py-4 font-bold text-slate-950 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-xl hover:scale-105 active:scale-95 transition-all duration-200"
-        >
-          <RefreshCw className="w-5 h-5 mr-2 animate-spin" style={{ animationDuration: '4s' }} />
-          START NEW RECON
-        </button>
-      </div>
-    );
-  }
+/* =========================================================
+   SHOOT ASTEROID
+========================================================= */
 
-  // PLAYING STATE (ACTIVE ARCADE GAMEPLAY)
-  const currentQ = levelQuestions[currentQuestionIndex] || { text: '___', answer: 'A', hint: '' };
-  const sentenceParts = currentQ.text.split('___');
+function shoot(selectedOption) {
 
-  return (
-    <div className={`flex flex-col min-h-screen bg-slate-950 text-white overflow-hidden relative select-none ${
-      shakeScreen ? 'animate-shake' : ''
-    }`}>
-      {/* Dynamic Starfield Animation (scrolling down effect) */}
-      <div className="absolute inset-0 bg-starfield pointer-events-none opacity-40"></div>
+    if (feedbackLocked) {
+        return;
+    }
 
-      {/* Particle Explosions rendering */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
-        {particles.map((p) => (
-          <div
-            key={p.id}
-            className="absolute rounded-full"
-            style={{
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              width: `${p.life * 10}px`,
-              height: `${p.life * 10}px`,
-              backgroundColor: p.color,
-              opacity: p.life,
-              transform: 'translate(-50%, -50%)',
-            }}
-          />
-        ))}
-      </div>
 
-      {/* Top Console HUD */}
-      <header className="relative z-10 flex justify-between items-center p-4 md:p-6 bg-slate-900/90 border-b border-slate-800 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex w-10 h-10 rounded-xl bg-cyan-950 border border-cyan-500/30 items-center justify-center text-cyan-400 font-bold text-sm">
-            S-{currentLevel}
-          </div>
-          <div>
-            <div className="text-xs text-slate-400 uppercase font-black tracking-widest">Sector Orbit</div>
-            <div className="text-sm md:text-base font-bold text-cyan-400">Asteroid {currentQuestionIndex + 1} / 10</div>
-          </div>
-        </div>
+    feedbackLocked = true;
 
-        {/* Shield indicator */}
-        <div className="flex items-center gap-1 bg-slate-950/80 px-3 py-2 rounded-xl border border-slate-800">
-          <span className="text-xs text-slate-400 uppercase font-bold mr-2 hidden md:inline">Shields:</span>
-          {[...Array(3)].map((_, i) => (
-            <Shield 
-              key={i} 
-              className={`w-5 h-5 ${
-                i < shields 
-                  ? 'text-cyan-400 fill-cyan-400/80 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]' 
-                  : 'text-slate-800 fill-transparent'
-              }`} 
-            />
-          ))}
-        </div>
 
-        {/* Score */}
-        <div className="text-right">
-          <div className="text-xs text-slate-400 uppercase font-black tracking-widest">Score</div>
-          <div className="text-lg md:text-xl font-black text-yellow-400 flex items-center justify-end gap-1">
-            {score}
-            {streak > 2 && <Zap className="w-4 h-4 text-orange-500 fill-orange-500 animate-bounce" />}
-          </div>
-        </div>
-      </header>
+    const question =
+        levelQuestions[
+            currentQuestionIndex
+        ];
 
-      {/* Holographic Question Board */}
-      <section className="relative z-10 px-4 pt-6 max-w-4xl mx-auto w-full">
-        <div className="bg-slate-900/80 border-2 border-cyan-500/20 rounded-3xl p-6 md:p-8 shadow-[0_0_20px_rgba(6,182,212,0.1)] backdrop-blur-sm relative overflow-hidden">
-          {/* Holographic grid scan lines */}
-          <div className="absolute inset-0 bg-scanlines opacity-10 pointer-events-none"></div>
-          
-          <div className="text-xs text-cyan-500 uppercase font-bold tracking-widest text-center mb-2">TARGET SCAN:</div>
-          <h2 className="text-xl md:text-3xl leading-relaxed font-bold text-center">
-            {sentenceParts[0]}
-            <span className={`inline-block mx-2 border-b-2 px-3 pb-1 ${
-              feedback === 'correct' ? 'text-emerald-400 border-emerald-400 animate-pulse' : 
-              feedback === 'wrong' ? 'text-red-400 border-red-400' : 
-              'text-cyan-400 border-cyan-400'
-            }`}>
-              {feedback ? currentQ.answer : '___'}
-            </span>
-            {sentenceParts[1]}
-          </h2>
-        </div>
-      </section>
 
-      {/* Floating Interactive Space Battleground */}
-      <main className="relative z-10 flex-grow flex flex-col items-center justify-between p-4 w-full max-w-4xl mx-auto">
-        
-        {/* Asteroid Target Row */}
-        <div className="w-full grid grid-cols-3 gap-3 md:gap-8 my-auto relative min-h-[160px] items-center">
-          {['A', 'An', 'The'].map((option, index) => {
-            const isCorrect = option === currentQ.answer;
-            const isTargeted = laserEffect?.target === option;
+    const isCorrect =
+        selectedOption ===
+        question.answer;
 
-            // Base asteroid animations/colors
-            let asteroidStyle = "border-slate-700 bg-slate-800 text-slate-100 shadow-[0_6px_0_rgba(15,23,42,0.9)]";
-            if (laserEffect) {
-              if (isTargeted) {
-                asteroidStyle = isCorrect 
-                  ? "border-emerald-500 bg-emerald-950/60 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.5)] scale-110" 
-                  : "border-red-500 bg-red-950/60 text-red-300 shadow-[0_0_20px_rgba(239,110,110,0.5)] scale-90";
-              } else {
-                asteroidStyle = "opacity-40 scale-95 border-slate-900";
-              }
+
+    const buttons =
+        document.querySelectorAll(
+            ".asteroid"
+        );
+
+
+    buttons.forEach(
+        function(button) {
+
+            button.disabled =
+                true;
+
+
+            if (
+                button.dataset.option !==
+                selectedOption
+            ) {
+
+                button.classList.add(
+                    "dimmed"
+                );
+
             }
 
-            return (
-              <button
-                key={option}
-                onClick={() => handleShoot(option)}
-                disabled={feedback !== null}
-                className={`group flex flex-col items-center justify-center p-4 md:p-6 rounded-full border-4 aspect-square max-w-[140px] mx-auto text-2xl md:text-4xl font-black transition-all duration-300 relative ${
-                  !laserEffect ? 'hover:-translate-y-2 hover:scale-105 active:translate-y-1' : ''
-                } ${asteroidStyle}`}
-                style={{
-                  animation: !laserEffect ? `floatAsteroid 4s ease-in-out infinite alternate` : '',
-                  animationDelay: `${index * 0.5}s`
-                }}
-              >
-                {/* Orbital particles overlay inside the button */}
-                <div className="absolute inset-0 rounded-full border border-dashed border-cyan-500/20 animate-spin-slow group-hover:border-cyan-500/50"></div>
-                
-                {/* Letter Value */}
-                <span className="relative z-10 tracking-wider select-none">{option}</span>
-                
-                {/* Asteroid Surface detail */}
-                <div className="absolute top-2 right-4 w-3 h-3 bg-slate-900/30 rounded-full"></div>
-                <div className="absolute bottom-3 left-3 w-4 h-4 bg-slate-900/30 rounded-full"></div>
-              </button>
+        }
+    );
+
+
+    const selectedButton =
+        document.querySelector(
+            '[data-option="' +
+            selectedOption +
+            '"]'
+        );
+
+
+    if (selectedButton) {
+
+        if (isCorrect) {
+
+            selectedButton
+                .classList
+                .add(
+                    "target-correct"
+                );
+
+        } else {
+
+            selectedButton
+                .classList
+                .add(
+                    "target-wrong"
+                );
+
+        }
+    }
+
+
+    const blank =
+        document.getElementById(
+            "answerBlank"
+        );
+
+
+    if (isCorrect) {
+
+        blank.textContent =
+            question.answer;
+
+        blank.classList.add(
+            "correct"
+        );
+
+
+        playSound(true);
+
+
+        createExplosion();
+
+
+        score +=
+            10 + streak * 3;
+
+
+        streak++;
+
+
+        showCorrectFeedback();
+
+    } else {
+
+        blank.textContent =
+            question.answer;
+
+        blank.classList.add(
+            "wrong"
+        );
+
+
+        playSound(false);
+
+
+        shields =
+            Math.max(
+                0,
+                shields - 1
             );
-          })}
-        </div>
 
-        {/* Dynamic laser path indicator lines */}
-        {laserEffect && (
-          <div className="absolute inset-0 pointer-events-none z-10">
-            <div className={`absolute bottom-[10%] left-1/2 h-full w-[2px] origin-bottom transition-all duration-300 bg-gradient-to-t from-cyan-400 to-transparent ${
-              laserEffect.target === 'A' ? '-rotate-30 h-[60%]' :
-              laserEffect.target === 'The' ? 'rotate-30 h-[60%]' : 'rotate-0 h-[60%]'
-            }`}
-            style={{
-              borderColor: laserEffect.color,
-              boxShadow: `0 0 10px ${laserEffect.color}`,
-              transformOrigin: 'bottom center',
-              left: '50%',
-              bottom: '12%',
-              height: '50vh',
-              transform: `translateX(-50%) ${
-                laserEffect.target === 'A' ? 'rotate(-25deg)' :
-                laserEffect.target === 'The' ? 'rotate(25deg)' : 'rotate(0deg)'
-              }`
-            }}
-            />
-          </div>
-        )}
 
-        {/* Action Prompt / Correction Alert Banner */}
-        <div className="h-16 w-full flex items-center justify-center mt-2 z-10">
-          {feedback === 'wrong' && (
-            <div className="text-red-400 font-bold bg-red-950/80 border border-red-500/30 px-6 py-2 rounded-2xl flex items-center gap-2 animate-bounce shadow-lg text-sm md:text-base">
-              <ShieldAlert className="w-5 h-5 text-red-500" /> Shield breached! Hint: {currentQ.hint}
-            </div>
-          )}
-          {feedback === 'correct' && (
-            <div className="text-emerald-400 font-bold bg-emerald-950/80 border border-emerald-500/30 px-6 py-2 rounded-2xl flex items-center gap-2 animate-bounce shadow-lg text-sm md:text-base">
-              🎯 Critical hit! Hyperdrive locked.
-            </div>
-          )}
-          {!feedback && !laserEffect && (
-            <p className="text-slate-400 text-sm font-semibold tracking-wider text-center animate-pulse">
-              🎮 CHOOSE AN ASTEROID PORTAL ABOVE TO FIRE YOUR LASER
-            </p>
-          )}
-        </div>
+        streak = 0;
 
-        {/* Ship Cockpit at bottom */}
-        <div className="relative w-full flex justify-center pb-8 pt-4 z-10 pointer-events-none">
-          <div className="relative flex flex-col items-center">
-            {/* Plasma weapon recharge energy */}
-            <div className="absolute -top-6 w-8 h-8 rounded-full bg-cyan-400/20 blur-sm animate-pulse"></div>
-            
-            {/* Spaceship SVG */}
-            <svg 
-              className={`w-20 h-20 text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)] transition-transform duration-300 ${
-                laserEffect?.target === 'A' ? '-rotate-[25deg]' :
-                laserEffect?.target === 'The' ? 'rotate-[25deg]' : 'rotate-0'
-              }`}
-              viewBox="0 0 100 100"
-              fill="currentColor"
-            >
-              {/* Outer Thrusters / Wings */}
-              <path d="M20,80 L35,65 L35,80 L20,80 Z" fill="#0891b2" />
-              <path d="M80,80 L65,65 L65,80 L80,80 Z" fill="#0891b2" />
-              
-              {/* Ship Main Fuselage */}
-              <path d="M50,15 L68,60 L50,85 L32,60 Z" fill="#22d3ee" />
-              
-              {/* Cabin Glass */}
-              <ellipse cx="50" cy="48" rx="8" ry="12" fill="#e0f7fa" />
-              
-              {/* Plasma Engine Glow */}
-              <polygon points="45,85 55,85 50,98" fill="#f43f5e" className="animate-pulse" />
-            </svg>
-          </div>
-        </div>
-      </main>
 
-      {/* Styled Animations Injected */}
-      <style>{`
-        @keyframes floatAsteroid {
-          0% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-8px) rotate(3deg); }
-          100% { transform: translateY(8px) rotate(-3deg); }
-        }
-        .animate-spin-slow {
-          animation: spin 20s linear infinite;
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .bg-starfield {
-          background-image: 
-            radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
-            radial-gradient(1.5px 1.5px at 40px 70px, #fff, rgba(0,0,0,0)),
-            radial-gradient(1px 1px at 50px 160px, #ddd, rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 80px 120px, #fff, rgba(0,0,0,0));
-          background-size: 200px 200px;
-        }
-        .bg-scanlines {
-          background: linear-gradient(
-            rgba(18, 16, 16, 0) 50%, 
-            rgba(0, 0, 0, 0.25) 50%
-          ), linear-gradient(
-            90deg, 
-            rgba(255, 0, 0, 0.06), 
-            rgba(0, 255, 0, 0.02), 
-            rgba(0, 0, 255, 0.06)
-          );
-          background-size: 100% 4px, 6px 100%;
-        }
-        .animate-shake {
-          animation: shake 0.4s ease-in-out;
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20%, 60% { transform: translateX(-10px); }
-          40%, 80% { transform: translateX(10px); }
-        }
-      `}</style>
-    </div>
-  );
+        document
+            .getElementById(
+                "gameScreen"
+            )
+            .classList
+            .add("shake");
+
+
+        setTimeout(
+            function() {
+
+                document
+                    .getElementById(
+                        "gameScreen"
+                    )
+                    .classList
+                    .remove("shake");
+
+            },
+            500
+        );
+
+
+        updateShields();
+
+
+        showWrongFeedback(
+            question.hint
+        );
+    }
+
+
+    updateHUD();
+
+
+    setTimeout(
+        function() {
+
+            goToNextQuestion();
+
+        },
+        1800
+    );
 }
+
+
+/* =========================================================
+   CORRECT FEEDBACK
+========================================================= */
+
+function showCorrectFeedback() {
+
+    document
+        .getElementById(
+            "feedbackArea"
+        )
+        .innerHTML =
+
+        '<div class="feedback correct-feedback">' +
+        '🎯 Critical hit! Hyperdrive locked.' +
+        '</div>';
+}
+
+
+/* =========================================================
+   WRONG FEEDBACK
+========================================================= */
+
+function showWrongFeedback(hint) {
+
+    document
+        .getElementById(
+            "feedbackArea"
+        )
+        .innerHTML =
+
+        '<div class="feedback wrong-feedback">' +
+        '🛡️ Shield breached! Hint: ' +
+        hint +
+        '</div>';
+}
+
+
+/* =========================================================
+   NEXT QUESTION
+========================================================= */
+
+function goToNextQuestion() {
+
+    if (
+        currentQuestionIndex <
+        levelQuestions.length - 1
+    ) {
+
+        currentQuestionIndex++;
+
+        showQuestion();
+
+        updateHUD();
+
+        return;
+    }
+
+
+    /* =========================
+       END OF LEVEL 1
+    ========================= */
+
+    if (currentLevel === 1) {
+
+        document
+            .getElementById(
+                "levelScore"
+            )
+            .textContent =
+                score;
+
+
+        hideAllScreens();
+
+
+        document
+            .getElementById(
+                "levelComplete"
+            )
+            .classList
+            .remove("hidden");
+
+
+        return;
+    }
+
+
+    /* =========================
+       END OF LEVEL 2
+    ========================= */
+
+    document
+        .getElementById(
+            "finalScore"
+        )
+        .textContent =
+            score;
+
+
+    hideAllScreens();
+
+
+    document
+        .getElementById(
+            "gameComplete"
+        )
+        .classList
+        .remove("hidden");
+}
+
+
+/* =========================================================
+   PARTICLE EXPLOSION
+========================================================= */
+
+function createExplosion() {
+
+    const colors = [
+
+        "#22d3ee",
+
+        "#34d399",
+
+        "#facc15",
+
+        "#f472b6",
+
+        "#60a5fa"
+
+    ];
+
+
+    for (
+        let i = 0;
+        i < 25;
+        i++
+    ) {
+
+        const particle =
+            document.createElement(
+                "div"
+            );
+
+
+        particle.className =
+            "particle";
+
+
+        particle.style.background =
+            colors[
+                Math.floor(
+                    Math.random() *
+                    colors.length
+                )
+            ];
+
+
+        particle.style.left =
+            "50%";
+
+
+        particle.style.top =
+            "50%";
+
+
+        const angle =
+            Math.random() *
+            Math.PI *
+            2;
+
+
+        const distance =
+            80 +
+            Math.random() *
+            180;
+
+
+        particle.style.transition =
+            "all 0.8s ease-out";
+
+
+        document.body.appendChild(
+            particle
+        );
+
+
+        requestAnimationFrame(
+            function() {
+
+                particle.style.transform =
+                    "translate(" +
+                    (
+                        Math.cos(angle) *
+                        distance
+                    ) +
+                    "px," +
+                    (
+                        Math.sin(angle) *
+                        distance
+                    ) +
+                    "px)";
+
+
+                particle.style.opacity =
+                    "0";
+
+
+                particle.style.width =
+                    "3px";
+
+
+                particle.style.height =
+                    "3px";
+
+            }
+        );
+
+
+        setTimeout(
+            function() {
+
+                particle.remove();
+
+            },
+            900
+        );
+    }
+}
+
+</script>
+
+</body>
+</html>
