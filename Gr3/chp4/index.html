@@ -2,324 +2,290 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pronoun Power Quest - Grade 3 English</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pronoun Power Explorer - Grade 3</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
+
     <style>
         body {
-            font-family: 'Fredoka', 'Inter', sans-serif;
+            font-family: 'Fredoka', 'Outfit', sans-serif;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: manipulation;
+            background-color: #0f172a;
         }
-        
+
         .bounce-gentle {
             animation: bounceGentle 2s infinite ease-in-out;
         }
-        
+
         @keyframes bounceGentle {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-8px); }
         }
-        
+
         .pop-in {
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        
+
         @keyframes popIn {
-            0% { transform: scale(0.8); opacity: 0; }
+            0% { transform: scale(0.85); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
 
-        .pulse-slow {
-            animation: pulseSlow 3s infinite ease-in-out;
+        .dpad-btn {
+            background: linear-gradient(145deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 4px 0 #1e40af;
         }
 
-        @keyframes pulseSlow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); }
+        .dpad-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1e40af;
         }
 
-        .card-shadow {
-            box-shadow: 0 8px 0px rgba(0, 0, 0, 0.15);
-        }
-        
-        .card-shadow-sm {
-            box-shadow: 0 4px 0px rgba(0, 0, 0, 0.12);
+        /* Glassmorphism effects */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
         }
 
-        .card-shadow:active, .card-shadow-sm:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+        canvas {
+            display: block;
+            touch-action: none;
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-center items-center p-2 sm:p-4 overflow-x-hidden">
+<body class="text-slate-800 min-h-screen flex flex-col justify-center items-center p-0 sm:p-3 overflow-hidden select-none">
 
-    <div id="game-app" class="w-full max-w-4xl bg-sky-50 rounded-3xl shadow-2xl overflow-hidden border-4 border-sky-300 min-h-[620px] flex flex-col relative">
+    <!-- MAIN APP CONTAINER -->
+    <div id="game-app" class="w-full max-w-4xl h-screen sm:h-[680px] bg-slate-900 sm:rounded-3xl shadow-2xl overflow-hidden border-0 sm:border-4 border-indigo-500/30 flex flex-col relative">
 
         <!-- ==================== SPLASH SCREEN (5 SECONDS) ==================== -->
         <div id="splash-screen" class="absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700">
-            <div class="relative flex flex-col items-center max-w-md w-full">
-                <!-- Logo Image with fallback preview -->
-                <div class="w-64 h-64 mb-6 flex items-center justify-center relative p-4 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm">
-                    <img id="splash-logo" src="innovine-logo.png" alt="Innovine Logo" class="max-w-full max-h-full object-contain" 
-                         onerror="this.onerror=null; this.src='https://placehold.co/300x300/3b82f6/ffffff?text=Innovine+Logo';">
+            <div class="relative flex flex-col items-center max-w-sm w-full">
+                <!-- Logo Image using exact GitHub Repository Assets & local fallbacks -->
+                <div class="w-80 h-44 mb-4 flex items-center justify-center relative p-2">
+                    <img id="splash-logo" 
+                         src="https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp4/assets/innovine-logo.png" 
+                         alt="Innovine Solutions Logo" 
+                         class="max-w-full max-h-full object-contain"
+                         onerror="handleLogoError(this)">
+                    
+                    <!-- Styled Fallback matching exact Innovine Solutions logo graphic -->
+                    <div id="logo-svg-fallback" class="hidden flex items-center justify-center gap-3">
+                        <svg class="w-16 h-28" viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Pencil Stem -->
+                            <rect x="42" y="35" width="16" height="120" fill="#334155" rx="2" />
+                            <!-- Pencil Tip -->
+                            <polygon points="42,35 50,15 58,35" fill="#f97316" />
+                            <!-- Spiral Ribbon Graphic -->
+                            <path d="M 12 165 C 20 200, 75 140, 50 100 C 25 60, 88 25, 78 5" stroke="#b91c1c" stroke-width="14" stroke-linecap="round" fill="none" />
+                            <path d="M 22 105 C 38 130, 78 115, 62 82" stroke="#ea580c" stroke-width="10" stroke-linecap="round" fill="none" />
+                        </svg>
+                        <div class="text-left font-sans">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-wider leading-none">INNOVINE</div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-800 tracking-[0.25em] mt-1">SOLUTIONS</div>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <!-- Timer Progress Bar -->
-                <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden mb-3">
-                    <div id="splash-progress" class="bg-indigo-600 h-full w-0 transition-all duration-100 ease-linear"></div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-3 border border-slate-200">
+                    <div id="splash-progress" class="bg-indigo-600 h-full w-0 transition-all duration-100 ease-linear rounded-full"></div>
                 </div>
-                
-                <p class="text-slate-500 text-sm font-medium tracking-wide">Loading Pronoun Power Quest... (<span id="splash-seconds">5</span>s)</p>
-                
-                <button onclick="skipSplash()" class="mt-4 text-xs text-indigo-600 underline font-semibold hover:text-indigo-800">
+
+                <p class="text-slate-500 text-sm font-semibold tracking-wide">Starting Game in <span id="splash-seconds" class="text-indigo-600 font-bold">5</span>s...</p>
+
+                <button onclick="skipSplash()" class="mt-4 text-xs font-bold text-indigo-600 hover:text-indigo-800 underline">
                     Skip Intro
                 </button>
             </div>
         </div>
 
         <!-- ==================== TOP NAVIGATION / HEADER ==================== -->
-        <header id="game-header" class="bg-indigo-600 text-white px-4 py-3 flex justify-between items-center shadow-md hidden">
-            <div class="flex items-center space-x-3">
-                <button onclick="showMainMenu()" class="bg-indigo-700 hover:bg-indigo-800 p-2 rounded-xl text-xs font-bold flex items-center gap-1 transition">
-                    🏠 <span class="hidden sm:inline">Menu</span>
+        <header id="game-header" class="bg-slate-800/90 text-white px-4 py-2.5 flex justify-between items-center border-b border-slate-700 hidden z-20">
+            <div class="flex items-center space-x-2">
+                <button onclick="showMainMenu()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition">
+                    🏠 Menu
                 </button>
-                <h1 class="text-lg sm:text-xl font-bold tracking-wide">Pronoun Power Quest</h1>
+                <h1 class="text-sm sm:text-base font-extrabold tracking-wide text-indigo-400 hidden sm:block">Pronoun Explorer</h1>
             </div>
 
             <!-- Stats Bar -->
-            <div class="flex items-center space-x-3 sm:space-x-5 text-sm sm:text-base font-bold">
-                <div class="flex items-center space-x-1 bg-indigo-700 px-3 py-1 rounded-full">
+            <div class="flex items-center space-x-3 text-xs sm:text-sm font-bold">
+                <div class="flex items-center space-x-1 bg-slate-900/80 px-2.5 py-1 rounded-full border border-slate-700">
+                    <span>❤️</span>
+                    <span id="lives-display" class="text-rose-400">3</span>
+                </div>
+                <div class="flex items-center space-x-1 bg-slate-900/80 px-2.5 py-1 rounded-full border border-slate-700">
                     <span>⭐</span>
-                    <span id="score-display">0</span>
+                    <span id="score-display" class="text-amber-400">0</span>
                 </div>
-                <div class="flex items-center space-x-1 bg-indigo-700 px-3 py-1 rounded-full">
-                    <span>🔥</span>
-                    <span id="streak-display">0</span>
-                </div>
-                <button id="sound-toggle" onclick="toggleAudio()" class="bg-indigo-700 hover:bg-indigo-800 p-2 rounded-xl text-sm">
+                <button id="sound-toggle" onclick="toggleAudio()" class="bg-slate-700 hover:bg-slate-600 p-1.5 rounded-xl text-xs">
                     🔊
                 </button>
             </div>
         </header>
 
-        <!-- ==================== MAIN CONTENT AREA ==================== -->
-        <main class="flex-1 flex flex-col p-4 sm:p-6 overflow-y-auto relative">
+        <main class="flex-1 relative overflow-hidden flex flex-col">
 
             <!-- 1. MAIN MENU SCREEN -->
-            <div id="screen-menu" class="hidden flex-1 flex flex-col items-center justify-center text-center py-4">
-                <div class="bounce-gentle mb-4">
-                    <span class="text-6xl sm:text-7xl">👑</span>
-                </div>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-indigo-900 mb-2">Pronoun Power Quest!</h2>
-                <p class="text-slate-600 max-w-md text-sm sm:text-base mb-6">
-                    Master Personal Pronouns (1st, 2nd, 3rd Person) and Possessive Pronouns while exploring the Kingdom!
+            <div id="screen-menu" class="hidden absolute inset-0 z-30 glass-panel flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
+                <div class="bounce-gentle mb-3 text-6xl">🚀</div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-1">Pronoun Power Explorer!</h2>
+                <p class="text-slate-600 max-w-md text-sm mb-6 font-medium">
+                    Move your hero on the screen to catch the target pronoun stars while avoiding the wrong ones!
                 </p>
 
-                <!-- Game Mode Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl mb-6">
-                    <!-- Mode 1 -->
-                    <button onclick="startGameMode('sorting')" class="bg-gradient-to-br from-amber-400 to-amber-500 text-slate-900 p-4 rounded-2xl border-2 border-amber-600 card-shadow flex flex-col items-center justify-between text-center hover:brightness-105 transition">
-                        <span class="text-3xl mb-1">🏷️</span>
-                        <span class="font-extrabold text-lg">Pronoun Sorter</span>
-                        <span class="text-xs font-medium text-amber-950 mt-1">Classify Personal & Possessive Pronouns</span>
+                <!-- Level Select Buttons -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md mb-6">
+                    <button onclick="startLevel(1)" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-900 p-3.5 rounded-2xl border-2 border-amber-600 shadow-md font-extrabold text-left flex items-center justify-between transition">
+                        <div>
+                            <div class="text-xs uppercase opacity-80 font-extrabold">Level 1</div>
+                            <div class="text-base">👤 Personal Pronouns</div>
+                            <div class="text-[11px] font-normal opacity-90">1st, 2nd & 3rd Person</div>
+                        </div>
+                        <span class="text-2xl">⭐</span>
                     </button>
 
-                    <!-- Mode 2 -->
-                    <button onclick="startGameMode('builder')" class="bg-gradient-to-br from-emerald-400 to-emerald-500 text-slate-900 p-4 rounded-2xl border-2 border-emerald-600 card-shadow flex flex-col items-center justify-between text-center hover:brightness-105 transition">
-                        <span class="text-3xl mb-1">✍️</span>
-                        <span class="font-extrabold text-lg">Sentence Builder</span>
-                        <span class="text-xs font-medium text-emerald-950 mt-1">Fill in blanks with correct pronouns</span>
+                    <button onclick="startLevel(2)" class="bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-slate-900 p-3.5 rounded-2xl border-2 border-purple-600 shadow-md font-extrabold text-left flex items-center justify-between transition">
+                        <div>
+                            <div class="text-xs uppercase opacity-80 font-extrabold">Level 2</div>
+                            <div class="text-base">🎒 Possessive Pronouns</div>
+                            <div class="text-[11px] font-normal opacity-90">Mine, yours, hers, theirs...</div>
+                        </div>
+                        <span class="text-2xl">🎒</span>
                     </button>
 
-                    <!-- Mode 3 -->
-                    <button onclick="startGameMode('detective')" class="bg-gradient-to-br from-purple-400 to-purple-500 text-slate-900 p-4 rounded-2xl border-2 border-purple-600 card-shadow flex flex-col items-center justify-between text-center hover:brightness-105 transition">
-                        <span class="text-3xl mb-1">🔍</span>
-                        <span class="font-extrabold text-lg">Story Detective</span>
-                        <span class="text-xs font-medium text-purple-950 mt-1">Swap repetitive nouns for pronouns</span>
+                    <button onclick="startLevel(3)" class="bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 text-slate-900 p-3.5 rounded-2xl border-2 border-emerald-600 shadow-md font-extrabold text-left flex items-center justify-between transition">
+                        <div>
+                            <div class="text-xs uppercase opacity-80 font-extrabold">Level 3</div>
+                            <div class="text-base">👥 Singular vs Plural</div>
+                            <div class="text-[11px] font-normal opacity-90">I vs We, He vs They</div>
+                        </div>
+                        <span class="text-2xl">👥</span>
+                    </button>
+
+                    <button onclick="startLevel(4)" class="bg-gradient-to-r from-sky-400 to-indigo-500 hover:from-sky-500 hover:to-indigo-600 text-white p-3.5 rounded-2xl border-2 border-indigo-600 shadow-md font-extrabold text-left flex items-center justify-between transition">
+                        <div>
+                            <div class="text-xs uppercase opacity-80 font-extrabold">Level 4</div>
+                            <div class="text-base">⚡ Pronoun Grand Quest</div>
+                            <div class="text-[11px] font-normal opacity-90">Sentence Completion Runner</div>
+                        </div>
+                        <span class="text-2xl">🏆</span>
                     </button>
                 </div>
 
-                <!-- Reference / Cheat Sheet Button -->
-                <button onclick="showStudyGuide()" class="bg-white text-indigo-600 hover:bg-indigo-50 border-2 border-indigo-300 px-6 py-2.5 rounded-2xl font-bold text-sm shadow-sm flex items-center gap-2 transition">
-                    📖 View Pronoun Learning Guide
+                <button onclick="showStudyGuide()" class="bg-white text-indigo-600 hover:bg-indigo-50 border-2 border-indigo-200 px-5 py-2 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2 transition">
+                    📖 Read Pronoun Guide Chart
                 </button>
             </div>
 
-            <!-- 2. GAMEPLAY SCREEN -->
-            <div id="screen-gameplay" class="hidden flex-1 flex flex-col">
-                <!-- Level / Progress Bar -->
-                <div class="flex justify-between items-center mb-4">
-                    <span id="game-mode-title" class="font-bold text-indigo-800 text-sm sm:text-base bg-indigo-100 px-3 py-1 rounded-lg">Mode Title</span>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-slate-500">Question <span id="q-current">1</span>/<span id="q-total">10</span></span>
-                        <div class="w-28 sm:w-36 bg-slate-200 h-3 rounded-full overflow-hidden">
-                            <div id="game-progress" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Question Card Box -->
-                <div id="question-card" class="bg-white rounded-3xl p-5 sm:p-8 border-2 border-sky-200 shadow-md mb-6 flex-1 flex flex-col justify-center items-center text-center pop-in relative">
-                    <!-- Dynamic Question Banner / Category Hint -->
-                    <div id="question-category" class="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-amber-100 text-amber-800 rounded-full mb-3">
-                        Category
-                    </div>
-
-                    <h3 id="question-prompt" class="text-lg sm:text-2xl font-bold text-slate-800 mb-4 leading-relaxed max-w-xl">
-                        Question Prompt Here
+            <!-- 2. GAMEPLAY CANVAS AREA -->
+            <div id="screen-gameplay" class="hidden flex-1 relative flex flex-col bg-slate-950">
+                
+                <!-- Target Mission Banner Overlay -->
+                <div class="absolute top-2 left-2 right-2 z-10 bg-slate-900/90 border border-slate-700/80 text-white p-3 rounded-2xl shadow-lg flex flex-col items-center justify-center text-center">
+                    <span id="mission-category" class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-indigo-500/30 text-indigo-300 rounded-md mb-1">
+                        MISSION
+                    </span>
+                    <h3 id="mission-prompt" class="text-sm sm:text-lg font-black text-amber-300 leading-tight">
+                        Steer your Hero to collect target pronouns!
                     </h3>
-
-                    <!-- Visual Context or Sentence Box -->
-                    <div id="question-context" class="w-full bg-slate-50 p-4 rounded-2xl border border-slate-200 text-base sm:text-xl font-medium text-slate-700 mb-4 hidden">
-                        <!-- Dynamic text content -->
-                    </div>
-
-                    <!-- Options Container -->
-                    <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg mt-2">
-                        <!-- Dynamic Option Buttons -->
-                    </div>
                 </div>
 
-                <!-- Feedback Banner -->
-                <div id="feedback-banner" class="hidden rounded-2xl p-4 text-center font-bold text-lg border-2 mb-2 pop-in">
-                    <!-- Correct / Incorrect feedback -->
+                <!-- Game Canvas -->
+                <canvas id="game-canvas" class="w-full h-full flex-1"></canvas>
+
+                <!-- On-Screen Controls for Touch / Phone Screen -->
+                <div id="mobile-controls" class="absolute bottom-3 left-0 right-0 z-10 flex justify-between items-end px-4 pointer-events-none">
+                    
+                    <!-- D-PAD CONTROLLER -->
+                    <div class="pointer-events-auto grid grid-cols-3 gap-1 bg-slate-900/80 p-2 rounded-2xl border border-slate-700/80 backdrop-blur-sm">
+                        <div></div>
+                        <button id="btn-up" class="dpad-btn text-white w-12 h-12 rounded-xl font-black text-xl flex items-center justify-center">▲</button>
+                        <div></div>
+                        <button id="btn-left" class="dpad-btn text-white w-12 h-12 rounded-xl font-black text-xl flex items-center justify-center">◀</button>
+                        <div class="w-12 h-12 flex items-center justify-center text-slate-500 font-bold text-xs">MOVE</div>
+                        <button id="btn-right" class="dpad-btn text-white w-12 h-12 rounded-xl font-black text-xl flex items-center justify-center">▶</button>
+                        <div></div>
+                        <button id="btn-down" class="dpad-btn text-white w-12 h-12 rounded-xl font-black text-xl flex items-center justify-center">▼</button>
+                        <div></div>
+                    </div>
+
+                    <!-- Touch Drag Hint -->
+                    <div class="text-right text-slate-400 text-[10px] font-semibold bg-slate-900/80 px-3 py-2 rounded-xl border border-slate-700/80 hidden sm:block">
+                        💡 Use Keyboard <kbd class="bg-slate-800 px-1 rounded">Arrow Keys</kbd> or <kbd class="bg-slate-800 px-1 rounded">WASD</kbd>
+                    </div>
                 </div>
             </div>
 
-            <!-- 3. STUDY GUIDE SCREEN -->
-            <div id="screen-guide" class="hidden flex-1 flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-extrabold text-indigo-900 flex items-center gap-2">
-                        📖 Pronoun Power Chart
+            <!-- 3. STUDY GUIDE MODAL -->
+            <div id="screen-guide" class="hidden absolute inset-0 z-30 glass-panel flex flex-col p-4 overflow-y-auto">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-extrabold text-indigo-900 flex items-center gap-1.5">
+                        📖 Grade 3 Pronoun Guide
                     </h2>
-                    <button onclick="showMainMenu()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-1.5 rounded-xl text-xs font-bold">
+                    <button onclick="showMainMenu()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 py-1 rounded-xl text-xs font-bold">
                         Back to Menu
                     </button>
                 </div>
 
-                <div class="space-y-4 overflow-y-auto max-h-[460px] pr-1">
-                    <!-- Personal Pronouns Card -->
-                    <div class="bg-white p-5 rounded-2xl border border-indigo-100 shadow-sm">
-                        <h3 class="text-lg font-bold text-indigo-700 mb-2 flex items-center gap-2">
-                            👤 Personal Pronouns
-                        </h3>
-                        <p class="text-xs text-slate-600 mb-3">Personal pronouns take the place of specific people, places, or things.</p>
-                        
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-xs sm:text-sm text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-indigo-50 text-indigo-900 border-b border-indigo-200">
-                                        <th class="p-2 font-bold">Person</th>
-                                        <th class="p-2 font-bold">Singular (1)</th>
-                                        <th class="p-2 font-bold">Plural (More than 1)</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100">
-                                    <tr>
-                                        <td class="p-2 font-bold text-indigo-600">1st Person (Speaker)</td>
-                                        <td class="p-2"><span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-semibold">I, me</span></td>
-                                        <td class="p-2"><span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-semibold">we, us</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2 font-bold text-indigo-600">2nd Person (Listener)</td>
-                                        <td class="p-2"><span class="bg-sky-100 text-sky-900 px-2 py-0.5 rounded font-semibold">you</span></td>
-                                        <td class="p-2"><span class="bg-sky-100 text-sky-900 px-2 py-0.5 rounded font-semibold">you</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2 font-bold text-indigo-600">3rd Person (Others)</td>
-                                        <td class="p-2"><span class="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded font-semibold">he, him, she, her, it</span></td>
-                                        <td class="p-2"><span class="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded font-semibold">they, them</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                <div class="space-y-3 text-xs">
+                    <!-- Personal Pronouns -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-indigo-700 mb-1 text-sm">👤 Personal Pronouns</h3>
+                        <p class="text-slate-600 mb-2">Replaces specific people or things.</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-amber-50 p-2 rounded-xl border border-amber-200">
+                                <span class="font-bold text-amber-900 block">Singular (1)</span>
+                                <span class="text-amber-800 font-semibold">I, me, you, he, him, she, her, it</span>
+                            </div>
+                            <div class="bg-emerald-50 p-2 rounded-xl border border-emerald-200">
+                                <span class="font-bold text-emerald-900 block">Plural (2+)</span>
+                                <span class="text-emerald-800 font-semibold">we, us, you, they, them</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Possessive Pronouns Card -->
-                    <div class="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm">
-                        <h3 class="text-lg font-bold text-purple-700 mb-2 flex items-center gap-2">
-                            🎒 Possessive Pronouns & Adjectives
-                        </h3>
-                        <p class="text-xs text-slate-600 mb-3">Possessive pronouns show ownership (who owns or has something).</p>
-                        
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
-                            <div class="bg-purple-50 p-3 rounded-xl border border-purple-200">
-                                <span class="font-bold text-purple-900 block mb-1">Possessive Pronouns:</span>
-                                <div class="flex flex-wrap gap-1">
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">mine</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">yours</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">his</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">hers</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">ours</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">theirs</span>
-                                </div>
-                                <p class="text-[11px] text-purple-700 mt-2">Example: "That backpack is <b>mine</b>."</p>
-                            </div>
-
-                            <div class="bg-purple-50 p-3 rounded-xl border border-purple-200">
-                                <span class="font-bold text-purple-900 block mb-1">Possessive Words before Nouns:</span>
-                                <div class="flex flex-wrap gap-1">
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">my</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">your</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">his</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">her</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">its</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">our</span>
-                                    <span class="bg-white px-2 py-1 rounded border text-slate-700 font-semibold">their</span>
-                                </div>
-                                <p class="text-[11px] text-purple-700 mt-2">Example: "This is <b>my</b> backpack."</p>
-                            </div>
+                    <!-- Possessive Pronouns -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-purple-700 mb-1 text-sm">🎒 Possessive Pronouns</h3>
+                        <p class="text-slate-600 mb-2">Shows who owns or possesses something.</p>
+                        <div class="bg-purple-50 p-2 rounded-xl border border-purple-200">
+                            <span class="text-purple-900 font-semibold">mine, yours, his, hers, ours, theirs</span>
+                            <p class="text-[10px] text-purple-700 mt-1">Example: "That backpack is <b>mine</b>."</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 4. RESULTS / SUMMARY SCREEN -->
-            <div id="screen-summary" class="hidden flex-1 flex flex-col items-center justify-center text-center py-4 pop-in">
-                <div class="text-6xl mb-3" id="summary-badge">🏆</div>
-                <h2 class="text-3xl font-extrabold text-slate-900 mb-1" id="summary-title">Quest Complete!</h2>
-                <p class="text-slate-600 mb-6 text-sm sm:text-base" id="summary-subtitle">You are a Pronoun Champion!</p>
+            <!-- 4. GAME OVER / SUMMARY SCREEN -->
+            <div id="screen-summary" class="hidden absolute inset-0 z-30 glass-panel flex flex-col items-center justify-center p-6 text-center pop-in">
+                <div class="text-6xl mb-2" id="summary-badge">🏆</div>
+                <h2 class="text-3xl font-black text-slate-900 mb-1" id="summary-title">Level Complete!</h2>
+                <p class="text-slate-600 text-sm mb-6" id="summary-subtitle">Great exploration runner!</p>
 
-                <!-- Score Board -->
-                <div class="bg-white border-2 border-indigo-200 rounded-2xl p-6 w-full max-w-md shadow-sm mb-6">
-                    <div class="grid grid-cols-2 gap-4 text-center">
-                        <div class="bg-indigo-50 p-3 rounded-xl">
-                            <span class="text-xs font-bold text-indigo-600 block uppercase">Total Score</span>
-                            <span id="final-score" class="text-3xl font-black text-indigo-900">0</span>
+                <div class="bg-white border-2 border-indigo-100 rounded-2xl p-5 w-full max-w-xs shadow-sm mb-6">
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-indigo-50 p-2.5 rounded-xl">
+                            <span class="text-[10px] font-bold text-indigo-600 block uppercase">Final Score</span>
+                            <span id="final-score" class="text-2xl font-black text-indigo-900">0</span>
                         </div>
-                        <div class="bg-emerald-50 p-3 rounded-xl">
-                            <span class="text-xs font-bold text-emerald-600 block uppercase">Accuracy</span>
-                            <span id="final-accuracy" class="text-3xl font-black text-emerald-900">100%</span>
+                        <div class="bg-amber-50 p-2.5 rounded-xl">
+                            <span class="text-[10px] font-bold text-amber-600 block uppercase">Gems Caught</span>
+                            <span id="final-gems" class="text-2xl font-black text-amber-900">0</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-3 w-full max-w-md">
-                    <button onclick="restartCurrentMode()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition">
+                <div class="flex gap-2 w-full max-w-xs">
+                    <button onclick="retryLevel()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-3 rounded-xl shadow transition text-sm">
                         🔄 Play Again
                     </button>
-                    <button onclick="showMainMenu()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition">
+                    <button onclick="showMainMenu()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-3 rounded-xl shadow transition text-sm">
                         🏠 Main Menu
                     </button>
                 </div>
@@ -329,23 +295,42 @@
     </div>
 
     <script>
-        // Sound files provided in requirements + fallback synth
-        const correctAudio = new Audio('correct.mp3');
-        const wrongAudio = new Audio('wrong.mp3');
+        // Assets direct from GitHub repo path with local folder fallbacks
+        const GITHUB_ASSETS = 'https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/chp4/assets/';
+
+        const correctAudio = new Audio(GITHUB_ASSETS + 'correct.mp3');
+        const wrongAudio = new Audio(GITHUB_ASSETS + 'wrong.mp3');
+
+        const localCorrectAudio = new Audio('assets/correct.mp3');
+        const localWrongAudio = new Audio('assets/wrong.mp3');
+
+        function handleLogoError(img) {
+            if (img.src !== 'assets/innovine-logo.png' && !img.dataset.triedLocal) {
+                img.dataset.triedLocal = 'true';
+                img.src = 'assets/innovine-logo.png';
+            } else {
+                img.style.display = 'none';
+                const fallback = document.getElementById('logo-svg-fallback');
+                if (fallback) fallback.classList.remove('hidden');
+            }
+        }
 
         let soundEnabled = true;
 
-        // Fallback Web Audio API Sound Generator in case mp3 files fail or are blocked
-        function playToneSound(type) {
+        // Enhanced Sound player supporting GitHub raw, local assets, and Web Audio API synthesizer
+        function playSound(type) {
             if (!soundEnabled) return;
+            const primary = type === 'correct' ? correctAudio : wrongAudio;
+            const secondary = type === 'correct' ? localCorrectAudio : localWrongAudio;
+
             try {
-                // First try playing the mp3 element
-                if (type === 'correct') {
-                    correctAudio.currentTime = 0;
-                    correctAudio.play().catch(() => playSynthFallback(true));
-                } else {
-                    wrongAudio.currentTime = 0;
-                    wrongAudio.play().catch(() => playSynthFallback(false));
+                primary.currentTime = 0;
+                const promise = primary.play();
+                if (promise !== undefined) {
+                    promise.catch(() => {
+                        secondary.currentTime = 0;
+                        secondary.play().catch(() => playSynthFallback(type === 'correct'));
+                    });
                 }
             } catch (e) {
                 playSynthFallback(type === 'correct');
@@ -363,24 +348,22 @@
 
                 if (isCorrect) {
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-                    osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.15); // E5
-                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.25);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
                     osc.start();
                     osc.stop(ctx.currentTime + 0.3);
-                } else {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, ctx.currentTime); // A3
-                    osc.frequency.exponentialRampToValueAtTime(130, ctx.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.35);
                 }
-            } catch(err) {
-                // Audio context not allowed or supported
-            }
+            } catch(e) {}
         }
 
         function toggleAudio() {
@@ -388,15 +371,12 @@
             document.getElementById('sound-toggle').innerText = soundEnabled ? '🔊' : '🔇';
         }
 
-        let splashSecondsRemaining = 5;
+        // 5 Second Splash Screen Timer Logic
         let splashInterval = null;
-
         function startSplashTimer() {
             const progressBar = document.getElementById('splash-progress');
             const secondsLabel = document.getElementById('splash-seconds');
-            const splashScreen = document.getElementById('splash-screen');
 
-            // 5 second total duration
             const totalDuration = 5000;
             const updateInterval = 100;
             let elapsed = 0;
@@ -431,54 +411,80 @@
             }, 700);
         }
 
-        // Datasets designed for Grade 3 ELA Standards (Personal 1st, 2nd, 3rd person singular/plural & Possessives)
-        const sortingQuestions = [
-            { word: "I", correct: "1st Person (Singular)", options: ["1st Person (Singular)", "2nd Person", "3rd Person (Plural)", "Possessive Pronoun"], category: "Personal Pronoun" },
-            { word: "Mine", correct: "Possessive Pronoun", options: ["1st Person (Singular)", "3rd Person (Singular)", "Possessive Pronoun", "2nd Person"], category: "Possessive Pronoun" },
-            { word: "We", correct: "1st Person (Plural)", options: ["1st Person (Singular)", "1st Person (Plural)", "3rd Person (Plural)", "Possessive Pronoun"], category: "Personal Pronoun" },
-            { word: "They", correct: "3rd Person (Plural)", options: ["1st Person (Plural)", "2nd Person", "3rd Person (Plural)", "Possessive Pronoun"], category: "Personal Pronoun" },
-            { word: "Hers", correct: "Possessive Pronoun", options: ["3rd Person (Singular)", "Possessive Pronoun", "2nd Person", "1st Person (Plural)"], category: "Possessive Pronoun" },
-            { word: "You", correct: "2nd Person", options: ["1st Person (Singular)", "2nd Person", "3rd Person (Singular)", "3rd Person (Plural)"], category: "Personal Pronoun" },
-            { word: "He", correct: "3rd Person (Singular)", options: ["1st Person (Singular)", "2nd Person", "3rd Person (Singular)", "Possessive Pronoun"], category: "Personal Pronoun" },
-            { word: "Ours", correct: "Possessive Pronoun", options: ["1st Person (Plural)", "Possessive Pronoun", "3rd Person (Plural)", "2nd Person"], category: "Possessive Pronoun" },
-            { word: "She", correct: "3rd Person (Singular)", options: ["1st Person (Singular)", "2nd Person", "3rd Person (Singular)", "Possessive Pronoun"], category: "Personal Pronoun" },
-            { word: "Theirs", correct: "Possessive Pronoun", options: ["3rd Person (Plural)", "Possessive Pronoun", "1st Person (Plural)", "2nd Person"], category: "Possessive Pronoun" }
-        ];
+        const levelMissions = {
+            1: [
+                { prompt: "Collect 1st Person Pronouns! (I, me, we, us)", category: "1st Person", valid: ["I", "me", "we", "us"], invalid: ["you", "he", "she", "they", "mine", "his"] },
+                { prompt: "Collect 2nd Person Pronouns! (you)", category: "2nd Person", valid: ["you"], invalid: ["I", "he", "she", "we", "they", "hers"] },
+                { prompt: "Collect 3rd Person Pronouns! (he, she, it, they)", category: "3rd Person", valid: ["he", "she", "it", "they", "him", "her", "them"], invalid: ["I", "me", "we", "you", "mine"] }
+            ],
+            2: [
+                { prompt: "Collect Possessive Pronouns! (mine, yours, hers, ours...)", category: "Possessive", valid: ["mine", "yours", "his", "hers", "ours", "theirs"], invalid: ["I", "you", "he", "she", "we", "they"] },
+                { prompt: "Collect Words that show ownership!", category: "Possessive Words", valid: ["my", "your", "his", "her", "our", "their", "mine"], invalid: ["them", "us", "him", "it"] }
+            ],
+            3: [
+                { prompt: "Collect Singular Pronouns! (Only 1 person/thing)", category: "Singular", valid: ["I", "me", "he", "him", "she", "her", "it"], invalid: ["we", "us", "they", "them"] },
+                { prompt: "Collect Plural Pronouns! (More than 1 person)", category: "Plural", valid: ["we", "us", "they", "them"], invalid: ["I", "me", "he", "she", "it"] }
+            ],
+            4: [
+                { prompt: "Complete: '___ are going to the park!'", category: "Sentence Runner", valid: ["We", "They"], invalid: ["He", "She", "I", "Him"] },
+                { prompt: "Complete: 'This pencil belongs to me. It is ___.'", category: "Sentence Runner", valid: ["mine"], invalid: ["my", "me", "I", "we"] },
+                { prompt: "Complete: 'Maya loves sports. ___ plays soccer.'", category: "Sentence Runner", valid: ["She"], invalid: ["He", "They", "We", "Her"] }
+            ]
+        };
 
-        const sentenceQuestions = [
-            { prompt: "Fill in the blank with the correct 1st person plural pronoun:", sentence: "___ are going to the playground after school.", correct: "We", options: ["We", "He", "She", "It"], category: "Personal Pronoun (1st Plural)" },
-            { prompt: "Which possessive pronoun completes the sentence?", sentence: "This pencil belongs to me. It is ___.", correct: "mine", options: ["mine", "my", "me", "I"], category: "Possessive Pronoun" },
-            { prompt: "Select the correct 3rd person singular pronoun for a girl:", sentence: "Maya loves reading. ___ read three books this week!", correct: "She", options: ["He", "She", "They", "We"], category: "Personal Pronoun (3rd Singular)" },
-            { prompt: "Choose the correct possessive pronoun:", sentence: "That bicycle belongs to Tim. The red bike is ___.", correct: "his", options: ["his", "him", "he", "hers"], category: "Possessive Pronoun" },
-            { prompt: "Which 2nd person pronoun fits best?", sentence: "Can ___ help me carry these heavy books?", correct: "you", options: ["you", "them", "us", "him"], category: "Personal Pronoun (2nd Person)" },
-            { prompt: "Choose the correct pronoun for the plural noun (The dogs):", sentence: "The puppies were hungry, so ___ ate all their food.", correct: "they", options: ["they", "it", "he", "she"], category: "Personal Pronoun (3rd Plural)" },
-            { prompt: "Fill in the blank with a possessive word:", sentence: "I lost ___ ruler during math class.", correct: "my", options: ["my", "mine", "me", "I"], category: "Possessive Word" },
-            { prompt: "Select the correct 3rd person singular pronoun for an object:", sentence: "Look at that colorful bird! ___ is singing in the tree.", correct: "It", options: ["It", "They", "We", "You"], category: "Personal Pronoun (3rd Singular)" }
-        ];
+        let canvas, ctx;
+        let currentLevel = 1;
+        let currentMissionIndex = 0;
+        let score = 0;
+        let lives = 3;
+        let gemsCaughtCount = 0;
+        let gameLoopReq = null;
 
-        const detectiveQuestions = [
-            { prompt: "Replace the underlined words with a pronoun:", sentence: "<u>Leo and Sam</u> built a fort in the backyard.", correct: "They", options: ["They", "We", "He", "Them"], category: "Noun Replacement" },
-            { prompt: "Replace the underlined words with a pronoun:", sentence: "Sarah handed the drawing to <u>Mr. Johnson</u>.", correct: "him", options: ["him", "he", "his", "they"], category: "Object Pronoun" },
-            { prompt: "Which pronoun can replace <u>Emma's</u>?", sentence: "This is <u>Emma's</u> cat.", correct: "her", options: ["her", "she", "hers", "their"], category: "Possessive" },
-            { prompt: "Replace <u>the laptop</u> with the correct pronoun:", sentence: "Please close <u>the laptop</u> when you are finished.", correct: "it", options: ["it", "them", "he", "him"], category: "Noun Replacement" },
-            { prompt: "Replace <u>my sister and I</u> with the correct pronoun:", sentence: "<u>My sister and I</u> baked delicious cookies together.", correct: "We", options: ["We", "Us", "They", "Them"], category: "1st Person Plural" },
-            { prompt: "Replace <u>the students'</u> in this sentence:", sentence: "These art projects are <u>the students'</u>.", correct: "theirs", options: ["theirs", "their", "they", "them"], category: "Possessive Pronoun" }
-        ];
+        // Player Avatar Object
+        const hero = {
+            x: 0,
+            y: 0,
+            radius: 22,
+            speed: 5,
+            dx: 0,
+            dy: 0,
+            color: '#3b82f6',
+            emoji: '🧙‍♂️'
+        };
 
-        let currentMode = 'sorting';
-        let questionList = [];
-        let currentQIndex = 0;
-        let totalScore = 0;
-        let streak = 0;
-        let correctAnswersCount = 0;
-        let isAnsweringAllowed = true;
+        // Floating Pronoun Gems Array
+        let gems = [];
+        let particles = [];
+
+        // Input state tracking
+        const keys = { Up: false, Down: false, Left: false, Right: false };
+
+        function initCanvas() {
+            canvas = document.getElementById('game-canvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            if (hero.x === 0 && hero.y === 0) {
+                hero.x = canvas.width / 2;
+                hero.y = canvas.height / 2;
+            }
+        }
 
         function showMainMenu() {
+            if (gameLoopReq) cancelAnimationFrame(gameLoopReq);
             hideAllScreens();
             document.getElementById('screen-menu').classList.remove('hidden');
         }
 
         function showStudyGuide() {
+            if (gameLoopReq) cancelAnimationFrame(gameLoopReq);
             hideAllScreens();
             document.getElementById('screen-guide').classList.remove('hidden');
         }
@@ -490,182 +496,299 @@
             document.getElementById('screen-summary').classList.add('hidden');
         }
 
-        function startGameMode(mode) {
-            currentMode = mode;
-            currentQIndex = 0;
-            totalScore = 0;
-            streak = 0;
-            correctAnswersCount = 0;
+        function startLevel(lvl) {
+            currentLevel = lvl;
+            currentMissionIndex = 0;
+            score = 0;
+            lives = 3;
+            gemsCaughtCount = 0;
 
-            updateScoreUI();
-
-            if (mode === 'sorting') {
-                document.getElementById('game-mode-title').innerText = '🏷️ Pronoun Sorter';
-                questionList = shuffleArray([...sortingQuestions]);
-            } else if (mode === 'builder') {
-                document.getElementById('game-mode-title').innerText = '✍️ Sentence Builder';
-                questionList = shuffleArray([...sentenceQuestions]);
-            } else if (mode === 'detective') {
-                document.getElementById('game-mode-title').innerText = '🔍 Story Detective';
-                questionList = shuffleArray([...detectiveQuestions]);
-            }
-
-            document.getElementById('q-total').innerText = questionList.length;
+            updateUI();
             hideAllScreens();
             document.getElementById('screen-gameplay').classList.remove('hidden');
 
-            renderCurrentQuestion();
+            resizeCanvas();
+            hero.x = canvas.width / 2;
+            hero.y = canvas.height / 2;
+
+            spawnGems();
+            loadCurrentMission();
+
+            if (gameLoopReq) cancelAnimationFrame(gameLoopReq);
+            gameLoop();
         }
 
-        function restartCurrentMode() {
-            startGameMode(currentMode);
+        function retryLevel() {
+            startLevel(currentLevel);
         }
 
-        function renderCurrentQuestion() {
-            isAnsweringAllowed = true;
-            const feedbackBanner = document.getElementById('feedback-banner');
-            feedbackBanner.classList.add('hidden');
-
-            const currentQ = questionList[currentQIndex];
-
-            // Update Progress Bar
-            document.getElementById('q-current').innerText = currentQIndex + 1;
-            const progressPercent = ((currentQIndex) / questionList.length) * 100;
-            document.getElementById('game-progress').style.width = progressPercent + '%';
-
-            // Set Category
-            document.getElementById('question-category').innerText = currentQ.category;
-
-            const contextBox = document.getElementById('question-context');
-            const promptEl = document.getElementById('question-prompt');
-
-            if (currentMode === 'sorting') {
-                promptEl.innerText = `What type of pronoun is "${currentQ.word}"?`;
-                contextBox.classList.remove('hidden');
-                contextBox.innerHTML = `<span class="text-3xl sm:text-4xl font-extrabold text-indigo-700">"${currentQ.word}"</span>`;
-            } else if (currentMode === 'builder') {
-                promptEl.innerText = currentQ.prompt;
-                contextBox.classList.remove('hidden');
-                contextBox.innerHTML = `<p class="text-slate-800 leading-relaxed">${currentQ.sentence}</p>`;
-            } else if (currentMode === 'detective') {
-                promptEl.innerText = currentQ.prompt;
-                contextBox.classList.remove('hidden');
-                contextBox.innerHTML = `<p class="text-slate-800 leading-relaxed">${currentQ.sentence}</p>`;
+        function loadCurrentMission() {
+            const levelData = levelMissions[currentLevel];
+            if (!levelData || currentMissionIndex >= levelData.length) {
+                finishLevel();
+                return;
             }
 
-            // Shuffle Options
-            const shuffledOptions = shuffleArray([...currentQ.options]);
-
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-
-            shuffledOptions.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'w-full bg-slate-100 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 text-slate-800 font-bold p-3 sm:p-4 rounded-2xl text-sm sm:text-base card-shadow-sm transition text-center';
-                btn.innerText = opt;
-                btn.onclick = () => handleAnswer(opt, currentQ.correct, btn);
-                optionsContainer.appendChild(btn);
-            });
+            const mission = levelData[currentMissionIndex];
+            document.getElementById('mission-category').innerText = mission.category;
+            document.getElementById('mission-prompt').innerText = mission.prompt;
         }
 
-        function handleAnswer(selectedOpt, correctOpt, clickedBtn) {
-            if (!isAnsweringAllowed) return;
-            isAnsweringAllowed = false;
+        function spawnGems() {
+            gems = [];
+            const levelData = levelMissions[currentLevel];
+            const currentMission = levelData[currentMissionIndex];
 
-            const feedbackBanner = document.getElementById('feedback-banner');
-            const isCorrect = (selectedOpt === correctOpt);
+            if (!currentMission) return;
 
-            // Disable all option buttons
-            const allBtns = document.getElementById('options-container').querySelectorAll('button');
-            allBtns.forEach(btn => {
-                btn.classList.add('pointer-events-none');
-                if (btn.innerText === correctOpt) {
-                    btn.classList.remove('bg-slate-100', 'border-slate-200');
-                    btn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
-                }
-            });
+            const totalGems = 8;
+            for (let i = 0; i < totalGems; i++) {
+                const isTarget = Math.random() < 0.5;
+                const textList = isTarget ? currentMission.valid : currentMission.invalid;
+                const word = textList[Math.floor(Math.random() * textList.length)];
 
-            if (isCorrect) {
-                playToneSound('correct');
-                clickedBtn.classList.remove('bg-slate-100', 'border-slate-200');
-                clickedBtn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
+                gems.push({
+                    x: Math.random() * (canvas.width - 80) + 40,
+                    y: Math.random() * (canvas.height - 180) + 90,
+                    radius: 26,
+                    word: word,
+                    isTarget: isTarget,
+                    color: isTarget ? '#10b981' : '#f43f5e',
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: (Math.random() - 0.5) * 1.5,
+                    pulse: Math.random() * Math.PI
+                });
+            }
+        }
 
-                totalScore += 10 + (streak * 2);
-                streak++;
-                correctAnswersCount++;
+        // Particle Burst Effect
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 12; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    radius: Math.random() * 4 + 2,
+                    color: color,
+                    alpha: 1,
+                    life: 25
+                });
+            }
+        }
 
-                feedbackBanner.className = "rounded-2xl p-3 text-center font-bold text-sm sm:text-base bg-emerald-100 border-2 border-emerald-400 text-emerald-900 mb-2 pop-in";
-                feedbackBanner.innerHTML = "🎉 Fantastic! That's correct!";
-            } else {
-                playToneSound('wrong');
-                clickedBtn.classList.remove('bg-slate-100', 'border-slate-200');
-                clickedBtn.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
+        function updateUI() {
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('lives-display').innerText = lives;
+        }
 
-                streak = 0;
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                feedbackBanner.className = "rounded-2xl p-3 text-center font-bold text-sm sm:text-base bg-rose-100 border-2 border-rose-400 text-rose-900 mb-2 pop-in";
-                feedbackBanner.innerHTML = `💡 Oops! The correct answer was <b>"${correctOpt}"</b>.`;
+            // Draw Subtle Grid Background
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            const gridSize = 40;
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
             }
 
-            feedbackBanner.classList.remove('hidden');
-            updateScoreUI();
+            // Move Hero based on controls
+            let speed = hero.speed;
+            if (keys.Up) hero.y -= speed;
+            if (keys.Down) hero.y += speed;
+            if (keys.Left) hero.x -= speed;
+            if (keys.Right) hero.x += speed;
 
-            // Auto advance after 1.8s
-            setTimeout(() => {
-                currentQIndex++;
-                if (currentQIndex < questionList.length) {
-                    renderCurrentQuestion();
-                } else {
-                    finishGame();
+            // Constrain Hero inside bounds
+            hero.x = Math.max(hero.radius + 10, Math.min(canvas.width - hero.radius - 10, hero.x));
+            hero.y = Math.max(hero.radius + 80, Math.min(canvas.height - hero.radius - 100, hero.y));
+
+            // Render Hero Avatar
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(hero.x, hero.y, hero.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#6366f1';
+            ctx.shadowColor = '#818cf8';
+            ctx.shadowBlur = 12;
+            ctx.fill();
+            ctx.restore();
+
+            ctx.font = '22px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(hero.emoji, hero.x, hero.y);
+
+            // Render Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= 1 / p.life;
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
                 }
-            }, 1800);
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Render & Update Gems
+            const levelData = levelMissions[currentLevel];
+            const currentMission = levelData[currentMissionIndex];
+
+            for (let i = gems.length - 1; i >= 0; i--) {
+                const g = gems[i];
+                g.x += g.vx;
+                g.y += g.vy;
+                g.pulse += 0.05;
+
+                // Bounce off walls
+                if (g.x < g.radius + 10 || g.x > canvas.width - g.radius - 10) g.vx *= -1;
+                if (g.y < g.radius + 80 || g.y > canvas.height - g.radius - 100) g.vy *= -1;
+
+                const r = g.radius + Math.sin(g.pulse) * 2;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(g.x, g.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = '#1e293b';
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 3;
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+
+                // Pronoun Label
+                ctx.font = 'bold 14px Fredoka, sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(g.word, g.x, g.y);
+
+                // Check collision with Hero
+                const dist = Math.hypot(hero.x - g.x, hero.y - g.y);
+                if (dist < hero.radius + g.radius) {
+                    // Collision detected
+                    if (currentMission.valid.includes(g.word)) {
+                        playSound('correct');
+                        createParticles(g.x, g.y, '#10b981');
+                        score += 20;
+                        gemsCaughtCount++;
+                        updateUI();
+                    } else {
+                        playSound('wrong');
+                        createParticles(g.x, g.y, '#f43f5e');
+                        lives--;
+                        updateUI();
+                        if (lives <= 0) {
+                            finishLevel();
+                            return;
+                        }
+                    }
+
+                    // Remove collected gem and re-spawn
+                    gems.splice(i, 1);
+
+                    // If remaining target gems are low, move to next mission
+                    const remainingTargets = gems.filter(gm => currentMission.valid.includes(gm.word));
+                    if (remainingTargets.length === 0 || gems.length < 3) {
+                        currentMissionIndex++;
+                        if (currentMissionIndex >= levelData.length) {
+                            finishLevel();
+                            return;
+                        } else {
+                            loadCurrentMission();
+                            spawnGems();
+                        }
+                    }
+                }
+            }
+
+            gameLoopReq = requestAnimationFrame(gameLoop);
         }
 
-        function updateScoreUI() {
-            document.getElementById('score-display').innerText = totalScore;
-            document.getElementById('streak-display').innerText = streak;
-        }
-
-        function finishGame() {
+        function finishLevel() {
+            if (gameLoopReq) cancelAnimationFrame(gameLoopReq);
             hideAllScreens();
             document.getElementById('screen-summary').classList.remove('hidden');
 
-            const accuracy = Math.round((correctAnswersCount / questionList.length) * 100);
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-gems').innerText = gemsCaughtCount;
 
-            document.getElementById('final-score').innerText = totalScore;
-            document.getElementById('final-accuracy').innerText = accuracy + '%';
+            const badge = document.getElementById('summary-badge');
+            const title = document.getElementById('summary-title');
+            const subtitle = document.getElementById('summary-subtitle');
 
-            const badgeEl = document.getElementById('summary-badge');
-            const titleEl = document.getElementById('summary-title');
-            const subtitleEl = document.getElementById('summary-subtitle');
-
-            if (accuracy >= 80) {
-                badgeEl.innerText = '👑';
-                titleEl.innerText = 'Pronoun Master!';
-                subtitleEl.innerText = 'Outstanding work! You know your pronouns inside and out!';
+            if (lives > 0) {
+                badge.innerText = '👑';
+                title.innerText = 'Quest Accomplished!';
+                subtitle.innerText = 'You navigated the map and mastered pronouns!';
                 if (typeof confetti === 'function') {
                     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                 }
-            } else if (accuracy >= 50) {
-                badgeEl.innerText = '🌟';
-                titleEl.innerText = 'Great Effort!';
-                subtitleEl.innerText = 'You are getting really good at this. Keep practicing!';
             } else {
-                badgeEl.innerText = '📚';
-                titleEl.innerText = 'Keep Learning!';
-                subtitleEl.innerText = 'Review the Pronoun Power Chart and try again!';
+                badge.innerText = '💥';
+                title.innerText = 'Game Over!';
+                subtitle.innerText = 'Keep practicing your pronouns and try again!';
             }
         }
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
+        function setupControls() {
+            // Keyboard listeners
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.Up = true;
+                if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.Down = true;
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.Left = true;
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.Right = true;
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.Up = false;
+                if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.Down = false;
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.Left = false;
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.Right = false;
+            });
+
+            // On-screen D-Pad Touch Controls for Phone screens
+            const bindBtn = (id, keyName) => {
+                const btn = document.getElementById(id);
+                if (!btn) return;
+                const start = (e) => { e.preventDefault(); keys[keyName] = true; };
+                const end = (e) => { e.preventDefault(); keys[keyName] = false; };
+                btn.addEventListener('touchstart', start);
+                btn.addEventListener('touchend', end);
+                btn.addEventListener('mousedown', start);
+                btn.addEventListener('mouseup', end);
+            };
+
+            bindBtn('btn-up', 'Up');
+            bindBtn('btn-down', 'Down');
+            bindBtn('btn-left', 'Left');
+            bindBtn('btn-right', 'Right');
+
+            // Canvas Direct Touch-and-Drag / Tap Movement for phones
+            canvas = document.getElementById('game-canvas');
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 0) {
+                    const rect = canvas.getBoundingClientRect();
+                    hero.x = e.touches[0].clientX - rect.left;
+                    hero.y = e.touches[0].clientY - rect.top;
+                }
+            });
         }
 
         window.onload = function() {
+            initCanvas();
+            setupControls();
             startSplashTimer();
         };
     </script>
