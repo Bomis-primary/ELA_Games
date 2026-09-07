@@ -1,1051 +1,492 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Silent Word Smasher: Grade 3 Silent Letters</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Friendly Google Fonts for Kids -->
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Lexend', sans-serif;
-      background-color: #fef3c7; /* Warm playful beige/sand background */
-    }
-    .game-title-font {
-      font-family: 'Fredoka', sans-serif;
-    }
-    /* Toycraft soft bounce animation */
-    @keyframes cardWobble {
-      0%, 100% { transform: rotate(-1deg) translateY(0); }
-      50% { transform: rotate(1deg) translateY(-6px); }
-    }
-    .kids-bounce {
-      animation: cardWobble 4s ease-in-out infinite;
-    }
-    /* Chunky wooden beveled button shadow style */
-    .wood-shadow-pink {
-      box-shadow: 0 6px 0 0 #be185d;
-    }
-    .wood-shadow-pink:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 0 #be185d;
-    }
-    .wood-shadow-teal {
-      box-shadow: 0 6px 0 0 #0f766e;
-    }
-    .wood-shadow-teal:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 0 #0f766e;
-    }
-    /* Dynamic progress loader animation */
-    @keyframes loadProgress {
-      0% { width: 0%; }
-      100% { width: 100%; }
-    }
-    .animate-progress {
-      animation: loadProgress 5s linear forwards;
-    }
-    /* Retro CRT Screen Scanlines overlay */
-    .crt-scanlines {
-      background: linear-gradient(
-        rgba(255, 255, 255, 0) 50%, 
-        rgba(0, 0, 0, 0.08) 50%
-      );
-      background-size: 100% 4px;
-      pointer-events: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Silent Letter Catcher Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: #f0fdfa; /* Tailwind teal-50 */
+            overflow: hidden; /* Prevent scrolling during game */
+            touch-action: none; /* Prevent pinch-zoom and default touch actions */
+        }
+
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease-out;
+        }
+
+        #splash-screen img {
+            max-width: 80%;
+            max-height: 50%;
+        }
+
+        #game-container {
+            display: none; /* Hidden initially, shown after splash */
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sky-area {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #7dd3fc, #e0f2fe); /* Sky colors */
+        }
+
+        .falling-word {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 24px;
+            font-weight: bold;
+            color: #334155;
+            user-select: none;
+            white-space: nowrap;
+            /* Transition for smooth falling managed by JS */
+            transition: top 0.05s linear, left 0.2s ease-out;
+        }
+
+        #bucket-area {
+            height: 120px;
+            background-color: #86efac; /* Grass color */
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding-bottom: 20px;
+            border-top: 4px solid #4ade80;
+        }
+
+        .bucket {
+            width: 70px;
+            height: 80px;
+            background-color: #fbbf24; /* Bucket color */
+            border-radius: 10px 10px 40px 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            color: white;
+            text-shadow: 2px 2px 0 #b45309;
+            box-shadow: inset 0 -10px 0 rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        .bucket.active {
+            transform: scale(0.95) translateY(5px);
+            background-color: #f59e0b;
+        }
+
+        #score-board {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255,255,255,0.8);
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-size: 20px;
+            color: #1e293b;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        #message-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+
+        /* Fun animations for correct/wrong */
+        @keyframes pop {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+
+        .word-caught {
+            animation: pop 0.5s forwards;
+            color: #16a34a !important; /* Green */
+        }
+        
+        .word-missed {
+            animation: pop 0.5s forwards;
+            color: #ef4444 !important; /* Red */
+        }
+        
+        button.primary-btn {
+            background-color: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-size: 20px;
+            font-family: inherit;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+        }
+    </style>
 </head>
-<body class="text-slate-800 min-h-screen flex flex-col justify-between overflow-x-hidden select-none relative">
+<body>
 
-  <!-- SCREEN 0: 5-SECOND FULL-SCREEN BLANK LOADING SCREEN (Completely covers everything) -->
-  <div id="screen-splash" class="fixed inset-0 w-screen h-screen bg-black flex flex-col items-center justify-center gap-8 z-[9999] transition-opacity duration-300">
-    <div class="flex flex-col items-center gap-6 text-center">
-      <!-- Centered plain logo container -->
-      <div id="splash-logo-container" class="w-48 h-48 flex items-center justify-center overflow-hidden p-2">
-        <img id="splash-logo" src="https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/cho24/assets/innovine-logo.png" alt="Innovine Logo" class="w-full h-full object-contain" onerror="handleLogoFallback()">
-      </div>
+    <div id="splash-screen">
+        <!-- Assuming path based on image provided -->
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.src='https://placehold.co/400x200/ffffff/000000?text=Innovine+Logo';">
     </div>
 
-    <!-- Clean minimalist loading bar -->
-    <div class="w-full max-w-xs bg-zinc-900 rounded-full h-1.5 overflow-hidden relative">
-      <div class="bg-yellow-400 h-full animate-progress rounded-full"></div>
-    </div>
-    
-    <!-- Subtle skip button -->
-    <button onclick="endSplashScreen()" class="px-4 py-1 bg-zinc-900 hover:bg-zinc-800 rounded text-[10px] text-zinc-500 tracking-wider uppercase transition">
-      Skip [Space]
-    </button>
-  </div>
-
-  <!-- TOP HEADER (Hidden initially during splash screen) -->
-  <header class="w-full bg-teal-800 border-b-8 border-amber-600 p-4 sticky top-0 z-50 shadow-md">
-    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div class="text-center sm:text-left">
-        <h1 class="text-3xl sm:text-4xl font-black text-amber-300 game-title-font tracking-wide drop-shadow-[0_2px_0_rgba(0,0,0,0.4)]">
-          SILENT WORD SMASHER
-        </h1>
-        <p class="text-xs text-amber-100 font-bold uppercase tracking-wider">Playroom Craft Edition: L, H, T, G</p>
-      </div>
-      
-      <!-- NAV NAVIGATION CONTROLS -->
-      <nav id="nav-controls" class="flex items-center gap-3 invisible">
-        <button onclick="switchScreen('menu')" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider border-b-4 border-pink-800 active:translate-y-0.5 transition">
-          🪵 Toy Box Menu
-        </button>
-        <button onclick="switchScreen('study')" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-teal-950 rounded-2xl text-xs font-bold uppercase tracking-wider border-b-4 border-amber-600 active:translate-y-0.5 transition">
-          💡 Blackboard Lesson
-        </button>
-        <button onclick="toggleMute()" id="mute-btn" class="p-2 bg-teal-900 hover:bg-teal-700 text-amber-200 rounded-2xl border-b-4 border-teal-950 text-sm transition">
-          🔊
-        </button>
-      </nav>
-    </div>
-  </header>
-
-  <!-- MAIN PLAY AREA -->
-  <main class="flex-grow flex items-center justify-center p-4">
-
-    <!-- SCREEN 1: SIMPLIFIED WOODEN PLAYROOM MAIN MENU -->
-    <div id="screen-menu" class="w-full max-w-2xl bg-amber-50 border-8 border-amber-800 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col gap-6 hidden text-center relative overflow-hidden">
-      <!-- Playful background decorations -->
-      <div class="absolute -top-12 -left-12 w-24 h-24 bg-teal-100 rounded-full opacity-60"></div>
-      <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-pink-100 rounded-full opacity-60"></div>
-
-      <div class="kids-bounce relative z-10">
-        <span class="px-4 py-1.5 bg-teal-800 text-white rounded-full text-xs font-bold uppercase tracking-wider shadow">
-          Classroom Spelling Fun!
-        </span>
-        <h2 class="text-4xl sm:text-5xl font-black text-amber-800 game-title-font mt-4 drop-shadow-sm">
-          SILENT WORD SMASHER
-        </h2>
-        <p class="text-slate-600 text-sm mt-3 max-w-md mx-auto font-medium">
-          Read the sentence. Aim your toy slingshot and smash the falling wooden blocks to pieces!
-        </p>
-      </div>
-
-      <!-- SELECT LEVELS -->
-      <div class="grid sm:grid-cols-2 gap-5 mt-4 relative z-10">
-        <!-- LEVEL 1 -->
-        <div class="bg-teal-50 border-4 border-teal-800 rounded-2xl p-5 flex flex-col justify-between gap-4 text-center shadow-lg">
-          <div>
-            <span class="text-xs font-bold text-teal-800 uppercase tracking-widest bg-teal-100 px-2.5 py-1 rounded-full">Level 1</span>
-            <h3 class="text-xl font-extrabold text-teal-900 game-title-font mt-2">Woodland Walk</h3>
-            <p class="text-xs text-teal-700 mt-1.5 font-medium leading-relaxed">
-              Practicing words with silent <strong class="text-pink-600">L</strong> and <strong class="text-pink-600">H</strong>!
-            </p>
-          </div>
-          <button onclick="startGame(1)" class="w-full py-3 bg-pink-500 hover:bg-pink-400 text-white font-extrabold text-sm rounded-2xl wood-shadow-pink transition uppercase tracking-wider">
-            Start Level 1 🚀
-          </button>
+    <div id="game-container" class="hidden">
+        
+        <div id="score-board">
+            Score: <span id="score">0</span>
         </div>
 
-        <!-- LEVEL 2 -->
-        <div class="bg-pink-50 border-4 border-pink-800 rounded-2xl p-5 flex flex-col justify-between gap-4 text-center shadow-lg">
-          <div>
-            <span class="text-xs font-bold text-pink-800 uppercase tracking-widest bg-pink-100 px-2.5 py-1 rounded-full">Level 2</span>
-            <h3 class="text-xl font-extrabold text-pink-900 game-title-font mt-2">Castle Climber</h3>
-            <p class="text-xs text-pink-700 mt-1.5 font-medium leading-relaxed">
-              Practicing words with silent <strong class="text-teal-800">T</strong> and <strong class="text-teal-800">G</strong>!
-            </p>
-          </div>
-          <button onclick="startGame(2)" class="w-full py-3 bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-sm rounded-2xl wood-shadow-teal transition uppercase tracking-wider">
-            Start Level 2 🎯
-          </button>
+        <div id="sky-area">
+            <!-- Falling words will be injected here -->
         </div>
-      </div>
+
+        <div id="bucket-area">
+            <div class="bucket" data-letter="L">L</div>
+            <div class="bucket" data-letter="H">H</div>
+            <div class="bucket" data-letter="T">T</div>
+            <div class="bucket" data-letter="G">G</div>
+        </div>
+        
+        <!-- Start/End Game Overlay -->
+        <div id="message-overlay" class="hidden">
+            <h2 id="overlay-title" class="text-4xl text-yellow-300">Silent Letter Catcher!</h2>
+            <p id="overlay-desc" class="text-xl">Catch the falling words in the correct silent letter bucket.</p>
+            <p id="final-score" class="text-2xl hidden">Final Score: <span>0</span></p>
+            <button id="start-btn" class="primary-btn">Start Game</button>
+        </div>
     </div>
 
-    <!-- SCREEN 2: LEARN ZONE / COZY WOOD BULLETIN BOARD -->
-    <div id="screen-study" class="w-full max-w-2xl bg-amber-50 border-8 border-amber-800 p-6 rounded-3xl shadow-2xl flex flex-col gap-4 hidden">
-      <div class="text-center border-b-2 border-dashed border-amber-800/40 pb-3">
-        <h2 class="text-3xl font-black text-amber-800 game-title-font">Blackboard Lesson</h2>
-        <p class="text-xs text-slate-600 mt-1 font-bold">Letters we write, but do not say out loud!</p>
-      </div>
+    <audio id="audio-correct" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="audio-wrong" src="assets/wrong.mp3" preload="auto"></audio>
 
-      <!-- Cute sticky-note cards -->
-      <div class="grid grid-cols-2 gap-4 text-xs font-medium">
-        <!-- Silent L -->
-        <div class="bg-yellow-100/80 p-4 rounded-2xl border-2 border-yellow-300 shadow-md transform -rotate-1">
-          <h3 class="text-teal-800 font-extrabold text-sm mb-1.5">🤫 Silent L</h3>
-          <p class="text-slate-700 mb-2">Often quiet after A, O, or U.</p>
-          <div class="bg-white/80 p-2 rounded-xl text-[11px] text-slate-800 font-bold">
-            • wa<span class="text-pink-600">l</span>k (sounds like wok)<br>
-            • ha<span class="text-pink-600">l</span>f
-          </div>
-        </div>
+    <script>
+        // Game Configuration and State
+        const SPLASH_DURATION = 5000; // 5 seconds
+        let score = 0;
+        let isPlaying = false;
+        let currentWordElement = null;
+        let wordFallInterval;
+        let fallSpeed = 2; // Initial fall speed
+        let gameLoopInterval;
+        
+        // Vocabulary list containing words with silent L, H, T, G
+        // Format: { word: "Wou_d", complete: "Would", silent: "L" }
+        const wordList = [
+            // Silent L
+            { display: "ha_f", complete: "half", silent: "L" },
+            { display: "ca_f", complete: "calf", silent: "L" },
+            { display: "wou_d", complete: "would", silent: "L" },
+            { display: "cou_d", complete: "could", silent: "L" },
+            { display: "shou_d", complete: "should", silent: "L" },
+            { display: "sa_mon", complete: "salmon", silent: "L" },
+            { display: "ta_k", complete: "talk", silent: "L" },
+            { display: "wa_k", complete: "walk", silent: "L" },
+            { display: "yo_k", complete: "yolk", silent: "L" },
+            
+            // Silent H
+            { display: "g_ost", complete: "ghost", silent: "H" },
+            { display: "w_at", complete: "what", silent: "H" },
+            { display: "w_en", complete: "when", silent: "H" },
+            { display: "w_y", complete: "why", silent: "H" },
+            { display: "w_ere", complete: "where", silent: "H" },
+            { display: "_onest", complete: "honest", silent: "H" },
+            { display: "_our", complete: "hour", silent: "H" },
+            { display: "ec_o", complete: "echo", silent: "H" },
+            
+            // Silent T
+            { display: "cas_le", complete: "castle", silent: "T" },
+            { display: "lis_en", complete: "listen", silent: "T" },
+            { display: "of_en", complete: "often", silent: "T" },
+            { display: "sof_en", complete: "soften", silent: "T" },
+            { display: "fas_en", complete: "fasten", silent: "T" },
+            { display: "whis_le", complete: "whistle", silent: "T" },
+            { display: "wres_le", complete: "wrestle", silent: "T" },
+            
+            // Silent G
+            { display: "si_n", complete: "sign", silent: "G" },
+            { display: "desi_n", complete: "design", silent: "G" },
+            { display: "ali_n", complete: "align", silent: "G" },
+            { display: "_nome", complete: "gnome", silent: "G" },
+            { display: "forei_n", complete: "foreign", silent: "G" },
+            { display: "campai_n", complete: "campaign", silent: "G" }
+        ];
 
-        <!-- Silent H -->
-        <div class="bg-teal-50 p-4 rounded-2xl border-2 border-teal-200 shadow-md transform rotate-1">
-          <h3 class="text-teal-800 font-extrabold text-sm mb-1.5">🤫 Silent H</h3>
-          <p class="text-slate-700 mb-2">Quiet at the start or after G/R.</p>
-          <div class="bg-white/80 p-2 rounded-xl text-[11px] text-slate-800 font-bold">
-            • <span class="text-pink-600">h</span>our (sounds like our)<br>
-            • g<span class="text-pink-600">h</span>ost
-          </div>
-        </div>
+        // DOM Elements
+        const splashScreen = document.getElementById('splash-screen');
+        const gameContainer = document.getElementById('game-container');
+        const skyArea = document.getElementById('sky-area');
+        const scoreDisplay = document.getElementById('score');
+        const buckets = document.querySelectorAll('.bucket');
+        const messageOverlay = document.getElementById('message-overlay');
+        const startBtn = document.getElementById('start-btn');
+        const overlayTitle = document.getElementById('overlay-title');
+        const overlayDesc = document.getElementById('overlay-desc');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const audioCorrect = document.getElementById('audio-correct');
+        const audioWrong = document.getElementById('audio-wrong');
 
-        <!-- Silent T -->
-        <div class="bg-pink-50 p-4 rounded-2xl border-2 border-pink-200 shadow-md transform rotate-1">
-          <h3 class="text-pink-800 font-extrabold text-sm mb-1.5">🤫 Silent T</h3>
-          <p class="text-slate-700 mb-2">Often quiet in -sten, -tle, -tch.</p>
-          <div class="bg-white/80 p-2 rounded-xl text-[11px] text-slate-800 font-bold">
-            • lis<span class="text-teal-700">t</span>en<br>
-            • cas<span class="text-teal-700">t</span>le
-          </div>
-        </div>
+        // Initialize App
+        window.onload = () => {
+            // Ensure audio doesn't fail silently if missing during development
+            audioCorrect.volume = 0.5;
+            audioWrong.volume = 0.5;
 
-        <!-- Silent G -->
-        <div class="bg-orange-50 p-4 rounded-2xl border-2 border-orange-200 shadow-md transform -rotate-1">
-          <h3 class="text-orange-900 font-extrabold text-sm mb-1.5">🤫 Silent G</h3>
-          <p class="text-slate-700 mb-2">Quiet when next to N.</p>
-          <div class="bg-white/80 p-2 rounded-xl text-[11px] text-slate-800 font-bold">
-            • si<span class="text-teal-700">g</span>n<br>
-            • <span class="text-teal-700">g</span>nome
-          </div>
-        </div>
-      </div>
+            setTimeout(() => {
+                splashScreen.style.opacity = '0';
+                setTimeout(() => {
+                    splashScreen.classList.add('hidden');
+                    gameContainer.classList.remove('hidden');
+                    gameContainer.style.display = 'flex'; // override inline hide
+                    showStartScreen();
+                }, 500); // Wait for fade out transition
+            }, SPLASH_DURATION);
+        };
 
-      <div class="flex justify-end gap-3 mt-2 border-t-2 border-dashed border-amber-800/20 pt-3">
-        <button onclick="switchScreen('menu')" class="px-5 py-2.5 bg-slate-500 hover:bg-slate-400 text-xs text-white rounded-2xl font-bold border-b-4 border-slate-700 active:translate-y-0.5 transition uppercase">
-          Back
-        </button>
-        <button onclick="startGame(1)" class="px-6 py-2.5 bg-teal-700 hover:bg-teal-600 text-xs text-white font-extrabold rounded-2xl border-b-4 border-teal-900 active:translate-y-0.5 transition uppercase">
-          Play Level 1!
-        </button>
-      </div>
-    </div>
-
-    <!-- SCREEN 3: COZY TOYBOX PLAYROOM CABINET -->
-    <div id="screen-game" class="w-full max-w-2xl flex flex-col items-center justify-center hidden">
-      
-      <!-- TOYBOARD WOODEN HUD -->
-      <div class="w-full bg-amber-800 rounded-t-3xl border-t-4 border-x-4 border-amber-900 p-4 flex flex-wrap justify-between items-center gap-3 z-10 relative shadow-lg text-white">
-        <div class="flex items-center gap-3">
-          <div class="bg-amber-950 px-3 py-1.5 rounded-xl border border-amber-700 flex flex-col">
-            <span class="text-[9px] text-amber-300 font-extrabold uppercase">QUESTION</span>
-            <span id="hud-progress" class="text-xs font-black tracking-widest">01/20</span>
-          </div>
-          <div class="bg-amber-950 px-3 py-1.5 rounded-xl border border-amber-700 flex flex-col">
-            <span class="text-[9px] text-yellow-300 font-extrabold uppercase">SCORE</span>
-            <span id="hud-score" class="text-xs font-black tracking-widest">0000</span>
-          </div>
-        </div>
-
-        <!-- CONTEXT SENTENCE PROMPT -->
-        <div class="flex-grow max-w-xs bg-amber-950 p-2.5 rounded-2xl border-2 border-amber-600 flex flex-col justify-center text-center shadow-inner">
-          <p id="game-prompt" class="text-xs sm:text-sm font-bold text-amber-50 leading-snug">
-            Loading...
-          </p>
-        </div>
-
-        <!-- HEALTH BAR -->
-        <div class="flex items-center gap-1.5 bg-amber-950 px-3 py-1.5 rounded-xl border border-amber-700">
-          <span class="text-[9px] text-pink-300 font-extrabold uppercase mr-1">SHIELDS:</span>
-          <div id="hud-lives" class="flex items-center gap-1">
-            <!-- Dynamic wooden heart cells -->
-          </div>
-        </div>
-      </div>
-
-      <!-- PLAY STAGE CONTAINER -->
-      <div class="w-full bg-amber-100 border-x-4 border-b-4 border-amber-900 relative flex flex-col overflow-hidden aspect-[4/3] max-h-[380px] rounded-b-3xl shadow-xl">
-        <div class="absolute inset-0 crt-scanlines pointer-events-none z-30"></div>
-        <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair z-10 bg-amber-50"></canvas>
-
-        <!-- GAME END RESULTS OVERLAYS -->
-        <div id="canvas-overlay" class="absolute inset-0 bg-slate-950/85 flex flex-col items-center justify-center p-6 text-center z-40 hidden text-white">
-          
-          <!-- Game Over Modal -->
-          <div id="overlay-gameover" class="hidden flex flex-col items-center gap-4">
-            <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-3xl shadow-lg animate-bounce">
-              🪵
-            </div>
-            <h2 class="text-3xl font-black text-red-400 game-title-font tracking-wide">TRY AGAIN!</h2>
-            <p class="text-slate-300 text-xs max-w-sm">
-              Keep practicing! You can do this. Learn from the blackboard and try again.
-            </p>
-            <div class="flex gap-3 mt-3">
-              <button onclick="switchScreen('menu')" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-xs font-bold rounded-2xl transition">
-                Menu
-              </button>
-              <button onclick="restartGame()" class="px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-teal-950 text-xs font-black rounded-2xl transition shadow-md">
-                Play Again 🔄
-              </button>
-            </div>
-          </div>
-
-          <!-- Victory Modal -->
-          <div id="overlay-victory" class="hidden flex flex-col items-center gap-4">
-            <div class="w-16 h-16 bg-yellow-400 text-teal-950 rounded-full flex items-center justify-center text-3xl shadow-lg animate-bounce">
-              🎖️
-            </div>
-            <h2 class="text-3xl font-black text-yellow-300 game-title-font tracking-wide">GREAT JOB!</h2>
-            <p id="victory-commentary" class="text-slate-200 text-xs max-w-sm font-medium">
-              Super spelling skills! You've successfully cleared this level.
-            </p>
-            <div class="bg-teal-900/80 px-6 py-2.5 rounded-2xl border-2 border-yellow-300 flex flex-col items-center">
-              <span class="text-[9px] text-yellow-300 font-extrabold uppercase tracking-widest">FINAL SCORE</span>
-              <span id="overlay-final-score" class="text-2xl font-black text-green-300">0000</span>
-            </div>
-            <div class="flex gap-3 mt-3">
-              <button onclick="switchScreen('menu')" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-xs font-bold rounded-2xl transition">
-                Menu
-              </button>
-              <button id="next-level-btn" onclick="nextLevel()" class="px-6 py-2.5 bg-pink-500 hover:bg-pink-400 text-white text-xs font-black rounded-2xl transition shadow-md">
-                Next Level ➡️
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- POP-UP NOTIFICATIONS -->
-        <div id="game-notif" class="absolute top-4 left-1/2 -translate-x-1/2 bg-yellow-300 text-teal-950 px-5 py-2.5 rounded-2xl border-4 border-amber-800 font-black text-xs z-20 flex items-center gap-2 transform translate-y-[-100px] transition-transform duration-300 shadow-lg">
-          <span id="notif-emoji">✨</span>
-          <span id="notif-text">Perfect Pop!</span>
-        </div>
-      </div>
-
-      <!-- IN-GAME INTERACTIVE DIRECTIVE -->
-      <p class="text-center text-xs text-amber-900 font-bold mt-3 max-w-sm">
-        🎯 <strong>Slingshot Action:</strong> Tap/click a falling wooden block to launch a dart and smash it!
-      </p>
-    </div>
-
-  </main>
-
-  <!-- LOW-CONNECTIVITY SYSTEM FOOTER -->
-  <footer class="w-full bg-teal-900 p-3.5 border-t-4 border-amber-600 text-center text-xs text-amber-100 flex flex-col sm:flex-row items-center justify-between max-w-4xl mx-auto gap-2 shadow-inner">
-    <p>© 2026 Word Quest Arcade.</p>
-    <div class="flex items-center gap-1.5">
-      <span class="inline-block w-2.5 h-2.5 rounded-full bg-green-400 animate-ping"></span>
-      <span class="text-[11px] text-amber-200 font-bold">Offline-ready Audio Protocol Active</span>
-    </div>
-  </footer>
-
-  <!-- DYNAMIC CORE ENGINE AND DATABASE -->
-  <script>
-    // --- GRADE 3 PEDAGOGICAL CONTENT (EXACTLY 30 SILENT L, H, T, G QUESTIONS) ---
-    const SILENT_LETTER_DB = [
-      // SILENT T
-      { q: "To keep our classroom quiet, we must ______ to the teacher.", a: "listen", choices: ["listen", "lisen", "listenn"], tag: "T" },
-      { q: "The old medieval king lived in a giant stone ______ with towers.", a: "castle", choices: ["castle", "casle", "castel"], tag: "T" },
-      { q: "Before our space shuttle takes off, remember to ______ your seatbelt.", a: "fasten", choices: ["fasten", "fassen", "fastin"], tag: "T" },
-      { q: "The soccer referee blew the loud ______ to stop the play.", a: "whistle", choices: ["whistle", "wisle", "whistel"], tag: "T" },
-      { q: "In the magical fairytale, the good ______ saved the village.", a: "witch", choices: ["witch", "wich", "witche"], tag: "T" },
-      { q: "I looked down at my wrist ______ to check if it was lunchtime.", a: "watch", choices: ["watch", "wach", "watche"], tag: "T" },
-      { q: "During a storm, the rain will ______ the dry soil outside.", a: "soften", choices: ["soften", "sofen", "softin"], tag: "T" },
-      { q: "The two school champions went to the gym mat to ______.", a: "wrestle", choices: ["wrestle", "resle", "wrestel"], tag: "T" },
-
-      // SILENT L
-      { q: "We went for a long, healthy ______ in the neighborhood park.", a: "walk", choices: ["walk", "wok", "wak"], tag: "L" },
-      { q: "Mom made an egg yolk but I didn't want to eat the yellow ______.", a: "yolk", choices: ["yolk", "yoke", "yolck"], tag: "L" },
-      { q: "I cut the big, juicy red apple in ______ to share with my friend.", a: "half", choices: ["half", "haf", "hawf"], tag: "L" },
-      { q: "We ordered a delicious grilled ______ fish at the restaurant.", a: "salmon", choices: ["salmon", "samon", "salmin"], tag: "L" },
-      { q: "The newborn baby cow, called a ______, was running in the field.", a: "calf", choices: ["calf", "caf", "kawf"], tag: "L" },
-      { q: "If we study hard, we ______ get a high score on the spelling quiz.", a: "should", choices: ["should", "shud", "shoud"], tag: "L" },
-      { q: "We sat around the campfire to ______ about our summer plans.", a: "talk", choices: ["talk", "tok", "tak"], tag: "L" },
-
-      // SILENT H
-      { q: "My watch was broken, so I was one ______ late for school.", a: "hour", choices: ["hour", "our", "hower"], tag: "H" },
-      { q: "The spooky story told us about a friendly ______ in the library.", a: "ghost", choices: ["ghost", "gost", "gohst"], tag: "H" },
-      { q: "My teacher is always ______; she always tells the absolute truth.", a: "honest", choices: ["honest", "onest", "honnest"], tag: "H" },
-      { q: "The mountain climber heard her own voice ______ back from the dark cave.", a: "echo", choices: ["echo", "eco", "ekko"], tag: "H" },
-      { q: "I love going to ______ every morning to learn new things.", a: "school", choices: ["school", "scool", "shool"], tag: "H" },
-      { q: "The zebra is black and ______ with beautiful patterns.", a: "white", choices: ["white", "wite", "whyte"], tag: "H" },
-      { q: "The school music band played a song with a very catchy ______.", a: "rhythm", choices: ["rhythm", "rythm", "rithim"], tag: "H" },
-      { q: "We stood at the station wondering ______ the yellow bus would arrive.", a: "when", choices: ["when", "wen", "whehn"], tag: "H" },
-
-      // SILENT G
-      { q: "I saw a funny little garden ______ holding a shovel under the bush.", a: "gnome", choices: ["gnome", "nome", "gnomy"], tag: "G" },
-      { q: "The highway traffic controller pointed to the stop ______.", a: "sign", choices: ["sign", "sine", "sgn"], tag: "G" },
-      { q: "Be careful! That small, flying ______ might bite your arm.", a: "gnat", choices: ["gnat", "nat", "gnatt"], tag: "G" },
-      { q: "Our class wants to ______ and build a brand-new birdhouse.", a: "design", choices: ["design", "dezign", "disign"], tag: "G" },
-      { q: "The cute puppy loves to ______ on its favorite rubber bone.", a: "gnaw", choices: ["gnaw", "naw", "gnawe"], tag: "G" },
-      { q: "A person visiting us from a different country is a ______ traveler.", a: "foreign", choices: ["foreign", "forin", "forein"], tag: "G" },
-      { q: "The roots of the ancient giant oak tree were old and ______.", a: "gnarl", choices: ["gnarl", "narl", "gnarled"], tag: "G" }
-    ];
-
-    // --- GAME CONTROL REGISTRY ---
-    let score = 0;
-    let lives = 3;
-    let currentLevel = 1;
-    let currentQuestionIdx = 0;
-    let soundEnabled = true;
-    let activeQuestions = [];
-    
-    // Canvas configurations
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    let animationId = null;
-    let blocks = [];
-    let darts = [];
-    let splinters = [];
-    let scenery = [];
-
-    // Playful wooden slingshot launcher
-    const slingshot = {
-      x: 0,
-      y: 0,
-      angle: -Math.PI / 2,
-      targetAngle: -Math.PI / 2
-    };
-
-    // --- AUDIO PROTOCOL WITH SYNTH FALLBACK ---
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    const audioAssets = {
-      correct: new Audio("https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/cho24/assets/correct.mp3"),
-      wrong: new Audio("https://raw.githubusercontent.com/Bomis-primary/ELA_Games/main/Gr3/cho24/assets/wrong.mp3")
-    };
-
-    // Preload audio files
-    Object.keys(audioAssets).forEach(k => {
-      audioAssets[k].load();
-    });
-
-    // Native Synth fallback function for offline support
-    function triggerSynth(frequency, duration, type = "sine", gainVal = 0.08) {
-      if (!soundEnabled) return;
-      try {
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
+        function showStartScreen() {
+            messageOverlay.classList.remove('hidden');
+            overlayTitle.textContent = "Silent Letter Catcher!";
+            overlayDesc.textContent = "Look at the falling word with a missing letter.\nTap the bucket with the correct SILENT letter to catch it!";
+            finalScoreDisplay.classList.add('hidden');
+            startBtn.textContent = "Play";
         }
-        const osc = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        
-        osc.type = type;
-        osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-        gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        
-        osc.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {
-        console.warn("Synth state: busy");
-      }
-    }
 
-    // Audio router
-    const sounds = {
-      correct: () => {
-        audioAssets.correct.play().catch(() => {
-          // Playful kid chime
-          triggerSynth(523.25, 0.15, 'sine'); // C5
-          setTimeout(() => triggerSynth(659.25, 0.25, 'sine'), 100); // E5
-        });
-      },
-      wrong: () => {
-        audioAssets.wrong.play().catch(() => {
-          // Flat soft buzz
-          triggerSynth(180, 0.3, 'triangle', 0.15);
-        });
-      },
-      snap: () => {
-        // Fun cartoon rubber slingshot snap
-        if (!soundEnabled) return;
-        try {
-          if (audioCtx.state === 'suspended') audioCtx.resume();
-          const osc = audioCtx.createOscillator();
-          const gainNode = audioCtx.createGain();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(350, audioCtx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.1);
-          gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-          osc.connect(gainNode);
-          gainNode.connect(audioCtx.destination);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.1);
-        } catch (err) {}
-      }
-    };
-
-    function toggleMute() {
-      soundEnabled = !soundEnabled;
-      document.getElementById('mute-btn').innerText = soundEnabled ? '🔊' : '🔇';
-    }
-
-    // --- RECOVERY LOGO SVG FALLBACK ---
-    function handleLogoFallback() {
-      const parent = document.getElementById('splash-logo-container');
-      if (!parent) return;
-      
-      // Cheerful, colorful toy/alphabet placeholder vector
-      parent.innerHTML = `
-        <svg class="w-24 h-24 text-yellow-400 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <circle cx="12" cy="12" r="10" fill="#1e1b4b"></circle>
-          <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="7" font-family="'Fredoka', sans-serif" font-weight="bold" fill="#facc15">INNOVINE</text>
-        </svg>
-      `;
-    }
-
-    // --- 5-SECOND DYNAMIC SPLASH SCREEN ---
-    let splashTimeLeft = 5;
-    let splashInterval = null;
-
-    function startSplashScreenTimer() {
-      const countdownSpan = document.getElementById('splash-timer');
-      splashInterval = setInterval(() => {
-        splashTimeLeft--;
-        if (splashTimeLeft <= 0) {
-          endSplashScreen();
+        function startGame() {
+            messageOverlay.classList.add('hidden');
+            score = 0;
+            updateScore();
+            fallSpeed = 2; // Reset speed
+            isPlaying = true;
+            
+            // Clear sky
+            skyArea.innerHTML = '';
+            
+            spawnWord();
         }
-      }, 1000);
-    }
 
-    function endSplashScreen() {
-      if (splashInterval) {
-        clearInterval(splashInterval);
-        splashInterval = null;
-      }
-      document.getElementById('screen-splash').classList.add('hidden');
-      document.getElementById('screen-menu').classList.remove('hidden');
-      document.getElementById('nav-controls').classList.remove('invisible');
-    }
-
-    // Key Listener to skip loading
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' && !document.getElementById('screen-splash').classList.contains('hidden')) {
-        e.preventDefault();
-        endSplashScreen();
-      }
-    });
-
-    // Start on DOM Load
-    window.addEventListener('DOMContentLoaded', () => {
-      startSplashScreenTimer();
-      createPlayroomScenery();
-    });
-
-    // --- NAVIGATION CONTROLLER ---
-    function switchScreen(screenId) {
-      document.getElementById('screen-menu').classList.add('hidden');
-      document.getElementById('screen-study').classList.add('hidden');
-      document.getElementById('screen-game').classList.add('hidden');
-      
-      document.getElementById('screen-' + screenId).classList.remove('hidden');
-
-      if (screenId !== 'game') {
-        stopGameLoop();
-      }
-    }
-
-    // --- PLAYROOM ENVIRONMENT SCENERY ---
-    function createPlayroomScenery() {
-      scenery = [];
-      // Playful cloud particles
-      for (let i = 0; i < 5; i++) {
-        scenery.push({
-          x: Math.random() * 500,
-          y: 20 + Math.random() * 60,
-          size: 30 + Math.random() * 20,
-          speed: 0.1 + Math.random() * 0.15
-        });
-      }
-    }
-
-    // --- CHUNKY WOODEN TOY BLOCK ---
-    class ToyBlock {
-      constructor(x, y, text, isCorrect, slotIdx) {
-        this.x = x;
-        this.y = y;
-        this.width = 96;
-        this.height = 44;
-        this.text = text;
-        this.isCorrect = isCorrect;
-        
-        // Gentle descending speed profile
-        this.speedY = 0.4 + (Math.random() * 0.2);
-        this.oscillationSpeed = 0.01 + Math.random() * 0.01;
-        this.oscillationWidth = 10 + Math.random() * 10;
-        this.angle = Math.random() * Math.PI;
-        this.baseX = x;
-        this.isDying = false;
-        this.fade = 1.0;
-
-        // Beveled Toy block palette
-        const colors = ['#f43f5e', '#0d9488', '#8b5cf6', '#f59e0b'];
-        this.color = colors[slotIdx % colors.length];
-      }
-
-      update() {
-        if (this.isDying) {
-          this.fade -= 0.15;
-          return;
+        function gameOver() {
+            isPlaying = false;
+            clearInterval(wordFallInterval);
+            if (currentWordElement) {
+                currentWordElement.remove();
+            }
+            
+            messageOverlay.classList.remove('hidden');
+            overlayTitle.textContent = "Game Over!";
+            overlayDesc.textContent = "Oh no! A word hit the ground.";
+            finalScoreDisplay.classList.remove('hidden');
+            finalScoreDisplay.querySelector('span').textContent = score;
+            startBtn.textContent = "Play Again";
         }
-        this.y += this.speedY;
-        this.angle += this.oscillationSpeed;
-        this.x = this.baseX + Math.sin(this.angle) * this.oscillationWidth;
-      }
 
-      draw() {
-        ctx.save();
-        ctx.globalAlpha = this.fade;
+        function spawnWord() {
+            if (!isPlaying) return;
 
-        // Draw shadow of block
-        ctx.fillStyle = 'rgba(120, 53, 4, 0.15)';
-        ctx.fillRect(this.x - this.width/2 + 6, this.y - this.height/2 + 6, this.width, this.height);
+            // Pick a random word
+            const wordData = wordList[Math.floor(Math.random() * wordList.length)];
+            
+            // Create DOM element
+            const wordEl = document.createElement('div');
+            wordEl.className = 'falling-word';
+            wordEl.textContent = wordData.display;
+            wordEl.dataset.silent = wordData.silent;
+            wordEl.dataset.complete = wordData.complete;
+            
+            // Random horizontal position (keep away from edges)
+            const minX = 10; // 10%
+            const maxX = 90; // 90%
+            const startX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+            wordEl.style.left = startX + '%';
+            wordEl.style.top = '-50px';
+            
+            skyArea.appendChild(wordEl);
+            currentWordElement = wordEl;
+            
+            // Start falling animation
+            let currentTop = -50;
+            const screenHeight = skyArea.offsetHeight;
+            
+            wordFallInterval = setInterval(() => {
+                if (!isPlaying) {
+                    clearInterval(wordFallInterval);
+                    return;
+                }
+                
+                currentTop += fallSpeed;
+                wordEl.style.top = currentTop + 'px';
+                
+                // Check if it hit the ground (bucket area top)
+                if (currentTop > screenHeight - 20) {
+                    clearInterval(wordFallInterval);
+                    handleMissedWord(wordEl);
+                }
+            }, 50); // Updates every 50ms
+        }
 
-        // Draw Main Block
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.roundRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height, 8);
-        ctx.fill();
+        function checkBucketTap(bucketLetter) {
+            if (!isPlaying || !currentWordElement) return;
 
-        // Draw Bevel effect
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.roundRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height, 8);
-        ctx.stroke();
+            const targetLetter = currentWordElement.dataset.silent;
+            
+            // Temporarily stop falling to process
+            clearInterval(wordFallInterval);
+            
+            if (bucketLetter === targetLetter) {
+                // Correct!
+                playAudio(audioCorrect);
+                handleCorrectCatch(currentWordElement, bucketLetter);
+            } else {
+                // Wrong!
+                playAudio(audioWrong);
+                handleWrongCatch(currentWordElement);
+            }
+        }
 
-        // Draw Inner wooden carving line
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(this.x - this.width/2 + 6, this.y - this.height/2 + 6, this.width - 12, this.height - 12);
+        function handleCorrectCatch(wordEl, bucketLetter) {
+            score += 10;
+            updateScore();
+            
+            // Visual feedback
+            wordEl.textContent = wordEl.dataset.complete; // Show full word
+            wordEl.classList.add('word-caught');
+            
+            // Move word towards the correct bucket (visual flair)
+            // Find bucket center
+            const bucketElement = Array.from(buckets).find(b => b.dataset.letter === bucketLetter);
+            if(bucketElement){
+               const bucketRect = bucketElement.getBoundingClientRect();
+               const skyRect = skyArea.getBoundingClientRect();
+               const targetLeft = bucketRect.left + (bucketRect.width / 2) - skyRect.left;
+               const targetTop = bucketRect.top - skyRect.top;
+               
+               // Let CSS transition handle it, but wait for animation to finish before removing
+               wordEl.style.top = (targetTop - 20) + 'px'; // Move near bucket
+               wordEl.style.left = targetLeft + 'px';
+            }
 
-        // Clear kid-friendly text label
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        ctx.shadowBlur = 3;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = 'bold 16px Lexend';
-        ctx.fillText(this.text, this.x, this.y);
+            // Increase speed slightly
+            if(score % 50 === 0) {
+                fallSpeed += 0.5;
+            }
 
-        ctx.restore();
-      }
-    }
-
-    // --- SPRINGY DART BEAMS (SUCTION CUP DARTS) ---
-    class DartBeam {
-      constructor(sx, sy, tx, ty) {
-        this.sx = sx;
-        this.sy = sy;
-        this.tx = tx;
-        this.ty = ty;
-        this.progress = 0;
-        this.speed = 0.15;
-      }
-
-      update() {
-        this.progress += this.speed;
-        if (this.progress > 1) this.progress = 1;
-      }
-
-      draw() {
-        ctx.save();
-        
-        // Calculate current tip coordinates
-        const currX = this.sx + (this.tx - this.sx) * this.progress;
-        const currY = this.sy + (this.ty - this.sy) * this.progress;
-
-        // Draw trailing string of suction cup dart
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(this.sx, this.sy);
-        ctx.lineTo(currX, currY);
-        ctx.stroke();
-
-        // Draw bright orange suction tip
-        ctx.fillStyle = '#f97316';
-        ctx.beginPath();
-        ctx.arc(currX, currY, 8, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Small bevel on suction tip
-        ctx.fillStyle = '#ffedd5';
-        ctx.beginPath();
-        ctx.arc(currX - 3, currY - 3, 3, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
-      }
-    }
-
-    // --- WOOD SPLINTERS ---
-    class WoodSplinter {
-      constructor(x, y, color) {
-        this.x = x;
-        this.y = y;
-        this.width = Math.random() * 8 + 4;
-        this.height = Math.random() * 4 + 2;
-        this.vx = (Math.random() - 0.5) * 6;
-        this.vy = (Math.random() - 0.5) * 6;
-        this.color = color;
-        this.alpha = 1;
-        this.rotation = Math.random() * Math.PI;
-        this.decay = 0.05;
-      }
-
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.alpha -= this.decay;
-        this.rotation += 0.05;
-      }
-
-      draw() {
-        ctx.save();
-        ctx.globalAlpha = this.alpha;
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.rotation);
-        
-        // Draw wood block shred
-        ctx.fillStyle = this.color;
-        ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
-        
-        ctx.restore();
-      }
-    }
-
-    // --- GAME LAUNCH CONTROLLER ---
-    function startGame(levelNum) {
-      currentLevel = levelNum;
-      score = 0;
-      lives = 3;
-      currentQuestionIdx = 0;
-      blocks = [];
-      darts = [];
-      splinters = [];
-
-      // Create shuffled master collection
-      let shuffledPool = [...SILENT_LETTER_DB].sort(() => Math.random() - 0.5);
-      
-      // Grab 20 questions for the session
-      activeQuestions = shuffledPool.slice(0, 20);
-
-      document.getElementById('hud-score').innerText = "0000";
-      document.getElementById('next-level-btn').innerText = currentLevel === 1 ? "Level 2 ➡️" : "Level 1 Again 🔄";
-
-      switchScreen('game');
-      resizeCanvas();
-      
-      document.getElementById('canvas-overlay').classList.add('hidden');
-      document.getElementById('overlay-gameover').classList.add('hidden');
-      document.getElementById('overlay-victory').classList.add('hidden');
-
-      loadQuestion();
-      setupMainLoop();
-    }
-
-    function restartGame() {
-      startGame(currentLevel);
-    }
-
-    function nextLevel() {
-      if (currentLevel === 1) {
-        startGame(2);
-      } else {
-        startGame(1);
-      }
-    }
-
-    function resizeCanvas() {
-      const parent = canvas.parentElement;
-      canvas.width = parent.clientWidth;
-      canvas.height = parent.clientHeight;
-      slingshot.x = canvas.width / 2;
-      slingshot.y = canvas.height - 12;
-    }
-
-    window.addEventListener('resize', () => {
-      if (!document.getElementById('screen-game').classList.contains('hidden')) {
-        resizeCanvas();
-      }
-    });
-
-    // --- LOAD QUESTION MECHANICS ---
-    function loadQuestion() {
-      const q = activeQuestions[currentQuestionIdx];
-      document.getElementById('hud-progress').innerText = `${currentQuestionIdx + 1}/20`;
-      
-      // Formatting question prompt
-      document.getElementById('game-prompt').innerHTML = q.q.replace("______", "<span class='text-yellow-400 font-extrabold underline px-1'>______</span>");
-
-      blocks = [];
-      
-      // Spawn blocks with friendly staggered columns
-      const choicesCount = q.choices.length;
-      q.choices.forEach((choice, idx) => {
-        const spacing = canvas.width / (choicesCount + 1);
-        const startX = spacing * (idx + 1);
-        const startY = -60 - (idx * 30); // Gentle stagger heights
-        const isCorrect = (choice === q.a);
-        
-        blocks.push(new ToyBlock(startX, startY, choice, isCorrect, idx));
-      });
-    }
-
-    // Clean HUD feedback popups
-    function showBannerFeedback(emoji, msg) {
-      const banner = document.getElementById('game-notif');
-      document.getElementById('notif-emoji').innerText = emoji;
-      document.getElementById('notif-text').innerText = msg;
-      banner.classList.remove('translate-y-[-100px]');
-      banner.classList.add('translate-y-0');
-
-      setTimeout(() => {
-        banner.classList.remove('translate-y-0');
-        banner.classList.add('translate-y-[-100px]');
-      }, 1500);
-    }
-
-    // Tap Actions
-    canvas.addEventListener('click', (e) => {
-      handleTouchFire(e);
-    });
-
-    canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      if (e.touches.length > 0) {
-        handleTouchFire(e.touches[0]);
-      }
-    }, { passive: false });
-
-    function handleTouchFire(point) {
-      const rect = canvas.getBoundingClientRect();
-      const clickX = point.clientX - rect.left;
-      const clickY = point.clientY - rect.top;
-
-      for (let i = blocks.length - 1; i >= 0; i--) {
-        const b = blocks[i];
-        if (b.isDying) continue;
-
-        // Calculate distances to block beveled rectangle
-        const distX = Math.abs(clickX - b.x);
-        const distY = Math.abs(clickY - b.y);
-        
-        // Friendly touch padding
-        if (distX <= b.width/2 + 10 && distY <= b.height/2 + 10) {
-          slingshot.targetAngle = Math.atan2(clickY - slingshot.y, clickX - slingshot.x);
-          sounds.snap();
-          
-          darts.push(new DartBeam(slingshot.x, slingshot.y, b.x, b.y));
-
-          if (b.isCorrect) {
-            score += 100;
-            b.isDying = true;
+            currentWordElement = null; // Detach
             
             setTimeout(() => {
-              sounds.correct();
-              spawnWoodSplinters(b.x, b.y, b.color);
-              showBannerFeedback("🎉", "Perfect! +100");
-              
-              currentQuestionIdx++;
-              if (currentQuestionIdx >= 20) {
-                triggerVictory();
-              } else {
-                loadQuestion();
-              }
-            }, 250);
-          } else {
-            lives--;
-            b.isDying = true;
-
-            setTimeout(() => {
-              sounds.wrong();
-              spawnWoodSplinters(b.x, b.y, '#f43f5e');
-              showBannerFeedback("❌", `Oops! Correct: "${activeQuestions[currentQuestionIdx].a}"`);
-              
-              if (lives <= 0) {
-                triggerGameOver();
-              } else {
-                currentQuestionIdx++;
-                if (currentQuestionIdx >= 20) {
-                  triggerVictory();
-                } else {
-                  loadQuestion();
-                }
-              }
-            }, 250);
-          }
-          break;
+                if (wordEl.parentNode) wordEl.parentNode.removeChild(wordEl);
+                spawnWord(); // Spawn next word
+            }, 500); // Matches animation duration
         }
-      }
-    }
 
-    function spawnWoodSplinters(x, y, color) {
-      for (let i = 0; i < 20; i++) {
-        splinters.push(new WoodSplinter(x, y, color));
-      }
-    }
+        function handleWrongCatch(wordEl) {
+            // Visual feedback for wrong selection
+            wordEl.style.backgroundColor = '#fca5a5'; // Light red
+            
+            // Shake effect
+            let shake = 0;
+            const shakeInt = setInterval(()=>{
+                shake++;
+                wordEl.style.transform = `translateX(-50%) rotate(${shake%2===0?5:-5}deg)`;
+                if(shake>5){
+                     clearInterval(shakeInt);
+                     wordEl.style.transform = `translateX(-50%) rotate(0deg)`;
+                     wordEl.style.backgroundColor = 'white';
+                     
+                     // Resume falling
+                     const screenHeight = skyArea.offsetHeight;
+                     let currentTop = parseInt(wordEl.style.top) || 0;
+                     
+                     wordFallInterval = setInterval(() => {
+                         if (!isPlaying) return;
+                         currentTop += fallSpeed;
+                         wordEl.style.top = currentTop + 'px';
+                         if (currentTop > screenHeight - 20) {
+                             clearInterval(wordFallInterval);
+                             handleMissedWord(wordEl);
+                         }
+                     }, 50);
+                }
+            }, 50);
+        }
 
-    function triggerGameOver() {
-      stopGameLoop();
-      document.getElementById('canvas-overlay').classList.remove('hidden');
-      document.getElementById('overlay-gameover').classList.remove('hidden');
-    }
+        function handleMissedWord(wordEl) {
+            playAudio(audioWrong);
+            wordEl.textContent = wordEl.dataset.complete;
+            wordEl.classList.add('word-missed');
+            currentWordElement = null;
+            
+            setTimeout(() => {
+                 if (wordEl.parentNode) wordEl.parentNode.removeChild(wordEl);
+                 gameOver();
+            }, 500);
+        }
 
-    function triggerVictory() {
-      stopGameLoop();
-      const scoreStr = String(score).padStart(4, '0');
-      document.getElementById('overlay-final-score').innerText = scoreStr;
-      
-      const commentary = document.getElementById('victory-commentary');
-      if (score >= 2000) {
-        commentary.innerText = "Awesome! Perfect 20/20 spelling toy master!";
-      } else if (score >= 1500) {
-        commentary.innerText = "Super spelling! High score achieved.";
-      } else {
-        commentary.innerText = "Level completed. Well done learning silent words!";
-      }
+        function updateScore() {
+            scoreDisplay.textContent = score;
+        }
 
-      document.getElementById('canvas-overlay').classList.remove('hidden');
-      document.getElementById('overlay-victory').classList.remove('hidden');
-    }
+        function playAudio(audioElement) {
+            // Reset time and play to allow rapid successive plays
+            if (!audioElement) return;
+            audioElement.currentTime = 0;
+            // Catch error if browser blocks autoplay before interaction
+            audioElement.play().catch(e => console.log("Audio play prevented:", e));
+        }
 
-    function stopGameLoop() {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-      }
-    }
+        // Event Listeners
+        startBtn.addEventListener('click', startGame);
 
-    // --- MAIN ENGINE HEARTBEAT LOOP ---
-    function setupMainLoop() {
-      function tick() {
-        if (document.getElementById('screen-game').classList.contains('hidden')) return;
-
-        // Playroom soft cream background
-        ctx.fillStyle = '#fffbeb';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Draw soft hanging playroom banners or clouds
-        scenery.forEach(c => {
-          c.x += c.speed;
-          if (c.x > canvas.width + c.size) {
-            c.x = -c.size;
-          }
-          ctx.fillStyle = '#f1f5f9';
-          ctx.beginPath();
-          ctx.arc(c.x, c.y, c.size, 0, Math.PI * 2);
-          ctx.arc(c.x + c.size*0.6, c.y - c.size*0.1, c.size*0.8, 0, Math.PI * 2);
-          ctx.arc(c.x - c.size*0.6, c.y, c.size*0.7, 0, Math.PI * 2);
-          ctx.fill();
+        buckets.forEach(bucket => {
+            // Use pointerdown for better mobile touch support
+            bucket.addEventListener('pointerdown', function(e) {
+                e.preventDefault(); // Prevent default touch behavior
+                
+                // Visual click effect
+                this.classList.add('active');
+                setTimeout(() => this.classList.remove('active'), 100);
+                
+                checkBucketTap(this.dataset.letter);
+            });
         });
 
-        // 1. UPDATE AND DRAW TOY BLOCKS
-        for (let i = blocks.length - 1; i >= 0; i--) {
-          const b = blocks[i];
-          b.update();
-          b.draw();
-
-          // Boundary handler (Dropped out of bottom view)
-          if (!b.isDying && b.y > canvas.height - 30) {
-            if (b.isCorrect) {
-              sounds.wrong();
-              lives--;
-              showBannerFeedback("⏰", "The correct block fell away!");
-
-              if (lives <= 0) {
-                triggerGameOver();
-                return;
-              } else {
-                setTimeout(() => {
-                  currentQuestionIdx++;
-                  if (currentQuestionIdx >= 20) {
-                    triggerVictory();
-                  } else {
-                    loadQuestion();
-                  }
-                }, 1000);
-              }
-            }
-            blocks.splice(i, 1);
-          }
-        }
-
-        // 2. DARTS
-        for (let i = darts.length - 1; i >= 0; i--) {
-          const d = darts[i];
-          d.update();
-          d.draw();
-          if (d.progress >= 1) {
-            darts.splice(i, 1);
-          }
-        }
-
-        // 3. EXPLOSIVE WOOD SPLINTERS
-        for (let i = splinters.length - 1; i >= 0; i--) {
-          const s = splinters[i];
-          s.update();
-          s.draw();
-          if (s.alpha <= 0) {
-            splinters.splice(i, 1);
-          }
-        }
-
-        // 4. DRAW TOY WOOD SLINGSHOT
-        drawWoodSlingshot();
-
-        // 5. UPDATE GRAPHIC INTERFACES (HUD)
-        updateHUD();
-
-        animationId = requestAnimationFrame(tick);
-      }
-      animationId = requestAnimationFrame(tick);
-    }
-
-    function drawWoodSlingshot() {
-      const diff = slingshot.targetAngle - slingshot.angle;
-      slingshot.angle += diff * 0.25;
-
-      ctx.save();
-      ctx.translate(slingshot.x, slingshot.y);
-      ctx.rotate(slingshot.angle);
-
-      // Slingshot beveled handle
-      ctx.fillStyle = '#b45309';
-      ctx.strokeStyle = '#78350f';
-      ctx.lineWidth = 3;
-      
-      // Forked wooden branch structure
-      ctx.beginPath();
-      ctx.moveTo(-12, -25);
-      ctx.lineTo(-12, -15);
-      ctx.lineTo(0, 0);
-      ctx.lineTo(12, -15);
-      ctx.lineTo(12, -25);
-      ctx.stroke();
-
-      // Handle shaft
-      ctx.fillRect(-5, 0, 10, 20);
-      ctx.strokeRect(-5, 0, 10, 20);
-
-      // Rubber bands
-      ctx.strokeStyle = '#ef4444';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(-12, -23);
-      ctx.lineTo(0, -10);
-      ctx.lineTo(12, -23);
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    function updateHUD() {
-      document.getElementById('hud-score').innerText = String(score).padStart(4, '0');
-      
-      const livesBlock = document.getElementById('hud-lives');
-      livesBlock.innerHTML = '';
-      for (let i = 0; i < 3; i++) {
-        const heart = document.createElement('span');
-        heart.className = `text-lg transition-all duration-300 ${
-          i < lives ? 'opacity-100 scale-100' : 'opacity-30 scale-90'
-        }`;
-        heart.innerText = i < lives ? '🤎' : '🪵';
-        livesBlock.appendChild(heart);
-      }
-    }
-  </script>
+    </script>
 </body>
 </html>
