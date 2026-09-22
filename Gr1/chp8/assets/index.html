@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olympic Grammar Archery - Grade 1</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            user-select: none;
+            overflow: hidden;
+            background-color: #0f172a;
+        }
+        canvas {
+            display: block;
+        }
+        .animate-pop {
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="relative w-screen h-screen flex items-center justify-center bg-slate-900 text-white">
+
+    <!-- 1. INTRO / LOGO SCREEN (Strictly ONLY the logo on a blank screen for 5 seconds) -->
+    <div id="logo-screen" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-950 transition-opacity duration-1000">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-xs md:max-w-md object-contain animate-pulse">
+    </div>
+
+    <!-- 2. START / INSTRUCTIONS SCREEN -->
+    <div id="start-screen" class="absolute inset-0 z-40 hidden flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-6">
+        <div class="max-w-md w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 text-center shadow-2xl animate-pop">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-amber-400 mb-2">Grammar Archery</h1>
+            <p class="text-slate-300 mb-6 text-sm md:text-base">Help the archer hit the correct verb target (<strong>IS</strong>, <strong>AM</strong>, or <strong>ARE</strong>) to complete each sentence!</p>
+            
+            <div class="bg-slate-900/60 rounded-2xl p-4 mb-6 text-left text-xs md:text-sm space-y-2 border border-slate-700">
+                <div class="flex items-center gap-2">
+                    <span class="bg-amber-500/20 text-amber-400 p-1.5 rounded-lg font-bold">🎯 Aim</span>
+                    <span>Use <strong>Up / Down Arrows</strong> or <strong>Aim Buttons</strong></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-blue-500/20 text-blue-400 p-1.5 rounded-lg font-bold">🏹 Fire</span>
+                    <span>Press <strong>Spacebar</strong> or tap <strong>RELEASE ARROW</strong></span>
+                </div>
+            </div>
+
+            <button id="start-btn" class="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-lg rounded-2xl shadow-lg transform transition active:scale-95">
+                START GAME
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. GAME HUD OVERLAY -->
+    <div id="game-hud" class="absolute inset-0 z-30 pointer-events-none hidden flex flex-col justify-between p-4 md:p-6">
+        <!-- Top Stats Bar & Sentence Container -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 pointer-events-auto">
+            <!-- Score & Arrow Counter -->
+            <div class="flex items-center gap-4 bg-slate-800/80 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-slate-700 shadow-md">
+                <div class="text-center">
+                    <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Score</div>
+                    <div id="score-el" class="text-2xl font-black text-amber-400">0</div>
+                </div>
+                <div class="h-8 w-px bg-slate-700"></div>
+                <div class="text-center">
+                    <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Arrows</div>
+                    <div id="arrows-el" class="text-2xl font-black text-blue-400">10</div>
+                </div>
+                <div class="h-8 w-px bg-slate-700"></div>
+                <div id="streak-el" class="text-lg font-extrabold text-orange-400">🔥 0</div>
+            </div>
+
+            <!-- Grammar Question Card -->
+            <div class="bg-slate-800/90 backdrop-blur-md border-2 border-amber-500/50 px-6 py-3 rounded-2xl shadow-xl text-center max-w-xl w-full">
+                <span class="text-xs font-semibold text-amber-400 uppercase tracking-widest block mb-1">Fill in the blank</span>
+                <div id="question-text" class="text-xl md:text-2xl font-black text-white">
+                    I _____ going to the park.
+                </div>
+            </div>
+        </div>
+
+        <!-- HUD Notification Toast -->
+        <div id="hud-toast" class="self-center hidden bg-emerald-500 text-slate-950 px-6 py-2 rounded-full font-black text-lg shadow-2xl animate-pop">
+            CORRECT HIT!
+        </div>
+
+        <!-- Touch Controls for Mobile/Mouse -->
+        <div class="flex justify-between items-end pointer-events-auto">
+            <div class="flex flex-col gap-2">
+                <button id="aim-up-btn" class="w-14 h-14 bg-slate-800/80 border border-slate-700 rounded-2xl text-2xl font-bold flex items-center justify-center active:bg-amber-500 active:text-slate-900 shadow-lg">▲</button>
+                <button id="aim-down-btn" class="w-14 h-14 bg-slate-800/80 border border-slate-700 rounded-2xl text-2xl font-bold flex items-center justify-center active:bg-amber-500 active:text-slate-900 shadow-lg">▼</button>
+            </div>
+            <button id="shoot-btn" class="px-8 py-4 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-400 hover:to-amber-400 text-white font-black text-lg rounded-2xl shadow-xl transform active:scale-95 border-2 border-amber-300">
+                RELEASE ARROW 🏹
+            </button>
+        </div>
+    </div>
+
+    <!-- 4. END GAME OVERLAY -->
+    <div id="end-screen" class="absolute inset-0 z-40 hidden flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-6">
+        <div class="max-w-md w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 text-center shadow-2xl animate-pop">
+            <h2 class="text-3xl font-extrabold text-amber-400 mb-2">Great Effort!</h2>
+            <p class="text-slate-300 text-sm mb-6">You completed your archery session!</p>
+
+            <div class="bg-slate-900/60 rounded-2xl p-6 mb-6 text-center border border-slate-700">
+                <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Final Score</div>
+                <div id="final-score" class="text-5xl font-black text-amber-400 mb-2">0</div>
+                <div id="accuracy-text" class="text-sm font-semibold text-slate-300">Accuracy: 0%</div>
+            </div>
+
+            <button id="restart-btn" class="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-lg rounded-2xl shadow-lg transform transition active:scale-95">
+                PLAY AGAIN
+            </button>
+        </div>
+    </div>
+
+    <!-- 5. MAIN CANVAS -->
+    <canvas id="gameCanvas" class="w-full h-full"></canvas>
+
+    <script>
+        // Audio Asset Preloading (Using local folder files specified)
+        const sounds = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3'),
+            clapping: new Audio('assets/clapping.mp3')
+        };
+
+        function playSound(name) {
+            if (sounds[name]) {
+                sounds[name].currentTime = 0;
+                sounds[name].play().catch(e => console.log('Audio playback waiting for user interaction:', e));
+            }
+        }
+
+        // Questions Array for Grade 1 Verb Targets (is, am, are)
+        const questions = [
+            { text: "I _____ going to the park.", answer: "am" },
+            { text: "She _____ my best friend.", answer: "is" },
+            { text: "They _____ playing soccer.", answer: "are" },
+            { text: "He _____ eating an apple.", answer: "is" },
+            { text: "We _____ excited for school.", answer: "are" },
+            { text: "It _____ a sunny day.", answer: "is" },
+            { text: "You _____ very kind.", answer: "are" },
+            { text: "I _____ seven years old.", answer: "am" },
+            { text: "The dogs _____ barking.", answer: "are" },
+            { text: "My teacher _____ nice.", answer: "is" }
+        ];
+
+        // Canvas & UI Elements
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const logoScreen = document.getElementById('logo-screen');
+        const startScreen = document.getElementById('start-screen');
+        const gameHud = document.getElementById('game-hud');
+        const endScreen = document.getElementById('end-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const shootBtn = document.getElementById('shoot-btn');
+        const aimUpBtn = document.getElementById('aim-up-btn');
+        const aimDownBtn = document.getElementById('aim-down-btn');
+        
+        const scoreEl = document.getElementById('score-el');
+        const arrowsEl = document.getElementById('arrows-el');
+        const streakEl = document.getElementById('streak-el');
+        const questionText = document.getElementById('question-text');
+        const hudToast = document.getElementById('hud-toast');
+        const finalScoreEl = document.getElementById('final-score');
+        const accuracyText = document.getElementById('accuracy-text');
+
+        // Game State Variables
+        let gameState = 'INTRO'; // 'INTRO', 'START', 'PLAYING', 'END'
+        let currentQuestionIndex = 0;
+        let currentQuestion = null;
+        let score = 0;
+        let arrowsCount = 10;
+        let streak = 0;
+        let correctHits = 0;
+        let totalShots = 0;
+        let scaleFactor = 1;
+
+        // Entities
+        let archer = { x: 80, y: 0, angle: 0, minAngle: -Math.PI / 4, maxAngle: Math.PI / 4, aimSpeed: 0.02, isAimingUp: false, isAimingDown: false };
+        let activeArrow = null;
+        let particles = [];
+        let targets = [];
+
+        const arrowConfig = { speed: 22, length: 50 };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            scaleFactor = Math.min(canvas.width / 1000, canvas.height / 600);
+            if (scaleFactor < 0.65) scaleFactor = 0.65;
+
+            archer.x = 90 * scaleFactor;
+            archer.y = canvas.height / 2;
+
+            setupTargets();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function setupTargets() {
+            const labels = ["is", "am", "are"];
+            const colors = ["#ef4444", "#3b82f6", "#10b981"];
+            const total = labels.length;
+            const startY = canvas.height * 0.25;
+            const gap = (canvas.height * 0.5) / (total - 1);
+
+            targets = labels.map((label, i) => ({
+                id: label,
+                label: label,
+                x: canvas.width - (110 * scaleFactor),
+                y: startY + (i * gap),
+                r: 45 * scaleFactor,
+                color: colors[i]
+            }));
+        }
+
+        function loadNewQuestion() {
+            currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+            currentQuestion = questions[currentQuestionIndex];
+            questionText.textContent = currentQuestion.text;
+        }
+
+        function startGame() {
+            score = 0;
+            arrowsCount = 10;
+            streak = 0;
+            correctHits = 0;
+            totalShots = 0;
+            currentQuestionIndex = 0;
+            currentQuestion = questions[0];
+
+            scoreEl.textContent = score;
+            arrowsEl.textContent = arrowsCount;
+            streakEl.textContent = "🔥 " + streak;
+            questionText.textContent = currentQuestion.text;
+
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            gameHud.classList.remove('hidden');
+            gameState = 'PLAYING';
+        }
+
+        function endSession() {
+            gameState = 'END';
+            gameHud.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+
+            finalScoreEl.textContent = score;
+            const accuracy = totalShots > 0 ? Math.round((correctHits / totalShots) * 100) : 0;
+            accuracyText.textContent = `Accuracy: ${accuracy}% (${correctHits}/${totalShots} hits)`;
+
+            playSound('clapping');
+        }
+
+        function releaseArrow() {
+            if (gameState !== 'PLAYING' || activeArrow || arrowsCount <= 0) return;
+
+            activeArrow = {
+                x: archer.x + Math.cos(archer.angle) * 40 * scaleFactor,
+                y: archer.y + Math.sin(archer.angle) * 40 * scaleFactor,
+                vx: Math.cos(archer.angle) * arrowConfig.speed * scaleFactor,
+                vy: Math.sin(archer.angle) * arrowConfig.speed * scaleFactor,
+                angle: archer.angle
+            };
+
+            arrowsCount--;
+            totalShots++;
+            arrowsEl.textContent = arrowsCount;
+        }
+
+        function triggerHUDNotification(text, isSuccess) {
+            hudToast.textContent = text;
+            hudToast.className = `self-center border-2 ${isSuccess ? 'bg-emerald-500 text-slate-950 border-emerald-300' : 'bg-red-500 text-white border-red-300'} px-6 py-2 rounded-full font-black text-lg shadow-2xl animate-pop`;
+            hudToast.classList.remove('hidden');
+            setTimeout(() => hudToast.classList.add('hidden'), 1200);
+        }
+
+        function checkCollision(x, y, target) {
+            const dx = x - target.x;
+            const dy = y - target.y;
+            return Math.sqrt(dx * dx + dy * dy) < target.r;
+        }
+
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 25; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 10 * scaleFactor,
+                    vy: (Math.random() - 0.5) * 10 * scaleFactor,
+                    r: Math.random() * 4 + 2,
+                    color: color,
+                    alpha: 1,
+                    decay: Math.random() * 0.03 + 0.02
+                });
+            }
+        }
+
+        // Draw Environment & Archer
+        function drawBackground() {
+            // Sky Gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(1, '#1e293b');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Ground Line
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+        }
+
+        function drawArcher() {
+            ctx.save();
+            ctx.translate(archer.x, archer.y);
+
+            // Body Base
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(0, 0, 18 * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Rotating Bow Arm
+            ctx.rotate(archer.angle);
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 4 * scaleFactor;
+            ctx.beginPath();
+            ctx.arc(15 * scaleFactor, 0, 25 * scaleFactor, -Math.PI / 2.2, Math.PI / 2.2);
+            ctx.stroke();
+
+            // Bowstring
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(15 * scaleFactor + Math.cos(-Math.PI / 2.2) * 25 * scaleFactor, Math.sin(-Math.PI / 2.2) * 25 * scaleFactor);
+            ctx.lineTo(15 * scaleFactor + Math.cos(Math.PI / 2.2) * 25 * scaleFactor, Math.sin(Math.PI / 2.2) * 25 * scaleFactor);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawTargets() {
+            targets.forEach(target => {
+                ctx.save();
+                
+                // Ring 1 (Outer)
+                ctx.fillStyle = '#f8fafc';
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ring 2
+                ctx.fillStyle = target.color;
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r * 0.75, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ring 3
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r * 0.45, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Target Stand Legs
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 3 * scaleFactor;
+                ctx.beginPath();
+                ctx.moveTo(target.x, target.y + target.r);
+                ctx.lineTo(target.x - (12 * scaleFactor), target.y + target.r + (24 * scaleFactor));
+                ctx.moveTo(target.x, target.y + target.r);
+                ctx.lineTo(target.x + (12 * scaleFactor), target.y + target.r + (24 * scaleFactor));
+                ctx.stroke();
+
+                // Text Badge
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.roundRect(target.x - (28 * scaleFactor), target.y - (12 * scaleFactor), 56 * scaleFactor, 24 * scaleFactor, 6 * scaleFactor);
+                ctx.fill();
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = target.color;
+                ctx.stroke();
+
+                // Verb Label Text (IS, AM, ARE)
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `bold ${Math.floor(15 * scaleFactor)}px "Outfit", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(target.label.toUpperCase(), target.x, target.y);
+
+                ctx.restore();
+            });
+        }
+
+        function drawArrow() {
+            if (!activeArrow) return;
+
+            ctx.save();
+            ctx.translate(activeArrow.x, activeArrow.y);
+            ctx.rotate(activeArrow.angle);
+            ctx.scale(scaleFactor, scaleFactor);
+
+            // Shaft
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(-arrowConfig.length / 2, 0);
+            ctx.lineTo(arrowConfig.length / 2, 0);
+            ctx.stroke();
+
+            // Head
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.moveTo(arrowConfig.length / 2, -5);
+            ctx.lineTo(arrowConfig.length / 2 + 10, 0);
+            ctx.lineTo(arrowConfig.length / 2, 5);
+            ctx.fill();
+
+            // Feathers
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.moveTo(-arrowConfig.length / 2, 0);
+            ctx.lineTo(-arrowConfig.length / 2 - 8, -6);
+            ctx.lineTo(-arrowConfig.length / 2 - 4, 0);
+            ctx.lineTo(-arrowConfig.length / 2 - 8, 6);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawParticles() {
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(idx, 1);
+                    return;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        function drawTrajectoryLine() {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.25)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 6]);
+
+            const startX = archer.x + Math.cos(archer.angle) * 35 * scaleFactor;
+            const startY = archer.y + Math.sin(archer.angle) * 35 * scaleFactor;
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX + Math.cos(archer.angle) * (canvas.width * 0.75), startY + Math.sin(archer.angle) * (canvas.width * 0.75));
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            // Aim controls update
+            if (archer.isAimingUp) {
+                archer.angle -= archer.aimSpeed;
+                if (archer.angle < archer.minAngle) archer.angle = archer.minAngle;
+            }
+            if (archer.isAimingDown) {
+                archer.angle += archer.aimSpeed;
+                if (archer.angle > archer.maxAngle) archer.angle = archer.maxAngle;
+            }
+
+            // Arrow Flight Logic
+            if (activeArrow) {
+                activeArrow.x += activeArrow.vx;
+                activeArrow.y += activeArrow.vy;
+                activeArrow.angle = Math.atan2(activeArrow.vy, activeArrow.vx);
+
+                // Boundary collision (Miss)
+                if (activeArrow.x > canvas.width + 100 || activeArrow.y < -100 || activeArrow.y > canvas.height + 100) {
+                    activeArrow = null;
+                    streak = 0;
+                    streakEl.textContent = "🔥 " + streak;
+                    playSound('wrong');
+                    triggerHUDNotification("MISSED TARGET!", false);
+
+                    if (arrowsCount <= 0) {
+                        setTimeout(endSession, 1000);
+                    } else {
+                        loadNewQuestion();
+                    }
+                } else {
+                    // Target collisions
+                    for (let i = 0; i < targets.length; i++) {
+                        const target = targets[i];
+                        if (checkCollision(activeArrow.x, activeArrow.y, target)) {
+                            createExplosion(activeArrow.x, activeArrow.y, target.color);
+
+                            if (target.id === currentQuestion.answer) {
+                                correctHits++;
+                                streak++;
+                                score += 10 + Math.floor(streak / 3) * 5;
+                                scoreEl.textContent = score;
+                                streakEl.textContent = "🔥 " + streak;
+
+                                playSound('correct');
+                                triggerHUDNotification("CORRECT HIT!", true);
+                            } else {
+                                streak = 0;
+                                streakEl.textContent = "🔥 " + streak;
+
+                                playSound('wrong');
+                                triggerHUDNotification("INCORRECT!", false);
+                            }
+
+                            activeArrow = null;
+
+                            if (arrowsCount <= 0) {
+                                setTimeout(endSession, 1200);
+                            } else {
+                                setTimeout(loadNewQuestion, 1000);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            // Keep canvas blank during INTRO
+            if (gameState === 'INTRO') {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawBackground();
+            drawTargets();
+
+            if (gameState === 'PLAYING') {
+                drawTrajectoryLine();
+            }
+
+            drawArcher();
+            drawArrow();
+            drawParticles();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Key Listeners
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowUp') archer.isAimingUp = true;
+            if (e.key === 'ArrowDown') archer.isAimingDown = true;
+            if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault();
+                releaseArrow();
+            }
+        });
+
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowUp') archer.isAimingUp = false;
+            if (e.key === 'ArrowDown') archer.isAimingDown = false;
+        });
+
+        // Touch / Mouse Controls
+        aimUpBtn.addEventListener('mousedown', () => archer.isAimingUp = true);
+        aimUpBtn.addEventListener('mouseup', () => archer.isAimingUp = false);
+        aimUpBtn.addEventListener('touchstart', (e) => { e.preventDefault(); archer.isAimingUp = true; });
+        aimUpBtn.addEventListener('touchend', () => archer.isAimingUp = false);
+
+        aimDownBtn.addEventListener('mousedown', () => archer.isAimingDown = true);
+        aimDownBtn.addEventListener('mouseup', () => archer.isAimingDown = false);
+        aimDownBtn.addEventListener('touchstart', (e) => { e.preventDefault(); archer.isAimingDown = true; });
+        aimDownBtn.addEventListener('touchend', () => archer.isAimingDown = false);
+
+        shootBtn.addEventListener('click', releaseArrow);
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', startGame);
+
+        // Window Init
+        window.onload = function() {
+            gameState = 'INTRO';
+            resizeCanvas();
+            requestAnimationFrame(gameLoop);
+
+            // Blank intro screen displaying only the logo for 5 seconds
+            setTimeout(() => {
+                logoScreen.classList.add('opacity-0');
+                setTimeout(() => {
+                    logoScreen.classList.add('hidden');
+                    startScreen.classList.remove('hidden');
+                    gameState = 'START';
+                }, 1000);
+            }, 5000);
+        };
+    </script>
+</body>
+</html>
