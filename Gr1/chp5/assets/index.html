@@ -5,254 +5,275 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Grammar Pool Academy: Shot Masters!</title>
     <style>
+        :root {
+            --primary: #4caf50;
+            --primary-dark: #2e7d32;
+            --accent: #ffb300;
+            --dark: #1a1a1a;
+            --table-cloth: #1b5e20;
+            --wood: #5c3a21;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background: #1a1a1a;
+            background: var(--dark);
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
-            box-sizing: border-box;
-            overflow-x: hidden;
-            overflow-y: auto;
-        }
-        h1 { margin: 8px 0 2px 0; font-size: 1.2rem; color: #4caf50; text-align: center; }
-        #status { font-size: 0.85rem; margin-bottom: 6px; font-weight: bold; height: auto; text-align: center; max-width: 98%; color: #ffb300; }
-        
-        /* Layout Maximizer Engine */
-        #viewport-scaler {
+            justify-content: center;
+            height: 100vh;
             width: 100vw;
+            box-sizing: border-box;
+            overflow: hidden; /* Prevent scrolling, true app feel */
+        }
+
+        /* -------------------------------------------
+           LAYOUT & CANVAS SCALING
+        ------------------------------------------- */
+        #game-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
         }
 
+        /* Logical size of the table, scaled dynamically in JS */
         #game-container { 
             position: relative; 
-            width: 1000px;
-            height: 500px;
+            width: 600px;
+            height: 1000px;
             transform-origin: center center;
         }
         
         canvas {
-            width: 1000px;
-            height: 500px;
+            width: 600px;
+            height: 1000px;
             display: block;
-            border: 6px solid #5c3a21;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-            background: #2e7d32;
+            border: 20px solid var(--wood);
+            border-radius: 15px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 0 15px 40px rgba(0,0,0,0.9);
+            background: var(--table-cloth);
             cursor: crosshair;
             box-sizing: border-box;
         }
-        
-        /* Overlay Panel Engine (Splash, Instructions, Scoreboard) */
+
+        #status-bar {
+            position: absolute;
+            top: -45px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+
+        /* -------------------------------------------
+           FULL-SCREEN OVERLAYS (Splash, Quiz, End)
+        ------------------------------------------- */
         .fullscreen-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #111111;
+            background: var(--dark);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 9999;
             text-align: center;
-            padding: 15px;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        
+        .hidden { 
+            opacity: 0; 
+            pointer-events: none; 
+            transform: scale(1.05);
+        }
+
+        #splash-screen img {
+            max-width: 250px;
+            width: 60%;
+            height: auto;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* Full Screen Quiz UI */
+        #quiz-screen {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* Kid-friendly gradient */
+            color: #222;
+            z-index: 1000; /* Just below splash */
+        }
+
+        .quiz-header {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        #question-box {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 500px;
+            line-height: 1.4;
+            color: #111;
+            background: white;
+            padding: 25px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
             box-sizing: border-box;
         }
         
-        #splash-screen img {
-            max-width: 200px;
-            width: 50%;
-            height: auto;
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        button.quiz-btn {
+            padding: 20px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: white;
+            color: var(--primary-dark);
+            border: 3px solid var(--primary);
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(76,175,80,0.15);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        button.quiz-btn:active, button.quiz-btn:hover { 
+            background: var(--primary); 
+            color: white;
+            transform: scale(0.97);
         }
 
-        /* Instructions Screen UI */
-        #instruction-screen h2 { color: #4caf50; font-size: 1.5rem; margin-bottom: 8px; }
-        #instruction-screen ul { text-align: left; max-width: 500px; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px; padding-left: 20px; }
-        #instruction-screen li { margin-bottom: 6px; }
+        /* General Buttons & Elements */
+        .action-btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(76,175,80,0.4);
+            transition: transform 0.2s, background 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+        }
+        .action-btn:active { transform: scale(0.95); background: var(--primary-dark); }
 
-        /* Trophy & Scoreboard Panels */
+        #instruction-screen h2 { color: var(--primary); font-size: 2rem; margin-bottom: 15px; line-height: 1.2;}
+        #instruction-screen ul { text-align: left; max-width: 400px; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px; padding-left: 20px; }
+        #instruction-screen li { margin-bottom: 12px; }
+
+        /* End Screen Animations */
         .pop-animation {
             animation: popEffect 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             position: relative;
             z-index: 10;
         }
-        @keyframes popEffect {
-            0% { transform: scale(0.3); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .trophy-icon { font-size: 3rem; margin-bottom: 5px; animation: bounce 2s infinite ease-in-out; }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-        .award-banner { background: #ffb300; color: #111; font-weight: bold; padding: 6px 20px; border-radius: 30px; font-size: 1.2rem; margin-bottom: 12px; display: inline-block; box-shadow: 0 4px 12px rgba(255,179,0,0.4); text-transform: uppercase; }
-        .score-box { background: #222; border: 2px solid #444; padding: 12px 20px; border-radius: 12px; font-size: 0.95rem; margin-bottom: 12px; text-align: left; min-width: 220px; }
+        @keyframes popEffect { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        
+        .trophy-icon { font-size: 4rem; margin-bottom: 10px; animation: bounce 2s infinite ease-in-out; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .award-banner { background: var(--accent); color: #111; font-weight: bold; padding: 8px 25px; border-radius: 30px; font-size: 1.4rem; margin-bottom: 20px; display: inline-block; box-shadow: 0 4px 12px rgba(255,179,0,0.4); text-transform: uppercase; }
+        .score-box { background: #222; border: 2px solid #444; padding: 20px; border-radius: 15px; font-size: 1.1rem; margin-bottom: 20px; text-align: left; min-width: 260px; line-height: 1.6;}
 
-        /* Confetti Streamer Engines */
+        /* Confetti Engine */
         .confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
-        .confetti-piece { position: absolute; width: 8px; height: 16px; background: #ffeb3b; top: -20px; opacity: 0.8; animation: fall 4s infinite linear; }
-        @keyframes fall {
-            0% { top: -20px; transform: translateX(0) rotate(0deg); }
-            100% { top: 105vh; transform: translateX(100px) rotate(720deg); }
-        }
+        .confetti-piece { position: absolute; width: 10px; height: 20px; background: #ffeb3b; top: -20px; opacity: 0.8; animation: fall 4s infinite linear; }
+        @keyframes fall { 0% { top: -20px; transform: translateX(0) rotate(0deg); } 100% { top: 105vh; transform: translateX(100px) rotate(720deg); } }
 
-        /* Kid-Friendly Light Grey Quiz Overlay */
-        #quiz-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #f5f5f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            box-sizing: border-box;
-            padding: 12px;
-            transition: all 0.3s ease;
-        }
-        .hidden { display: none !important; }
-        
-        #question-box {
-            font-size: 1.15rem;
-            font-weight: bold;
-            margin-bottom: 12px;
-            text-align: center;
-            width: 95%;
-            line-height: 1.3;
-            color: #222222;
-            background: white;
-            padding: 10px 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            box-sizing: border-box;
-        }
-        
-        .options-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 95%;
-            max-width: 800px;
-        }
-        
-        /* Unified Action Buttons */
-        .action-btn {
-            padding: 10px 25px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(76,175,80,0.5);
-            transition: transform 0.2s, background 0.2s;
-        }
-        .action-btn:hover { transform: scale(1.05); background: #43a047; }
-
-        /* Friendly Colorful Buttons for Grade 1 */
-        button.quiz-btn {
-            padding: 10px;
-            font-size: 1rem;
-            font-weight: bold;
-            background: white;
-            color: #222222;
-            border: 2px solid #4caf50;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
-            transition: background 0.2s, color 0.2s, transform 0.1s;
-        }
-        button.quiz-btn:hover { 
-            background: #4caf50; 
-            color: white;
-        }
-
-        /* Mobile Layout Adjustments */
-        @media (max-width: 768px) {
-            .options-container {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-            button.quiz-btn {
-                padding: 8px;
-                font-size: 0.95rem;
-            }
-        }
     </style>
 </head>
 <body>
 
+    <!-- Splash Screen -->
     <div id="splash-screen" class="fullscreen-overlay">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
+    <!-- Instructions -->
     <div id="instruction-screen" class="fullscreen-overlay hidden">
-        <h2>🎱 Grammar Pool Academy:<br>Shot Masters!</h2>
+        <h2>🎱 Grammar Pool Academy<br>Shot Masters!</h2>
         <ul>
-            <li>💡 Answer the questions correctly to earn your shot at the game.</li>
-            <li>🟢 <strong>If you are correct:</strong> You get a chance to take a shot!</li>
-            <li>🤖 <strong>If you are wrong:</strong> The chance to shoot goes to the computer system.</li>
-            <li>🏆 Clear out the pool table and try to pocket as many coloured balls as possible in 15 rounds!</li>
+            <li>💡 Answer questions correctly to earn your shot.</li>
+            <li>🟢 <strong>Correct:</strong> You aim and shoot!</li>
+            <li>🤖 <strong>Wrong:</strong> The computer takes a turn.</li>
+            <li>🏆 Clear the vertical table in 15 rounds!</li>
         </ul>
-        <button class="action-btn" onclick="startGameSession()">Start Game</button>
+        <button class="action-btn" onclick="startGameSession()">Play Now</button>
     </div>
 
+    <!-- Full Screen Quiz -->
+    <div id="quiz-screen" class="fullscreen-overlay hidden">
+        <div class="quiz-header" id="quiz-status">Question 1 of 15</div>
+        <div id="question-box">Question Loading...</div>
+        <div class="options-container" id="options-box"></div>
+    </div>
+
+    <!-- End Game Screen -->
     <div id="end-screen" class="fullscreen-overlay hidden">
         <div class="confetti-container" id="confetti-holder"></div>
         <div class="pop-animation">
             <div class="trophy-icon">🏆</div>
             <div id="award-title" class="award-banner">WINNER!</div>
             <div class="score-box">
-                <p style="margin: 4px 0;">📝 Quiz Score: <span id="final-answers-score" style="color:#4caf50; font-weight:bold;">0</span> / 15</p>
-                <p style="margin: 4px 0;">🟢 Player Pockets: <span id="final-player-pocket" style="color:#ffb300; font-weight:bold;">0</span></p>
-                <p style="margin: 4px 0;">🤖 Computer Pockets: <span id="final-computer-pocket" style="color:#e53935; font-weight:bold;">0</span></p>
-                <p style="margin: 4px 0;">⏱️ Total Time Taken: <span id="final-time" style="color:#1e88e5; font-weight:bold;">0s</span></p>
+                <p style="margin: 0;">📝 Quiz Score: <span id="final-answers-score" style="color:#4caf50; font-weight:bold;">0</span> / 15</p>
+                <p style="margin: 0;">🟢 Player Pockets: <span id="final-player-pocket" style="color:#ffb300; font-weight:bold;">0</span></p>
+                <p style="margin: 0;">🤖 Computer Pockets: <span id="final-computer-pocket" style="color:#e53935; font-weight:bold;">0</span></p>
+                <p style="margin: 0;">⏱️ Total Time: <span id="final-time" style="color:#1e88e5; font-weight:bold;">0s</span></p>
             </div>
             <button class="action-btn" onclick="window.location.reload();">Play Again</button>
         </div>
     </div>
 
-    <h1>🎱 Grammar Pool Academy</h1>
-    <div id="status">Loading game graphics context...</div>
-
-    <div id="viewport-scaler">
+    <!-- Main Game Area -->
+    <div id="game-wrapper">
         <div id="game-container">
-            <canvas id="poolCanvas" width="1000" height="500"></canvas>
-            
-            <div id="quiz-overlay" class="hidden">
-                <div id="question-box">Question Loading...</div>
-                <div class="options-container" id="options-box"></div>
-            </div>
+            <div id="status-bar">Loading...</div>
+            <!-- Portrait Canvas: 600 width x 1000 height -->
+            <canvas id="poolCanvas" width="600" height="1000"></canvas>
         </div>
     </div>
 
 <script>
 const canvas = document.getElementById('poolCanvas');
 const ctx = canvas.getContext('2d');
-const statusDiv = document.getElementById('status');
-const quizOverlay = document.getElementById('quiz-overlay');
-const questionBox = document.getElementById('question-box');
-const optionsBox = document.getElementById('options-box');
 const gameContainer = document.getElementById('game-container');
-const viewportScaler = document.getElementById('viewport-scaler');
+const statusBar = document.getElementById('status-bar');
 
 const splashScreen = document.getElementById('splash-screen');
 const instructionScreen = document.getElementById('instruction-screen');
+const quizScreen = document.getElementById('quiz-screen');
 const endScreen = document.getElementById('end-screen');
-const awardTitle = document.getElementById('award-title');
-const finalAnswersScore = document.getElementById('final-answers-score');
-const finalPlayerPocket = document.getElementById('final-player-pocket');
-const finalComputerPocket = document.getElementById('final-computer-pocket');
-const finalTime = document.getElementById('final-time');
-const confettiHolder = document.getElementById('confetti-holder');
+
+const quizStatus = document.getElementById('quiz-status');
+const questionBox = document.getElementById('question-box');
+const optionsBox = document.getElementById('options-box');
 
 // --- AUDIO ASSETS ---
 const correctSound = new Audio('assets/correct.mp3');
@@ -272,7 +293,6 @@ let totalPlayerPocketed = 0;
 let totalComputerPocketed = 0;
 let matchStartTime = 0;
 
-// Grade 1 Grammar Pool (20 Questions)
 const questionBank = [
     { q: "Look at the pencil in my hand! ______ is my favorite red pencil.", a: ["This", "That", "These", "Those"], correct: 0 },
     { q: "Pointing to the sky; Look at ______ beautiful birds flying far away.", a: ["this", "that", "these", "those"], correct: 3 },
@@ -299,6 +319,7 @@ const questionBank = [
 let activeQuestions = [];
 let questionIndex = 0;
 
+// --- PHYSICS ENGINE ---
 class Ball {
     constructor(x, y, radius, color, isCue = false) {
         this.x = x; this.y = y;
@@ -309,9 +330,24 @@ class Ball {
     }
     draw() {
         if (!this.active) return;
+        
+        // Shadow
+        ctx.beginPath();
+        ctx.arc(this.x + 3, this.y + 3, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fill();
+        ctx.closePath();
+
+        // Ball
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
+        ctx.fill();
+        
+        // Highlight (3D effect)
+        ctx.beginPath();
+        ctx.arc(this.x - 4, this.y - 4, this.radius * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
         ctx.fill();
         ctx.closePath();
     }
@@ -331,23 +367,32 @@ class Ball {
     }
 }
 
+// Vertical Table Pockets (Corners + Middle Sides)
+const pocketRadius = 32;
 const pockets = [
-    {x: 0, y: 0}, {x: canvas.width/2, y: 0}, {x: canvas.width, y: 0},
-    {x: 0, y: canvas.height}, {x: canvas.width/2, y: canvas.height}, {x: canvas.width, y: canvas.height}
+    {x: 0, y: 0}, {x: canvas.width, y: 0}, 
+    {x: 0, y: canvas.height/2}, {x: canvas.width, y: canvas.height/2},
+    {x: 0, y: canvas.height}, {x: canvas.width, y: canvas.height}
 ];
 
 let balls = [];
 function initGame() {
     balls = [];
-    balls.push(new Ball(180, canvas.height / 2, 14, 'white', true));
-    let startX = 680, startY = canvas.height / 2;
-    let colors = ['#e53935', '#ffb300', '#1e88e5', '#8e24aa', '#3949ab'];
+    // Cue ball near the bottom center for portrait layout
+    balls.push(new Ball(canvas.width / 2, 750, 16, '#ffffff', true));
+    
+    // Rack of balls (Triangle pointing down towards cue)
+    let startX = canvas.width / 2;
+    let startY = 300; 
+    let colors = ['#e53935', '#ffb300', '#1e88e5', '#8e24aa', '#ff5722', '#00bcd4'];
     let index = 0;
-    for (let col = 0; col < 3; col++) {
-        for (let row = 0; row <= col; row++) {
-            let bx = startX + col * 26;
-            let by = startY + (row - col / 2) * 28;
-            balls.push(new Ball(bx, by, 14, colors[index % colors.length]));
+    
+    // Create a 10-ball rack for vertical play (4 rows)
+    for (let row = 0; row < 4; row++) {
+        for (let col = 0; col <= row; col++) {
+            let bx = startX + (col * 32) - (row * 16);
+            let by = startY - (row * 28);
+            balls.push(new Ball(bx, by, 16, colors[index % colors.length]));
             index++;
         }
     }
@@ -361,28 +406,28 @@ function initGame() {
     setTimeout(() => {
         splashScreen.classList.add('hidden');
         instructionScreen.classList.remove('hidden');
-    }, 3000);
+    }, 2500);
 }
 
+// Dynamic scaling logic to fit vertical mobile screens perfectly
 function resizeViewport() {
-    let containerWidth = window.innerWidth;
-    let containerHeight = window.innerHeight - 80;
+    let vw = window.innerWidth;
+    let vh = window.innerHeight;
 
-    let scaleX = containerWidth / 1000;
-    let scaleY = containerHeight / 500;
-    let scale = Math.min(scaleX, scaleY, 1);
-    if (scale < 0.3) scale = 0.3;
+    // Allow margin for status bar
+    let availableHeight = vh - 100;
+    
+    let scaleX = vw / 640; // 600 + padding
+    let scaleY = availableHeight / 1000; 
+    let scale = Math.min(scaleX, scaleY, 1.2); 
 
     gameContainer.style.transform = `scale(${scale})`;
-    viewportScaler.style.height = `${500 * scale}px`;
 }
 
 function startGameSession() {
+    // Prime audio for iOS/Mobile
     [correctSound, wrongSound, clappingSound, shotSound].forEach(sound => {
-        sound.play().then(() => {
-            sound.pause();
-            sound.currentTime = 0;
-        }).catch(() => {});
+        sound.play().then(() => { sound.pause(); sound.currentTime = 0; }).catch(() => {});
     });
     
     instructionScreen.classList.add('hidden');
@@ -390,7 +435,6 @@ function startGameSession() {
     triggerNextQuiz();
 }
 
-// --- GAME LOGIC LOOP ---
 function update() {
     let ballsMoving = false;
     
@@ -409,25 +453,26 @@ function update() {
         if (!ball.active) return;
         pockets.forEach(pocket => {
             let dist = Math.hypot(ball.x - pocket.x, ball.y - pocket.y);
-            if (dist < 26) {
+            if (dist < pocketRadius) {
                 ball.active = false;
                 clappingSound.play().catch(e => {});
                 if (!ball.isCue) {
-                    if (currentTurn === 'player_shoot') {
-                        totalPlayerPocketed++;
-                    } else if (currentTurn === 'computer') {
-                        totalComputerPocketed++;
-                    }
+                    if (currentTurn === 'player_shoot') totalPlayerPocketed++;
+                    else if (currentTurn === 'computer') totalComputerPocketed++;
                 } else { 
-                    setTimeout(() => { ball.x = 180; ball.y = canvas.height/2; ball.vx=0; ball.vy=0; ball.active=true; }, 1000);
+                    // Scratch! Reset cue ball
+                    setTimeout(() => { 
+                        ball.x = canvas.width/2; 
+                        ball.y = 750; 
+                        ball.vx=0; ball.vy=0; 
+                        ball.active=true; 
+                    }, 1000);
                 }
             }
         });
     });
 
-    if (ballsMoving) {
-        isMovingState = true;
-    }
+    if (ballsMoving) isMovingState = true;
 
     if (!ballsMoving && isMovingState) {
         isMovingState = false;
@@ -435,7 +480,7 @@ function update() {
             if (questionIndex >= activeQuestions.length) {
                 endMatchGame();
             } else {
-                setTimeout(triggerNextQuiz, 300);
+                setTimeout(triggerNextQuiz, 500);
             }
         }
     }
@@ -463,27 +508,32 @@ function handleCollision(b1, b2) {
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    // Draw pockets
     pockets.forEach(p => {
-        ctx.beginPath(); ctx.arc(p.x, p.y, 26, 0, Math.PI * 2);
-        ctx.fillStyle = '#111'; ctx.fill(); ctx.closePath();
+        ctx.beginPath(); 
+        ctx.arc(p.x, p.y, pocketRadius, 0, Math.PI * 2);
+        ctx.fillStyle = '#0a0a0a'; 
+        ctx.fill(); 
+        ctx.closePath();
     });
 
     balls.forEach(ball => ball.draw());
 
-    if (currentTurn === 'player_shoot' && balls[0].active) {
+    // Draw Aim Line
+    if (currentTurn === 'player_shoot' && balls[0].active && isAiming) {
         ctx.beginPath();
         ctx.moveTo(balls[0].x, balls[0].y);
-        ctx.lineTo(balls[0].x + Math.cos(aimAngle) * 120, balls[0].y + Math.sin(aimAngle) * 120);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([6, 6]);
+        ctx.lineTo(balls[0].x + Math.cos(aimAngle) * 150, balls[0].y + Math.sin(aimAngle) * 150);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([8, 8]);
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.closePath();
     }
 }
 
-// --- QUIZ MECHANICS ---
+// --- FULL SCREEN QUIZ MECHANICS ---
 function triggerNextQuiz() {
     if (questionIndex >= activeQuestions.length) {
         endMatchGame();
@@ -491,8 +541,10 @@ function triggerNextQuiz() {
     }
 
     currentTurn = 'player_quiz';
-    statusDiv.innerHTML = `💡 Question ${questionIndex + 1}/15: Get it right to shoot!`;
-    quizOverlay.classList.remove('hidden');
+    statusBar.innerHTML = `Round ${questionIndex + 1}`;
+    
+    quizStatus.innerText = `Question ${questionIndex + 1} of 15`;
+    quizScreen.classList.remove('hidden');
     
     let currentQ = activeQuestions[questionIndex];
     questionBox.innerText = currentQ.q;
@@ -508,20 +560,20 @@ function triggerNextQuiz() {
 }
 
 function handleAnswer(isCorrect) {
-    quizOverlay.classList.add('hidden');
+    quizScreen.classList.add('hidden');
     questionIndex++; 
     
     if (isCorrect) {
         correctAnswersCount++;
         correctSound.play().catch(e => {});
-        statusDiv.innerHTML = "✅ Correct! Tap/Click on the table to aim & shoot!";
+        statusBar.innerHTML = "✅ Correct! Tap & aim to shoot!";
         currentTurn = 'player_shoot';
         isAiming = true; 
     } else {
         wrongSound.play().catch(e => {});
-        statusDiv.innerHTML = "❌ Wrong! Computer gets to shoot this turn.";
+        statusBar.innerHTML = "❌ Wrong! Computer's turn.";
         currentTurn = 'computer';
-        setTimeout(executeComputerTurn, 400);
+        setTimeout(executeComputerTurn, 1000);
     }
 }
 
@@ -530,54 +582,48 @@ function executeComputerTurn() {
     let cue = balls[0];
     let target = balls.find(b => !b.isCue && b.active);
     
-    if (!target) {
-        endMatchGame();
-        return;
-    }
+    if (!target) { endMatchGame(); return; }
 
-    let angle = Math.atan2(target.y - cue.y, target.x - cue.x) + (Math.random() * 0.2 - 0.1);
-    let power = 15 + Math.random() * 5;
+    let angle = Math.atan2(target.y - cue.y, target.x - cue.x) + (Math.random() * 0.15 - 0.075);
+    let power = 18 + Math.random() * 7;
 
     isMovingState = true;
     shotSound.play().catch(e => {});
     cue.vx = Math.cos(angle) * power;
     cue.vy = Math.sin(angle) * power;
-    statusDiv.innerHTML = "🤖 Computer Shot!";
 }
 
-// --- SCOREBOARD TERMINATION PANELS ---
+// --- SCOREBOARD ---
 function endMatchGame() {
-    statusDiv.innerHTML = "🏁 Match Completed!";
+    statusBar.innerHTML = "🏁 Match Completed!";
     
     let remark = "EXCELLENT!";
     if (correctAnswersCount < 12) remark = "GREAT JOB!";
-    if (correctAnswersCount < 8) remark = "WINNER!";
-    awardTitle.innerText = remark;
+    if (correctAnswersCount < 8) remark = "NICE TRY!";
+    document.getElementById('award-title').innerText = remark;
     
     let timeSpent = Math.floor((Date.now() - matchStartTime) / 1000);
+    document.getElementById('final-answers-score').innerText = correctAnswersCount;
+    document.getElementById('final-player-pocket').innerText = totalPlayerPocketed;
+    document.getElementById('final-computer-pocket').innerText = totalComputerPocketed;
+    document.getElementById('final-time').innerText = timeSpent + "s";
     
-    finalAnswersScore.innerText = correctAnswersCount;
-    finalPlayerPocket.innerText = totalPlayerPocketed;
-    finalComputerPocket.innerText = totalComputerPocketed;
-    finalTime.innerText = timeSpent + "s";
-    
+    let confettiHolder = document.getElementById('confetti-holder');
     confettiHolder.innerHTML = '';
     const confettiColors = ['#ffeb3b', '#e91e63', '#2196f3', '#4caf50', '#ff9800', '#9c27b0'];
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 50; i++) {
         let piece = document.createElement('div');
         piece.className = 'confetti-piece';
         piece.style.left = Math.random() * 100 + 'vw';
         piece.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
         piece.style.animationDelay = (Math.random() * 3) + 's';
-        piece.style.width = (Math.random() * 6 + 6) + 'px';
-        piece.style.height = (Math.random() * 12 + 12) + 'px';
         confettiHolder.appendChild(piece);
     }
     
     endScreen.classList.remove('hidden');
 }
 
-// --- UNIVERSAL MOUSE & TOUCH TRANSFORMATION CONTROLS ---
+// --- MOBILE TOUCH CONTROLS ---
 function getCanvasCoords(e) {
     let rect = canvas.getBoundingClientRect();
     let clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -596,14 +642,14 @@ function handlePointerMove(e) {
 
 function handlePointerClick(e) {
     if (currentTurn !== 'player_shoot' || !isAiming) return;
-    let power = 16; 
+    let power = 22; // Slightly more power for vertical layout 
     isMovingState = true;
     isAiming = false; 
     shotSound.play().catch(e => {});
     balls[0].vx = Math.cos(aimAngle) * power;
     balls[0].vy = Math.sin(aimAngle) * power;
     
-    statusDiv.innerHTML = "💥 Shot taken!";
+    statusBar.innerHTML = "💥 Shot taken!";
 }
 
 canvas.addEventListener('mousemove', handlePointerMove);
