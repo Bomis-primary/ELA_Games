@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Mobile Viewport Scaling Lock & Touch Adjustments -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Grade 3 ELA - Bubble Pop Word Challenge</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    /* Prevent unwanted mobile scrolling, gestures, and tap highlighting */
+    html, body {
+      touch-action: manipulation;
+      overscroll-behavior: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    canvas {
+      touch-action: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Custom animated gradient background */
+    .bg-animated {
+      background: linear-gradient(135deg, #0f172a, #1e1b4b, #311042);
+      background-size: 200% 200%;
+      animation: gradientShift 12s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-white font-sans antialiased h-screen w-screen overflow-hidden flex flex-col justify-between">
+
+  <!-- 1. SPLASH SCREEN OVERLAY (Appears for 5 seconds on startup) -->
+  <div id="screen-splash" class="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-50 transition-opacity duration-500">
+    <div class="flex flex-col items-center gap-6 p-4">
+      <img 
+        src="assets/innovine-logo.png" 
+        alt="Innovine Logo" 
+        class="w-72 max-w-[80vw] h-auto object-contain animate-pulse drop-shadow-[0_0_25px_rgba(168,85,247,0.4)]"
+      />
+      <div class="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mt-4"></div>
+    </div>
+  </div>
+
+  <!-- 2. START / LEVEL SELECT SCREEN -->
+  <div id="screen-start" class="hidden fixed inset-0 bg-animated z-40 flex flex-col items-center justify-center p-6 text-center">
+    <div class="max-w-md w-full bg-slate-900/80 backdrop-blur-md p-8 rounded-3xl border border-slate-700 shadow-2xl flex flex-col items-center">
+      <span class="text-5xl mb-3">🎈</span>
+      <h1 class="text-3xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-indigo-400">
+        Grade 3 Word Pop
+      </h1>
+      <p class="text-slate-300 text-sm mt-2 mb-8">
+        Pop the correct floating bubble to answer questions and score points!
+      </p>
+
+      <div class="w-full flex flex-col gap-4">
+        <button onclick="startGame(1)" class="w-full py-4 px-6 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 rounded-2xl font-bold text-lg shadow-lg transform active:scale-95 transition-all">
+          Level 1: Fill in the Blank
+        </button>
+        <button onclick="startGame(2)" class="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 rounded-2xl font-bold text-lg shadow-lg transform active:scale-95 transition-all">
+          Level 2: Homonym Challenge
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MAIN GAME SCREEN -->
+  <div id="screen-game" class="hidden flex-1 flex flex-col h-full w-full relative bg-animated">
+    
+    <!-- Top HUD Navigation Bar -->
+    <header class="w-full bg-slate-900/70 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between z-10 shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="text-xs uppercase tracking-wider text-slate-400 font-bold">Progress</span>
+        <span id="hud-progress" class="bg-purple-900/60 text-purple-200 text-xs px-2.5 py-1 rounded-full font-semibold border border-purple-700/50">
+          Question 1/10
+        </span>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs uppercase tracking-wider text-slate-400 font-bold">Score</span>
+          <span id="hud-score" class="font-mono text-yellow-400 font-bold text-lg tracking-wider">0000</span>
+        </div>
+        <div id="hud-lives" class="flex items-center gap-1">
+          <span>❤️</span><span>❤️</span><span>❤️</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Question Prompt Banner -->
+    <div class="p-4 shrink-0 max-w-2xl mx-auto w-full z-10">
+      <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 text-center shadow-xl backdrop-blur-md">
+        <div id="prompt-label" class="text-xs font-bold uppercase tracking-widest text-pink-400 mb-1">
+          Level 1 • Fill the Blank:
+        </div>
+        <div id="game-prompt" class="text-lg md:text-xl font-medium text-slate-100">
+          Loading question...
+        </div>
+      </div>
+    </div>
+
+    <!-- Canvas Interactive Game Container -->
+    <div class="flex-1 w-full relative min-h-0">
+      <canvas id="game-canvas" class="w-full h-full block cursor-pointer"></canvas>
+      
+      <!-- Top Dynamic Feedback Notification Banner -->
+      <div id="game-notif" class="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-[100px] transition-transform duration-300 ease-out bg-slate-900/95 border border-purple-500/50 px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-3 z-20 pointer-events-none">
+        <span id="notif-emoji" class="text-2xl">🎉</span>
+        <span id="notif-text" class="text-sm font-bold text-slate-100">Feedback message</span>
+      </div>
+
+      <!-- End-Game Overlays (Victory / Game Over) -->
+      <div id="canvas-overlay" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-6 z-30">
+        
+        <!-- Game Over View -->
+        <div id="overlay-gameover" class="hidden text-center max-w-sm w-full bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl">
+          <span class="text-6xl mb-2 block">💔</span>
+          <h2 class="text-3xl font-black text-rose-500">Game Over!</h2>
+          <p class="text-slate-300 text-sm mt-2 mb-6">You ran out of lives. Keep practicing your Grade 3 vocabulary!</p>
+          <button onclick="returnToMenu()" class="w-full py-3 bg-rose-600 hover:bg-rose-700 rounded-xl font-bold shadow-lg">
+            Try Again
+          </button>
+        </div>
+
+        <!-- Victory View -->
+        <div id="overlay-victory" class="hidden text-center max-w-sm w-full bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl">
+          <span class="text-6xl mb-2 block">🏆</span>
+          <h2 class="text-3xl font-black text-amber-400">Challenge Complete!</h2>
+          <p class="text-xs uppercase tracking-widest text-slate-400 mt-2">Final Score</p>
+          <div id="overlay-final-score" class="font-mono text-4xl font-extrabold text-yellow-300 my-1">0000</div>
+          <p id="victory-commentary" class="text-slate-300 text-sm mb-6">Great job!</p>
+          <button onclick="returnToMenu()" class="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-xl font-bold shadow-lg">
+            Play Again
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- GAME LOGIC ENGINE SCRIPT -->
+  <script>
+    // --- QUESTION DATABASES ---
+    const level1Questions = [
+      { q: "The bright sun will ______ in the east.", a: "rise", choices: ["rise", "rice", "raise"] },
+      { q: "She put her book over ______ on the desk.", a: "there", choices: ["their", "there", "they're"] },
+      { q: "Can you ______ the birds singing outside?", a: "hear", choices: ["here", "hear", "hare"] },
+      { q: "He wore a warm ______ during the winter storm.", a: "coat", choices: ["coat", "cot", "cote"] },
+      { q: "The ocean ______ washed the seashells onto the beach.", a: "wave", choices: ["waive", "wave", "wafe"] },
+      { q: "I need to buy a ______ of shoes for school.", a: "pair", choices: ["pear", "pair", "pare"] },
+      { q: "My little dog likes to wag its ______.", a: "tail", choices: ["tale", "tail", "tall"] },
+      { q: "We walked through the main ______ of the building.", a: "hall", choices: ["haul", "hall", "hole"] },
+      { q: "She wrote a letter and sent it in the ______.", a: "mail", choices: ["male", "mail", "mile"] },
+      { q: "The knight wore shiny armor into ______. ", a: "battle", choices: ["bottle", "battle", "beetle"] }
+    ];
+
+    const level2Questions = [
+      { q: "Which word means 'a large wild animal' (not bare)?", a: "bear", choices: ["bare", "bear", "beer"] },
+      { q: "Which word means '7 days in a row' (not feeble)?", a: "week", choices: ["weak", "week", "wick"] },
+      { q: "Which word means 'to write with a pen' (not correct)?", a: "write", choices: ["right", "write", "rite"] },
+      { q: "Which word means 'a flower' (not flour for baking)?", a: "flower", choices: ["flour", "flower", "floor"] },
+      { q: "Which word means 'a fruit' (not a pair of socks)?", a: "pear", choices: ["pair", "pear", "pare"] },
+      { q: "Which word means 'to see with your eyes' (not the ocean)?", a: "see", choices: ["sea", "see", "si"] },
+      { q: "Which word means 'the number 2' (not also)?", a: "two", choices: ["to", "too", "two"] },
+      { q: "Which word means 'a story' (not an animal tail)?", a: "tale", choices: ["tail", "tale", "tall"] },
+      { q: "Which word means 'the morning light' (not a boy offspring)?", a: "sun", choices: ["son", "sun", "soon"] },
+      { q: "Which word means 'past tense of blow' (not the color)?", a: "blew", choices: ["blue", "blew", "blow"] }
+    ];
+
+    // --- GAME ENGINE STATE ---
+    let currentLevel = 1;
+    let activeQuestions = [];
+    let currentQuestionIdx = 0;
+    let score = 0;
+    let lives = 3;
+    let bubbles = [];
+    let particles = [];
+    let animationId = null;
+
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // --- ASSET SOUND SYSTEM (WITH MOBILE AUDIO UNLOCK & PATHS) ---
+    const sounds = {
+      correctAudio: new Audio('assets/correct.mp3'),
+      wrongAudio: new Audio('assets/wrong.mp3'),
+      
+      // Synthesized pop audio node for instant tactile feedback
+      pop() {
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.05);
+        } catch (e) {}
+      },
+
+      correct() {
+        this.correctAudio.currentTime = 0;
+        this.correctAudio.play().catch(() => {});
+      },
+
+      wrong() {
+        this.wrongAudio.currentTime = 0;
+        this.wrongAudio.play().catch(() => {});
+      }
+    };
+
+    // Mobile browsers require audio initialization on touch gesture
+    function unlockMobileAudio() {
+      sounds.correctAudio.play().then(() => {
+        sounds.correctAudio.pause();
+        sounds.correctAudio.currentTime = 0;
+      }).catch(() => {});
+      sounds.wrongAudio.play().then(() => {
+        sounds.wrongAudio.pause();
+        sounds.wrongAudio.currentTime = 0;
+      }).catch(() => {});
+
+      window.removeEventListener('touchstart', unlockMobileAudio);
+      window.removeEventListener('click', unlockMobileAudio);
+    }
+    window.addEventListener('touchstart', unlockMobileAudio, { passive: true });
+    window.addEventListener('click', unlockMobileAudio, { passive: true });
+
+    // --- 5-SECOND SPLASH SCREEN INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      const splashScreen = document.getElementById('screen-splash');
+      const startScreen = document.getElementById('screen-start');
+
+      // Hold splash logo for 5 seconds before presenting start menu
+      setTimeout(() => {
+        if (splashScreen) {
+          splashScreen.classList.add('opacity-0');
+          setTimeout(() => {
+            splashScreen.classList.add('hidden');
+            if (startScreen) startScreen.classList.remove('hidden');
+          }, 500);
+        }
+      }, 5000);
+    });
+
+    // --- BUBBLE CLASS ---
+    class Bubble {
+      constructor(x, y, text, isCorrect, idx) {
+        this.x = x;
+        this.y = y;
+        this.text = text;
+        this.isCorrect = isCorrect;
+        this.radius = 45;
+        this.speed = 1.2 + Math.random() * 0.5;
+        this.wobbleAngle = Math.random() * Math.PI * 2;
+        this.wobbleSpeed = 0.03 + Math.random() * 0.02;
+        
+        // Dynamic bubble color palettes
+        const colors = [
+          { main: 'rgba(236, 72, 153, 0.4)', border: '#ec4899' },
+          { main: 'rgba(168, 85, 247, 0.4)', border: '#a855f7' },
+          { main: 'rgba(59, 130, 246, 0.4)', border: '#3b82f6' }
+        ];
+        this.color = colors[idx % colors.length];
+      }
+
+      update() {
+        this.y -= this.speed;
+        this.wobbleAngle += this.wobbleSpeed;
+        this.x += Math.sin(this.wobbleAngle) * 0.8;
+      }
+
+      draw() {
+        ctx.save();
+        
+        // Bubble body fill
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color.main;
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = this.color.border;
+        ctx.stroke();
+
+        // Highlight shine
+        ctx.beginPath();
+        ctx.arc(this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.25, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.fill();
+
+        // Text label
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.text, this.x, this.y);
+
+        ctx.restore();
+      }
+    }
+
+    // --- PARTICLE CLASS ---
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.radius = 3 + Math.random() * 4;
+        this.vx = (Math.random() - 0.5) * 8;
+        this.vy = (Math.random() - 0.5) * 8;
+        this.color = color.border || '#a855f7';
+        this.alpha = 1;
+        this.decay = 0.02 + Math.random() * 0.03;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= this.decay;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.alpha);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // --- GAME FLOW CONTROL ---
+    function startGame(level) {
+      currentLevel = level;
+      activeQuestions = (level === 1 ? level1Questions : level2Questions).sort(() => Math.random() - 0.5);
+      currentQuestionIdx = 0;
+      score = 0;
+      lives = 3;
+      particles = [];
+
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('canvas-overlay').classList.add('hidden');
+      document.getElementById('overlay-gameover').classList.add('hidden');
+      document.getElementById('overlay-victory').classList.add('hidden');
+      document.getElementById('screen-game').classList.remove('hidden');
+
+      resizeCanvas();
+      loadQuestion();
+      setupMainLoop();
+    }
+
+    function returnToMenu() {
+      stopGameLoop();
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-start').classList.remove('hidden');
+    }
+
+    function resizeCanvas() {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      canvas.width = parent.clientWidth;
+      canvas.height = parent.clientHeight;
+    }
+
+    window.addEventListener('resize', () => {
+      if (!document.getElementById('screen-game').classList.contains('hidden')) {
+        resizeCanvas();
+      }
+    });
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(resizeCanvas, 200);
+    });
+
+    function loadQuestion() {
+      const q = activeQuestions[currentQuestionIdx];
+      document.getElementById('hud-progress').innerText = `Question ${currentQuestionIdx + 1}/10`;
+      
+      if (currentLevel === 1) {
+        document.getElementById('prompt-label').innerText = "Level 1 • Fill the Blank:";
+        document.getElementById('game-prompt').innerHTML = q.q.replace("______", "<span class='text-yellow-400 underline font-black'>______</span>");
+      } else {
+        document.getElementById('prompt-label').innerText = "Level 2 • Choose the homonym word that fits:";
+        document.getElementById('game-prompt').innerText = q.q;
+      }
+
+      bubbles = [];
+      
+      q.choices.forEach((choice, idx) => {
+        const spacing = canvas.width / (q.choices.length + 1);
+        const startX = spacing * (idx + 1);
+        const startY = canvas.height + 60 + (idx * 30);
+        const isCorrect = (choice === q.a);
+        
+        bubbles.push(new Bubble(startX, startY, choice, isCorrect, idx));
+      });
+    }
+
+    function showBannerFeedback(emoji, msg) {
+      const banner = document.getElementById('game-notif');
+      document.getElementById('notif-emoji').innerText = emoji;
+      document.getElementById('notif-text').innerText = msg;
+      banner.classList.remove('translate-y-[-100px]');
+      banner.classList.add('translate-y-0');
+
+      setTimeout(() => {
+        banner.classList.remove('translate-y-0');
+        banner.classList.add('translate-y-[-100px]');
+      }, 1500);
+    }
+
+    // --- INTERACTION HANDLING (TOUCH AND CLICK) ---
+    canvas.addEventListener('click', (e) => {
+      handleUserInteraction(e);
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (e.touches.length > 0) {
+        handleUserInteraction(e.touches[0]);
+      }
+    }, { passive: false });
+
+    function handleUserInteraction(point) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const clickX = (point.clientX - rect.left) * scaleX;
+      const clickY = (point.clientY - rect.top) * scaleY;
+
+      for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        const dist = Math.hypot(clickX - b.x, clickY - b.y);
+        
+        if (dist <= b.radius + 15) { // Generous mobile tap radius
+          sounds.pop();
+          spawnBurstParticles(b.x, b.y, b.color);
+
+          if (b.isCorrect) {
+            sounds.correct();
+            score += 100;
+            showBannerFeedback("🎉", "Correct! +100 Points");
+            
+            setTimeout(() => {
+              currentQuestionIdx++;
+              if (currentQuestionIdx >= 10) {
+                triggerVictory();
+              } else {
+                loadQuestion();
+              }
+            }, 600);
+          } else {
+            sounds.wrong();
+            lives--;
+            showBannerFeedback("❌", `Oops! The answer was "${activeQuestions[currentQuestionIdx].a}"`);
+            
+            canvas.classList.add('translate-x-2');
+            setTimeout(() => canvas.classList.remove('translate-x-2'), 100);
+
+            if (lives <= 0) {
+              triggerGameOver();
+            } else {
+              setTimeout(() => {
+                currentQuestionIdx++;
+                if (currentQuestionIdx >= 10) {
+                  triggerVictory();
+                } else {
+                  loadQuestion();
+                }
+              }, 1200);
+            }
+          }
+
+          bubbles.splice(i, 1);
+          break;
+        }
+      }
+    }
+
+    function spawnBurstParticles(x, y, color) {
+      for (let i = 0; i < 18; i++) {
+        particles.push(new Particle(x, y, color));
+      }
+    }
+
+    function triggerGameOver() {
+      stopGameLoop();
+      document.getElementById('canvas-overlay').classList.remove('hidden');
+      document.getElementById('overlay-gameover').classList.remove('hidden');
+    }
+
+    function triggerVictory() {
+      stopGameLoop();
+      const scoreStr = String(score).padStart(4, '0');
+      document.getElementById('overlay-final-score').innerText = scoreStr;
+      
+      const commentary = document.getElementById('victory-commentary');
+      if (score >= 1000) {
+        commentary.innerText = "Wow! You got a PERFECT 10/10 Score!";
+      } else if (score >= 800) {
+        commentary.innerText = "Terrific Job! You got a solid 8/10 or better!";
+      } else {
+        commentary.innerText = "Keep on trying! Great effort mastering Grade 3 words!";
+      }
+
+      document.getElementById('canvas-overlay').classList.remove('hidden');
+      document.getElementById('overlay-victory').classList.remove('hidden');
+    }
+
+    function stopGameLoop() {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    }
+
+    // --- MAIN ENGINE HEARTBEAT ---
+    function setupMainLoop() {
+      function tick() {
+        if (document.getElementById('screen-game').classList.contains('hidden')) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Arcade visual grid
+        ctx.strokeStyle = 'rgba(219, 39, 119, 0.12)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.stroke();
+        }
+
+        // 1. UPDATE AND DRAW BUBBLES
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+          const b = bubbles[i];
+          b.update();
+          b.draw();
+
+          // Float off-screen handler
+          if (b.y < -b.radius) {
+            if (b.isCorrect) {
+              sounds.wrong();
+              lives--;
+              showBannerFeedback("⏰", "Correct word bubble floated away!");
+              
+              if (lives <= 0) {
+                triggerGameOver();
+                return;
+              } else {
+                setTimeout(() => {
+                  currentQuestionIdx++;
+                  if (currentQuestionIdx >= 10) {
+                    triggerVictory();
+                  } else {
+                    loadQuestion();
+                  }
+                }, 1000);
+              }
+            }
+            bubbles.splice(i, 1);
+          }
+        }
+
+        // Auto respawn check
+        if (bubbles.length === 0 && currentQuestionIdx < 10) {
+          loadQuestion();
+        }
+
+        // 2. PARTICLES SYSTEM
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.update();
+          p.draw();
+          if (p.alpha <= 0) {
+            particles.splice(i, 1);
+          }
+        }
+
+        // 3. RE-RENDER METRICS
+        updateHUD();
+
+        animationId = requestAnimationFrame(tick);
+      }
+      animationId = requestAnimationFrame(tick);
+    }
+
+    function updateHUD() {
+      document.getElementById('hud-score').innerText = String(score).padStart(4, '0');
+      
+      const livesBlock = document.getElementById('hud-lives');
+      livesBlock.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const heart = document.createElement('span');
+        heart.className = 'text-base transition-all duration-300';
+        heart.innerText = i < lives ? '❤️' : '🖤';
+        if (i >= lives) heart.classList.add('opacity-40');
+        livesBlock.appendChild(heart);
+      }
+    }
+  </script>
+</body>
+</html>
