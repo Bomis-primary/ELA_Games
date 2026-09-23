@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Mobile Viewport Scaling & Gesture Lock -->
+  <!-- Mobile Viewport & Gesture Scaling Lock -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Grade 3 ELA - Bubble Pop Word Challenge</title>
   
@@ -10,7 +10,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   
   <style>
-    /* Prevent mobile scroll-bounce, text-selection, and double-tap zoom */
+    /* Prevent unwanted mobile scrolling, bounce, and text selection */
     html, body {
       touch-action: manipulation;
       overscroll-behavior: none;
@@ -24,7 +24,7 @@
       -webkit-touch-callout: none;
     }
 
-    /* Dynamic gradient background */
+    /* Dynamic arcade background gradient */
     .bg-animated {
       background: linear-gradient(135deg, #0f172a, #1e1b4b, #311042);
       background-size: 200% 200%;
@@ -40,7 +40,7 @@
 </head>
 <body class="bg-slate-950 text-white font-sans antialiased h-screen w-screen overflow-hidden flex flex-col justify-between">
 
-  <!-- 1. SPLASH SCREEN OVERLAY (5-Second Launch Display) -->
+  <!-- 1. SPLASH SCREEN OVERLAY (Displays Innovine logo for 5 seconds) -->
   <div id="screen-splash" class="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-50 transition-opacity duration-500">
     <div class="flex flex-col items-center gap-6 p-4 text-center">
       <img 
@@ -77,7 +77,7 @@
   <!-- 3. MAIN GAME SCREEN -->
   <div id="screen-game" class="hidden flex-1 flex flex-col h-full w-full relative bg-animated">
     
-    <!-- HUD Navigation Bar -->
+    <!-- Top HUD Navigation Bar -->
     <header class="w-full bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between z-10 shrink-0">
       <div class="flex items-center gap-2">
         <span class="text-xs uppercase tracking-wider text-slate-400 font-bold">Progress</span>
@@ -97,32 +97,32 @@
       </div>
     </header>
 
-    <!-- Question Prompt Banner -->
-    <div class="p-4 shrink-0 max-w-2xl mx-auto w-full z-10">
-      <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 text-center shadow-xl backdrop-blur-md">
+    <!-- Question Prompt Container -->
+    <div class="p-4 pb-2 shrink-0 max-w-2xl mx-auto w-full z-10 relative">
+      <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 text-center shadow-xl backdrop-blur-md relative">
         <div id="prompt-label" class="text-xs font-bold uppercase tracking-widest text-pink-400 mb-1">
           Level 1 • Fill the Blank:
         </div>
-        <div id="game-prompt" class="text-lg md:text-xl font-medium text-slate-100">
+        <div id="game-prompt" class="text-lg md:text-xl font-medium text-slate-100 min-h-[3.25rem] flex items-center justify-center">
           Loading question...
         </div>
       </div>
+
+      <!-- Feedback Notification Banner (Positioned safely below question box) -->
+      <div id="game-notif" class="absolute -bottom-4 left-1/2 -translate-x-1/2 opacity-0 scale-90 pointer-events-none transition-all duration-300 ease-out bg-slate-900/95 border border-purple-500/80 px-5 py-2 rounded-full shadow-2xl flex items-center gap-2.5 z-20">
+        <span id="notif-emoji" class="text-xl">🎉</span>
+        <span id="notif-text" class="text-xs md:text-sm font-bold text-slate-100 whitespace-nowrap">Feedback message</span>
+      </div>
     </div>
 
-    <!-- Canvas Game Display -->
-    <div class="flex-1 w-full relative min-h-0">
+    <!-- Interactive Game Canvas Container -->
+    <div class="flex-1 w-full relative min-h-0 mt-3">
       <canvas id="game-canvas" class="w-full h-full block cursor-pointer"></canvas>
-      
-      <!-- Top Dynamic Feedback Banner -->
-      <div id="game-notif" class="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-[100px] transition-transform duration-300 ease-out bg-slate-900/95 border border-purple-500/50 px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-3 z-20 pointer-events-none">
-        <span id="notif-emoji" class="text-2xl">🎉</span>
-        <span id="notif-text" class="text-sm font-bold text-slate-100">Feedback message</span>
-      </div>
 
-      <!-- End-Game Overlays -->
+      <!-- Game Over & Victory Overlay -->
       <div id="canvas-overlay" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-6 z-30">
         
-        <!-- Game Over View -->
+        <!-- Game Over Box -->
         <div id="overlay-gameover" class="hidden text-center max-w-sm w-full bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl">
           <span class="text-6xl mb-2 block">💔</span>
           <h2 class="text-3xl font-black text-rose-500">Game Over!</h2>
@@ -132,7 +132,7 @@
           </button>
         </div>
 
-        <!-- Victory View -->
+        <!-- Victory Box -->
         <div id="overlay-victory" class="hidden text-center max-w-sm w-full bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl">
           <span class="text-6xl mb-2 block">🏆</span>
           <h2 class="text-3xl font-black text-amber-400">Challenge Complete!</h2>
@@ -149,7 +149,7 @@
 
   </div>
 
-  <!-- GAME LOGIC SCRIPT -->
+  <!-- GAME LOGIC ENGINE SCRIPT -->
   <script>
     // --- QUESTION DATABASES ---
     const level1Questions = [
@@ -178,7 +178,7 @@
       { q: "Which word means 'past tense of blow' (not the color)?", a: "blew", choices: ["blue", "blew", "blow"] }
     ];
 
-    // --- GAME STATE VARIABLES ---
+    // --- GAME ENGINE STATE ---
     let currentLevel = 1;
     let activeQuestions = [];
     let currentQuestionIdx = 0;
@@ -191,12 +191,12 @@
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
 
-    // --- SOUND ENGINE WITH RELATIVE PATHS & MOBILE AUDIO UNLOCK ---
+    // --- AUDIO SYSTEM (WITH MOBILE UNLOCK) ---
     const sounds = {
       correctAudio: new Audio('correct.mp3'),
       wrongAudio: new Audio('wrong.mp3'),
       
-      // Synthesized touch pop for instant mobile tactile feedback
+      // Synthesized pop for instant touch feedback
       pop() {
         try {
           const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -225,7 +225,7 @@
       }
     };
 
-    // Unlock audio context on initial user gesture (required for iOS Safari and mobile Chrome)
+    // Unlock browser audio policy on mobile device gesture
     function unlockMobileAudio() {
       sounds.correctAudio.play().then(() => {
         sounds.correctAudio.pause();
@@ -242,7 +242,7 @@
     window.addEventListener('touchstart', unlockMobileAudio, { passive: true });
     window.addEventListener('click', unlockMobileAudio, { passive: true });
 
-    // --- 5-SECOND SPLASH SCREEN INITIALIZATION ---
+    // --- 5-SECOND SPLASH SCREEN LOGIC ---
     window.addEventListener('DOMContentLoaded', () => {
       const splashScreen = document.getElementById('screen-splash');
       const startScreen = document.getElementById('screen-start');
@@ -296,13 +296,13 @@
         ctx.strokeStyle = this.color.border;
         ctx.stroke();
 
-        // Highlight sheen
+        // Highlight shine
         ctx.beginPath();
         ctx.arc(this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.25, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.fill();
 
-        // Label text
+        // Text label
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 18px sans-serif';
         ctx.textAlign = 'center';
@@ -414,16 +414,17 @@
       const banner = document.getElementById('game-notif');
       document.getElementById('notif-emoji').innerText = emoji;
       document.getElementById('notif-text').innerText = msg;
-      banner.classList.remove('translate-y-[-100px]');
-      banner.classList.add('translate-y-0');
+      
+      banner.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
+      banner.classList.add('opacity-100', 'scale-100');
 
       setTimeout(() => {
-        banner.classList.remove('translate-y-0');
-        banner.classList.add('translate-y-[-100px]');
+        banner.classList.remove('opacity-100', 'scale-100');
+        banner.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
       }, 1500);
     }
 
-    // --- MOBILE TOUCH & POINTER EVENTS ---
+    // --- MOBILE TOUCH & POINTER INTERACTIONS ---
     canvas.addEventListener('click', (e) => {
       handleUserInteraction(e);
     });
@@ -447,7 +448,7 @@
         const b = bubbles[i];
         const dist = Math.hypot(clickX - b.x, clickY - b.y);
         
-        // Mobile tap radius padding (+20px)
+        // Touch target radius padding (+20px) for phone screens
         if (dist <= b.radius + 20) {
           sounds.pop();
           spawnBurstParticles(b.x, b.y, b.color);
@@ -537,7 +538,7 @@
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Grid pattern
+        // Grid overlay
         ctx.strokeStyle = 'rgba(219, 39, 119, 0.12)';
         ctx.lineWidth = 1;
         for (let x = 0; x < canvas.width; x += 40) {
