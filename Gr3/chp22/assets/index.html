@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Mobile Viewport Scaling Lock & Touch Adjustments -->
+  <!-- Mobile Viewport Scaling & Gesture Lock -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Grade 3 ELA - Bubble Pop Word Challenge</title>
   
@@ -10,7 +10,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   
   <style>
-    /* Prevent unwanted mobile scrolling, gestures, and tap highlighting */
+    /* Prevent mobile scroll-bounce, text-selection, and double-tap zoom */
     html, body {
       touch-action: manipulation;
       overscroll-behavior: none;
@@ -24,7 +24,7 @@
       -webkit-touch-callout: none;
     }
 
-    /* Custom animated gradient background */
+    /* Dynamic gradient background */
     .bg-animated {
       background: linear-gradient(135deg, #0f172a, #1e1b4b, #311042);
       background-size: 200% 200%;
@@ -40,27 +40,27 @@
 </head>
 <body class="bg-slate-950 text-white font-sans antialiased h-screen w-screen overflow-hidden flex flex-col justify-between">
 
-  <!-- 1. SPLASH SCREEN OVERLAY (Appears for 5 seconds on startup) -->
+  <!-- 1. SPLASH SCREEN OVERLAY (5-Second Launch Display) -->
   <div id="screen-splash" class="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-50 transition-opacity duration-500">
-    <div class="flex flex-col items-center gap-6 p-4">
+    <div class="flex flex-col items-center gap-6 p-4 text-center">
       <img 
-        src="assets/innovine-logo.png" 
+        src="innovine-logo.png" 
         alt="Innovine Logo" 
-        class="w-72 max-w-[80vw] h-auto object-contain animate-pulse drop-shadow-[0_0_25px_rgba(168,85,247,0.4)]"
+        class="w-72 max-w-[80vw] h-auto object-contain animate-pulse drop-shadow-[0_0_30px_rgba(168,85,247,0.5)]"
       />
-      <div class="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mt-4"></div>
+      <div class="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mt-2"></div>
     </div>
   </div>
 
   <!-- 2. START / LEVEL SELECT SCREEN -->
   <div id="screen-start" class="hidden fixed inset-0 bg-animated z-40 flex flex-col items-center justify-center p-6 text-center">
-    <div class="max-w-md w-full bg-slate-900/80 backdrop-blur-md p-8 rounded-3xl border border-slate-700 shadow-2xl flex flex-col items-center">
+    <div class="max-w-md w-full bg-slate-900/85 backdrop-blur-md p-8 rounded-3xl border border-slate-700 shadow-2xl flex flex-col items-center">
       <span class="text-5xl mb-3">🎈</span>
       <h1 class="text-3xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-indigo-400">
         Grade 3 Word Pop
       </h1>
       <p class="text-slate-300 text-sm mt-2 mb-8">
-        Pop the correct floating bubble to answer questions and score points!
+        Tap the correct floating bubble to complete sentences and earn points!
       </p>
 
       <div class="w-full flex flex-col gap-4">
@@ -77,8 +77,8 @@
   <!-- 3. MAIN GAME SCREEN -->
   <div id="screen-game" class="hidden flex-1 flex flex-col h-full w-full relative bg-animated">
     
-    <!-- Top HUD Navigation Bar -->
-    <header class="w-full bg-slate-900/70 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between z-10 shrink-0">
+    <!-- HUD Navigation Bar -->
+    <header class="w-full bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between z-10 shrink-0">
       <div class="flex items-center gap-2">
         <span class="text-xs uppercase tracking-wider text-slate-400 font-bold">Progress</span>
         <span id="hud-progress" class="bg-purple-900/60 text-purple-200 text-xs px-2.5 py-1 rounded-full font-semibold border border-purple-700/50">
@@ -109,17 +109,17 @@
       </div>
     </div>
 
-    <!-- Canvas Interactive Game Container -->
+    <!-- Canvas Game Display -->
     <div class="flex-1 w-full relative min-h-0">
       <canvas id="game-canvas" class="w-full h-full block cursor-pointer"></canvas>
       
-      <!-- Top Dynamic Feedback Notification Banner -->
+      <!-- Top Dynamic Feedback Banner -->
       <div id="game-notif" class="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-[100px] transition-transform duration-300 ease-out bg-slate-900/95 border border-purple-500/50 px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-3 z-20 pointer-events-none">
         <span id="notif-emoji" class="text-2xl">🎉</span>
         <span id="notif-text" class="text-sm font-bold text-slate-100">Feedback message</span>
       </div>
 
-      <!-- End-Game Overlays (Victory / Game Over) -->
+      <!-- End-Game Overlays -->
       <div id="canvas-overlay" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-6 z-30">
         
         <!-- Game Over View -->
@@ -149,7 +149,7 @@
 
   </div>
 
-  <!-- GAME LOGIC ENGINE SCRIPT -->
+  <!-- GAME LOGIC SCRIPT -->
   <script>
     // --- QUESTION DATABASES ---
     const level1Questions = [
@@ -178,7 +178,7 @@
       { q: "Which word means 'past tense of blow' (not the color)?", a: "blew", choices: ["blue", "blew", "blow"] }
     ];
 
-    // --- GAME ENGINE STATE ---
+    // --- GAME STATE VARIABLES ---
     let currentLevel = 1;
     let activeQuestions = [];
     let currentQuestionIdx = 0;
@@ -191,12 +191,12 @@
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
 
-    // --- ASSET SOUND SYSTEM (WITH MOBILE AUDIO UNLOCK & PATHS) ---
+    // --- SOUND ENGINE WITH RELATIVE PATHS & MOBILE AUDIO UNLOCK ---
     const sounds = {
-      correctAudio: new Audio('assets/correct.mp3'),
-      wrongAudio: new Audio('assets/wrong.mp3'),
+      correctAudio: new Audio('correct.mp3'),
+      wrongAudio: new Audio('wrong.mp3'),
       
-      // Synthesized pop audio node for instant tactile feedback
+      // Synthesized touch pop for instant mobile tactile feedback
       pop() {
         try {
           const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -225,7 +225,7 @@
       }
     };
 
-    // Mobile browsers require audio initialization on touch gesture
+    // Unlock audio context on initial user gesture (required for iOS Safari and mobile Chrome)
     function unlockMobileAudio() {
       sounds.correctAudio.play().then(() => {
         sounds.correctAudio.pause();
@@ -247,7 +247,6 @@
       const splashScreen = document.getElementById('screen-splash');
       const startScreen = document.getElementById('screen-start');
 
-      // Hold splash logo for 5 seconds before presenting start menu
       setTimeout(() => {
         if (splashScreen) {
           splashScreen.classList.add('opacity-0');
@@ -266,16 +265,15 @@
         this.y = y;
         this.text = text;
         this.isCorrect = isCorrect;
-        this.radius = 45;
-        this.speed = 1.2 + Math.random() * 0.5;
+        this.radius = 46;
+        this.speed = 1.1 + Math.random() * 0.5;
         this.wobbleAngle = Math.random() * Math.PI * 2;
         this.wobbleSpeed = 0.03 + Math.random() * 0.02;
         
-        // Dynamic bubble color palettes
         const colors = [
-          { main: 'rgba(236, 72, 153, 0.4)', border: '#ec4899' },
-          { main: 'rgba(168, 85, 247, 0.4)', border: '#a855f7' },
-          { main: 'rgba(59, 130, 246, 0.4)', border: '#3b82f6' }
+          { main: 'rgba(236, 72, 153, 0.45)', border: '#ec4899' },
+          { main: 'rgba(168, 85, 247, 0.45)', border: '#a855f7' },
+          { main: 'rgba(59, 130, 246, 0.45)', border: '#3b82f6' }
         ];
         this.color = colors[idx % colors.length];
       }
@@ -289,7 +287,7 @@
       draw() {
         ctx.save();
         
-        // Bubble body fill
+        // Bubble main body
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color.main;
@@ -298,13 +296,13 @@
         ctx.strokeStyle = this.color.border;
         ctx.stroke();
 
-        // Highlight shine
+        // Highlight sheen
         ctx.beginPath();
         ctx.arc(this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.25, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.fill();
 
-        // Text label
+        // Label text
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 18px sans-serif';
         ctx.textAlign = 'center';
@@ -345,7 +343,7 @@
       }
     }
 
-    // --- GAME FLOW CONTROL ---
+    // --- GAME CONTROL FUNCTIONS ---
     function startGame(level) {
       currentLevel = level;
       activeQuestions = (level === 1 ? level1Questions : level2Questions).sort(() => Math.random() - 0.5);
@@ -425,7 +423,7 @@
       }, 1500);
     }
 
-    // --- INTERACTION HANDLING (TOUCH AND CLICK) ---
+    // --- MOBILE TOUCH & POINTER EVENTS ---
     canvas.addEventListener('click', (e) => {
       handleUserInteraction(e);
     });
@@ -449,7 +447,8 @@
         const b = bubbles[i];
         const dist = Math.hypot(clickX - b.x, clickY - b.y);
         
-        if (dist <= b.radius + 15) { // Generous mobile tap radius
+        // Mobile tap radius padding (+20px)
+        if (dist <= b.radius + 20) {
           sounds.pop();
           spawnBurstParticles(b.x, b.y, b.color);
 
@@ -531,14 +530,14 @@
       }
     }
 
-    // --- MAIN ENGINE HEARTBEAT ---
+    // --- MAIN RENDER LOOP ---
     function setupMainLoop() {
       function tick() {
         if (document.getElementById('screen-game').classList.contains('hidden')) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Arcade visual grid
+        // Grid pattern
         ctx.strokeStyle = 'rgba(219, 39, 119, 0.12)';
         ctx.lineWidth = 1;
         for (let x = 0; x < canvas.width; x += 40) {
@@ -554,7 +553,6 @@
           b.update();
           b.draw();
 
-          // Float off-screen handler
           if (b.y < -b.radius) {
             if (b.isCorrect) {
               sounds.wrong();
@@ -579,7 +577,6 @@
           }
         }
 
-        // Auto respawn check
         if (bubbles.length === 0 && currentQuestionIdx < 10) {
           loadQuestion();
         }
@@ -594,7 +591,7 @@
           }
         }
 
-        // 3. RE-RENDER METRICS
+        // 3. HUD RE-RENDER
         updateHUD();
 
         animationId = requestAnimationFrame(tick);
