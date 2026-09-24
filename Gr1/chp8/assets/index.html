@@ -31,7 +31,7 @@
 
     <!-- 1. INTRO / LOGO SCREEN (Strictly ONLY the logo on a blank screen for 5 seconds) -->
     <div id="logo-screen" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-950 transition-opacity duration-1000">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="max-w-xs md:max-w-md object-contain animate-pulse">
+        <img src="innovine-logo.png" alt="Innovine Logo" class="max-w-xs md:max-w-md object-contain animate-pulse">
     </div>
 
     <!-- 2. START / INSTRUCTIONS SCREEN -->
@@ -124,11 +124,11 @@
     <canvas id="gameCanvas" class="w-full h-full"></canvas>
 
     <script>
-        // Audio Asset Preloading (Using local folder files specified)
+        // Audio Asset Preloading
         const sounds = {
-            correct: new Audio('assets/correct.mp3'),
-            wrong: new Audio('assets/wrong.mp3'),
-            clapping: new Audio('assets/clapping.mp3')
+            correct: new Audio('correct.mp3'),
+            wrong: new Audio('wrong.mp3'),
+            clapping: new Audio('clapping.mp3')
         };
 
         function playSound(name) {
