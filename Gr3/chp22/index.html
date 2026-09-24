@@ -36,6 +36,19 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+
+    /* Active entrance & glowing pulse animation for the splash logo */
+    @keyframes logoPlay {
+      0% { transform: scale(0.85); opacity: 0; filter: drop-shadow(0 0 10px rgba(168,85,247,0.3)); }
+      20% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 40px rgba(168,85,247,0.8)); }
+      50% { transform: scale(0.98); filter: drop-shadow(0 0 20px rgba(168,85,247,0.4)); }
+      80% { transform: scale(1.03); filter: drop-shadow(0 0 35px rgba(168,85,247,0.9)); }
+      100% { transform: scale(1); filter: drop-shadow(0 0 25px rgba(168,85,247,0.6)); }
+    }
+
+    .animate-logo {
+      animation: logoPlay 2.5s ease-in-out infinite alternate;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-white font-sans antialiased h-screen w-screen overflow-hidden flex flex-col justify-between">
@@ -44,9 +57,11 @@
   <div id="screen-splash" class="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-50 transition-opacity duration-500">
     <div class="flex flex-col items-center gap-6 p-4 text-center">
       <img 
+        id="splash-logo"
         src="assets/innovine-logo.png" 
+        onerror="if(!this.dataset.fallback){this.dataset.fallback=true; this.src='innovine-logo.png';}"
         alt="Innovine Logo" 
-        class="w-72 max-w-[80vw] h-auto object-contain animate-pulse drop-shadow-[0_0_30px_rgba(168,85,247,0.5)]"
+        class="w-72 max-w-[80vw] h-auto object-contain animate-logo"
       />
       <div class="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mt-2"></div>
     </div>
@@ -191,10 +206,21 @@
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
 
-    // --- AUDIO SYSTEM (WITH MOBILE UNLOCK) ---
+    // --- RESILIENT AUDIO LOADER (Tries subfolder assets/ then falls back to current directory) ---
+    function createResilientAudio(filename) {
+      const audio = new Audio(`assets/${filename}`);
+      audio.addEventListener('error', () => {
+        if (!audio.dataset.retried) {
+          audio.dataset.retried = 'true';
+          audio.src = filename;
+        }
+      }, { once: true });
+      return audio;
+    }
+
     const sounds = {
-      correctAudio: new Audio('assets/correct.mp3'),
-      wrongAudio: new Audio('assets/wrong.mp3'),
+      correctAudio: createResilientAudio('correct.mp3'),
+      wrongAudio: createResilientAudio('wrong.mp3'),
       
       // Synthesized pop for instant touch feedback
       pop() {
@@ -246,6 +272,13 @@
     window.addEventListener('DOMContentLoaded', () => {
       const splashScreen = document.getElementById('screen-splash');
       const startScreen = document.getElementById('screen-start');
+      const splashLogo = document.getElementById('splash-logo');
+
+      // Refresh logo source with timestamp to trigger dynamic animation frames on page load
+      if (splashLogo) {
+        const currentSrc = splashLogo.src;
+        splashLogo.src = `${currentSrc.split('?')[0]}?t=${Date.now()}`;
+      }
 
       setTimeout(() => {
         if (splashScreen) {
