@@ -1,937 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conjunction Maze Runner - Grade 4 Chapter 8</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Comic Sans MS', 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
-
-        .splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease-out;
-        }
-
-        .splash-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .splash-screen img {
-            max-width: 500px;
-            width: 90%;
-            height: auto;
-            animation: logoFloat 2s ease-in-out infinite;
-        }
-
-        @keyframes logoFloat {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            overflow: hidden;
-            opacity: 0;
-            transition: opacity 0.5s ease-in;
-        }
-
-        .container.visible {
-            opacity: 1;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .score-board {
-            display: flex;
-            justify-content: space-around;
-            padding: 15px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-
-        .score-item {
-            text-align: center;
-        }
-
-        .score-item span {
-            display: block;
-            font-size: 24px;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        .game-container {
-            padding: 20px;
-            position: relative;
-        }
-
-        #gameCanvas {
-            width: 100%;
-            max-width: 600px;
-            height: 400px;
-            border: 3px solid #667eea;
-            border-radius: 10px;
-            display: block;
-            margin: 0 auto;
-            background: #f0f4ff;
-            touch-action: none;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            gap: 10px;
-        }
-
-        .control-btn {
-            width: 60px;
-            height: 60px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
-        }
-
-        .control-btn:active {
-            transform: scale(0.95);
-        }
-
-        .control-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 60px);
-            gap: 10px;
-        }
-
-        .control-grid .control-btn:nth-child(1) {
-            grid-column: 2;
-        }
-
-        .control-grid .control-btn:nth-child(2) {
-            grid-column: 1;
-            grid-row: 2;
-        }
-
-        .control-grid .control-btn:nth-child(3) {
-            grid-column: 3;
-            grid-row: 2;
-        }
-
-        .control-grid .control-btn:nth-child(4) {
-            grid-column: 2;
-            grid-row: 2;
-        }
-
-        .question-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .question-box {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .question-box h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-
-        .question-text {
-            font-size: 18px;
-            margin-bottom: 20px;
-            line-height: 1.6;
-            color: #333;
-        }
-
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .option-btn {
-            padding: 15px 20px;
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            background: white;
-            color: #333;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: left;
-        }
-
-        .option-btn:hover {
-            background: #f0f4ff;
-            transform: translateX(5px);
-        }
-
-        .option-btn.correct {
-            background: #4CAF50;
-            color: white;
-            border-color: #4CAF50;
-            animation: correctPulse 0.5s;
-        }
-
-        .option-btn.wrong {
-            background: #f44336;
-            color: white;
-            border-color: #f44336;
-            animation: shake 0.5s;
-        }
-
-        @keyframes correctPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        .feedback {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            display: none;
-        }
-
-        .feedback.correct {
-            background: #c8e6c9;
-            color: #2e7d32;
-        }
-
-        .feedback.wrong {
-            background: #ffcdd2;
-            color: #c62828;
-        }
-
-        .restart-btn {
-            display: none;
-            margin: 30px auto;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .restart-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-        }
-
-        .volume-control {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        .volume-control input {
-            width: 200px;
-        }
-
-        .celebration {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 100px;
-            animation: celebrationAnim 1s ease-out;
-            pointer-events: none;
-            z-index: 2000;
-        }
-
-        @keyframes celebrationAnim {
-            0% {
-                transform: translate(-50%, -50%) scale(0) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(2) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        .instructions {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #ffc107;
-        }
-
-        .instructions p {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 22px;
-            }
-
-            #gameCanvas {
-                height: 300px;
-            }
-
-            .question-box {
-                padding: 20px;
-            }
-
-            .question-text {
-                font-size: 16px;
-            }
-
-            .option-btn {
-                font-size: 14px;
-                padding: 12px 15px;
-            }
-
-            .splash-screen img {
-                max-width: 300px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Conjunction Maze Runner - Grade 4 Chapter 8</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{font-family:'Comic Sans MS',Arial,sans-serif;background:linear-gradient(135deg,#667eea,#764ba2) fixed;
+  display:flex;justify-content:center;align-items:flex-start;
+  padding:calc(8px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left));
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
+button{font-family:inherit;touch-action:manipulation}
+.splash{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;z-index:9999;transition:opacity .5s}
+.splash.hidden{opacity:0;pointer-events:none}
+.splash img{max-width:min(500px,85%);max-height:60%;height:auto;animation:float 2s ease-in-out infinite}
+.splash small{color:#667eea}
+@keyframes float{50%{transform:translateY(-16px)}}
+.container{max-width:720px;width:100%;background:#fff;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,.3);overflow:hidden;opacity:0;transition:opacity .5s}
+.container.visible{opacity:1}
+.header{background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff;padding:12px;text-align:center}
+.header h1{font-size:clamp(18px,5vw,28px)}
+.score-board{display:flex;justify-content:space-around;padding:8px;background:rgba(255,255,255,.2);border-radius:10px;margin-top:8px;font-size:14px}
+.score-board span{display:block;font-size:22px;font-weight:bold}
+.game{padding:12px}
+.tip{background:#fff3cd;padding:8px 10px;border-radius:10px;border-left:4px solid #ffc107;font-size:13px;margin-bottom:10px;line-height:1.4}
+#gameCanvas{display:block;width:100%;max-width:600px;margin:0 auto;border:3px solid #667eea;border-radius:10px;background:#f0f4ff;touch-action:none}
+.dpad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,64px);gap:8px;justify-content:center;margin-top:12px}
+.dpad button{border:none;border-radius:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:26px;font-weight:bold;box-shadow:0 4px 10px rgba(0,0,0,.2);touch-action:none}
+.dpad button:active{transform:scale(.94)}
+#upBtn{grid-column:2;grid-row:1}#leftBtn{grid-column:1;grid-row:2}#downBtn{grid-column:2;grid-row:2}#rightBtn{grid-column:3;grid-row:2}
+.volume{text-align:center;margin-top:12px;font-size:14px}
+.volume input{width:200px;max-width:80%}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;justify-content:center;align-items:center;padding:16px;overflow-y:auto}
+.box{background:#fff;border-radius:20px;padding:22px;max-width:600px;width:100%;max-height:92vh;max-height:92dvh;overflow-y:auto;animation:slide .3s ease-out}
+@keyframes slide{from{transform:translateY(-40px);opacity:0}}
+.box h2{color:#667eea;margin-bottom:14px;font-size:20px}
+.qtext{font-size:18px;line-height:1.5;color:#333;margin-bottom:16px}
+.options{display:flex;flex-direction:column;gap:12px}
+.opt{padding:14px 16px;min-height:52px;border:2px solid #667eea;border-radius:12px;background:#fff;color:#333;font-size:17px;text-align:left;cursor:pointer}
+@media (hover:hover){.opt:hover:not(:disabled){background:#f0f4ff}}
+.opt.correct{background:#4CAF50;color:#fff;border-color:#4CAF50}
+.opt.wrong{background:#f44336;color:#fff;border-color:#f44336;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.feedback{display:none;margin-top:14px;padding:12px;border-radius:10px;font-weight:bold}
+.feedback.correct{background:#c8e6c9;color:#2e7d32}
+.feedback.wrong{background:#ffcdd2;color:#c62828}
+.btn{display:block;margin:16px auto 0;padding:14px 34px;min-height:50px;border:none;border-radius:12px;background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff;font-size:18px;font-weight:bold;box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.pop{position:fixed;top:50%;left:50%;font-size:90px;animation:pop 1s ease-out forwards;pointer-events:none;z-index:2000}
+@keyframes pop{0%{transform:translate(-50%,-50%) scale(0);opacity:1}100%{transform:translate(-50%,-50%) scale(2) rotate(360deg);opacity:0}}
+@media (max-width:600px){.qtext{font-size:16px}.opt{font-size:16px}.box{padding:18px}}
+@media (max-height:700px){.tip{display:none}}
+</style>
 </head>
 <body>
-    <!-- Splash Screen with Logo -->
-    <div class="splash-screen" id="splashScreen">
-        <img src="assets/logo.png" alt="Innovine Logo" onerror="this.style.display='none'">
+<div class="splash" id="splash">
+  <img src="assets/logo.png" alt="Innovine Logo" onerror="this.style.display='none'">
+  <small>Tap to start</small>
+</div>
+
+<div class="container" id="main">
+  <div class="header">
+    <h1>🔗 Conjunction Maze Runner 🔗</h1>
+    <div class="score-board">
+      <div>Stars<span id="stars">0</span></div>
+      <div>Questions<span id="qDone">0/12</span></div>
+      <div>Correct<span id="correctCount">0</span></div>
     </div>
-
-    <div class="container" id="mainContainer">
-        <div class="header">
-            <h1>🔗 Conjunction Maze Runner 🔗</h1>
-            <div class="score-board">
-                <div class="score-item">
-                    <div>Stars</div>
-                    <span id="stars">0</span>
-                </div>
-                <div class="score-item">
-                    <div>Questions</div>
-                    <span id="questionsAnswered">0/12</span>
-                </div>
-                <div class="score-item">
-                    <div>Correct</div>
-                    <span id="correctCount">0</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="game-container">
-            <div class="instructions">
-                <p><strong>How to Play:</strong></p>
-                <p>🎮 Use arrow keys or on-screen buttons to move</p>
-                <p>⭐ Collect 3 stars to unlock a question about Conjunctions</p>
-                <p>✅ Answer correctly to get a speed boost!</p>
-            </div>
-
-            <canvas id="gameCanvas"></canvas>
-
-            <div class="controls">
-                <div class="control-grid">
-                    <button class="control-btn" id="upBtn">↑</button>
-                    <button class="control-btn" id="leftBtn">←</button>
-                    <button class="control-btn" id="rightBtn">→</button>
-                    <button class="control-btn" id="downBtn">↓</button>
-                </div>
-            </div>
-
-            <div class="volume-control">
-                <label for="volumeSlider">🔊 Volume: <span id="volumeLabel">80%</span></label><br>
-                <input type="range" id="volumeSlider" min="0" max="100" value="80">
-            </div>
-
-            <button class="restart-btn" id="restartBtn">🔄 Play Again</button>
-        </div>
+  </div>
+  <div class="game">
+    <div class="tip">🎮 Use the arrows, swipe the maze, or use the keyboard. ⭐ Collect 3 stars to get a question. ✅ Answer correctly for a speed boost!</div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="dpad">
+      <button id="upBtn" aria-label="Up">↑</button>
+      <button id="leftBtn" aria-label="Left">←</button>
+      <button id="downBtn" aria-label="Down">↓</button>
+      <button id="rightBtn" aria-label="Right">→</button>
     </div>
+    <div class="volume" id="volumeBox">🔊 Volume: <span id="volLabel">80%</span><br>
+      <input type="range" id="volSlider" min="0" max="100" value="80"></div>
+  </div>
+</div>
 
-    <div class="question-modal" id="questionModal">
-        <div class="question-box">
-            <h2>Question <span id="questionNumber">1</span> of 12</h2>
-            <div class="question-text" id="questionText"></div>
-            <div class="options" id="optionsContainer"></div>
-            <div class="feedback" id="feedback"></div>
-        </div>
-    </div>
+<div class="overlay" id="qModal"><div class="box">
+  <h2>Question <span id="qNum">1</span> of 12</h2>
+  <div class="qtext" id="qText"></div>
+  <div class="options" id="opts"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="btn" id="continueBtn" style="display:none">Continue ▶</button>
+</div></div>
 
-    <script>
-        // Hide splash screen and show game after 5 seconds
-        setTimeout(() => {
-            document.getElementById('splashScreen').classList.add('hidden');
-            document.getElementById('mainContainer').classList.add('visible');
-            initGame();
-            draw();
-        }, 5000);
+<div class="overlay" id="resultModal"><div class="box">
+  <h2>🎯 Game Complete!</h2>
+  <div class="qtext" style="text-align:center">
+    <p style="font-size:24px;margin:10px 0"><strong id="rScore"></strong></p>
+    <p style="font-size:20px;margin:10px 0" id="rPct"></p>
+    <p style="color:#667eea" id="rMsg"></p>
+  </div>
+  <button class="btn" id="restartBtn">🔄 Play Again</button>
+</div></div>
 
-        // Audio elements for external sound files
-        const correctSound = new Audio('assets/correct.mp3');
-        const wrongSound = new Audio('assets/wrong.mp3');
-        const celebrationSound = new Audio('assets/freesound_community-claps-44774.mp3');
-        
-        let volume = 0.8;
+<script>
+const $=id=>document.getElementById(id);
+const COLS=12, ROWS=9, MAX_STARS=3;
+const QUESTIONS=[
+ {q:"Riya bought apples ___ oranges from the market.",o:["and","or","because","if"],c:0},
+ {q:"I stayed indoors ___ it was raining heavily outside.",o:["but","when","because","or"],c:2},
+ {q:"Wear a raincoat ___ you don't want to get wet.",o:["if","so","till","and"],c:0},
+ {q:"We must hurry, ___ we will miss the train.",o:["because","so","while","or"],c:3},
+ {q:"For breakfast, you can have tea ___ coffee — not both.",o:["and","but","or","when"],c:2},
+ {q:"The children played happily ___ their parents watched them closely.",o:["while","till","because","if"],c:0},
+ {q:"I will not go out to play ___ I finish my homework.",o:["so","till","and","when"],c:1},
+ {q:"She is very small in size, ___ she is extremely strong.",o:["and","but","or","because"],c:1},
+ {q:"Ring the doorbell ___ you reach the gate.",o:["when","till","so","but"],c:0},
+ {q:"The plant died ___ nobody watered it for two weeks. (This tells us the REASON.)",o:["so","because","or","while"],c:1},
+ {q:"The sky turned dark and cloudy, ___ we knew a storm was coming. (This tells us the RESULT.)",o:["because","if","so","till"],c:2},
+ {q:"He fell asleep ___ watching the movie, showing two things happening at the same time.",o:["when","while","till","so"],c:1}
+];
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 
-        // Set initial volume
-        correctSound.volume = volume;
-        wrongSound.volume = volume;
-        celebrationSound.volume = volume;
+/* ---------- AUDIO (iOS-safe) ---------- */
+const sounds={correct:new Audio('assets/correct.mp3'),wrong:new Audio('assets/wrong.mp3'),clap:new Audio('assets/freesound_community-claps-44774.mp3')};
+Object.values(sounds).forEach(a=>a.preload='auto');
+let volume=.8, actx=null;
+// iOS ignores audio.volume, so hide the slider there
+const t=new Audio();t.volume=.5;const volumeWorks=t.volume===.5;
+if(!volumeWorks)$('volumeBox').style.display='none';
+function unlockAudio(){
+  try{const AC=window.AudioContext||window.webkitAudioContext;if(AC&&!actx)actx=new AC();if(actx&&actx.state==='suspended')actx.resume()}catch(e){}
+  Object.values(sounds).forEach(a=>{a.muted=true;const p=a.play();if(p)p.then(()=>{a.pause();a.currentTime=0;a.muted=false}).catch(()=>{a.muted=false})});
+}
+document.addEventListener('pointerdown',unlockAudio,{once:true});
+function play(k){const a=sounds[k];try{a.volume=volume}catch(e){}try{a.currentTime=0;a.play().catch(()=>{})}catch(e){}}
+function beep(){
+  if(!actx)return;
+  try{const o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);
+    o.frequency.value=800;g.gain.setValueAtTime(volume*.2,actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.01,actx.currentTime+.2);o.start();o.stop(actx.currentTime+.2)}catch(e){}
+}
+$('volSlider').addEventListener('input',e=>{volume=e.target.value/100;$('volLabel').textContent=e.target.value+'%'});
 
-        function playCorrectSound() {
-            correctSound.currentTime = 0;
-            correctSound.play().catch(e => console.log('Audio play failed:', e));
-        }
+/* ---------- GAME STATE ---------- */
+const canvas=$('gameCanvas'),ctx=canvas.getContext('2d');
+let walls,stars,player,qs,qIndex,correct,starsCollected,totalStars,paused=true,boost=false,boostTimer=null,gameId=0;
 
-        function playWrongSound() {
-            wrongSound.currentTime = 0;
-            wrongSound.play().catch(e => console.log('Audio play failed:', e));
-        }
+function resize(){
+  const w=canvas.parentElement.clientWidth?Math.min(canvas.parentElement.clientWidth-24,600):300;
+  if(w<=0)return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  canvas.style.height=(w*ROWS/COLS)+'px';
+  canvas.width=Math.round(canvas.clientWidth*dpr);
+  canvas.height=Math.round(canvas.clientHeight*dpr);
+}
+window.addEventListener('resize',resize);
+window.addEventListener('orientationchange',()=>setTimeout(resize,200));
 
-        function playCelebrationSound() {
-            celebrationSound.currentTime = 0;
-            celebrationSound.play().catch(e => console.log('Audio play failed:', e));
-        }
+function neighbors(x,y){return [[1,0],[-1,0],[0,1],[0,-1]].map(d=>[x+d[0],y+d[1]])}
+function reachable(){
+  const seen=new Set(['1,1']),q=[[1,1]];
+  while(q.length){const [x,y]=q.shift();
+    for(const [nx,ny] of neighbors(x,y)){const k=nx+','+ny;
+      if(nx>=0&&ny>=0&&nx<COLS&&ny<ROWS&&!walls[ny][nx]&&!seen.has(k)){seen.add(k);q.push([nx,ny])}}}
+  return seen;
+}
+function buildMaze(){
+  for(let tries=0;tries<30;tries++){
+    walls=Array.from({length:ROWS},(_,y)=>Array.from({length:COLS},(_,x)=>x===0||y===0||x===COLS-1||y===ROWS-1));
+    for(let i=0;i<15;i++){const x=1+Math.floor(Math.random()*(COLS-2)),y=1+Math.floor(Math.random()*(ROWS-2));
+      if(!(x===1&&y===1))walls[y][x]=true}
+    let free=0;walls.forEach(r=>r.forEach(w=>{if(!w)free++}));
+    if(reachable().size>=free-2)return; // (almost) all open cells connected
+  }
+}
+function spawnStar(){
+  const cells=[...reachable()].map(k=>k.split(',').map(Number))
+    .filter(([x,y])=>!(x===player.x&&y===player.y)&&!stars.some(s=>s.x===x&&s.y===y));
+  if(cells.length){const [x,y]=cells[Math.floor(Math.random()*cells.length)];stars.push({x,y})}
+}
+function fillStars(){while(stars.length<MAX_STARS){const n=stars.length;spawnStar();if(stars.length===n)break}}
 
-        function playStarSound() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            
-            gainNode.gain.setValueAtTime(volume * 0.2, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.2);
-        }
+function updateScore(){
+  $('stars').textContent=totalStars;
+  $('qDone').textContent=qIndex+'/'+qs.length;
+  $('correctCount').textContent=correct;
+}
+function initGame(){
+  gameId++;
+  player={x:1,y:1};stars=[];
+  buildMaze();fillStars();
+  qs=shuffle(QUESTIONS);qIndex=0;correct=0;starsCollected=0;totalStars=0;
+  boost=false;clearTimeout(boostTimer);
+  updateScore();resize();paused=false;
+}
 
-        // Volume control
-        document.getElementById('volumeSlider').addEventListener('input', function(e) {
-            volume = e.target.value / 100;
-            correctSound.volume = volume;
-            wrongSound.volume = volume;
-            celebrationSound.volume = volume;
-            document.getElementById('volumeLabel').textContent = e.target.value + '%';
-        });
+function move(dx,dy){
+  if(paused)return;
+  const nx=player.x+dx,ny=player.y+dy;
+  if(nx<0||ny<0||nx>=COLS||ny>=ROWS||walls[ny][nx])return;
+  player.x=nx;player.y=ny;
+  const i=stars.findIndex(s=>s.x===nx&&s.y===ny);
+  if(i>-1){
+    stars.splice(i,1);starsCollected++;totalStars++;beep();updateScore();
+    const id=gameId;setTimeout(()=>{if(id===gameId&&!paused)fillStars()},1000);
+    if(starsCollected>=3)showQuestion();
+  }
+}
 
-        // Questions array - Conjunctions: and, because, when, if, till, but, while, so, or
-        const questions = [
-            {
-                question: "Riya bought apples ___ oranges from the market.",
-                options: ["and", "or", "because", "if"],
-                correct: 0
-            },
-            {
-                question: "I stayed indoors ___ it was raining heavily outside.",
-                options: ["but", "when", "because", "or"],
-                correct: 2
-            },
-            {
-                question: "Wear a raincoat ___ you don't want to get wet.",
-                options: ["if", "so", "till", "and"],
-                correct: 0
-            },
-            {
-                question: "We must hurry, ___ we will miss the train.",
-                options: ["because", "so", "while", "or"],
-                correct: 1
-            },
-            {
-                question: "For breakfast, you can have tea ___ coffee — not both.",
-                options: ["and", "but", "or", "when"],
-                correct: 2
-            },
-            {
-                question: "The children played happily ___ their parents watched them closely.",
-                options: ["while", "till", "because", "if"],
-                correct: 0
-            },
-            {
-                question: "I will not go out to play ___ I finish my homework.",
-                options: ["so", "till", "and", "when"],
-                correct: 1
-            },
-            {
-                question: "She is very small in size, ___ she is extremely strong.",
-                options: ["and", "but", "or", "because"],
-                correct: 1
-            },
-            {
-                question: "Ring the doorbell ___ you reach the gate.",
-                options: ["when", "till", "so", "but"],
-                correct: 0
-            },
-            {
-                question: "The plant died ___ nobody watered it for two weeks. (This tells us the REASON.)",
-                options: ["so", "because", "or", "while"],
-                correct: 1
-            },
-            {
-                question: "The sky turned dark and cloudy, ___ we knew a storm was coming. (This tells us the RESULT.)",
-                options: ["because", "if", "so", "till"],
-                correct: 2
-            },
-            {
-                question: "He fell asleep ___ watching the movie, showing two things happening at the same time.",
-                options: ["when", "while", "till", "so"],
-                correct: 1
-            }
-        ];
+/* ---------- DRAW ---------- */
+function draw(){
+  const cw=canvas.width/COLS,ch=canvas.height/ROWS;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(walls){
+    ctx.fillStyle='#667eea';
+    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(walls[y][x])ctx.fillRect(x*cw,y*ch,cw-1,ch-1);
+    ctx.fillStyle='#ffd700';
+    stars.forEach(s=>{
+      const cx=s.x*cw+cw/2,cy=s.y*ch+ch/2,r=cw/2.6;ctx.beginPath();
+      for(let i=0;i<5;i++){const a=i*4*Math.PI/5-Math.PI/2;const px=cx+r*Math.cos(a),py=cy+r*Math.sin(a);i?ctx.lineTo(px,py):ctx.moveTo(px,py)}
+      ctx.closePath();ctx.fill();
+    });
+    const px=player.x*cw+cw/2,py=player.y*ch+ch/2;
+    ctx.fillStyle=boost?'#4CAF50':'#f5576c';ctx.beginPath();ctx.arc(px,py,cw/2.5,0,7);ctx.fill();
+    ctx.fillStyle='#fff';
+    [-1,1].forEach(d=>{ctx.beginPath();ctx.arc(px+d*cw/8,py-cw/13,cw/14,0,7);ctx.fill()});
+  }
+  requestAnimationFrame(draw);
+}
 
-        let shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
-        let currentQuestionIndex = 0;
-        let correctAnswers = 0;
+/* ---------- QUESTIONS ---------- */
+function showQuestion(){
+  paused=true;stopRepeat();
+  const q=qs[qIndex];
+  $('qNum').textContent=qIndex+1;$('qText').textContent=q.q;
+  $('feedback').style.display='none';$('continueBtn').style.display='none';
+  const box=$('opts');box.innerHTML='';
+  q.o.forEach((text,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=text;b.onclick=()=>answer(i,b);box.appendChild(b)});
+  $('qModal').style.display='flex';
+}
+function answer(i,btn){
+  const q=qs[qIndex],fb=$('feedback'),all=document.querySelectorAll('.opt');
+  all.forEach(b=>b.disabled=true);
+  if(i===q.c){
+    btn.classList.add('correct');fb.textContent="🎉 Excellent! That's correct!";fb.className='feedback correct';
+    correct++;play('correct');popStar();
+    boost=true;clearTimeout(boostTimer);boostTimer=setTimeout(()=>boost=false,5000);
+  }else{
+    btn.classList.add('wrong');all[q.c].classList.add('correct');
+    fb.textContent='❌ Not quite right. The correct answer is highlighted.';fb.className='feedback wrong';play('wrong');
+  }
+  fb.style.display='block';
+  updateScore();
+  $('continueBtn').style.display='block';
+}
+$('continueBtn').onclick=()=>{
+  $('qModal').style.display='none';
+  qIndex++;starsCollected=0;updateScore();
+  if(qIndex>=qs.length)endGame();else{paused=false;fillStars()}
+};
+function popStar(){const d=document.createElement('div');d.className='pop';d.textContent='⭐';document.body.appendChild(d);setTimeout(()=>d.remove(),1000)}
+function endGame(){
+  const pct=Math.round(correct/qs.length*100);
+  $('rScore').textContent='Your Score: '+correct+'/'+qs.length;
+  $('rPct').textContent=pct+'% Correct';
+  let msg;
+  if(pct>=80){msg='🌟 Outstanding! You have excellent understanding of Conjunctions!';play('clap')}
+  else if(pct>=60)msg='👍 Great job! You have a good grasp of Conjunctions!';
+  else msg='💪 Keep practicing! Review the chapter and try again!';
+  $('rMsg').textContent=msg;
+  $('resultModal').style.display='flex';
+}
+$('restartBtn').onclick=()=>{$('resultModal').style.display='none';initGame()};
 
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        function resizeCanvas() {
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+/* ---------- INPUT ---------- */
+let repeatTimer=null;
+function stopRepeat(){clearTimeout(repeatTimer);repeatTimer=null}
+function startRepeat(dx,dy){
+  stopRepeat();
+  const step=()=>{move(dx,dy);repeatTimer=setTimeout(step,boost?90:170)};
+  step();
+}
+[['upBtn',0,-1],['downBtn',0,1],['leftBtn',-1,0],['rightBtn',1,0]].forEach(([id,dx,dy])=>{
+  const b=$(id);
+  b.addEventListener('pointerdown',e=>{e.preventDefault();startRepeat(dx,dy)});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,stopRepeat));
+  b.addEventListener('contextmenu',e=>e.preventDefault());
+});
+document.addEventListener('keydown',e=>{
+  const m={ArrowUp:[0,-1],w:[0,-1],ArrowDown:[0,1],s:[0,1],ArrowLeft:[-1,0],a:[-1,0],ArrowRight:[1,0],d:[1,0]}[e.key];
+  if(m){e.preventDefault();move(m[0],m[1])}
+});
+// swipe on the maze
+let sw=null;
+canvas.addEventListener('pointerdown',e=>{sw={x:e.clientX,y:e.clientY}});
+canvas.addEventListener('pointerup',e=>{
+  if(!sw)return;const dx=e.clientX-sw.x,dy=e.clientY-sw.y;sw=null;
+  if(Math.max(Math.abs(dx),Math.abs(dy))<20)return;
+  if(Math.abs(dx)>Math.abs(dy))move(dx>0?1:-1,0);else move(0,dy>0?1:-1);
+});
+canvas.addEventListener('pointercancel',()=>sw=null);
+// block iOS pinch/double-tap zoom
+['gesturestart','gesturechange'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
+let lastTouch=0;
+document.addEventListener('touchend',e=>{const n=Date.now();if(n-lastTouch<300&&e.target.tagName!=='INPUT')e.preventDefault();lastTouch=n},{passive:false});
 
-        const gridSize = 40;
-        const MAX_STARS = 3;
-        let player = {
-            x: 1,
-            y: 1,
-            speed: 1,
-            speedBoost: false
-        };
-
-        let stars = [];
-        let walls = [];
-        let starsCollected = 0;
-        let totalStarsCollected = 0;
-        let occupiedCells = new Set();
-
-        function generateMaze() {
-            walls = [];
-            occupiedCells.clear();
-            const cols = Math.floor(canvas.width / gridSize);
-            const rows = Math.floor(canvas.height / gridSize);
-
-            for (let i = 0; i < cols; i++) {
-                walls.push({x: i, y: 0});
-                walls.push({x: i, y: rows - 1});
-                occupiedCells.add(`${i},0`);
-                occupiedCells.add(`${i},${rows - 1}`);
-            }
-            for (let i = 0; i < rows; i++) {
-                walls.push({x: 0, y: i});
-                walls.push({x: cols - 1, y: i});
-                occupiedCells.add(`0,${i}`);
-                occupiedCells.add(`${cols - 1},${i}`);
-            }
-
-            occupiedCells.add('1,1');
-
-            for (let i = 0; i < 15; i++) {
-                const wallX = Math.floor(Math.random() * (cols - 2)) + 1;
-                const wallY = Math.floor(Math.random() * (rows - 2)) + 1;
-                const cellKey = `${wallX},${wallY}`;
-                if (!occupiedCells.has(cellKey)) {
-                    walls.push({x: wallX, y: wallY});
-                    occupiedCells.add(cellKey);
-                }
-            }
-        }
-
-        function isValidPosition(x, y) {
-            const cellKey = `${x},${y}`;
-            if (occupiedCells.has(cellKey)) {
-                return false;
-            }
-            for (let star of stars) {
-                if (star.x === x && star.y === y) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        function generateSingleStar() {
-            const cols = Math.floor(canvas.width / gridSize);
-            const rows = Math.floor(canvas.height / gridSize);
-            let attempts = 0;
-            const maxAttempts = 100;
-
-            while (attempts < maxAttempts) {
-                const starX = Math.floor(Math.random() * (cols - 2)) + 1;
-                const starY = Math.floor(Math.random() * (rows - 2)) + 1;
-                
-                if (isValidPosition(starX, starY)) {
-                    return {x: starX, y: starY};
-                }
-                attempts++;
-            }
-            
-            for (let y = 1; y < rows - 1; y++) {
-                for (let x = 1; x < cols - 1; x++) {
-                    if (isValidPosition(x, y)) {
-                        return {x, y};
-                    }
-                }
-            }
-            
-            return null;
-        }
-
-        // Maintain exactly 3 stars at all times
-        function maintainStarCount() {
-            while (stars.length < MAX_STARS) {
-                const newStar = generateSingleStar();
-                if (newStar) {
-                    stars.push(newStar);
-                } else {
-                    break;
-                }
-            }
-        }
-
-        function generateStars() {
-            stars = [];
-            maintainStarCount();
-        }
-
-        function initGame() {
-            player.x = 1;
-            player.y = 1;
-            generateMaze();
-            generateStars();
-            starsCollected = 0;
-            totalStarsCollected = 0;
-            currentQuestionIndex = 0;
-            correctAnswers = 0;
-            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
-            updateScoreboard();
-        }
-
-        function checkCollision(x, y) {
-            return walls.some(wall => wall.x === x && wall.y === y);
-        }
-
-        function movePlayer(dx, dy) {
-            const newX = player.x + dx;
-            const newY = player.y + dy;
-
-            if (!checkCollision(newX, newY)) {
-                player.x = newX;
-                player.y = newY;
-
-                const starIndex = stars.findIndex(star => star.x === player.x && star.y === player.y);
-                if (starIndex !== -1) {
-                    stars.splice(starIndex, 1);
-                    starsCollected++;
-                    totalStarsCollected++;
-                    playStarSound();
-                    updateScoreboard();
-
-                    // Regenerate star after 1 second to maintain 3 stars
-                    setTimeout(() => {
-                        maintainStarCount();
-                    }, 1000);
-
-                    if (starsCollected >= 3) {
-                        if (currentQuestionIndex < shuffledQuestions.length) {
-                            showQuestion();
-                        } else {
-                            endGame();
-                        }
-                    }
-                }
-            }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#667eea';
-            walls.forEach(wall => {
-                ctx.fillRect(wall.x * gridSize, wall.y * gridSize, gridSize - 2, gridSize - 2);
-            });
-
-            stars.forEach(star => {
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath();
-                const centerX = star.x * gridSize + gridSize / 2;
-                const centerY = star.y * gridSize + gridSize / 2;
-                const radius = gridSize / 3;
-                
-                for (let i = 0; i < 5; i++) {
-                    const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
-                    const x = centerX + radius * Math.cos(angle);
-                    const y = centerY + radius * Math.sin(angle);
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                }
-                ctx.closePath();
-                ctx.fill();
-            });
-
-            ctx.fillStyle = player.speedBoost ? '#4CAF50' : '#f5576c';
-            ctx.beginPath();
-            ctx.arc(
-                player.x * gridSize + gridSize / 2,
-                player.y * gridSize + gridSize / 2,
-                gridSize / 2.5,
-                0,
-                2 * Math.PI
-            );
-            ctx.fill();
-
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(player.x * gridSize + gridSize / 2 - 5, player.y * gridSize + gridSize / 2 - 3, 3, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(player.x * gridSize + gridSize / 2 + 5, player.y * gridSize + gridSize / 2 - 3, 3, 0, 2 * Math.PI);
-            ctx.fill();
-
-            requestAnimationFrame(draw);
-        }
-
-        function updateScoreboard() {
-            document.getElementById('stars').textContent = totalStarsCollected;
-            document.getElementById('questionsAnswered').textContent = currentQuestionIndex + '/' + shuffledQuestions.length;
-            document.getElementById('correctCount').textContent = correctAnswers;
-        }
-
-        function showQuestion() {
-            const modal = document.getElementById('questionModal');
-            const questionText = document.getElementById('questionText');
-            const optionsContainer = document.getElementById('optionsContainer');
-            const questionNumber = document.getElementById('questionNumber');
-            const feedback = document.getElementById('feedback');
-
-            const currentQuestion = shuffledQuestions[currentQuestionIndex];
-            
-            questionNumber.textContent = currentQuestionIndex + 1;
-            questionText.textContent = currentQuestion.question;
-            optionsContainer.innerHTML = '';
-            feedback.style.display = 'none';
-            feedback.className = 'feedback';
-
-            currentQuestion.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.className = 'option-btn';
-                button.textContent = option;
-                button.onclick = () => checkAnswer(index, button);
-                optionsContainer.appendChild(button);
-            });
-
-            modal.style.display = 'flex';
-        }
-
-        function checkAnswer(selectedIndex, button) {
-            const currentQuestion = shuffledQuestions[currentQuestionIndex];
-            const feedback = document.getElementById('feedback');
-            const allButtons = document.querySelectorAll('.option-btn');
-
-            allButtons.forEach(btn => btn.disabled = true);
-
-            if (selectedIndex === currentQuestion.correct) {
-                button.classList.add('correct');
-                feedback.textContent = '🎉 Excellent! That\'s correct!';
-                feedback.className = 'feedback correct';
-                feedback.style.display = 'block';
-                correctAnswers++;
-                playCorrectSound();
-                showCelebration();
-                
-                player.speedBoost = true;
-                setTimeout(() => {
-                    player.speedBoost = false;
-                }, 5000);
-
-            } else {
-                button.classList.add('wrong');
-                allButtons[currentQuestion.correct].classList.add('correct');
-                feedback.textContent = '❌ Not quite right. The correct answer is highlighted above.';
-                feedback.className = 'feedback wrong';
-                feedback.style.display = 'block';
-                playWrongSound();
-            }
-
-            updateScoreboard();
-
-            setTimeout(() => {
-                document.getElementById('questionModal').style.display = 'none';
-                currentQuestionIndex++;
-                starsCollected = 0;
-            }, 3000);
-        }
-
-        function showCelebration() {
-            const celebration = document.createElement('div');
-            celebration.className = 'celebration';
-            celebration.textContent = '⭐';
-            document.body.appendChild(celebration);
-            setTimeout(() => {
-                celebration.remove();
-            }, 1000);
-        }
-
-        function endGame() {
-            const modal = document.getElementById('questionModal');
-            const questionBox = document.querySelector('.question-box');
-            
-            const percentage = Math.round((correctAnswers / shuffledQuestions.length) * 100);
-            let message = '';
-            
-            if (percentage >= 80) {
-                message = '🌟 Outstanding! You have excellent understanding of Conjunctions!';
-                playCelebrationSound();
-            } else if (percentage >= 60) {
-                message = '👍 Great job! You have a good grasp of Conjunctions!';
-            } else {
-                message = '💪 Keep practicing! Review the chapter and try again!';
-            }
-
-            questionBox.innerHTML = `
-                <h2>🎯 Game Complete!</h2>
-                <div class="question-text">
-                    <p style="font-size: 24px; text-align: center; margin: 20px 0;">
-                        <strong>Your Score: ${correctAnswers}/${shuffledQuestions.length}</strong>
-                    </p>
-                    <p style="font-size: 20px; text-align: center; margin: 20px 0;">
-                        ${percentage}% Correct
-                    </p>
-                    <p style="text-align: center; font-size: 18px; color: #667eea;">
-                        ${message}
-                    </p>
-                </div>
-            `;
-            
-            modal.style.display = 'flex';
-            document.getElementById('restartBtn').style.display = 'block';
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (document.getElementById('questionModal').style.display === 'flex') return;
-
-            switch(e.key) {
-                case 'ArrowUp':
-                    e.preventDefault();
-                    movePlayer(0, -1);
-                    break;
-                case 'ArrowDown':
-                    e.preventDefault();
-                    movePlayer(0, 1);
-                    break;
-                case 'ArrowLeft':
-                    e.preventDefault();
-                    movePlayer(-1, 0);
-                    break;
-                case 'ArrowRight':
-                    e.preventDefault();
-                    movePlayer(1, 0);
-                    break;
-            }
-        });
-
-        document.getElementById('upBtn').addEventListener('click', () => movePlayer(0, -1));
-        document.getElementById('downBtn').addEventListener('click', () => movePlayer(0, 1));
-        document.getElementById('leftBtn').addEventListener('click', () => movePlayer(-1, 0));
-        document.getElementById('rightBtn').addEventListener('click', () => movePlayer(1, 0));
-
-        document.getElementById('restartBtn').addEventListener('click', () => {
-            document.getElementById('questionModal').style.display = 'none';
-            document.getElementById('restartBtn').style.display = 'none';
-            initGame();
-        });
-    </script>
+/* ---------- START ---------- */
+let started=false;
+function start(){
+  if(started)return;started=true;
+  $('splash').classList.add('hidden');$('main').classList.add('visible');
+  initGame();
+}
+$('splash').addEventListener('click',start);
+setTimeout(start,4000);
+draw();
+</script>
 </body>
 </html>
