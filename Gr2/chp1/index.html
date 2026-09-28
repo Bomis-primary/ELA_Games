@@ -223,7 +223,7 @@ button:active {
 <body>
 
 <div id="splash">
-  <img src="assets/innovinelogo.png" alt="Innovine Logo">
+  <img src="assets/innovinelogo.png" alt="Innovine Logo" onerror="this.parentElement.style.display='none'; document.getElementById('game').style.display='block'; startGame();">
 </div>
 
 <div id="game">
@@ -237,7 +237,8 @@ button:active {
       <h2 id="nounWord"></h2>
     </div>
 
-    <div class="buttons">
+    <!-- Container for action buttons that will hide at game over -->
+    <div class="buttons" id="actionButtons">
       <button class="common-btn" onclick="checkAnswer('common')">Common Noun</button>
       <button class="proper-btn" onclick="checkAnswer('proper')">Proper Noun</button>
     </div>
@@ -285,6 +286,7 @@ const game = document.getElementById("game");
 const nounImage = document.getElementById("nounImage");
 const iconCard = document.getElementById("iconCard");
 const nounWord = document.getElementById("nounWord");
+const actionButtons = document.getElementById("actionButtons");
 const feedback = document.getElementById("feedback");
 const scoreBox = document.getElementById("score");
 const restartBtn = document.getElementById("restart");
@@ -323,6 +325,9 @@ function showQuestion() {
     endGame();
     return;
   }
+
+  // Ensure answer buttons are visible during normal gameplay questions
+  actionButtons.style.display = "flex";
 
   const current = gameItems[currentIndex];
 
@@ -371,6 +376,10 @@ function endGame() {
   nounWord.innerHTML = "<span class='final-message'>Finished!</span>";
   feedback.textContent = "Great work!";
   scoreBox.textContent = "Final Score: " + score + " / " + gameItems.length;
+  
+  // Hide Common Noun and Proper Noun buttons on final score slide
+  actionButtons.style.display = "none";
+  
   restartBtn.style.display = "inline-block";
   safePlay(clapAudio);
 }
